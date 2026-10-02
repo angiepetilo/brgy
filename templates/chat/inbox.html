@@ -1,0 +1,817 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Chats - Messenger{% endblock %}
+
+{% block content %}
+<style>
+/* ==================== MESSENGER SCREENSHOT 1 EXACT DESIGN ==================== */
+.messenger-container {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.messages-card,
+.messenger-shell {
+    display: flex;
+    width: 100%;
+    height: calc(100vh - 120px);
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* LEFT SIDEBAR: CHATS */
+.chat-sidebar,
+.messenger-sidebar {
+    width: 320px !important;
+    min-width: 320px !important;
+    max-width: 320px !important;
+    flex-shrink: 0 !important;
+    background: #FFFFFF;
+    border-right: 1px solid #E2E8F0 !important;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+/* RIGHT CONVERSATION WINDOW */
+.chat-view-area,
+.messenger-main-pane {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #FFFFFF;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.sidebar-header-bar {
+    padding: 1.15rem 1.15rem 0.75rem 1.15rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar-header-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #050505;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.sidebar-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.messenger-round-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #F0F2F5;
+    border: none;
+    color: #050505;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.messenger-round-btn:hover {
+    background: #E4E6EB;
+    color: #050505;
+    transform: scale(1.04);
+}
+
+/* SEARCH MESSENGER */
+.search-messenger-wrap {
+    padding: 0 1rem 0.75rem 1rem;
+}
+
+.search-messenger-box {
+    background: #F0F2F5;
+    border-radius: 50px;
+    padding: 0.55rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-messenger-box:focus-within {
+    background: #FFFFFF;
+    box-shadow: 0 0 0 2px #0084FF;
+}
+
+.search-messenger-box i {
+    color: #65676B;
+    font-size: 0.9rem;
+}
+
+.search-messenger-box input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+    font-size: 0.9375rem;
+    color: #050505;
+    font-family: inherit;
+}
+
+.search-messenger-box input::placeholder {
+    color: #65676B;
+}
+
+/* CHATS LIST */
+.messenger-contacts-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 0.5rem 1rem 0.5rem;
+}
+
+.messenger-contact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 10px;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.15s ease;
+    margin-bottom: 2px;
+}
+
+.messenger-contact-item:hover {
+    background: #F2F2F2;
+}
+
+.messenger-contact-item.active {
+    background: #E7F3FF;
+}
+
+.contact-avatar-wrap {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+}
+
+.contact-avatar-img,
+.contact-avatar-initials {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.contact-avatar-initials {
+    background: #E4E6EB;
+    color: #050505;
+    font-weight: 700;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.contact-online-dot {
+    position: absolute;
+    bottom: 1px;
+    right: 1px;
+    width: 13px;
+    height: 13px;
+    background: #31A24C;
+    border: 2px solid #FFFFFF;
+    border-radius: 50%;
+}
+
+.contact-meta {
+    flex: 1;
+    min-width: 0;
+}
+
+.contact-name {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #050505;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.contact-snippet {
+    font-size: 0.8125rem;
+    color: #65676B;
+    margin-top: 0.15rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.25;
+}
+
+.contact-snippet.unread-bold {
+    font-weight: 700;
+    color: #050505;
+}
+
+.contact-unread-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #0084FF;
+    flex-shrink: 0;
+    margin-left: 0.5rem;
+}
+
+/* RIGHT MAIN PANE: EMPTY STATE OR ACTIVE CHAT */
+.messenger-main-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #FFFFFF;
+    position: relative;
+}
+
+/* EMPTY STATE: SCREENSHOT 1 */
+.messenger-empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+}
+
+.empty-state-bubble-wrap {
+    width: 140px;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.empty-state-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #050505;
+    margin: 0.5rem 0 0.25rem 0;
+}
+
+/* ACTIVE CHAT WINDOW */
+.chat-window-header {
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid #E4E6EB;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #FFFFFF;
+}
+
+.chat-header-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.chat-header-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #050505;
+    line-height: 1.2;
+}
+
+.chat-header-status {
+    font-size: 0.75rem;
+    color: #65676B;
+    margin-top: 0.15rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.chat-stream-box {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    background: #FFFFFF;
+}
+
+.chat-message-row {
+    display: flex;
+    flex-direction: column;
+    max-width: 68%;
+}
+
+.chat-message-row.sent {
+    align-self: flex-end;
+    align-items: flex-end;
+}
+
+.chat-message-row.received {
+    align-self: flex-start;
+    align-items: flex-start;
+}
+
+.chat-bubble-pill {
+    padding: 0.65rem 1rem;
+    font-size: 0.9375rem;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.chat-message-row.sent .chat-bubble-pill {
+    background: #0084FF;
+    color: #FFFFFF;
+    border-radius: 18px 18px 4px 18px;
+}
+
+.chat-message-row.received .chat-bubble-pill {
+    background: #F0F2F5;
+    color: #050505;
+    border-radius: 18px 18px 18px 4px;
+}
+
+/* SENT, DELIVERED, SEEN WITH DATE AND TIME */
+.chat-receipt-meta {
+    font-size: 0.7rem;
+    color: #65676B;
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.chat-receipt-meta.seen {
+    color: #0084FF;
+    font-weight: 600;
+}
+
+.chat-receipt-meta.delivered {
+    color: #65676B;
+}
+
+.chat-receipt-meta.sent {
+    color: #94A3B8;
+}
+
+/* COMPOSER */
+.chat-composer-bar {
+    padding: 0.75rem 1.25rem;
+    border-top: 1px solid #E4E6EB;
+    background: #FFFFFF;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.composer-pill-input {
+    flex: 1;
+    background: #F0F2F5;
+    border-radius: 50px;
+    padding: 0.65rem 1.15rem;
+    border: none;
+    outline: none;
+    font-size: 0.9375rem;
+    font-family: inherit;
+    color: #050505;
+}
+
+.composer-pill-input:focus {
+    background: #FFFFFF;
+    box-shadow: 0 0 0 2px #0084FF;
+}
+
+.btn-send-messenger {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #0084FF;
+    color: #FFFFFF;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.15s ease, transform 0.1s ease;
+    flex-shrink: 0;
+}
+
+.btn-send-messenger:hover {
+    background: #0073E6;
+    transform: scale(1.05);
+}
+
+/* Live Staff Roster Modal */
+.modal-overlay-roster {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    z-index: 2500;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.modal-content-roster {
+    background: #FFFFFF;
+    border-radius: 16px;
+    max-width: 640px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+}
+
+.officer-roster-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 1rem;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 10px;
+    background: #F8FAFC;
+}
+
+.officer-roster-item.status-on-duty {
+    border-color: #16A34A;
+}
+
+.officer-roster-item.status-on-leave {
+    border-color: #EA580C;
+}
+</style>
+
+
+<div class="messenger-container">
+
+    <div class="messages-card messenger-shell">
+        
+        <!-- LEFT COLUMN: CHATS SIDEBAR (SCREENSHOT 1) -->
+        <div class="chat-sidebar messenger-sidebar">
+            <!-- Header: Chats Title -->
+            <div class="sidebar-header-bar">
+                <h1 class="sidebar-header-title">Chats</h1>
+            </div>
+
+            <!-- Search Messenger Input -->
+            <div class="search-messenger-wrap">
+                <div class="search-messenger-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="messenger-search-box" placeholder="Search Messenger" onkeyup="filterMessengerContacts(this.value)">
+                </div>
+            </div>
+
+            <!-- Contacts Scrollable List -->
+            <div class="messenger-contacts-list" id="messenger-contacts-list">
+                {% if contacts %}
+                    {% for c in contacts %}
+                    <a href="{% url 'chat:room' c.user.id %}" class="messenger-contact-item {% if other_user and other_user.id == c.user.id %}active{% endif %}" data-name="{{ c.user.get_full_name|default:c.user.username|lower }}">
+                        <div class="contact-avatar-wrap">
+                            {% if c.user.avatar %}
+                                <img src="{{ c.user.avatar.url }}" alt="{{ c.user.username }}" class="contact-avatar-img">
+                            {% else %}
+                                <div class="contact-avatar-initials">{{ c.user.initials }}</div>
+                            {% endif %}
+                            {% if c.is_online %}
+                                <div class="contact-online-dot" title="Online / On Duty"></div>
+                            {% endif %}
+                        </div>
+
+                        <div class="contact-meta">
+                            <div class="contact-name">{{ c.user.get_full_name|default:c.user.username }}</div>
+                            <div class="contact-snippet {% if c.unread_count > 0 %}unread-bold{% endif %}">
+                                {% if c.last_message %}
+                                    {% if c.last_message.sender == request.user %}You: {% endif %}{{ c.last_message.content|truncatechars:26 }} &bull; {{ c.last_message.created_at|timesince }}
+                                {% else %}
+                                    Start a conversation
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if c.unread_count > 0 %}
+                            <div class="contact-unread-dot" title="{{ c.unread_count }} unread message(s)"></div>
+                        {% endif %}
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <div style="text-align: center; padding: 2rem 1rem; color: #65676B; font-size: 0.875rem;">
+                        No conversations yet.<br>Click the write icon to start messaging an officer.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: EMPTY STATE (SCREENSHOT 1) OR ACTIVE CHAT -->
+        <div class="chat-view-area messenger-main-pane" id="messenger-main-pane" {% if other_user %}data-other-user-id="{{ other_user.id }}"{% endif %}>
+            {% if not other_user %}
+                <!-- EXACT REPLICA OF SCREENSHOT 1 EMPTY STATE -->
+                <div class="messenger-empty-state">
+                    <div class="empty-state-bubble-wrap">
+                        <!-- Custom vector icon: Smooth 3D speech bubble with colorful gradient pointer -->
+                        <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <!-- Arrow pointer gradient: pink to purple magenta -->
+                                <linearGradient id="cursorGradient" x1="15%" y1="10%" x2="85%" y2="90%">
+                                    <stop offset="0%" stop-color="#FF3B88"/>
+                                    <stop offset="50%" stop-color="#843BFF"/>
+                                    <stop offset="100%" stop-color="#4F46E5"/>
+                                </linearGradient>
+                                <!-- Bubble border subtle glow -->
+                                <filter id="bubbleDropShadow" x="-10%" y="-10%" width="130%" height="130%" filterUnits="userSpaceOnUse">
+                                    <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#7B8CA4" flood-opacity="0.18"/>
+                                </filter>
+                            </defs>
+                            
+                            <!-- Outer soft speech bubble -->
+                            <path d="M60 22 C37 22 20 37 20 56 C20 67 27 77 38 83 C38 88 35 96 30 100 C39 99 48 94 53 90 C55 90 58 90 60 90 C83 90 100 75 100 56 C100 37 83 22 60 22 Z" 
+                                  fill="#FFFFFF" 
+                                  stroke="#E4E9F2" 
+                                  stroke-width="7" 
+                                  filter="url(#bubbleDropShadow)"/>
+
+                            <!-- Inner colourful vector cursor arrow -->
+                            <g transform="translate(48, 42)">
+                                <path d="M2 2 L19 22 L11 23 L16 35 L10 37 L5 25 L-2 30 Z" 
+                                      fill="url(#cursorGradient)" 
+                                      stroke="#FFFFFF" 
+                                      stroke-width="1.8" 
+                                      stroke-linejoin="round"/>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="empty-state-title">No chats selected</div>
+                </div>
+
+            {% else %}
+                {% include 'messages/chat_view.html' %}
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ACTIVE BARANGAY OFFICERS & STAFF DUTY ROSTER MODAL -->
+<div id="staffRosterModal" class="modal-overlay-roster">
+    <div class="modal-content-roster">
+        <div style="padding: 1.15rem 1.5rem; border-bottom: 1px solid #E4E6EB; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #0F172A; text-transform: uppercase;">
+                    ACTIVE BARANGAY OFFICERS & STAFF DUTY ROSTER
+                </h3>
+                <p style="margin: 0.15rem 0 0 0; font-size: 0.75rem; color: #64748B;">
+                    Select an official to start an instant 1-on-1 direct conversation
+                </p>
+            </div>
+            <button type="button" onclick="closeStaffRosterModal()" style="border: none; background: transparent; font-size: 1.25rem; color: #64748B; cursor: pointer;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div style="padding: 1.25rem;">
+            {% if officers %}
+            <div style="display: grid; grid-template-columns: 1fr; gap: 0.75rem;">
+                {% for officer in officers %}
+                <div class="officer-roster-item {% if officer.duty_status == 'on_duty' %}status-on-duty{% elif officer.duty_status == 'on_leave' %}status-on-leave{% endif %}">
+                    <div style="display: flex; gap: 0.75rem; align-items: center;">
+                        <div class="contact-avatar-wrap" style="width: 44px; height: 44px;">
+                            {% if officer.avatar %}
+                                <img src="{{ officer.avatar.url }}" alt="{{ officer.username }}" class="contact-avatar-img" style="width: 44px; height: 44px;">
+                            {% else %}
+                                <div class="contact-avatar-initials" style="width: 44px; height: 44px;">{{ officer.initials }}</div>
+                            {% endif %}
+                            {% if officer.duty_status == 'on_duty' %}
+                                <div class="contact-online-dot"></div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 0.9375rem; color: #0F172A;">
+                                {{ officer.get_full_name|default:officer.username }}
+                            </div>
+                            <div style="display: flex; gap: 0.4rem; align-items: center; margin-top: 0.2rem;">
+                                <span class="badge badge-secondary" style="font-size: 0.65rem;">{{ officer.get_role_display|upper }}</span>
+                                {% if officer.duty_status == 'on_duty' %}
+                                    <span class="badge badge-success" style="background: #16A34A; color: #FFF; font-weight: 700;">[ON-DUTY]</span>
+                                {% elif officer.duty_status == 'on_leave' %}
+                                    <span class="badge badge-warning" style="background: #EA580C; color: #FFF; font-weight: 700;">[ON-LEAVE]</span>
+                                {% else %}
+                                    <span class="badge badge-secondary" style="background: #64748B; color: #FFF; font-weight: 700;">[ABSENT]</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <a href="{% url 'chat:room' officer.id %}" class="btn btn-primary btn-sm" style="font-weight: 700; padding: 0.45rem 1rem; border-radius: 8px;">
+                            [MESSAGE STAFF]
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align: center; color: #64748B; padding: 2rem;">No officers available in roster.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/chat.js' %}"></script>
+<script>
+function openStaffRosterModal() {
+    var modal = document.getElementById('staffRosterModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeStaffRosterModal() {
+    var modal = document.getElementById('staffRosterModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function filterMessengerContacts(val) {
+    var query = val.toLowerCase().trim();
+    var items = document.querySelectorAll('.messenger-contact-item');
+    items.forEach(function(item) {
+        var name = item.getAttribute('data-name') || '';
+        if (name.indexOf(query) !== -1) {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Close roster modal on click outside
+    var rosterModal = document.getElementById('staffRosterModal');
+    if (rosterModal) {
+        rosterModal.addEventListener('click', (e) => {
+            if (e.target === rosterModal) closeStaffRosterModal();
+        });
+    }
+
+    const currentUserId = "{{ request.user.id }}";
+    let currentChatSocket = null;
+
+    function bindChatSession() {
+        if (currentChatSocket) {
+            try { currentChatSocket.close(); } catch(err) {}
+            currentChatSocket = null;
+        }
+
+        const mainPane = document.getElementById('messenger-main-pane');
+        if (!mainPane) return;
+
+        const otherUserId = mainPane.getAttribute('data-other-user-id');
+        if (!otherUserId) return;
+
+        const messagesContainer = document.getElementById('chatMessagesBody') || document.getElementById('chat-messages-container');
+        const form = document.getElementById('chat-form');
+        const input = document.getElementById('chat-message-input');
+        const placeholder = document.getElementById('no-messages-placeholder');
+
+        function scrollToBottom() {
+            if (messagesContainer) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }
+        scrollToBottom();
+
+        // WebSocket connection for real-time 1-on-1 direct chat
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const chatWsUrl = `${protocol}//${window.location.host}/ws/chat/${otherUserId}/`;
+        currentChatSocket = new WebSocket(chatWsUrl);
+
+        currentChatSocket.onmessage = (e) => {
+            try {
+                const data = JSON.parse(e.data);
+                if (data.type === 'chat_message') {
+                    if (placeholder) placeholder.remove();
+
+                    const isSentByMe = String(data.sender_id) === String(currentUserId);
+                    const row = document.createElement('div');
+                    row.className = `message-row ${isSentByMe ? 'outgoing' : 'incoming'}`;
+                    
+                    if (isSentByMe) {
+                        row.innerHTML = `
+                            <div class="message-bubble">
+                                <p class="message-text">${data.content}</p>
+                                <span class="message-time">
+                                    <i class="fa-solid fa-check" style="font-size: 0.65rem;"></i>
+                                    ${data.created_at}
+                                </span>
+                            </div>
+                        `;
+                    } else {
+                        const initials = data.sender_initials || (data.sender_name ? data.sender_name.slice(0, 2).toUpperCase() : 'U');
+                        row.innerHTML = `
+                            <div class="message-avatar">${initials}</div>
+                            <div class="message-bubble">
+                                <p class="message-text">${data.content}</p>
+                                <span class="message-time">${data.created_at}</span>
+                            </div>
+                        `;
+                    }
+
+                    messagesContainer.appendChild(row);
+                    scrollToBottom();
+                }
+            } catch (err) {
+                console.error("Error processing incoming chat message:", err);
+            }
+        };
+
+        if (form && input) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const content = input.value.trim();
+                if (!content) return;
+
+                if (currentChatSocket && currentChatSocket.readyState === WebSocket.OPEN) {
+                    currentChatSocket.send(JSON.stringify({
+                        'message': content
+                    }));
+                    input.value = '';
+                    input.focus();
+                } else {
+                    alert("Chat socket reconnecting. Please wait a moment.");
+                }
+            });
+        }
+    }
+
+    // Attach dynamic click to contacts to keep display intact without moving
+    function attachContactItemHandlers() {
+        document.querySelectorAll('.messenger-contact-item').forEach(item => {
+            item.onclick = function(e) {
+                e.preventDefault();
+                const url = this.getAttribute('href');
+                if (!url) return;
+
+                document.querySelectorAll('.messenger-contact-item').forEach(el => el.classList.remove('active'));
+                this.classList.add('active');
+
+                // Remove unread dot if present
+                const dot = this.querySelector('.contact-unread-dot');
+                if (dot) dot.remove();
+
+                const mainPane = document.getElementById('messenger-main-pane');
+                if (!mainPane) return;
+
+                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(res => {
+                        if (!res.ok) throw new Error("HTTP " + res.status);
+                        return res.text();
+                    })
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const newPane = doc.getElementById('messenger-main-pane');
+                        if (newPane) {
+                            mainPane.innerHTML = newPane.innerHTML;
+                            mainPane.setAttribute('data-other-user-id', newPane.getAttribute('data-other-user-id') || '');
+                            window.history.pushState({ url: url }, '', url);
+                            bindChatSession();
+                        } else {
+                            window.location.href = url;
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Error loading chat conversation:", err);
+                        window.location.href = url;
+                    });
+            };
+        });
+    }
+
+    attachContactItemHandlers();
+    bindChatSession();
+
+    window.addEventListener('popstate', () => {
+        window.location.reload();
+    });
+});
+</script>
+{% endblock %}

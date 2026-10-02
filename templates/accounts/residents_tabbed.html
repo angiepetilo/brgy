@@ -1,0 +1,570 @@
+{% extends 'base.html' %}
+
+{% block title %}Residents Management - Barangay e-Portal{% endblock %}
+
+{% block content %}
+<div class="residents-management-container">
+
+    <!-- Header Section -->
+    <div class="page-header" style="margin-bottom: 1.25rem;">
+        <h1 style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin: 0; text-transform: uppercase;">
+            Residents Management
+        </h1>
+        <p style="color: #64748B; font-size: 0.8125rem; margin: 0.25rem 0 0 0;">
+            Official resident records, status verification, and inhabitant registration
+        </p>
+    </div>
+
+    <!-- Resident Module Navigation Tabs (Without Icons) -->
+    <div class="residents-module-tabs" style="display: flex; gap: 0.5rem; border-bottom: 2px solid #E2E8F0; margin-bottom: 1.5rem; overflow-x: auto;">
+        <a href="{% url 'accounts:residents_tabbed' %}?main_tab=residents&tab={{ active_tab }}&q={{ search_query }}" class="btn {% if main_tab != 'rbi' %}btn-primary{% else %}btn-secondary{% endif %}" style="font-weight: 700; border-bottom: none; border-radius: 8px 8px 0 0; min-height: 44px; min-width: 140px; display: inline-flex; align-items: center; justify-content: center;">
+            Residents
+        </a>
+        <a href="{% url 'accounts:residents_tabbed' %}?main_tab=rbi" class="btn {% if main_tab == 'rbi' %}btn-primary{% else %}btn-secondary{% endif %}" style="font-weight: 700; border-bottom: none; border-radius: 8px 8px 0 0; min-height: 44px; min-width: 240px; display: inline-flex; align-items: center; justify-content: center;">
+            Record of Barangay Inhabitants
+        </a>
+    </div>
+
+    {% if main_tab == 'rbi' %}
+    <!-- Tab 2: Record of Barangay Inhabitants (Coming Soon Text Design) -->
+    <div class="card" style="border: 1px solid #E2E8F0; border-radius: 12px; background: #FFFFFF; padding: 4.5rem 1.5rem; text-align: center; box-shadow: none;">
+        <div style="font-size: 0.8125rem; font-weight: 700; color: #2563EB; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem;">
+            Record of Barangay Inhabitants (RBI)
+        </div>
+        <h2 style="font-size: 2.25rem; font-weight: 800; color: #0F172A; margin: 0 0 0.5rem 0; letter-spacing: -0.02em;">
+            Coming Soon
+        </h2>
+        <p style="color: #64748B; font-size: 0.9375rem; max-width: 480px; margin: 0 auto; line-height: 1.5;">
+            The comprehensive inhabitant records and demographic census will be available in the upcoming release.
+        </p>
+    </div>
+    {% else %}
+
+    <!-- Filter & Search Controls (Single Select Dropdown: Pending, Approved, Rejected) -->
+    <div class="card" style="margin-bottom: 1.25rem; border: 1px solid #E2E8F0; border-radius: 8px; box-shadow: none;">
+        <div class="card-body" style="padding: 0.85rem 1rem;">
+            <form method="get" action="{% url 'accounts:residents_tabbed' %}" style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+                <input type="hidden" name="main_tab" value="residents">
+                <!-- Single Select Filter Dropdown -->
+                <div style="flex: 1.2; min-width: 180px;">
+                    <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 0.2rem;">Application Status</label>
+                    <select name="tab" class="form-control" onchange="this.form.submit()" style="font-weight: 600;">
+                        <option value="pending" {% if active_tab == 'pending' %}selected{% endif %}>Pending ({{ pending_count }})</option>
+                        <option value="approved" {% if active_tab == 'approved' %}selected{% endif %}>Approved ({{ approved_count }})</option>
+                        <option value="rejected" {% if active_tab == 'rejected' %}selected{% endif %}>Rejected ({{ rejected_count }})</option>
+                    </select>
+                </div>
+
+                <!-- Text Search -->
+                <div style="flex: 2; min-width: 200px;">
+                    <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 0.2rem;">Search Resident</label>
+                    <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Search resident name, username, phone, or email...">
+                </div>
+
+                {% if active_tab == 'approved' %}
+                <div style="flex: 1.2; min-width: 160px;">
+                    <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 0.2rem;">Purok Jurisdiction</label>
+                    <select name="purok" class="form-control" onchange="this.form.submit()">
+                        <option value="">All Puroks</option>
+                        {% for code, label in purok_choices %}
+                        <option value="{{ code }}" {% if purok_filter == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                <div style="display: flex; gap: 0.5rem; align-self: flex-end; padding-bottom: 1px;">
+                    <button type="submit" class="btn btn-secondary btn-sm" style="font-weight: 700; min-height: 38px;">
+                        <i class="fa-solid fa-filter" style="margin-right: 0.25rem;"></i> Filter
+                    </button>
+                    {% if search_query or purok_filter %}
+                    <a href="{% url 'accounts:residents_tabbed' %}?tab={{ active_tab }}" class="btn btn-secondary btn-sm" style="color: #DC2626; font-weight: 700; min-height: 38px;">
+                        Clear
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TAB 1: PENDING RESIDENTS -->
+    {% if active_tab == 'pending' %}
+    <div class="data-table-card">
+        <div style="background: #FFFFFF; padding: 1rem 1.25rem; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700; font-size: 0.8125rem; letter-spacing: 0.05em; text-transform: uppercase; color: #0F172A;">
+                UNAPPROVED RESIDENT REGISTRATIONS AWAITING VERIFICATION
+            </span>
+            <span class="status-text-pill status-builtin" style="font-size: 0.75rem;">
+                <i class="fa-solid fa-clock"></i> {{ pending_count }} Awaiting
+            </span>
+        </div>
+        <div>
+            {% if pending_residents %}
+            <div class="table-responsive">
+                <table class="clean-table">
+                    <thead>
+                        <tr>
+                            <th class="col-idx">#</th>
+                            <th style="width: 36%;">APPLICANT NAME</th>
+                            <th style="width: 22%;">PUROK</th>
+                            <th style="width: 14%;">STATUS</th>
+                            <th style="width: 18%;">REGISTERED ON</th>
+                            <th style="width: 10%; text-align: center;">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for resident in pending_residents %}
+                        <tr>
+                            <td class="col-idx">{{ forloop.counter }}</td>
+                            <td>
+                                <div class="cell-title">{{ resident.get_full_name|default:resident.username }}</div>
+                                <div class="cell-subtext">@{{ resident.username }}{% if resident.email %} &bull; {{ resident.email }}{% endif %}</div>
+                            </td>
+                            <td>
+                                <div style="font-weight: 600; color: #0F172A; font-size: 0.8125rem;">
+                                    {{ resident.get_purok_display|default:resident.address|default:"Unassigned" }}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-text-pill status-builtin">
+                                    <i class="fa-solid fa-clock"></i> Pending
+                                </span>
+                            </td>
+                            <td style="color: #334155; font-size: 0.8125rem;">
+                                {{ resident.date_joined|date:"Y-m-d" }}
+                            </td>
+                            <td style="text-align: center;">
+                                <button type="button" class="btn-action-circle open-resident-modal-btn" 
+                                    data-id="{{ resident.id }}"
+                                    data-name="{{ resident.get_full_name|default:resident.username }}"
+                                    data-username="{{ resident.username }}"
+                                    data-email="{{ resident.email|default:'N/A' }}"
+                                    data-phone="{{ resident.phone_number|default:'N/A' }}"
+                                    data-address="{{ resident.address|default:'N/A' }}"
+                                    data-purok="{{ resident.get_purok_display|default:'Unassigned' }}"
+                                    data-date="{{ resident.date_joined|date:'M d, Y' }}"
+                                    data-idproof="{% if resident.id_proof %}{{ resident.id_proof.url }}{% endif %}"
+                                    data-status="pending"
+                                    title="View Applicant Details">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table Footer Bar -->
+            <div class="table-footer-bar">
+                <div class="footer-count">
+                    Showing <strong>1</strong> to <strong>{{ pending_residents|length }}</strong> of <strong>{{ pending_count }}</strong> resident applications
+                </div>
+                <div class="pagination-controls">
+                    <span class="pagination-page-label">Page <strong>1</strong> of <strong>1</strong></span>
+                    <a href="javascript:void(0)" class="btn-page-pill disabled">&lt; Previous</a>
+                    <a href="javascript:void(0)" class="btn-page-pill disabled">Next &gt;</a>
+                </div>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 3rem 1.5rem; color: #64748B;">
+                <h3 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.25rem;">NO PENDING REGISTRATIONS</h3>
+                <p style="font-size: 0.8125rem;">All resident applications have been evaluated.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- TAB 2: APPROVED RESIDENTS (RBI DIRECTORY) -->
+    {% elif active_tab == 'approved' %}
+    <div class="data-table-card">
+        <div style="background: #FFFFFF; padding: 1rem 1.25rem; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700; font-size: 0.8125rem; letter-spacing: 0.05em; text-transform: uppercase; color: #0F172A;">
+                VERIFIED RESIDENTS DIRECTORY (RBI)
+            </span>
+            <span class="status-text-pill status-available" style="font-size: 0.75rem;">
+                <i class="fa-solid fa-circle-check"></i> {{ approved_count }} Verified
+            </span>
+        </div>
+        <div>
+            {% if approved_page %}
+            <div class="table-responsive">
+                <table class="clean-table">
+                    <thead>
+                        <tr>
+                            <th class="col-idx">#</th>
+                            <th style="width: 36%;">RESIDENT NAME</th>
+                            <th style="width: 22%;">PUROK</th>
+                            <th style="width: 14%;">STATUS</th>
+                            <th style="width: 18%;">REGISTERED ON</th>
+                            <th style="width: 10%; text-align: center;">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for resident in approved_page %}
+                        <tr>
+                            <td class="col-idx">{{ forloop.counter }}</td>
+                            <td>
+                                <div class="cell-title">{{ resident.get_full_name|default:resident.username }}</div>
+                                <div class="cell-subtext">@{{ resident.username }}{% if resident.email %} &bull; {{ resident.email }}{% endif %}</div>
+                            </td>
+                            <td>
+                                <div style="font-weight: 600; color: #0F172A; font-size: 0.8125rem;">
+                                    {{ resident.get_purok_display|default:"Unassigned" }}
+                                </div>
+                                {% if resident.household %}
+                                <div class="cell-subtext">HH #{{ resident.household.household_number }}</div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="status-text-pill status-available">
+                                    <i class="fa-solid fa-circle-check"></i> Approved
+                                </span>
+                            </td>
+                            <td style="color: #334155; font-size: 0.8125rem;">
+                                {{ resident.date_joined|date:"Y-m-d" }}
+                            </td>
+                            <td style="text-align: center;">
+                                <button type="button" class="btn-action-circle open-resident-modal-btn" 
+                                    data-id="{{ resident.id }}"
+                                    data-name="{{ resident.get_full_name|default:resident.username }}"
+                                    data-username="{{ resident.username }}"
+                                    data-email="{{ resident.email|default:'N/A' }}"
+                                    data-phone="{{ resident.phone_number|default:'N/A' }}"
+                                    data-address="{{ resident.address|default:'N/A' }}"
+                                    data-purok="{{ resident.get_purok_display|default:'Unassigned' }}"
+                                    data-date="{{ resident.date_joined|date:'M d, Y' }}"
+                                    data-idproof="{% if resident.id_proof %}{{ resident.id_proof.url }}{% endif %}"
+                                    data-status="approved"
+                                    title="View Resident Record">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table Footer Bar with Live Pagination -->
+            <div class="table-footer-bar">
+                <div class="footer-count">
+                    Showing <strong>1</strong> to <strong>{{ approved_page|length }}</strong> of <strong>{{ approved_count }}</strong> verified residents
+                </div>
+                <div class="pagination-controls">
+                    <span class="pagination-page-label">Page <strong>{{ approved_page.number }}</strong> of <strong>{{ approved_page.paginator.num_pages }}</strong></span>
+                    {% if approved_page.has_previous %}
+                    <a href="?tab=approved&page={{ approved_page.previous_page_number }}&q={{ search_query }}&purok={{ purok_filter }}" class="btn-page-pill">&lt; Previous</a>
+                    {% else %}
+                    <a href="javascript:void(0)" class="btn-page-pill disabled">&lt; Previous</a>
+                    {% endif %}
+                    {% if approved_page.has_next %}
+                    <a href="?tab=approved&page={{ approved_page.next_page_number }}&q={{ search_query }}&purok={{ purok_filter }}" class="btn-page-pill">Next &gt;</a>
+                    {% else %}
+                    <a href="javascript:void(0)" class="btn-page-pill disabled">Next &gt;</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 3rem 1.5rem; color: #64748B;">
+                <h3 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.25rem;">NO VERIFIED RESIDENTS FOUND</h3>
+                <p style="font-size: 0.8125rem;">Adjust search filters or select Pending to approve applications.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- TAB 3: REJECTED RESIDENTS -->
+    {% elif active_tab == 'rejected' %}
+    <div class="data-table-card">
+        <div style="background: #FFFFFF; padding: 1rem 1.25rem; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700; font-size: 0.8125rem; letter-spacing: 0.05em; text-transform: uppercase; color: #0F172A;">
+                DECLINED REGISTRATION ATTEMPTS & REJECTION AUDIT
+            </span>
+            <span class="status-text-pill status-rejected" style="font-size: 0.75rem;">
+                <i class="fa-solid fa-circle-xmark"></i> {{ rejected_count }} Declined
+            </span>
+        </div>
+        <div>
+            {% if rejected_residents %}
+            <div class="table-responsive">
+                <table class="clean-table">
+                    <thead>
+                        <tr>
+                            <th class="col-idx">#</th>
+                            <th style="width: 36%;">APPLICANT NAME</th>
+                            <th style="width: 22%;">PUROK</th>
+                            <th style="width: 14%;">STATUS</th>
+                            <th style="width: 18%;">REGISTERED ON</th>
+                            <th style="width: 10%; text-align: center;">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for resident in rejected_residents %}
+                        <tr>
+                            <td class="col-idx">{{ forloop.counter }}</td>
+                            <td>
+                                <div class="cell-title">{{ resident.get_full_name|default:resident.username }}</div>
+                                <div class="cell-subtext">@{{ resident.username }}{% if resident.email %} &bull; {{ resident.email }}{% endif %}</div>
+                            </td>
+                            <td>
+                                <div style="font-weight: 600; color: #0F172A; font-size: 0.8125rem;">
+                                    {{ resident.get_purok_display|default:resident.address|default:"Unassigned" }}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-text-pill status-rejected">
+                                    <i class="fa-solid fa-circle-xmark"></i> Rejected
+                                </span>
+                            </td>
+                            <td style="color: #334155; font-size: 0.8125rem;">
+                                {{ resident.date_joined|date:"Y-m-d" }}
+                            </td>
+                            <td style="text-align: center;">
+                                <button type="button" class="btn-action-circle open-resident-modal-btn" 
+                                    data-id="{{ resident.id }}"
+                                    data-name="{{ resident.get_full_name|default:resident.username }}"
+                                    data-username="{{ resident.username }}"
+                                    data-email="{{ resident.email|default:'N/A' }}"
+                                    data-phone="{{ resident.phone_number|default:'N/A' }}"
+                                    data-address="{{ resident.address|default:'N/A' }}"
+                                    data-purok="{{ resident.get_purok_display|default:'Unassigned' }}"
+                                    data-date="{{ resident.date_joined|date:'M d, Y' }}"
+                                    data-idproof="{% if resident.id_proof %}{{ resident.id_proof.url }}{% endif %}"
+                                    data-reason="{{ resident.rejection_reason|default:'' }}"
+                                    data-status="rejected"
+                                    title="View Rejected Applicant">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table Footer Bar -->
+            <div class="table-footer-bar">
+                <div class="footer-count">
+                    Showing <strong>1</strong> to <strong>{{ rejected_residents|length }}</strong> of <strong>{{ rejected_count }}</strong> declined registrations
+                </div>
+                <div class="pagination-controls">
+                    <span class="pagination-page-label">Page <strong>1</strong> of <strong>1</strong></span>
+                    <a href="javascript:void(0)" class="btn-page-pill disabled">&lt; Previous</a>
+                    <a href="javascript:void(0)" class="btn-page-pill disabled">Next &gt;</a>
+                </div>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 3rem 1.5rem; color: #64748B;">
+                <h3 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.25rem;">NO DECLINED REGISTRATIONS</h3>
+                <p style="font-size: 0.8125rem;">No rejected resident applications are currently logged.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+
+</div>
+
+<!-- Interactive Resident Detail & Verification Modal (Triggered by Eye Icon) -->
+<div id="residentDetailModal" class="modal-backdrop-custom" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); z-index: 2000; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: #FFFFFF; border-radius: 8px; max-width: 620px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);">
+        <!-- Modal Header -->
+        <div style="padding: 1rem 1.25rem; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid fa-id-card" style="color: #2563EB; font-size: 1.25rem;"></i>
+                <h3 id="m-applicant-title" style="margin: 0; font-size: 1.125rem; font-weight: 700; color: #0F172A;">Applicant Details</h3>
+            </div>
+            <button type="button" onclick="closeResidentModal()" style="border: none; background: none; font-size: 1.25rem; color: #64748B; cursor: pointer;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div style="padding: 1.25rem;">
+            <!-- Applicant Overview -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem; background: #F8FAFC; padding: 1rem; border-radius: 6px; border: 1px solid #E2E8F0;">
+                <div>
+                    <span style="font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase;">Full Name</span>
+                    <div id="m-name" style="font-weight: 700; color: #0F172A; font-size: 0.95rem;">-</div>
+                </div>
+                <div>
+                    <span style="font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase;">Username</span>
+                    <div id="m-username" style="font-weight: 600; color: #2563EB;">-</div>
+                </div>
+                <div>
+                    <span style="font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase;">Contact No.</span>
+                    <div id="m-phone" style="color: #0F172A;">-</div>
+                </div>
+                <div>
+                    <span style="font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase;">Email</span>
+                    <div id="m-email" style="color: #0F172A;">-</div>
+                </div>
+                <div>
+                    <span style="font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase;">Purok Jurisdiction</span>
+                    <div id="m-purok" style="font-weight: 600; color: #0F172A;">-</div>
+                </div>
+                <div>
+                    <span style="font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase;">Registered On</span>
+                    <div id="m-date" style="color: #0F172A;">-</div>
+                </div>
+                <div style="grid-column: span 2;">
+                    <span style="font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase;">Residential Address</span>
+                    <div id="m-address" style="color: #0F172A;">-</div>
+                </div>
+            </div>
+
+            <!-- Proof of Identity -->
+            <div style="margin-bottom: 1.25rem;">
+                <span style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.5rem;">Proof of Identity / Government ID</span>
+                <div id="m-idproof-container" style="text-align: center; background: #F1F5F9; border: 1px dashed #CBD5E1; border-radius: 6px; padding: 1rem; min-height: 120px; display: flex; align-items: center; justify-content: center;">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <!-- Rejection reason if present -->
+            <div id="m-rejection-box" style="display: none; margin-bottom: 1rem; padding: 0.75rem 1rem; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 6px;">
+                <span style="font-size: 0.75rem; font-weight: 700; color: #DC2626; text-transform: uppercase;">Logged Rejection Reason:</span>
+                <p id="m-rejection-text" style="color: #991B1B; font-size: 0.875rem; margin: 0.25rem 0 0 0;"></p>
+            </div>
+
+            <!-- Actions Container -->
+            <div id="m-pending-actions" style="display: none; border-top: 1px solid #E2E8F0; padding-top: 1rem; margin-top: 1rem;">
+                <div style="display: flex; gap: 0.75rem; justify-content: flex-end; flex-wrap: wrap;">
+                    <!-- Approve Form -->
+                    <form id="m-approve-form" method="post" action="">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary" style="font-weight: 700; min-height: 40px; padding: 0.5rem 1.25rem;">
+                            <i class="fa-solid fa-check" style="margin-right: 0.35rem;"></i> Approve Registration
+                        </button>
+                    </form>
+
+                    <!-- Reject Form -->
+                    <form id="m-reject-form" method="post" action="" style="display: inline-flex; gap: 0.5rem;" onsubmit="return confirm('Are you sure you want to decline this registration?');">
+                        {% csrf_token %}
+                        <input type="text" name="rejection_reason" placeholder="State rejection reason..." class="form-control" style="font-size: 0.8125rem; max-width: 200px;" required>
+                        <button type="submit" class="btn btn-danger" style="font-weight: 700; min-height: 40px;">
+                            <i class="fa-solid fa-xmark" style="margin-right: 0.35rem;"></i> Reject
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Re-evaluate Actions (For rejected) -->
+            <div id="m-rejected-actions" style="display: none; border-top: 1px solid #E2E8F0; padding-top: 1rem; margin-top: 1rem;">
+                <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                    <form id="m-reeval-approve-form" method="post" action="">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="approve">
+                        <button type="submit" class="btn btn-primary" style="font-weight: 700; min-height: 40px;">
+                            <i class="fa-solid fa-check" style="margin-right: 0.35rem;"></i> Re-evaluate & Approve
+                        </button>
+                    </form>
+                    <form id="m-reeval-pending-form" method="post" action="">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="pending">
+                        <button type="submit" class="btn btn-secondary" style="font-weight: 700; min-height: 40px;">
+                            <i class="fa-solid fa-clock-rotate-left" style="margin-right: 0.35rem;"></i> Return to Pending
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Close button for approved view -->
+            <div id="m-approved-actions" style="display: none; border-top: 1px solid #E2E8F0; padding-top: 1rem; margin-top: 1rem; text-align: right;">
+                <button type="button" onclick="closeResidentModal()" class="btn btn-secondary" style="font-weight: 700; min-height: 40px;">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openResidentModal(data) {
+    document.getElementById('m-name').textContent = data.name;
+    document.getElementById('m-username').textContent = '@' + data.username;
+    document.getElementById('m-phone').textContent = data.phone;
+    document.getElementById('m-email').textContent = data.email;
+    document.getElementById('m-purok').textContent = data.purok;
+    document.getElementById('m-date').textContent = data.date;
+    document.getElementById('m-address').textContent = data.address;
+
+    var idProofContainer = document.getElementById('m-idproof-container');
+    if (data.idproof) {
+        idProofContainer.innerHTML = '<a href="' + data.idproof + '" target="_blank" style="text-decoration:none;"><img src="' + data.idproof + '" style="max-height: 220px; max-width: 100%; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><div style="margin-top:0.5rem; font-size:0.75rem; font-weight:700; color:#2563EB;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open Full Image</div></a>';
+    } else {
+        idProofContainer.innerHTML = '<span class="badge badge-danger">NO PROOF UPLOADED</span>';
+    }
+
+    var pendingActions = document.getElementById('m-pending-actions');
+    var rejectedActions = document.getElementById('m-rejected-actions');
+    var approvedActions = document.getElementById('m-approved-actions');
+    var rejectionBox = document.getElementById('m-rejection-box');
+
+    pendingActions.style.display = 'none';
+    rejectedActions.style.display = 'none';
+    approvedActions.style.display = 'none';
+    rejectionBox.style.display = 'none';
+
+    if (data.status === 'pending') {
+        document.getElementById('m-applicant-title').textContent = 'Verify Resident Applicant';
+        pendingActions.style.display = 'block';
+        document.getElementById('m-approve-form').action = '/accounts/residents/' + data.id + '/approve/';
+        document.getElementById('m-reject-form').action = '/accounts/residents/' + data.id + '/reject/';
+    } else if (data.status === 'rejected') {
+        document.getElementById('m-applicant-title').textContent = 'Declined Resident Application';
+        rejectedActions.style.display = 'block';
+        if (data.reason) {
+            rejectionBox.style.display = 'block';
+            document.getElementById('m-rejection-text').textContent = data.reason;
+        }
+        document.getElementById('m-reeval-approve-form').action = '/accounts/residents/' + data.id + '/reevaluate/';
+        document.getElementById('m-reeval-pending-form').action = '/accounts/residents/' + data.id + '/reevaluate/';
+    } else {
+        document.getElementById('m-applicant-title').textContent = 'Verified Resident Profile';
+        approvedActions.style.display = 'block';
+    }
+
+    var modal = document.getElementById('residentDetailModal');
+    modal.style.display = 'flex';
+}
+
+function closeResidentModal() {
+    var modal = document.getElementById('residentDetailModal');
+    modal.style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var buttons = document.querySelectorAll('.open-resident-modal-btn');
+    buttons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var data = {
+                id: this.getAttribute('data-id'),
+                name: this.getAttribute('data-name'),
+                username: this.getAttribute('data-username'),
+                email: this.getAttribute('data-email'),
+                phone: this.getAttribute('data-phone'),
+                address: this.getAttribute('data-address'),
+                purok: this.getAttribute('data-purok'),
+                date: this.getAttribute('data-date'),
+                idproof: this.getAttribute('data-idproof'),
+                reason: this.getAttribute('data-reason'),
+                status: this.getAttribute('data-status')
+            };
+            openResidentModal(data);
+        });
+    });
+
+    var modal = document.getElementById('residentDetailModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeResidentModal();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,167 @@
+{% if other_user %}
+  {% with active_user=other_user chat_msgs=messages_history %}
+<div class="chat-conversation-wrapper">
+  <!-- Header -->
+  <div class="chat-header">
+    <div class="chat-user-info">
+      <div class="avatar-sm">
+        {% if active_user.avatar %}
+          <img src="{{ active_user.avatar.url }}" alt="{{ active_user.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+        {% else %}
+          {{ active_user.first_name|slice:":1" }}{{ active_user.last_name|slice:":1" }}
+        {% endif %}
+      </div>
+      <div>
+        <h2 class="user-name">{{ active_user.get_full_name|default:active_user.username }}</h2>
+        <span class="status-indicator">
+          {% if active_user.duty_status == 'on_duty' %}
+            Active now
+          {% elif active_user.duty_status == 'on_leave' %}
+            On Leave
+          {% else %}
+            Active now
+          {% endif %}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scrollable Message List Body -->
+  <div class="chat-messages-body" id="chatMessagesBody">
+    {% for msg in chat_msgs %}
+      {% if msg.sender == request.user %}
+        <div class="message-row outgoing">
+          <div class="message-bubble">
+            <p class="message-text">{{ msg.content }}</p>
+            <span class="message-time">
+              {% if msg.is_read %}
+                <i class="fa-solid fa-check-double" style="font-size: 0.65rem;"></i>
+              {% else %}
+                <i class="fa-solid fa-check" style="font-size: 0.65rem;"></i>
+              {% endif %}
+              {{ msg.created_at|date:"g:i A" }}
+            </span>
+          </div>
+        </div>
+      {% else %}
+        <div class="message-row incoming">
+          <div class="message-avatar">
+            {% if msg.sender.avatar %}
+              <img src="{{ msg.sender.avatar.url }}" alt="{{ msg.sender.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+            {% else %}
+              {{ msg.sender.first_name|slice:":1" }}{{ msg.sender.last_name|slice:":1" }}
+            {% endif %}
+          </div>
+          <div class="message-bubble">
+            <p class="message-text">{{ msg.content }}</p>
+            <span class="message-time">{{ msg.created_at|date:"g:i A" }}</span>
+          </div>
+        </div>
+      {% endif %}
+    {% empty %}
+      <div id="no-messages-placeholder" style="text-align: center; margin: auto; color: #64748B; font-size: 0.875rem; padding: 2rem;">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;">👋</div>
+        <div style="font-weight: 600; color: #0F172A; margin-bottom: 0.25rem;">Say hello to {{ active_user.get_full_name|default:active_user.username }}!</div>
+        <div>Send a message to start this consultation conversation.</div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Bottom Input Bar Line -->
+  <div class="chat-input-footer">
+    <form class="chat-input-form" id="chat-form">
+      {% csrf_token %}
+      <div class="input-wrapper">
+        <input type="text" id="chat-message-input" placeholder="Type a message..." autocomplete="off" required>
+        <button type="submit" class="btn-send" id="chat-send-btn" title="Send message">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+  {% endwith %}
+{% elif active_chat %}
+  {% with active_user=active_chat.user chat_msgs=messages %}
+<div class="chat-conversation-wrapper">
+  <!-- Header -->
+  <div class="chat-header">
+    <div class="chat-user-info">
+      <div class="avatar-sm">
+        {% if active_user.avatar %}
+          <img src="{{ active_user.avatar.url }}" alt="{{ active_user.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+        {% else %}
+          {{ active_user.first_name|slice:":1" }}{{ active_user.last_name|slice:":1" }}
+        {% endif %}
+      </div>
+      <div>
+        <h2 class="user-name">{{ active_user.get_full_name|default:active_user.username }}</h2>
+        <span class="status-indicator">
+          {% if active_user.duty_status == 'on_duty' %}
+            Active now
+          {% elif active_user.duty_status == 'on_leave' %}
+            On Leave
+          {% else %}
+            Active now
+          {% endif %}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scrollable Message List Body -->
+  <div class="chat-messages-body" id="chatMessagesBody">
+    {% for msg in chat_msgs %}
+      {% if msg.sender == request.user %}
+        <div class="message-row outgoing">
+          <div class="message-bubble">
+            <p class="message-text">{{ msg.content|default:msg.text }}</p>
+            <span class="message-time">
+              {% if msg.is_read %}
+                <i class="fa-solid fa-check-double" style="font-size: 0.65rem;"></i>
+              {% else %}
+                <i class="fa-solid fa-check" style="font-size: 0.65rem;"></i>
+              {% endif %}
+              {{ msg.created_at|default:msg.timestamp|date:"g:i A" }}
+            </span>
+          </div>
+        </div>
+      {% else %}
+        <div class="message-row incoming">
+          <div class="message-avatar">
+            {% if msg.sender.avatar %}
+              <img src="{{ msg.sender.avatar.url }}" alt="{{ msg.sender.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+            {% else %}
+              {{ msg.sender.first_name|slice:":1" }}{{ msg.sender.last_name|slice:":1" }}
+            {% endif %}
+          </div>
+          <div class="message-bubble">
+            <p class="message-text">{{ msg.content|default:msg.text }}</p>
+            <span class="message-time">{{ msg.created_at|default:msg.timestamp|date:"g:i A" }}</span>
+          </div>
+        </div>
+      {% endif %}
+    {% empty %}
+      <div id="no-messages-placeholder" style="text-align: center; margin: auto; color: #64748B; font-size: 0.875rem; padding: 2rem;">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;">👋</div>
+        <div style="font-weight: 600; color: #0F172A; margin-bottom: 0.25rem;">Say hello to {{ active_user.get_full_name|default:active_user.username }}!</div>
+        <div>Send a message to start this consultation conversation.</div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Bottom Input Bar Line -->
+  <div class="chat-input-footer">
+    <form class="chat-input-form" id="chat-form">
+      {% csrf_token %}
+      <div class="input-wrapper">
+        <input type="text" id="chat-message-input" placeholder="Type a message..." autocomplete="off" required>
+        <button type="submit" class="btn-send" id="chat-send-btn" title="Send message">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+  {% endwith %}
+{% endif %}

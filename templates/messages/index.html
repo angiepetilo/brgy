@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Messages - Barangay Portal{% endblock %}
+
+{% block content %}
+<div class="messages-card messenger-shell">
+    <!-- Left Chat List Panel -->
+    <div class="chat-sidebar messenger-sidebar">
+        <div class="sidebar-header-bar">
+            <h1 class="sidebar-header-title">Chats</h1>
+        </div>
+
+        <div class="search-messenger-wrap">
+            <div class="search-messenger-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="messenger-search-box" placeholder="Search Messenger" onkeyup="filterMessengerContacts(this.value)">
+            </div>
+        </div>
+
+        <div class="messenger-contacts-list" id="messenger-contacts-list">
+            {% if contacts %}
+                {% for c in contacts %}
+                <a href="{% url 'chat:room' c.user.id %}" class="messenger-contact-item {% if other_user and other_user.id == c.user.id %}active{% endif %}" data-name="{{ c.user.get_full_name|default:c.user.username|lower }}">
+                    <div class="contact-avatar-wrap">
+                        {% if c.user.avatar %}
+                            <img src="{{ c.user.avatar.url }}" alt="{{ c.user.username }}" class="contact-avatar-img">
+                        {% else %}
+                            <div class="contact-avatar-initials">{{ c.user.initials }}</div>
+                        {% endif %}
+                        {% if c.is_online %}
+                            <div class="contact-online-dot" title="Online / On Duty"></div>
+                        {% endif %}
+                    </div>
+
+                    <div class="contact-meta">
+                        <div class="contact-name">{{ c.user.get_full_name|default:c.user.username }}</div>
+                        <div class="contact-snippet {% if c.unread_count > 0 %}unread-bold{% endif %}">
+                            {% if c.last_message %}
+                                {% if c.last_message.sender == request.user %}You: {% endif %}{{ c.last_message.content|truncatechars:26 }} &bull; {{ c.last_message.created_at|timesince }}
+                            {% else %}
+                                Start a conversation
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if c.unread_count > 0 %}
+                        <div class="contact-unread-dot" title="{{ c.unread_count }} unread message(s)"></div>
+                    {% endif %}
+                </a>
+                {% endfor %}
+            {% else %}
+                <div style="text-align: center; padding: 2rem 1rem; color: #65676B; font-size: 0.875rem;">
+                    No conversations yet.<br>Click the write icon to start messaging an officer.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Right Conversation Window -->
+    <div class="chat-view-area messenger-main-pane" id="messenger-main-pane" {% if other_user %}data-other-user-id="{{ other_user.id }}"{% endif %}>
+        {% if not other_user %}
+            <div class="messenger-empty-state">
+                <div class="empty-state-bubble-wrap">
+                    <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="cursorGradient" x1="15%" y1="10%" x2="85%" y2="90%">
+                                <stop offset="0%" stop-color="#FF3B88"/>
+                                <stop offset="50%" stop-color="#843BFF"/>
+                                <stop offset="100%" stop-color="#4F46E5"/>
+                            </linearGradient>
+                            <filter id="bubbleDropShadow" x="-10%" y="-10%" width="130%" height="130%" filterUnits="userSpaceOnUse">
+                                <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#7B8CA4" flood-opacity="0.18"/>
+                            </filter>
+                        </defs>
+                        <path d="M60 22 C37 22 20 37 20 56 C20 67 27 77 38 83 C38 88 35 96 30 100 C39 99 48 94 53 90 C55 90 58 90 60 90 C83 90 100 75 100 56 C100 37 83 22 60 22 Z" 
+                              fill="#FFFFFF" 
+                              stroke="#E4E9F2" 
+                              stroke-width="7" 
+                              filter="url(#bubbleDropShadow)"/>
+                        <g transform="translate(48, 42)">
+                            <path d="M2 2 L19 22 L11 23 L16 35 L10 37 L5 25 L-2 30 Z" 
+                                  fill="url(#cursorGradient)" 
+                                  stroke="#FFFFFF" 
+                                  stroke-width="1.8" 
+                                  stroke-linejoin="round"/>
+                        </g>
+                    </svg>
+                </div>
+                <h2 class="empty-state-title">No chats selected</h2>
+                <p class="empty-state-sub">Choose from your existing conversations, start a new one, or just keep swimming.</p>
+                <button type="button" class="btn-new-message-pill" onclick="openStaffRosterModal()">
+                    <i class="fa-solid fa-pen-to-square"></i> New message
+                </button>
+            </div>
+        {% else %}
+            {% include 'messages/chat_view.html' %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/chat.js' %}"></script>
+{% endblock %}
+

@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+
+{% block title %}Appointment #{{ appointment.id }} - {{ appointment.get_document_type_display }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 1.5rem;">
+    <a href="{% url 'appointments:list' %}" style="font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; margin-bottom: 0.5rem; text-transform: uppercase;">
+        BACK TO REQUESTS
+    </a>
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="font-size: 1.25rem; font-weight: 600; color: #0f172a; line-height: 1.2;">
+                {{ appointment.get_document_type_display }}
+            </h1>
+            <p style="color: #64748b; font-size: 0.8125rem; margin-top: 0.2rem;">
+                Reference #{{ appointment.id }} - Submitted on {{ appointment.created_at|date:"F d, Y at h:i A" }}
+            </p>
+        </div>
+        <div>
+            <span class="badge {{ appointment.badge_class }}" style="font-size: 0.75rem; padding: 0.3rem 0.65rem;">
+                {{ appointment.get_status_display }}
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Status Stepper Lifecycle -->
+<div class="card" style="margin-bottom: 2rem;">
+    <div class="card-body">
+        <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 1.5rem;">Processing Lifecycle</h4>
+        
+        {% if appointment.status == 'rejected' %}
+        <div class="alert alert-danger" style="margin: 0;">
+            <div style="font-weight: 700; margin-bottom: 0.25rem;">REQUEST REJECTED</div>
+            <div>This document request was rejected by administration. See administrative remarks below.</div>
+        </div>
+        {% else %}
+        <div class="status-stepper">
+            {% for code, label in status_order %}
+            <div class="step-item 
+                {% if appointment.status == code %}active
+                {% elif forloop.counter <= 1 and appointment.status != 'submitted' %}completed
+                {% elif forloop.counter <= 2 and appointment.status in 'approved_scheduled,ready_for_pickup,completed' %}completed
+                {% elif forloop.counter <= 3 and appointment.status in 'ready_for_pickup,completed' %}completed
+                {% elif forloop.counter <= 4 and appointment.status == 'completed' %}completed
+                {% endif %}">
+                <div class="step-circle">
+                    {{ forloop.counter }}
+                </div>
+                <div class="step-label">{{ label }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Details Grid -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+    <!-- Left: Request & Resident Info -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">APPLICATION PARTICULARS</h3>
+            </div>
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+                    <div>
+                        <span style="font-size: 0.775rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Applicant Name</span>
+                        <div style="font-weight: 700; font-size: 0.95rem; margin-top: 0.2rem;">
+                            {{ appointment.resident.get_full_name|default:appointment.resident.username }}
+                        </div>
+                    </div>
+                    <div>
+                        <span style="font-size: 0.775rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Contact Number</span>
+                        <div style="font-weight: 600; font-size: 0.95rem; margin-top: 0.2rem;">
+                            {{ appointment.resident.phone_number|default:"Not specified" }}
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.25rem;">
+                    <span style="font-size: 0.775rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Registered Address</span>
+                    <div style="font-size: 0.9rem; margin-top: 0.2rem;">
+                        {{ appointment.resident.address|default:"Not specified" }}
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.25rem;">
+                    <span style="font-size: 0.775rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Purpose of Request</span>
+                    <div style="background: #f8fafc; padding: 0.85rem; border-radius: 2px; border: 1px solid #e2e8f0; margin-top: 0.35rem; font-size: 0.9rem; line-height: 1.5;">
+                        {{ appointment.purpose }}
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+                    <div>
+                        <span style="font-size: 0.775rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Preferred Date</span>
+                        <div style="font-weight: 700; color: #0f172a; margin-top: 0.2rem;">
+                            {{ appointment.preferred_date|date:"F d, Y" }}
+                        </div>
+                    </div>
+                    <div>
+                        <span style="font-size: 0.775rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Preferred Time Slot</span>
+                        <div style="font-weight: 700; color: #0f172a; margin-top: 0.2rem;">
+                            {{ appointment.get_preferred_time_slot_display }}
+                        </div>
+                    </div>
+                </div>
+
+                {% if appointment.supporting_id %}
+                <div>
+                    <span style="font-size: 0.775rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Supporting Attachment</span>
+                    <div style="margin-top: 0.35rem;">
+                        <a href="{{ appointment.supporting_id.url }}" target="_blank" class="btn btn-secondary btn-sm">
+                            VIEW UPLOADED ATTACHMENT
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Official Clearance Issuance & Verification QR Code -->
+        {% if appointment.issued_log %}
+        <div class="card" style="border: 1px solid #16a34a; background: #f0fdf4;">
+            <div class="card-header" style="background: #ecfdf5; border-bottom: 1px solid #a7f3d0;">
+                <h3 class="card-title" style="color: #065f46; font-size: 0.95rem; text-transform: uppercase;">
+                    OFFICIAL ISSUED DOCUMENT & VERIFICATION SEAL
+                </h3>
+            </div>
+            <div class="card-body" style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;">
+                {% if appointment.issued_log.qr_code %}
+                <div style="background: #ffffff; padding: 0.5rem; border-radius: 2px; border: 1px solid #d1fae5; text-align: center;">
+                    <img src="{{ appointment.issued_log.qr_code.url }}" alt="Verification QR" style="width: 120px; height: 120px; display: block;">
+                    <span style="font-size: 0.65rem; color: #065f46; font-weight: 700; display: block; margin-top: 0.25rem;">SCAN TO VERIFY</span>
+                </div>
+                {% endif %}
+                <div style="flex: 1;">
+                    <div style="font-size: 0.8rem; color: #047857; font-weight: 700; text-transform: uppercase;">Official Control Number</div>
+                    <div style="font-size: 1.35rem; font-weight: 800; color: #064e3b; letter-spacing: 0.03em; margin: 0.2rem 0;">
+                        {{ appointment.issued_log.control_number }}
+                    </div>
+                    <div style="font-size: 0.825rem; color: #065f46; margin-top: 0.25rem;">
+                        Issued on <strong>{{ appointment.issued_log.issued_at|date:"F d, Y at h:i A" }}</strong>
+                        {% if appointment.issued_log.issued_by %}
+                        by <strong>{{ appointment.issued_log.issued_by.get_full_name|default:appointment.issued_log.issued_by.username }}</strong>
+                        {% endif %}
+                    </div>
+                    <div style="margin-top: 0.75rem;">
+                        <a href="{% url 'appointments:verify' appointment.issued_log.control_number %}" target="_blank" class="btn btn-success btn-sm">
+                            VIEW PUBLIC VERIFICATION CERTIFICATE
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Admin Remarks Display -->
+        {% if appointment.admin_notes %}
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="font-size: 0.95rem; text-transform: uppercase;">Administrative Remarks</h3>
+            </div>
+            <div class="card-body">
+                <p style="font-size: 0.9rem; line-height: 1.5; color: #334155; margin: 0;">
+                    {{ appointment.admin_notes }}
+                </p>
+                {% if appointment.processed_by %}
+                <div style="margin-top: 0.75rem; font-size: 0.75rem; color: #64748b;">
+                    Processed by: {{ appointment.processed_by.get_full_name|default:appointment.processed_by.username }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Right: Administrative Controls or Help -->
+    <div>
+        {% if request.user.is_admin_user %}
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="font-size: 0.95rem; text-transform: uppercase;">Admin Status Management</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'appointments:detail' appointment.id %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Update Lifecycle Status</label>
+                        {{ status_form.status }}
+                    </div>
+                    <div class="form-group">
+                        <label>Administrative Notes / Instructions</label>
+                        {{ status_form.admin_notes }}
+                        <div class="form-help">Notes are instantly pushed to the resident via real-time WebSocket toast.</div>
+                    </div>
+                    <button type="submit" name="update_status" value="1" class="btn btn-primary" style="width: 100%;">
+                        SAVE & NOTIFY RESIDENT
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="font-size: 0.95rem; text-transform: uppercase;">Need Assistance?</h3>
+            </div>
+            <div class="card-body">
+                <p style="font-size: 0.85rem; color: #475569; line-height: 1.4; margin-bottom: 1rem;">
+                    Have questions regarding your document processing schedule or required attachments?
+                </p>
+                <a href="{% url 'chat:inbox' %}" class="btn btn-primary" style="width: 100%;">
+                    CHAT WITH BARANGAY ADMIN
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

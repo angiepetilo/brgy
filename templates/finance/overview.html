@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+
+{% block title %}Finance & Asset Inventory - Barangay e-Portal{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h1 style="font-size: 1.6rem; font-weight: 800; color: #0f172a;">Finance, Clearance Logs & Asset Inventory</h1>
+        <p style="color: #64748b; font-size: 0.9rem; margin-top: 0.25rem;">
+            Official document issuance registry, clearance control logs, and barangay property inventory
+        </p>
+    </div>
+    <a href="{% url 'finance:asset_create' %}" class="btn btn-primary">
+        + Register Barangay Asset
+    </a>
+</div>
+
+<!-- SECTION 1: Document Clearance Issuance Ledger -->
+<div style="margin-bottom: 3rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: #1e1b4b;">Document Issuing & Clearance Activity</h2>
+    </div>
+
+    <!-- Clearance Metrics -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
+        <div class="card" style="padding: 1.25rem; border-left: 4px solid #10b981;">
+            <div style="color: #64748b; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Total Clearances Issued</div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #064e3b; margin: 0.25rem 0;">{{ total_issued }}</div>
+            <span style="font-size: 0.775rem; color: #10b981;">Official logged documents</span>
+        </div>
+        <div class="card" style="padding: 1.25rem; border-left: 4px solid #4f46e5;">
+            <div style="color: #64748b; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Barangay Clearances</div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #1e1b4b; margin: 0.25rem 0;">{{ clearance_count }}</div>
+            <span style="font-size: 0.775rem; color: #64748b;">Employment & ID</span>
+        </div>
+        <div class="card" style="padding: 1.25rem; border-left: 4px solid #0284c7;">
+            <div style="color: #64748b; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Residency Certs</div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #082f49; margin: 0.25rem 0;">{{ residency_count }}</div>
+            <span style="font-size: 0.775rem; color: #64748b;">Proof of address</span>
+        </div>
+        <div class="card" style="padding: 1.25rem; border-left: 4px solid #f59e0b;">
+            <div style="color: #64748b; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Indigency & NOA</div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #78350f; margin: 0.25rem 0;">{{ indigency_count|add:noa_count }}</div>
+            <span style="font-size: 0.775rem; color: #d97706;">Social services & award</span>
+        </div>
+    </div>
+
+    <!-- Recent Logs Table -->
+    <div class="data-table-card">
+        <div style="background: #FFFFFF; padding: 1rem 1.25rem; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 0.875rem; font-weight: 700; color: #0F172A; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">
+                Recent Officially Issued Clearances ({{ total_issued }})
+            </h3>
+        </div>
+        <div>
+            {% if recent_logs %}
+            <div class="table-responsive">
+                <table class="clean-table">
+                    <thead>
+                        <tr>
+                            <th class="col-idx">#</th>
+                            <th style="width: 18%;">CONTROL NO.</th>
+                            <th style="width: 24%;">DOCUMENT TYPE</th>
+                            <th style="width: 24%;">ISSUED TO</th>
+                            <th style="width: 12%;">STATUS</th>
+                            <th style="width: 14%;">DATE ISSUED</th>
+                            <th style="width: 8%; text-align: center;">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in recent_logs %}
+                        <tr>
+                            <td class="col-idx">{{ forloop.counter }}</td>
+                            <td>
+                                <span class="serial-text">{{ log.control_number }}</span>
+                            </td>
+                            <td>
+                                <div class="cell-title">{{ log.appointment.get_document_type_display }}</div>
+                                <div class="cell-subtext">{{ log.issued_by.get_full_name|default:log.issued_by.username|default:"Barangay Hall Official" }}</div>
+                            </td>
+                            <td>
+                                <div class="cell-title">{{ log.issued_to.get_full_name|default:log.issued_to.username }}</div>
+                                <div class="cell-subtext">@{{ log.issued_to.username }}</div>
+                            </td>
+                            <td>
+                                <span class="status-text-pill status-available">
+                                    <i class="fa-solid fa-circle-check"></i> Issued
+                                </span>
+                            </td>
+                            <td style="color: #334155; font-size: 0.8125rem;">
+                                {{ log.issued_at|date:"Y-m-d" }}
+                                <div class="cell-subtext">{{ log.issued_at|date:"h:i A" }}</div>
+                            </td>
+                            <td style="text-align: center;">
+                                <a href="{% url 'appointments:verify' log.control_number %}" target="_blank" class="btn-action-circle" title="Verify Seal">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-footer-bar">
+                <div class="footer-count">
+                    Showing <strong>1</strong> to <strong>{{ recent_logs|length }}</strong> of <strong>{{ total_issued }}</strong> clearance records
+                </div>
+                <div class="pagination-controls">
+                    <span class="pagination-page-label">Page <strong>1</strong> of <strong>1</strong></span>
+                    <a href="javascript:void(0)" class="btn-page-pill disabled">&lt; Previous</a>
+                    <a href="javascript:void(0)" class="btn-page-pill disabled">Next &gt;</a>
+                </div>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 2.5rem; color: #64748b;">
+                No issued clearances recorded yet. Clearances appear automatically when appointment status is marked Completed.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 2: Asset & Property Inventory -->
+<div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: #1e1b4b;">Barangay Asset & Property Inventory</h2>
+    </div>
+
+    <!-- Asset Inventory Metrics -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
+        <div class="card" style="padding: 1.25rem; border-left: 4px solid #6366f1;">
+            <div style="color: #64748b; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Total Asset Quantity</div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #312e81; margin: 0.25rem 0;">{{ total_qty }}</div>
+            <span style="font-size: 0.775rem; color: #64748b;">Units across all categories</span>
+        </div>
+        <div class="card" style="padding: 1.25rem; border-left: 4px solid #10b981;">
+            <div style="color: #64748b; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Good Condition</div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #064e3b; margin: 0.25rem 0;">{{ good_qty }}</div>
+            <span style="font-size: 0.775rem; color: #10b981;">Operational assets</span>
+        </div>
+        <div class="card" style="padding: 1.25rem; border-left: 4px solid #f59e0b;">
+            <div style="color: #64748b; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Under Maintenance</div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #78350f; margin: 0.25rem 0;">{{ maintenance_qty }}</div>
+            <span style="font-size: 0.775rem; color: #d97706;">Requires service / repair</span>
+        </div>
+        <div class="card" style="padding: 1.25rem; border-left: 4px solid #ef4444;">
+            <div style="color: #64748b; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Disposed / Condemned</div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #991b1b; margin: 0.25rem 0;">{{ disposed_qty }}</div>
+            <span style="font-size: 0.775rem; color: #dc2626;">Retired property</span>
+        </div>
+    </div>
+
+    <!-- Asset Filters -->
+    <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-body" style="padding: 1rem 1.25rem;">
+            <form method="get" action="{% url 'finance:overview' %}" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                <div style="flex: 1; min-width: 170px;">
+                    <select name="cat" class="form-control" onchange="this.form.submit()">
+                        <option value="">All Categories</option>
+                        {% for code, label in category_choices %}
+                        <option value="{{ code }}" {% if category_filter == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div style="flex: 1; min-width: 170px;">
+                    <select name="condition" class="form-control" onchange="this.form.submit()">
+                        <option value="">All Conditions</option>
+                        {% for code, label in condition_choices %}
+                        <option value="{{ code }}" {% if condition_filter == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-secondary btn-sm">Filter</button>
+                {% if category_filter or condition_filter %}
+                <a href="{% url 'finance:overview' %}" class="btn btn-secondary btn-sm" style="color: #ef4444;">Reset</a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <!-- Asset Inventory Table -->
+    <div class="data-table-card">
+        <div>
+            {% if assets %}
+            <div class="table-responsive">
+                <table class="clean-table">
+                    <thead>
+                        <tr>
+                            <th class="col-idx">#</th>
+                            <th style="width: 18%;">SERIAL NO.</th>
+                            <th style="width: 24%;">EQUIPMENT UNIT NAME</th>
+                            <th style="width: 16%;">BUILT-IN / LOCATION</th>
+                            <th style="width: 12%;">STATUS</th>
+                            <th style="width: 12%;">DATE PURCHASED</th>
+                            <th style="width: 10%;">QTY / LIFESPAN</th>
+                            <th style="width: 8%; text-align: center;">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in assets %}
+                        <tr>
+                            <td class="col-idx">{{ forloop.counter }}</td>
+                            <td>
+                                <span class="serial-text">{{ item.serial_number|default:"SN-PENDING" }}</span>
+                            </td>
+                            <td>
+                                <div class="cell-title">{{ item.item_name }}</div>
+                                <div class="cell-subtext">{{ item.category }}</div>
+                            </td>
+                            <td style="color: #475569; font-weight: 500;">
+                                {{ item.location|default:"—" }}
+                            </td>
+                            <td>
+                                {% if item.condition == 'Good' %}
+                                <span class="status-text-pill status-available">Available</span>
+                                {% elif item.condition == 'Maintenance' %}
+                                <span class="status-text-pill status-builtin">Maintenance</span>
+                                {% else %}
+                                <span class="status-text-pill status-rejected">Disposed</span>
+                                {% endif %}
+                            </td>
+                            <td style="color: #334155; font-size: 0.8125rem;">
+                                {{ item.date_acquired|date:"Y-m-d" }}
+                            </td>
+                            <td style="color: #334155; font-size: 0.8125rem; font-weight: 600;">
+                                {{ item.quantity }} unit{% if item.quantity > 1 %}s{% endif %}
+                            </td>
+                            <td style="text-align: center;">
+                                <a href="{% url 'finance:asset_edit' item.id %}" class="btn-action-circle" title="Edit Asset">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table Footer Bar -->
+            <div class="table-footer-bar">
+                <div class="footer-count">
+                    Showing <strong>1</strong> to <strong>{{ assets|length }}</strong> of <strong>{{ total_qty|default:assets|length }}</strong> equipment units
+                </div>
+                <div class="pagination-controls">
+                    <span class="pagination-page-label">Page <strong>1</strong> of <strong>1</strong></span>
+                    <a href="javascript:void(0)" class="btn-page-pill disabled">&lt; Previous</a>
+                    <a href="javascript:void(0)" class="btn-page-pill disabled">Next &gt;</a>
+                </div>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 3rem; color: #64748b;">
+                No property or asset records found.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

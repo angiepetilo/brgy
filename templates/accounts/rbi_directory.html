@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% block title %}Registry of Barangay Inhabitants (RBI) - Barangay e-Portal{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+    <div>
+        <h1 style="font-size: 1.25rem; font-weight: 600; color: #0f172a; line-height: 1.2;">Registry of Barangay Inhabitants (RBI)</h1>
+        <p style="color: #64748b; font-size: 0.8125rem; margin-top: 0.2rem;">
+            Official demographic directory of residents, purok distribution, and social welfare demographics
+        </p>
+    </div>
+</div>
+
+<!-- Demographic Metrics Cards -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
+    <div class="card stat-card">
+        <div class="stat-label" style="color: #0f172a;">TOTAL REGISTERED INHABITANTS</div>
+        <div class="stat-number" style="color: #0f172a;">{{ total_residents }}</div>
+        <span class="stat-subtext" style="color: #16a34a;">Verified Residents</span>
+    </div>
+
+    <div class="card stat-card">
+        <div class="stat-label" style="color: #2563eb;">RECORDED HOUSEHOLDS</div>
+        <div class="stat-number" style="color: #2563eb;">{{ total_households }}</div>
+        <span class="stat-subtext" style="color: #64748b;">Family folders logged</span>
+    </div>
+
+    <div class="card stat-card">
+        <div class="stat-label" style="color: #ea580c;">SENIOR CITIZENS</div>
+        <div class="stat-number" style="color: #ea580c;">{{ total_seniors }}</div>
+        <a href="?is_senior=1" class="stat-link" style="color: #ea580c; text-transform: uppercase;">Filter seniors</a>
+    </div>
+
+    <div class="card stat-card">
+        <div class="stat-label" style="color: #0f172a;">PWD BENEFICIARIES</div>
+        <div class="stat-number" style="color: #0f172a;">{{ total_pwd }}</div>
+        <a href="?is_pwd=1" class="stat-link" style="color: #0f172a; text-transform: uppercase;">Filter PWDs</a>
+    </div>
+
+    <div class="card stat-card">
+        <div class="stat-label" style="color: #16a34a;">4PS FAMILIES</div>
+        <div class="stat-number" style="color: #16a34a;">{{ total_4ps }}</div>
+        <a href="?is_4ps=1" class="stat-link" style="color: #16a34a; text-transform: uppercase;">Filter 4Ps</a>
+    </div>
+</div>
+
+<!-- Search & Demographics Filter Bar -->
+<div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-body" style="padding: 1.25rem;">
+        <form method="get" action="{% url 'accounts:rbi_directory' %}" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
+            <div style="flex: 1; min-width: 170px;">
+                <label style="font-size: 0.75rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 0.25rem;">PUROK ZONE</label>
+                <select name="purok" class="form-control" onchange="this.form.submit()">
+                    <option value="">All Puroks</option>
+                    {% for code, label in purok_choices %}
+                    <option value="{{ code }}" {% if purok_filter == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="flex: 1; min-width: 160px;">
+                <label style="font-size: 0.75rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 0.25rem;">HOUSEHOLD #</label>
+                <input type="text" name="household" value="{{ household_filter }}" class="form-control" placeholder="e.g. HH-2026-001">
+            </div>
+
+            <div style="flex: 1.5; min-width: 220px;">
+                <label style="font-size: 0.75rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 0.25rem;">SEARCH INHABITANTS</label>
+                <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Search by name, username, occupation, address...">
+            </div>
+
+            <!-- Quick Demographic Toggles -->
+            <div style="display: flex; gap: 1rem; align-items: center; padding-top: 1rem;">
+                <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; font-weight: 600; cursor: pointer;">
+                    <input type="checkbox" name="is_senior" value="1" {% if is_senior == '1' %}checked{% endif %} onchange="this.form.submit()">
+                    Senior Citizen
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; font-weight: 600; cursor: pointer;">
+                    <input type="checkbox" name="is_pwd" value="1" {% if is_pwd == '1' %}checked{% endif %} onchange="this.form.submit()">
+                    PWD
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; font-weight: 600; cursor: pointer;">
+                    <input type="checkbox" name="is_4ps" value="1" {% if is_4ps == '1' %}checked{% endif %} onchange="this.form.submit()">
+                    4Ps
+                </label>
+            </div>
+
+            <div style="padding-top: 1rem; display: flex; gap: 0.5rem;">
+                <button type="submit" class="btn btn-primary btn-sm">FILTER</button>
+                {% if purok_filter or is_senior or is_pwd or is_4ps or household_filter or search_query %}
+                <a href="{% url 'accounts:rbi_directory' %}" class="btn btn-secondary btn-sm" style="color: #dc2626;">RESET</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Inhabitants Table -->
+<div class="data-table-card">
+    <div style="background: #FFFFFF; padding: 1rem 1.25rem; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: 700; font-size: 0.8125rem; letter-spacing: 0.05em; text-transform: uppercase; color: #0F172A;">
+            Resident Demographics Records
+        </span>
+        <span class="status-text-pill status-available" style="font-size: 0.75rem;">
+            <i class="fa-solid fa-users"></i> {{ page_obj.paginator.count }} Recorded
+        </span>
+    </div>
+    <div>
+        {% if page_obj %}
+        <div class="table-responsive">
+            <table class="clean-table">
+                <thead>
+                    <tr>
+                        <th class="col-idx">#</th>
+                        <th style="width: 14%;">USERNAME</th>
+                        <th style="width: 22%;">RESIDENT NAME</th>
+                        <th style="width: 18%;">PUROK & ADDRESS</th>
+                        <th style="width: 12%;">HOUSEHOLD</th>
+                        <th style="width: 12%;">CIVIL STATUS</th>
+                        <th style="width: 12%;">STATUS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for resident in page_obj %}
+                    <tr>
+                        <td class="col-idx">{{ forloop.counter }}</td>
+                        <td>
+                            <span class="serial-text">@{{ resident.username }}</span>
+                        </td>
+                        <td>
+                            <div class="cell-title">{{ resident.get_full_name|default:resident.username }}</div>
+                            <div class="cell-subtext">{{ resident.phone_number|default:"No phone" }} &bull; {{ resident.email|default:"No email" }}</div>
+                            {% if resident.date_of_birth %}
+                            <div class="cell-subtext">DOB: {{ resident.date_of_birth|date:"Y-m-d" }}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="font-weight: 600; color: #0F172A; font-size: 0.8125rem;">{{ resident.purok|default:"Unassigned" }}</div>
+                            <div class="cell-subtext">{{ resident.address|default:"No street recorded" }}</div>
+                        </td>
+                        <td>
+                            {% if resident.household %}
+                            <div>
+                                <span class="serial-text">{{ resident.household.household_number }}</span>
+                                {% if resident.household.head == resident %}
+                                <span class="status-text-pill status-builtin" style="font-size: 0.65rem; margin-left: 0.2rem;">Head</span>
+                                {% endif %}
+                            </div>
+                            <div class="cell-subtext">{{ resident.household.purok }}</div>
+                            {% else %}
+                            <span style="color: #94A3B8; font-size: 0.8125rem;">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="font-size: 0.8125rem; font-weight: 600; color: #334155;">{{ resident.civil_status }}</div>
+                            <div class="cell-subtext">{{ resident.occupation|default:"Unemployed / Not stated" }}</div>
+                        </td>
+                        <td>
+                            {% if resident.is_approved %}
+                            <span class="status-text-pill status-available">
+                                <i class="fa-solid fa-circle-check"></i> Verified
+                            </span>
+                            {% else %}
+                            <span class="status-text-pill status-builtin">
+                                <i class="fa-solid fa-clock"></i> Pending
+                            </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Table Footer Bar with Live Pagination -->
+        <div class="table-footer-bar">
+            <div class="footer-count">
+                Showing <strong>1</strong> to <strong>{{ page_obj|length }}</strong> of <strong>{{ page_obj.paginator.count }}</strong> resident records
+            </div>
+            <div class="pagination-controls">
+                <span class="pagination-page-label">Page <strong>{{ page_obj.number }}</strong> of <strong>{{ page_obj.paginator.num_pages }}</strong></span>
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&purok={{ purok_filter }}&is_senior={{ is_senior }}&is_pwd={{ is_pwd }}&is_4ps={{ is_4ps }}&household={{ household_filter }}&q={{ search_query }}" class="btn-page-pill">&lt; Previous</a>
+                {% else %}
+                <a href="javascript:void(0)" class="btn-page-pill disabled">&lt; Previous</a>
+                {% endif %}
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&purok={{ purok_filter }}&is_senior={{ is_senior }}&is_pwd={{ is_pwd }}&is_4ps={{ is_4ps }}&household={{ household_filter }}&q={{ search_query }}" class="btn-page-pill">Next &gt;</a>
+                {% else %}
+                <a href="javascript:void(0)" class="btn-page-pill disabled">Next &gt;</a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% else %}
+        <div style="text-align: center; padding: 4rem 1.5rem; color: #64748b;">
+            <h3 style="color: #0f172a; margin-bottom: 0.25rem;">NO INHABITANTS FOUND</h3>
+            <p style="font-size: 0.875rem;">No registered inhabitants matched the current filter conditions.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

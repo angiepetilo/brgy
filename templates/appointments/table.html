@@ -1,0 +1,89 @@
+<!-- Clean Modern Appointments Data Table Component (Reference Design) -->
+<table class="clean-table">
+    <thead>
+        <tr>
+            <th class="col-idx">#</th>
+            <th style="width: 14%;">REF NO.</th>
+            <th style="width: 24%;">APPLICANT</th>
+            <th style="width: 22%;">SERVICE</th>
+            <th style="width: 12%;">STATUS</th>
+            <th style="width: 18%;">SCHEDULE</th>
+            <th style="width: 10%; text-align: center;">ACTION</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for apt in appointments %}
+        <tr>
+            <!-- Column 1: # -->
+            <td class="col-idx">{{ forloop.counter }}</td>
+
+            <!-- Column 2: REF NO. -->
+            <td>
+                <span class="serial-text">APT-{{ apt.id|stringformat:"04d" }}</span>
+            </td>
+
+            <!-- Column 3: APPLICANT (Title + Subtext) -->
+            <td>
+                <div class="cell-title">{{ apt.get_applicant_name }}</div>
+                <div class="cell-subtext">
+                    {% if apt.get_applicant_phone %}{{ apt.get_applicant_phone }}{% endif %}
+                    {% if apt.get_applicant_phone and apt.get_applicant_email %} &bull; {% endif %}
+                    {% if apt.get_applicant_email %}{{ apt.get_applicant_email }}{% endif %}
+                </div>
+            </td>
+
+            <!-- Column 4: SERVICE (Title + Subtext) -->
+            <td>
+                <div class="cell-title">{{ apt.get_service_title }}</div>
+                <div class="cell-subtext">{{ apt.purpose|default:apt.get_category_display }}</div>
+            </td>
+
+            <!-- Column 5: STATUS (Clean Text Pill) -->
+            <td>
+                {% if apt.status == 'approved_scheduled' %}
+                <span class="status-text-pill status-approved"><i class="fa-solid fa-circle-check"></i> Approved</span>
+                {% elif apt.status == 'ready_for_pickup' %}
+                <span class="status-text-pill status-builtin"><i class="fa-solid fa-box-archive"></i> Ready</span>
+                {% elif apt.status == 'completed' %}
+                <span class="status-text-pill status-completed"><i class="fa-solid fa-check-double"></i> Completed</span>
+                {% elif apt.status == 'under_review' %}
+                <span class="status-text-pill status-review"><i class="fa-solid fa-clock"></i> In Review</span>
+                {% elif apt.status == 'rejected' %}
+                <span class="status-text-pill status-rejected"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>
+                {% else %}
+                <span class="status-text-pill status-builtin"><i class="fa-regular fa-clock"></i> Pending</span>
+                {% endif %}
+            </td>
+
+            <!-- Column 6: SCHEDULE (Date + Time Slot Subtext) -->
+            <td>
+                <div style="font-weight: 600; color: #334155; font-size: 0.8125rem;">
+                    {{ apt.preferred_date|date:"Y-m-d" }}
+                </div>
+                <div class="cell-subtext">
+                    {% if apt.preferred_time_slot == 'morning' %}8:00 AM - 11:30 AM{% elif apt.preferred_time_slot == 'afternoon' %}1:00 PM - 4:30 PM{% else %}{{ apt.get_preferred_time_slot_display }}{% endif %}
+                </div>
+            </td>
+
+            <!-- Column 7: ACTION (Circular Button with Vertical Dots) -->
+            <td style="text-align: center;">
+                <a href="{% url 'appointments:detail' apt.id %}" class="btn-action-circle" title="View Appointment Details">
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Clean Table Footer Bar -->
+<div class="table-footer-bar">
+    <div class="footer-count">
+        Showing <strong>1</strong> to <strong>{{ appointments|length }}</strong> of <strong>{{ appointments|length }}</strong> appointment records
+    </div>
+    <div class="pagination-controls">
+        <span class="pagination-page-label">Page <strong>1</strong> of <strong>1</strong></span>
+        <a href="javascript:void(0)" class="btn-page-pill disabled">&lt; Previous</a>
+        <a href="javascript:void(0)" class="btn-page-pill disabled">Next &gt;</a>
+    </div>
+</div>

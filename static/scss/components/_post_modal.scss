@@ -1,0 +1,503 @@
+/* ==========================================
+   Facebook-Style Create Post Modal & Trigger
+   ========================================== */
+
+/* Trigger Card */
+.post-trigger-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid #E2E8F0;
+  cursor: pointer;
+  margin-bottom: 1.25rem;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    background: #F8FAFC;
+    border-color: #CBD5E1;
+  }
+
+  .trigger-avatar, .trigger-avatar-initial {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .trigger-avatar {
+    object-fit: cover;
+  }
+
+  .trigger-avatar-initial {
+    background: #2563EB;
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .trigger-input-placeholder {
+    flex: 1;
+    background: #F1F5F9;
+    padding: 0.625rem 1rem;
+    border-radius: 9999px;
+    color: #64748B;
+    font-size: 0.875rem;
+    user-select: none;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background: #E2E8F0;
+    }
+  }
+
+  .trigger-quick-actions {
+    display: flex;
+    gap: 0.5rem;
+
+    .action-btn {
+      background: transparent;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      transition: background-color 0.15s ease;
+
+      &:hover {
+        background: #F1F5F9;
+      }
+
+      &.live { color: #EF4444; }
+      &.media { color: #22C55E; }
+      &.feeling { color: #F59E0B; }
+    }
+  }
+}
+
+/* Modal Window */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+
+.post-modal-content {
+  background: #FFFFFF;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: modalFadeIn 0.2s ease-out;
+
+  .post-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #E2E8F0;
+
+    .modal-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 0;
+      text-align: center;
+      flex: 1;
+      color: #0F172A;
+    }
+
+    .btn-close-modal {
+      background: #F1F5F9;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 1.25rem;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748B;
+      transition: background-color 0.15s ease, color 0.15s ease;
+
+      &:hover {
+        background: #E2E8F0;
+        color: #0F172A;
+      }
+    }
+  }
+
+  .post-author-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem 0.5rem;
+
+    .post-modal-avatar, .post-modal-avatar-initial {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .post-modal-avatar {
+      object-fit: cover;
+    }
+
+    .post-modal-avatar-initial {
+      background: #2563EB;
+      color: #FFFFFF;
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .author-name {
+      font-weight: 600;
+      font-size: 0.925rem;
+      display: block;
+      color: #0F172A;
+    }
+
+    /* Dynamic Category Pill Select */
+    .category-select-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: #F1F5F9;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      color: #334155;
+      margin-top: 2px;
+      border: 1px solid #E2E8F0;
+
+      i {
+        font-size: 0.7rem;
+        color: #64748B;
+      }
+
+      select {
+        background: transparent;
+        border: none;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #1E293B;
+        outline: none;
+        cursor: pointer;
+        padding-right: 4px;
+        font-family: inherit;
+      }
+    }
+  }
+
+  .post-body-area {
+    padding: 0.5rem 1.25rem;
+
+    .post-title-input {
+      width: 100%;
+      border: none;
+      border-bottom: 1px dashed #E2E8F0;
+      outline: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #0F172A;
+      padding: 0.25rem 0 0.5rem;
+      margin-bottom: 0.5rem;
+      font-family: inherit;
+
+      &::placeholder {
+        color: #94A3B8;
+        font-weight: 400;
+      }
+    }
+
+    textarea {
+      width: 100%;
+      border: none;
+      outline: none;
+      resize: none;
+      font-size: 1.05rem;
+      font-family: inherit;
+      color: #1E293B;
+      min-height: 110px;
+
+      &::placeholder {
+        color: #94A3B8;
+      }
+    }
+
+    .image-preview-container {
+      position: relative;
+      margin-top: 0.5rem;
+      max-height: 180px;
+      overflow: hidden;
+      border-radius: 8px;
+      border: 1px solid #E2E8F0;
+      background: #000000;
+
+      img {
+        width: 100%;
+        max-height: 180px;
+        object-fit: cover;
+        display: block;
+      }
+
+      .btn-remove-preview {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        background: rgba(0, 0, 0, 0.65);
+        color: #FFFFFF;
+        border: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+
+        &:hover {
+          background: rgba(0, 0, 0, 0.85);
+        }
+      }
+    }
+  }
+
+  .add-to-post-card {
+    margin: 0.5rem 1.25rem;
+    padding: 0.625rem 1rem;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .add-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #0F172A;
+    }
+
+    .attachment-icons {
+      display: flex;
+      gap: 0.75rem;
+
+      .icon-btn {
+        background: transparent;
+        border: none;
+        font-size: 1.15rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        transition: background-color 0.15s ease;
+
+        &:hover {
+          background: #F1F5F9;
+        }
+
+        &.media { color: #22C55E; }
+        &.pin { color: #3B82F6; }
+        &.alert { color: #EF4444; }
+      }
+    }
+  }
+
+  .post-modal-footer {
+    padding: 0.75rem 1.25rem 1.25rem;
+
+    .btn-post-submit {
+      width: 100%;
+      padding: 0.625rem;
+      border: none;
+      border-radius: 6px;
+      background: #2563EB;
+      color: #FFFFFF;
+      font-weight: 600;
+      font-size: 0.925rem;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+
+      &:disabled {
+        background: #E2E8F0;
+        color: #94A3B8;
+        cursor: not-allowed;
+      }
+
+      &:not(:disabled):hover {
+        background: #1D4ED8;
+      }
+    }
+  }
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 3-Dots Floating Action Menu for Post Cards */
+.post-card-menu-container {
+  position: relative;
+  display: inline-block;
+
+  .post-menu-trigger {
+    background: transparent;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: #64748B;
+    font-size: 1.15rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    &:hover, &.active {
+      background: #F1F5F9;
+      color: #0F172A;
+    }
+  }
+
+  .post-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+    min-width: 150px;
+    z-index: 1000;
+    overflow: hidden;
+    animation: menuFadeIn 0.15s ease-out;
+
+    &.show {
+      display: block;
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      width: 100%;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: #334155;
+      text-decoration: none;
+      background: transparent;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      box-sizing: border-box;
+      transition: background-color 0.1s ease, color 0.1s ease;
+
+      i {
+        font-size: 0.85rem;
+        color: #64748B;
+        width: 16px;
+        text-align: center;
+      }
+
+      &:hover {
+        background: #F8FAFC;
+        color: #0F172A;
+
+        i {
+          color: #2563EB;
+        }
+      }
+
+      &.danger {
+        color: #DC2626;
+
+        i {
+          color: #DC2626;
+        }
+
+        &:hover {
+          background: #FEF2F2;
+          color: #B91C1C;
+        }
+      }
+    }
+  }
+}
+
+@keyframes menuFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Consistent Standalone Post Edit Card (for announcement_form.html) */
+.post-standalone-card-container {
+  max-width: 520px;
+  margin: 1.5rem auto 2.5rem;
+
+  .post-standalone-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: #2563EB;
+    margin-bottom: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+
+    &:hover {
+      color: #1D4ED8;
+    }
+  }
+
+  .post-standalone-card {
+    background: #FFFFFF;
+    border-radius: 12px;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+    overflow: hidden;
+  }
+}
+

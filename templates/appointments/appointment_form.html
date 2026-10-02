@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Request Document - Barangay e-Portal{% endblock %}
+
+{% block content %}
+<div style="max-width: 640px; margin: 1.25rem auto;">
+    <div class="page-header" style="margin-bottom: 1.25rem;">
+        <a href="{% url 'appointments:list' %}" style="font-size: 0.8125rem; font-weight: 700; display: inline-flex; align-items: center; margin-bottom: 0.35rem; text-transform: uppercase;">
+            BACK TO REQUESTS
+        </a>
+        <h1 style="font-size: 1.25rem; font-weight: 600; color: #0f172a; line-height: 1.2;">Request Official Barangay Document</h1>
+        <p style="color: #64748b; font-size: 0.8125rem; margin-top: 0.2rem;">Fill in your document details and preferred processing schedule.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" action="{% url 'appointments:create' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label>Select Document Type *</label>
+                    {{ form.document_type }}
+                    {% if form.document_type.errors %}<div class="form-error">{{ form.document_type.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label>Purpose of Request *</label>
+                    {{ form.purpose }}
+                    <div class="form-help">Please be specific (e.g. Local Employment, Scholarship application, Postal ID, Passport requirement).</div>
+                    {% if form.purpose.errors %}<div class="form-error">{{ form.purpose.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Preferred Date *</label>
+                        {{ form.preferred_date }}
+                        {% if form.preferred_date.errors %}<div class="form-error">{{ form.preferred_date.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label>Preferred Time Slot *</label>
+                        {{ form.preferred_time_slot }}
+                        {% if form.preferred_time_slot.errors %}<div class="form-error">{{ form.preferred_time_slot.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Supporting Document / Valid ID (Optional)</label>
+                    {{ form.supporting_id }}
+                    <div class="form-help">Upload any relevant attachment, proof of billing, endorsement, or additional ID.</div>
+                    {% if form.supporting_id.errors %}<div class="form-error">{{ form.supporting_id.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+                    <a href="{% url 'appointments:list' %}" class="btn btn-secondary">CANCEL</a>
+                    <button type="submit" class="btn btn-primary">SUBMIT REQUEST</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

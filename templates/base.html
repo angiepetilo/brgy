@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Barangay Information & Management System{% endblock %}</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome 6 Vector Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Main Compiled CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <style>
+        /* Modern Top Bar Navigation Hover Effects */
+        .fb-topbar {
+            background: #FFFFFF !important;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+        }
+        .fb-topbar-center {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            justify-content: center;
+        }
+        .fb-topbar-center .fb-nav-tab {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 44px;
+            border-radius: 12px;
+            color: #64748B;
+            background: transparent;
+            text-decoration: none;
+            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            font-size: 1.15rem;
+        }
+        .fb-topbar-center .fb-nav-tab:hover {
+            background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%) !important;
+            color: #2563EB !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.2) !important;
+        }
+        .fb-topbar-center .fb-nav-tab.active {
+            color: #2563EB !important;
+            background: #EFF6FF !important;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15) !important;
+        }
+        .fb-topbar-right .btn-top-action {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #F8FAFC;
+            color: #334155;
+            border: 1.5px solid #E2E8F0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .fb-topbar-right .btn-top-action:hover {
+            background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%) !important;
+            color: #1D4ED8 !important;
+            border-color: #93C5FD !important;
+            transform: translateY(-2px) scale(1.06);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.22) !important;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body data-authenticated="{% if request.user.is_authenticated %}true{% else %}false{% endif %}" data-user-id="{% if request.user.is_authenticated %}{{ request.user.id }}{% endif %}">
+
+    <!-- 1. Top Bar Navigation System (Facebook Style Clean Header) -->
+    <header class="fb-topbar">
+        <div class="fb-topbar-left">
+            <a href="{% url 'appointments:list' %}" class="fb-brand-title" title="Barangay.ph" data-tooltip="Barangay.ph" style="display: flex; align-items: center; gap: 0.65rem;">
+                <img src="{% static 'images/barangay_logo.png' %}" alt="Barangay.ph Logo" style="height: 38px; width: auto; object-fit: contain;">
+                <span style="font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em; color: #0F172A;">BARANGAY.PH</span>
+            </a>
+        </div>
+        <!-- A. Center Main Navigation Tabs (Facebook Style) -->
+        <nav class="fb-topbar-center">
+            <a href="{% url 'communications:feed' %}" class="fb-nav-tab {% if request.path == '/feed/' or request.resolver_match.url_name == 'feed' %}active{% endif %}" title="Home" data-tooltip="Home">
+                <i class="fa-solid fa-house"></i>
+                <span class="sr-only">Home</span>
+            </a>
+            <a href="{% url 'communications:announcements_list' %}" class="fb-nav-tab {% if 'announcement' in request.path %}active{% endif %}" title="Announcements" data-tooltip="Announcements">
+                <i class="fa-solid fa-bullhorn"></i>
+                <span class="sr-only">Announcements</span>
+            </a>
+            <a href="{% url 'communications:emergency_list' %}" class="fb-nav-tab {% if 'emergency' in request.path %}active{% endif %}" title="Emergency" data-tooltip="Emergency">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span class="sr-only">Emergency</span>
+            </a>
+        </nav>
+
+        <!-- B. Right Action Group (Facebook-Style Floating Action Dropdowns) -->
+        <div class="fb-topbar-right">
+            {% if request.user.is_authenticated %}
+            
+            <!-- 1. MESSAGES DROPDOWN WRAPPER -->
+            <div class="fb-nav-dropdown-wrapper" id="fb-messages-wrapper">
+                <button type="button" class="btn-top-action {% if unread_messages_count > 0 %}has-badge{% endif %}" id="fb-messages-toggle" title="Messages" data-tooltip="Messages" aria-label="Messages">
+                    <i class="fa-solid fa-comment-dots"></i>
+                    {% if unread_messages_count > 0 %}
+                    <span class="action-count-pill">{{ unread_messages_count }}</span>
+                    {% endif %}
+                </button>
+
+                <!-- Facebook Style Chats Dropdown Panel -->
+                <div class="fb-dropdown-panel" id="fb-dropdown-messages">
+                    <div class="fb-dropdown-header">
+                        <span class="fb-dropdown-title">Chats</span>
+                        <div class="fb-dropdown-header-actions">
+                            <button type="button" class="fb-icon-btn" title="Options"><i class="fa-solid fa-ellipsis"></i></button>
+                            <a href="{% url 'chat:inbox' %}" class="fb-icon-btn" title="Expand Messenger"><i class="fa-solid fa-expand"></i></a>
+                            <a href="{% url 'chat:inbox' %}" class="fb-icon-btn" title="New Message"><i class="fa-solid fa-pen-to-square"></i></a>
+                        </div>
+                    </div>
+
+                    <!-- Search Messenger -->
+                    <div class="fb-dropdown-search-wrap">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" placeholder="Search Messenger" id="fb-messenger-search-input">
+                    </div>
+
+                    <!-- Filter Tabs: All | Unread -->
+                    <div class="fb-dropdown-tabs">
+                        <button type="button" class="fb-tab-pill active" id="btn-tab-chats-all">All</button>
+                        <button type="button" class="fb-tab-pill" id="btn-tab-chats-unread">Unread</button>
+                    </div>
+
+                    <!-- Scrollable Chat Previews List -->
+                    <div class="fb-dropdown-list scrollable-panel" id="fb-chats-list">
+                        {% for conv in recent_conversations %}
+                        <a href="{% url 'chat:inbox' %}?user={{ conv.user.id }}" class="fb-chat-item {% if conv.is_unread %}is-unread{% endif %}" data-unread="{% if conv.is_unread %}true{% else %}false{% endif %}" data-name="{{ conv.user.get_full_name|default:conv.user.username|lower }}">
+                            <div class="fb-avatar-wrap">
+                                {% if conv.user.avatar %}
+                                <img src="{{ conv.user.avatar.url }}" alt="{{ conv.user.username }}" class="fb-avatar-img">
+                                {% else %}
+                                <div class="fb-avatar-initials">{{ conv.user.initials }}</div>
+                                {% endif %}
+                                <span class="fb-online-dot"></span>
+                            </div>
+                            <div class="fb-item-content">
+                                <div class="fb-item-name">{{ conv.user.get_full_name|default:conv.user.username }}</div>
+                                <div class="fb-item-snippet">
+                                    {% if conv.is_mine %}You: {% endif %}{{ conv.last_message|truncatewords:6 }} · {{ conv.created_at|date:"M d" }}
+                                </div>
+                            </div>
+                            {% if conv.is_unread %}
+                            <div class="fb-unread-dot"></div>
+                            {% endif %}
+                        </a>
+                        {% empty %}
+                        <div class="fb-empty-state">
+                            <i class="fa-solid fa-comments"></i>
+                            <div>No messages yet</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Footer Link -->
+                    <div class="fb-dropdown-footer">
+                        <a href="{% url 'chat:inbox' %}" class="fb-footer-link">See all in Messages</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. NOTIFICATIONS BELL DROPDOWN WRAPPER -->
+            <div class="fb-nav-dropdown-wrapper" id="fb-notifs-wrapper">
+                <button type="button" class="btn-top-action {% if unread_notifications_count > 0 %}has-badge{% endif %}" id="fb-notifs-toggle" title="Notifications" data-tooltip="Notifications" aria-label="Notifications">
+                    <i class="fa-solid fa-bell"></i>
+                    {% if unread_notifications_count > 0 %}
+                    <span class="action-count-pill">{{ unread_notifications_count }}</span>
+                    {% endif %}
+                </button>
+
+                <!-- Facebook Style Notifications Dropdown Panel -->
+                <div class="fb-dropdown-panel" id="fb-dropdown-notifications">
+                    <div class="fb-dropdown-header">
+                        <span class="fb-dropdown-title">Notifications</span>
+                        <div class="fb-dropdown-header-actions">
+                            <button type="button" class="fb-icon-btn" title="Options"><i class="fa-solid fa-ellipsis"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Filter Tabs: All | Unread -->
+                    <div class="fb-dropdown-tabs">
+                        <button type="button" class="fb-tab-pill active" id="btn-tab-notifs-all">All</button>
+                        <button type="button" class="fb-tab-pill" id="btn-tab-notifs-unread">Unread</button>
+                    </div>
+
+                    <!-- Scrollable Notification List with New & Earlier Groups -->
+                    <div class="fb-dropdown-list scrollable-panel" id="fb-notifs-list">
+                        {% if new_notifications %}
+                        <div class="fb-group-heading">
+                            <span>New</span>
+                            <a href="{% url 'chat:notifications_list' %}" class="fb-group-action">See all</a>
+                        </div>
+                        {% for notif in new_notifications %}
+                        <a href="{{ notif.link_url|default:'/chat/notifications/' }}" class="fb-notif-item {% if not notif.is_read %}is-unread{% endif %}" data-unread="{% if not notif.is_read %}true{% else %}false{% endif %}">
+                            <div class="fb-avatar-wrap">
+                                <div class="fb-notif-badge-icon">
+                                    <i class="fa-solid fa-bell"></i>
+                                </div>
+                            </div>
+                            <div class="fb-item-content">
+                                <div class="fb-item-title">{{ notif.title }}</div>
+                                <div class="fb-item-snippet">{{ notif.message|truncatewords:8 }}</div>
+                                <div class="fb-item-time">{{ notif.created_at|date:"M d, H:i" }}</div>
+                            </div>
+                            {% if not notif.is_read %}
+                            <div class="fb-unread-dot"></div>
+                            {% endif %}
+                        </a>
+                        {% endfor %}
+                        {% endif %}
+
+                        {% if earlier_notifications %}
+                        <div class="fb-group-heading">
+                            <span>Earlier</span>
+                        </div>
+                        {% for notif in earlier_notifications %}
+                        <a href="{{ notif.link_url|default:'/chat/notifications/' }}" class="fb-notif-item" data-unread="false">
+                            <div class="fb-avatar-wrap">
+                                <div class="fb-notif-badge-icon muted">
+                                    <i class="fa-solid fa-check"></i>
+                                </div>
+                            </div>
+                            <div class="fb-item-content">
+                                <div class="fb-item-title">{{ notif.title }}</div>
+                                <div class="fb-item-snippet">{{ notif.message|truncatewords:8 }}</div>
+                                <div class="fb-item-time">{{ notif.created_at|date:"M d" }}</div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                        {% endif %}
+
+                        {% if not new_notifications and not earlier_notifications %}
+                        <div class="fb-empty-state">
+                            <i class="fa-solid fa-bell-slash"></i>
+                            <div>No notifications</div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Footer Link -->
+                    <div class="fb-dropdown-footer">
+                        <a href="{% url 'chat:notifications_list' %}" class="fb-footer-link">See all notifications</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. PROFILE AVATAR DROPDOWN WRAPPER -->
+            <div class="fb-nav-dropdown-wrapper" id="fb-profile-wrapper">
+                <button type="button" class="btn-top-action btn-top-profile" id="fb-profile-toggle" title="Account" data-tooltip="Account" aria-label="Account">
+                    {% if request.user.avatar %}
+                    <img src="{{ request.user.avatar.url }}" alt="{{ request.user.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                    {% else %}
+                    <span style="font-weight: 700; font-size: 0.85rem;">{{ request.user.initials }}</span>
+                    {% endif %}
+                </button>
+
+                <!-- Facebook Style Profile Dropdown Panel -->
+                <div class="fb-dropdown-panel fb-profile-dropdown" id="fb-dropdown-profile">
+                    <!-- Card Header: User Avatar + Full Name + Role -->
+                    <a href="{% url 'accounts:profile' %}" class="fb-profile-card-header">
+                        <div class="fb-profile-avatar-box">
+                            {% if request.user.avatar %}
+                            <img src="{{ request.user.avatar.url }}" alt="{{ request.user.username }}" class="fb-avatar-img">
+                            {% else %}
+                            <div class="fb-avatar-initials">{{ request.user.initials }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="fb-profile-header-info">
+                            <div class="fb-profile-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+                            <div class="fb-profile-sub">{{ request.user.get_role_display }}</div>
+                        </div>
+                    </a>
+
+                    <div class="fb-dropdown-divider"></div>
+
+                    <!-- Menu Links with right chevron icons -->
+                    <div class="fb-menu-list">
+                        <a href="{% url 'accounts:settings' %}" class="fb-menu-item">
+                            <div class="fb-menu-icon-circle"><i class="fa-solid fa-gear"></i></div>
+                            <span class="fb-menu-label">Settings & privacy</span>
+                            <i class="fa-solid fa-chevron-right fb-menu-arrow"></i>
+                        </a>
+
+                        <form action="{% url 'accounts:logout' %}" method="post" style="margin: 0; padding: 0;">
+                            {% csrf_token %}
+                            <button type="submit" class="fb-menu-item fb-menu-btn" style="width: 100%; border: none; background: none; text-align: left; cursor: pointer;">
+                                <div class="fb-menu-icon-circle"><i class="fa-solid fa-right-from-bracket"></i></div>
+                                <span class="fb-menu-label">Log out</span>
+                                <i class="fa-solid fa-chevron-right fb-menu-arrow"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            {% else %}
+            <a href="/" class="btn btn-secondary btn-sm" style="font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.85rem; border-radius: 6px; font-size: 0.775rem;">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Back to Landing Page</span>
+            </a>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- 3-Column Layout Container (Left Sidebar | Center Feed | Right Stats & Roster) -->
+    <div class="fb-main-container dashboard-layout" id="fb-main-container">
+        
+        {% if request.user.is_authenticated %}
+        <!-- 2. Collapsible Left Sidebar -->
+        {% include 'includes/sidebar.html' %}
+        {% endif %}
+
+        <!-- 3. Center Activity Feed & Main Content -->
+        <main class="fb-center-content main-content-area {% if not request.user.is_authenticated %}full-width{% endif %}">
+            <!-- Flash Messages -->
+            {% if messages %}
+            <div class="messages-container" style="margin-bottom: 1rem;">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }}">
+                    <span>{{ message }}</span>
+                    <button class="close-btn" onclick="this.parentElement.remove()" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">DISMISS</button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </main>
+
+        {% if request.user.is_authenticated %}
+        <!-- 4. Right Sidebar Panel (Stats & On-Duty Roster) -->
+        {% block right_sidebar %}
+        {% include 'includes/right_sidebar.html' %}
+        {% endblock %}
+        {% endif %}
+    </div>
+
+    {% if request.user.is_authenticated %}
+    <!-- Slide-Over Drawer for Profile, Settings & Django Admin -->
+    <div class="drawer-backdrop" id="drawer-backdrop"></div>
+    <aside class="slide-drawer" id="slide-drawer">
+        <div class="drawer-header">
+            <span class="drawer-header-title"><i class="fa-solid fa-circle-user"></i> USER PROFILE & SETTINGS</span>
+            <button class="drawer-close-btn" id="drawer-close-btn" aria-label="Close drawer"><i class="fa-solid fa-xmark"></i> CLOSE</button>
+        </div>
+
+        <div class="drawer-body scrollable-panel">
+            <!-- Profile Quick-Card -->
+            <div class="drawer-section-card profile-quick-card">
+                <div class="profile-summary-header">
+                    <div class="profile-avatar-wrap">
+                        {% if request.user.avatar %}
+                            <img src="{{ request.user.avatar.url }}" alt="{{ request.user.username }}" class="profile-avatar-img">
+                        {% else %}
+                            <div class="profile-avatar-initials">{{ request.user.initials }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="profile-summary-info">
+                        <div class="profile-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+                        <div class="profile-role"><span class="badge badge-primary">{{ request.user.get_role_display|upper }}</span></div>
+                        <div class="profile-duty-badge">
+                            {% if request.user.duty_status == 'on_duty' %}
+                                <span class="badge badge-success"><i class="fa-solid fa-circle-dot"></i> ON-DUTY</span>
+                            {% elif request.user.duty_status == 'on_leave' %}
+                                <span class="badge badge-warning"><i class="fa-solid fa-plane-departure"></i> ON-LEAVE</span>
+                            {% else %}
+                                <span class="badge badge-secondary"><i class="fa-solid fa-circle-xmark"></i> ABSENT</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-status-message-box">
+                    <span class="status-title"><i class="fa-solid fa-comment-dots"></i> STATUS MESSAGE:</span>
+                    <p class="status-text">"{{ request.user.status_message|default:'Available at Barangay Hall' }}"</p>
+                </div>
+
+                <div class="profile-quick-actions">
+                    <a href="{% url 'accounts:profile' %}" class="btn-flat btn-flat-sm btn-flat-primary"><i class="fa-solid fa-user-pen"></i> UPDATE PROFILE</a>
+                    {% if request.user.avatar %}
+                    <form action="{% url 'accounts:remove_avatar' %}" method="post" style="display:inline; margin:0;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-flat btn-flat-sm btn-flat-danger"><i class="fa-solid fa-trash"></i> REMOVE AVATAR</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Settings & Admin -->
+            <div class="drawer-section-card settings-card">
+                <div class="drawer-card-heading"><i class="fa-solid fa-sliders"></i> SETTINGS & ADMINISTRATION</div>
+                <div class="settings-nav-list">
+                    <a href="{% url 'accounts:settings' %}" class="settings-nav-item">
+                        <span><i class="fa-solid fa-gear"></i> ACCOUNT SETTINGS</span>
+                        <span class="nav-arrow"><i class="fa-solid fa-chevron-right"></i></span>
+                    </a>
+                    <a href="{% url 'accounts:profile' %}" class="settings-nav-item">
+                        <span><i class="fa-solid fa-id-badge"></i> MANAGE AVATAR & STATUS</span>
+                        <span class="nav-arrow"><i class="fa-solid fa-chevron-right"></i></span>
+                    </a>
+                    {% if request.user.is_superuser %}
+                    <a href="/admin/" target="_blank" class="settings-nav-item admin-card-item">
+                        <span><i class="fa-solid fa-shield-halved"></i> DJANGO ADMIN BACK-DOOR</span>
+                        <span class="badge badge-danger">SUPERUSER</span>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Tasks To-Do -->
+            <div class="drawer-section-card tasks-card">
+                <div class="drawer-card-heading">
+                    <span><i class="fa-solid fa-list-check"></i> TASKS TO-DO</span>
+                    <span class="badge badge-danger">[{{ pending_tasks_count }}]</span>
+                </div>
+                <div class="tasks-list">
+                    {% if pending_tasks_list %}
+                        {% for task in pending_tasks_list %}
+                        <a href="{{ task.url }}" class="task-row">
+                            <div class="task-info">
+                                <span class="task-badge badge badge-secondary">{{ task.badge }}</span>
+                                <div class="task-name">{{ task.title }}</div>
+                                <div class="task-sub">{{ task.subtitle }}</div>
+                            </div>
+                            <span class="task-action-btn"><i class="fa-solid fa-arrow-right"></i></span>
+                        </a>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state-text">No pending tasks. You are all caught up!</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Notification Center -->
+            <div class="drawer-section-card notifs-card">
+                <div class="drawer-card-heading">
+                    <span><i class="fa-solid fa-bell"></i> NOTIFICATION CENTER</span>
+                    <span class="badge badge-primary">[{{ unread_notifications_count }}]</span>
+                </div>
+                <div class="drawer-notifs-list scrollable-panel" id="drawer-notifs-container">
+                    {% if recent_notifications %}
+                        {% for notif in recent_notifications %}
+                        <div class="drawer-notif-row" id="notif-row-{{ notif.id }}">
+                            <div class="notif-text-col">
+                                <div class="notif-title-text">{{ notif.title }}</div>
+                                <div class="notif-body-text">{{ notif.message }}</div>
+                                <div class="notif-time-text">{{ notif.created_at|date:"M d, H:i" }}</div>
+                            </div>
+                            <div class="notif-btn-col">
+                                {% if notif.link_url %}
+                                <a href="{{ notif.link_url }}" class="btn-flat btn-flat-xs btn-flat-secondary"><i class="fa-solid fa-arrow-up-right-from-square"></i> OPEN</a>
+                                {% endif %}
+                                <button class="btn-flat btn-flat-xs btn-flat-primary mark-read-btn" data-notif-id="{{ notif.id }}">READ</button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state-text">No unread notifications.</div>
+                    {% endif %}
+                </div>
+                <div class="drawer-card-footer">
+                    <a href="{% url 'chat:notifications_list' %}" class="flat-text-link">VIEW ALL NOTIFICATIONS →</a>
+                </div>
+            </div>
+
+            <!-- Drawer Logout Action -->
+            <div class="drawer-logout-wrap">
+                <form action="{% url 'accounts:logout' %}" method="post" style="width: 100%;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-flat btn-flat-danger btn-block" style="width: 100%; height: 48px;">
+                        <i class="fa-solid fa-right-from-bracket"></i> LOGOUT ACCOUNT
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Mobile Bottom Navigation Bar (retained for mobile viewports) -->
+    <nav class="bottom-nav-bar" id="bottom-nav-bar">
+        <a href="{% url 'appointments:list' %}" class="bottom-nav-item {% if 'appointment' in request.path %}active{% endif %}">
+            <i class="fa-solid fa-calendar-check"></i>
+            <span class="bnav-label">APPOINTMENTS</span>
+        </a>
+        <a href="{% url 'chat:inbox' %}" class="bottom-nav-item {% if 'chat' in request.path %}active{% endif %}">
+            <i class="fa-solid fa-comments"></i>
+            <span class="bnav-label">MESSAGES</span>
+        </a>
+        {% if request.user.is_admin_user or request.user.is_kapitan_user %}
+        <a href="{% url 'accounts:residents_tabbed' %}" class="bottom-nav-item {% if 'residents' in request.path or 'approval' in request.path %}active{% endif %}">
+            <i class="fa-solid fa-users"></i>
+            <span class="bnav-label">RESIDENTS</span>
+        </a>
+        {% else %}
+        <a href="{% url 'accounts:profile' %}" class="bottom-nav-item {% if 'profile' in request.path %}active{% endif %}">
+            <i class="fa-solid fa-user"></i>
+            <span class="bnav-label">PROFILE</span>
+        </a>
+        {% endif %}
+        <a href="{% url 'records_hub' %}" class="bottom-nav-item {% if 'records' in request.path or 'blotter' in request.path or 'finance' in request.path %}active{% endif %}">
+            <i class="fa-solid fa-folder-open"></i>
+            <span class="bnav-label">RECORDS</span>
+        </a>
+    </nav>
+    {% endif %}
+
+    <!-- Global Toast Container for Real-Time Push Events -->
+    <div id="global-toast-container" class="toast-container"></div>
+
+    <!-- JavaScript Handlers -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% if request.user.is_authenticated %}
+    <script src="{% static 'js/websocket.js' %}"></script>
+    {% endif %}
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

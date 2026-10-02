@@ -1,0 +1,178 @@
+def global_barangay_context(request):
+    """
+    Supplies global context for header badge counters, Kapitan status indicator,
+    slide-over drawer items, and role helpers across all rendered templates.
+    """
+    context = {
+        'current_kapitan_status': None,
+        'unread_notifications_count': 0,
+        'unread_messages_count': 0,
+        'pending_approvals_count': 0,
+        'pending_tasks_count': 0,
+        'drawer_unread_count': 0,
+        'recent_notifications': [],
+        'pending_tasks_list': [],
+        # 4 Unique Real-Time Stat Cards (User.id level aggregations)
+        'stat_pending_docs_count': 0,
+        'stat_pending_residents_count': 0,
+        'stat_total_residents_count': 0,
+        'stat_handled_requests_count': 0,
+        # Staff Duty Roster
+        'duty_officers_roster': [],
+        'staff_members': [],
+    }
+
+    if not request.user.is_authenticated:
+        return context
+
+    try:
+        from apps.communications.models import KapitanStatus
+        latest_status = KapitanStatus.objects.order_by('-updated_at').first()
+        if latest_status:
+            context['current_kapitan_status'] = latest_status
+        else:
+            context['current_kapitan_status'] = {
+                'status': 'on_duty',
+                'status_display': 'On Duty',
+                'leave_reason': '',
+                'return_date': None,
+            }
+    except Exception:
+        context['current_kapitan_status'] = {
+            'status': 'on_duty',
+            'status_display': 'On Duty',
+            'leave_reason': '',
+            'return_date': None,
+        }
+
+    # Unread notifications & unread messages for current user
+    try:
+        from apps.chat.models import Notification, Message
+        from django.utils import timezone
+        import datetime
+        now = timezone.now()
+        day_ago = now - datetime.timedelta(hours=24)
+
+        all_notifs = list(Notification.objects.filter(recipient=request.user).select_related('sender').order_by('-created_at')[:25])
+        unread_notifs = [n for n in all_notifs if not n.is_read]
+        context['unread_notifications_count'] = len(unread_notifs)
+        context['recent_notifications'] = unread_notifs[:5]
+        context['all_notifications'] = all_notifs
+        context['new_notifications'] = [n for n in all_notifs if n.created_at >= day_ago or not n.is_read][:10]
+        context['earlier_notifications'] = [n for n in all_notifs if n.created_at < day_ago and n.is_read][:15]
+
+        # Recent chat previews
+        from django.db.models import Q
+        raw_msgs = Message.objects.filter(
+            Q(sender=request.user) | Q(recipient=request.user)
+        ).select_related('sender', 'recipient').order_by('-created_at')[:30]
+
+        conversations = {}
+        for m in raw_msgs:
+            other = m.recipient if m.sender == request.user else m.sender
+            if other.id not in conversations:
+                conversations[other.id] = {
+                    'user': other,
+                    'last_message': m.content,
+                    'created_at': m.created_at,
+                    'is_unread': (m.recipient == request.user and not m.is_read),
+                    'is_mine': (m.sender == request.user),
+                }
+
+        context['recent_conversations'] = list(conversations.values())[:10]
+        context['unread_messages_count'] = Message.objects.filter(recipient=request.user, is_read=False).count()
+    except Exception:
+        pass
+
+    # 4 Unique Real-Time Stat Cards (Unique Resident User.id counts)
+    try:
+        from apps.accounts.models import User
+        from apps.appointments.models import Appointment
+        from django.db.models import Q
+
+        # 1. Distinct User records with active document request in ['submitted', 'under_review']
+        context['stat_pending_docs_count'] = User.objects.filter(
+            appointments__status__in=[Appointment.STATUS_SUBMITTED, Appointment.STATUS_UNDER_REVIEW]
+        ).distinct().count()
+
+        # 2. Distinct User records where is_approved=False
+        context['stat_pending_residents_count'] = User.objects.filter(is_approved=False).distinct().count()
+
+        # 3. Distinct verified residents (is_approved=True, role='resident')
+        context['stat_total_residents_count'] = User.objects.filter(
+            is_approved=True, role=User.ROLE_RESIDENT
+        ).distinct().count()
+
+        # 4. Distinct User records with document request status='completed'
+        context['stat_handled_requests_count'] = User.objects.filter(
+            appointments__status=Appointment.STATUS_COMPLETED
+        ).distinct().count()
+
+        # Staff Duty Roster for Right Panel
+        roster_users = User.objects.filter(
+            Q(role__in=[User.ROLE_ADMIN, User.ROLE_KAPITAN]) | Q(is_staff=True)
+        ).distinct().order_by('role', 'last_name')
+        context['duty_officers_roster'] = roster_users
+        context['staff_members'] = roster_users
+    except Exception:
+        pass
+
+    # Count pending approvals & document tasks for admin/staff
+    is_staff_admin = (request.user.role in ['admin', 'kapitan'] or request.user.is_staff or request.user.is_superuser)
+    tasks = []
+
+    if is_staff_admin:
+        try:
+            from apps.accounts.models import User
+            unapproved = User.objects.filter(
+                role='resident', is_approved=False
+            ).exclude(rejection_reason__gt='').order_by('-date_joined')
+            context['pending_approvals_count'] = unapproved.count()
+            for u in unapproved[:3]:
+                tasks.append({
+                    'title': f'Verify Resident: {u.get_full_name() or u.username}',
+                    'subtitle': f'Registered on {u.date_joined.strftime("%b %d")}',
+                    'url': '/accounts/residents/?tab=pending',
+                    'badge': 'VERIFICATION',
+                })
+        except Exception:
+            pass
+
+        try:
+            from apps.appointments.models import Appointment
+            pending_docs = Appointment.objects.filter(
+                status__in=[Appointment.STATUS_SUBMITTED, Appointment.STATUS_UNDER_REVIEW]
+            ).select_related('resident').order_by('-created_at')
+            for doc in pending_docs[:3]:
+                tasks.append({
+                    'title': f'Approve {doc.get_document_type_display()}',
+                    'subtitle': f'Req by {doc.resident.get_full_name() or doc.resident.username}',
+                    'url': f'/appointments/{doc.id}/',
+                    'badge': 'DOCUMENT',
+                })
+        except Exception:
+            pass
+    else:
+        # Resident's own active document tasks
+        try:
+            from apps.appointments.models import Appointment
+            active_docs = Appointment.objects.filter(
+                resident=request.user
+            ).exclude(status__in=[Appointment.STATUS_COMPLETED, Appointment.STATUS_REJECTED]).order_by('-created_at')
+            for doc in active_docs[:3]:
+                tasks.append({
+                    'title': f'{doc.get_document_type_display()}',
+                    'subtitle': f'Status: {doc.get_status_display()}',
+                    'url': f'/appointments/{doc.id}/',
+                    'badge': doc.get_status_display().upper(),
+                })
+        except Exception:
+            pass
+
+    context['pending_tasks_list'] = tasks
+    context['pending_tasks_count'] = len(tasks)
+    context['drawer_unread_count'] = context['unread_notifications_count'] + (context['pending_approvals_count'] if is_staff_admin else 0)
+
+    return context
+
+

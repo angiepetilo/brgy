@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Barangay Document Authenticity Verification{% endblock %}
+
+{% block content %}
+<div style="max-width: 680px; margin: 1.5rem auto;">
+    {% if log %}
+    <div class="card" style="border: 1px solid #16a34a;">
+        <div class="card-header" style="text-align: center; display: block; background: #f0fdf4; padding: 1.25rem 1rem;">
+            <div class="badge badge-success" style="font-size: 0.6875rem; margin-bottom: 0.5rem; letter-spacing: 0.05em;">VERIFIED AUTHENTIC</div>
+            <h1 class="card-title" style="font-size: 1.25rem; font-weight: 600; color: #064e3b; text-transform: uppercase;">Official Document Verified Authentic</h1>
+            <p style="font-size: 0.8125rem; color: #047857; margin-top: 0.2rem;">
+                This certificate has been issued and verified through the Barangay Electronic Registry.
+            </p>
+        </div>
+        <div class="card-body" style="padding: 1.25rem;">
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 2px; padding: 1rem; margin-bottom: 1.25rem;">
+                <div style="text-align: center; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px dashed #cbd5e1;">
+                    <div style="font-size: 0.6875rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Official Control Tracking Number</div>
+                    <div style="font-size: 1.35rem; font-weight: 800; color: #0f172a; letter-spacing: 0.05em; margin-top: 0.2rem;">
+                        {{ log.control_number }}
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.9rem;">
+                    <div>
+                        <span style="color: #64748b; font-size: 0.8rem; display: block;">Document Type:</span>
+                        <strong style="color: #0f172a;">{{ log.appointment.get_document_type_display }}</strong>
+                    </div>
+                    <div>
+                        <span style="color: #64748b; font-size: 0.8rem; display: block;">Issued To:</span>
+                        <strong style="color: #0f172a;">{{ log.issued_to.get_full_name|default:log.issued_to.username }}</strong>
+                    </div>
+                    <div>
+                        <span style="color: #64748b; font-size: 0.8rem; display: block;">Date & Time Issued:</span>
+                        <strong style="color: #0f172a;">{{ log.issued_at|date:"F d, Y at h:i A" }}</strong>
+                    </div>
+                    <div>
+                        <span style="color: #64748b; font-size: 0.8rem; display: block;">Certifying Official:</span>
+                        <strong style="color: #0f172a;">{{ log.issued_by.get_full_name|default:log.issued_by.username|default:"Barangay Hall Administration" }}</strong>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e2e8f0; font-size: 0.85rem;">
+                    <span style="color: #64748b; font-size: 0.8rem; display: block;">Purpose of Issuance:</span>
+                    <div style="color: #334155; margin-top: 0.2rem;">{{ log.appointment.purpose }}</div>
+                </div>
+            </div>
+
+            <div style="text-align: center; color: #64748b; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                Republic of the Philippines | Barangay Information and Management System
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card" style="border: 1px solid #dc2626; text-align: center; padding: 3rem 2rem;">
+        <div class="badge badge-danger" style="font-size: 0.8rem; margin-bottom: 0.75rem; letter-spacing: 0.05em;">UNVERIFIED RECORD</div>
+        <h2 style="color: #dc2626; font-size: 1.4rem; margin-bottom: 0.5rem; text-transform: uppercase;">Unverified Document Record</h2>
+        <p style="color: #64748b; font-size: 0.9rem; line-height: 1.5; max-width: 480px; margin: 0 auto 1.5rem;">
+            No official record was found matching control number <strong>{{ control_number }}</strong>. This document may be fraudulent, expired, or improperly entered.
+        </p>
+        <a href="{% url 'accounts:dashboard' %}" class="btn btn-secondary">RETURN TO PORTAL</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

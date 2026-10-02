@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}Resident Registration - Barangay e-Portal{% endblock %}
+
+{% block content %}
+<div style="max-width: 620px; margin: 2.5rem auto;">
+    <div class="card">
+        <div class="card-header" style="text-align: center; display: block; padding: 1.75rem 1.5rem 1rem;">
+            <h2 class="card-title" style="font-size: 1.35rem; text-transform: uppercase;">Resident Registration</h2>
+            <p style="font-size: 0.85rem; color: #64748b; margin-top: 0.25rem;">Create your digital barangay resident account</p>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info" style="font-size: 0.825rem; margin-bottom: 1.5rem;">
+                <strong>VERIFICATION REQUIREMENT:</strong> All new resident accounts are gated and undergo administrative verification of valid ID proof before full access is granted.
+            </div>
+
+            <form method="post" action="{% url 'accounts:signup' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}<div class="form-error">{{ form.first_name.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}<div class="form-error">{{ form.last_name.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Username</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}<div class="form-error">{{ form.username.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}<div class="form-error">{{ form.email.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Mobile / Phone Number *</label>
+                    {{ form.phone_number }}
+                    {% if form.phone_number.errors %}<div class="form-error">{{ form.phone_number.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Purok Jurisdiction *</label>
+                        {{ form.purok }}
+                        {% if form.purok.errors %}<div class="form-error">{{ form.purok.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label>House / Street Address *</label>
+                        {{ form.street_address }}
+                        {% if form.street_address.errors %}<div class="form-error">{{ form.street_address.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Government ID Proof / Residency Proof *</label>
+                    {{ form.id_proof }}
+                    <div class="form-help">Upload clear photo or scan of valid Government ID, Student ID, or proof of billing.</div>
+                    {% if form.id_proof.errors %}<div class="form-error">{{ form.id_proof.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="alert alert-secondary" style="font-size: 0.8125rem; background: #F8FAFC; border: 1px solid #E2E8F0; color: #475569; margin: 1.25rem 0;">
+                    <i class="fa-solid fa-envelope-circle-check" style="color: #2563EB; margin-right: 0.35rem;"></i>
+                    <strong>Password-Free Registration:</strong> No password is required now. Once the Barangay Administrator approves your ID verification, a unique randomized password will be emailed to <strong>your registered email</strong> for secure login.
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; margin-top: 0.25rem; font-size: 0.95rem;">
+                    SUBMIT REGISTRATION FOR VERIFICATION
+                </button>
+            </form>
+        </div>
+        <div class="card-footer" style="text-align: center; font-size: 0.85rem; display: flex; flex-direction: column; gap: 0.75rem; align-items: center;">
+            <div>
+                <span>Already registered? </span>
+                <a href="{% url 'accounts:login' %}" style="font-weight: 700; text-transform: uppercase;">Sign In</a>
+            </div>
+            <a href="/" class="btn btn-secondary btn-sm" style="width: 100%; justify-content: center; font-weight: 700; text-transform: uppercase;">
+                <i class="fa-solid fa-arrow-left" style="margin-right: 0.35rem;"></i> Back to Landing Page
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== REGISTRATION SUCCESS POP-UP MODAL ==================== -->
+{% if registration_submitted %}
+<div id="signupSuccessModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.75); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 1rem; backdrop-filter: blur(4px);">
+    <div style="background: #FFFFFF; border-radius: 12px; max-width: 480px; width: 100%; border: 1px solid #E2E8F0; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04); overflow: hidden; animation: modalPop 0.2s ease-out;">
+        <div style="background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); color: #FFFFFF; padding: 1.5rem; text-align: center;">
+            <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(255, 255, 255, 0.2); display: inline-flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 0.75rem;">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.01em;">Registration Submitted!</h3>
+            <p style="margin: 0.35rem 0 0 0; font-size: 0.85rem; opacity: 0.95;">Success! Please check your email for approval of account.</p>
+        </div>
+        <div style="padding: 1.5rem;">
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 1rem; margin-bottom: 1.25rem;">
+                <div style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 0.35rem;">Applicant Profile</div>
+                <div style="font-size: 0.95rem; font-weight: 700; color: #0F172A;">{{ registered_user.get_full_name|default:registered_user.username }}</div>
+                <div style="font-size: 0.8125rem; color: #2563EB; margin-top: 0.15rem;">
+                    <i class="fa-solid fa-envelope" style="margin-right: 0.35rem;"></i> {{ registered_user.email }}
+                </div>
+            </div>
+
+            <p style="font-size: 0.85rem; color: #475569; line-height: 1.5; margin-top: 0; margin-bottom: 1.5rem;">
+                Your resident record and ID document have been submitted to the Barangay Hall administration for verification.
+                <strong>Once verified and approved, you will receive an email containing your generated login password.</strong>
+            </p>
+
+            <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                <a href="/" class="btn btn-secondary" style="flex: 1; justify-content: center; font-weight: 700;">
+                    <i class="fa-solid fa-house" style="margin-right: 0.35rem;"></i> Home Page
+                </a>
+                <a href="{% url 'accounts:login' %}" class="btn btn-primary" style="flex: 1; justify-content: center; font-weight: 700;">
+                    <i class="fa-solid fa-right-to-bracket" style="margin-right: 0.35rem;"></i> Sign In Page
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+@keyframes modalPop {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+</style>
+{% endif %}
+{% endblock %}

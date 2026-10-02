@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}Health Care Services Management - Barangay e-Portal{% endblock %}
+
+{% block content %}
+<div class="healthcare-services-container">
+
+    <!-- Header Section -->
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+        <div>
+            <h1 style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin: 0; text-transform: uppercase;">
+                Admin Health Care Request Management
+            </h1>
+            <p style="color: #64748B; font-size: 0.8125rem; margin: 0.25rem 0 0 0;">
+                Configure available health center consultations, dental procedures, and medical services
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{% url 'appointments:list' %}" class="btn btn-secondary btn-sm" style="font-weight: 700; min-height: 40px; display: inline-flex; align-items: center;">
+                <i class="fa-solid fa-arrow-left" style="margin-right: 0.35rem;"></i> Back to Appointments
+            </a>
+            <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('add-service-card').scrollIntoView({behavior: 'smooth'})" style="font-weight: 700; min-height: 40px; display: inline-flex; align-items: center;">
+                <i class="fa-solid fa-plus" style="margin-right: 0.35rem;"></i> Add Health Service
+            </button>
+        </div>
+    </div>
+
+    <!-- Services Table Card -->
+    <div class="data-table-card">
+        <div style="background: #FFFFFF; padding: 1rem 1.25rem; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700; font-size: 0.8125rem; letter-spacing: 0.05em; text-transform: uppercase; color: #0F172A;">
+                Active Health Care Services & Medical Clinic Procedures
+            </span>
+            <span class="status-text-pill status-available" style="font-size: 0.75rem;">
+                <i class="fa-solid fa-notes-medical"></i> {{ services|length }} Services
+            </span>
+        </div>
+        <div>
+            {% if services %}
+            <div class="table-responsive">
+                <table class="clean-table">
+                    <thead>
+                        <tr>
+                            <th class="col-idx">#</th>
+                            <th style="width: 16%;">SERVICE CODE</th>
+                            <th style="width: 28%;">SERVICE NAME</th>
+                            <th style="width: 32%;">DESCRIPTION</th>
+                            <th style="width: 14%;">STATUS</th>
+                            <th style="width: 10%; text-align: center;">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for svc in services %}
+                        <tr>
+                            <td class="col-idx">{{ forloop.counter }}</td>
+                            <td>
+                                <span class="serial-text">SVC-{{ svc.id|stringformat:"03d" }}</span>
+                            </td>
+                            <td>
+                                <div class="cell-title">{{ svc.name }}</div>
+                                <div class="cell-subtext">Clinical Health Service</div>
+                            </td>
+                            <td>
+                                <div style="font-size: 0.8125rem; color: #475569; line-height: 1.35;">{{ svc.description|default:"No description provided." }}</div>
+                            </td>
+                            <td>
+                                {% if svc.is_active %}
+                                    <span class="status-text-pill status-available"><i class="fa-solid fa-circle-check"></i> Active</span>
+                                {% else %}
+                                    <span class="status-text-pill status-rejected"><i class="fa-solid fa-circle-pause"></i> Disabled</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: center;">
+                                <div style="display: inline-flex; gap: 0.4rem; align-items: center; justify-content: center;">
+                                    <a href="{% url 'appointments:service_update' svc.id %}" class="btn-action-circle" title="Edit Service">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </a>
+                                    <a href="{% url 'appointments:service_delete' svc.id %}" class="btn-action-circle" title="Delete Service" style="color: #DC2626;">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table Footer Bar -->
+            <div class="table-footer-bar">
+                <div class="footer-count">
+                    Showing <strong>1</strong> to <strong>{{ services|length }}</strong> of <strong>{{ services|length }}</strong> healthcare services
+                </div>
+                <div class="pagination-controls">
+                    <span class="pagination-page-label">Page <strong>1</strong> of <strong>1</strong></span>
+                    <a href="javascript:void(0)" class="btn-page-pill disabled">&lt; Previous</a>
+                    <a href="javascript:void(0)" class="btn-page-pill disabled">Next &gt;</a>
+                </div>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 3rem 1.5rem; color: #64748B;">
+                <i class="fa-solid fa-notes-medical" style="font-size: 2.5rem; color: #94A3B8; margin-bottom: 0.75rem;"></i>
+                <h3 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.25rem;">NO HEALTH SERVICES CONFIGURED</h3>
+                <p style="font-size: 0.8125rem;">Add available health care services below to make them bookable for residents.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Add Service Card Form -->
+    <div class="card" id="add-service-card" style="border: 1px solid #E2E8F0; border-radius: 8px; box-shadow: none; background: #FFFFFF;">
+        <div class="card-header" style="background: #FFFFFF; color: #0F172A; border-bottom: 1px solid #E2E8F0; padding: 0.75rem 1rem;">
+            <span style="font-weight: 700; font-size: 0.8125rem; letter-spacing: 0.05em; text-transform: uppercase;">
+                <i class="fa-solid fa-plus" style="margin-right: 0.35rem; color: #2563EB;"></i> ADD NEW HEALTH CARE SERVICE
+            </span>
+        </div>
+        <div class="card-body" style="padding: 1.25rem;">
+            <form method="post" action="{% url 'appointments:service_list' %}">
+                {% csrf_token %}
+                <input type="hidden" name="create_service" value="1">
+                
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.35rem;">Service Name</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">{{ form.name.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.35rem;">Service Description</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">{{ form.description.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                    {{ form.is_active }}
+                    <label for="{{ form.is_active.id_for_label }}" style="font-size: 0.8125rem; font-weight: 600; color: #0F172A; margin: 0; cursor: pointer;">
+                        Active and available for resident booking
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="font-weight: 700; min-height: 42px; padding: 0.5rem 1.5rem;">
+                    Save Health Service
+                </button>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

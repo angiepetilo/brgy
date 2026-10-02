@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barangay.ph - Public Service & Online Appointment</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <!-- FullCalendar CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #F8FAFC;
+            color: #0F172A;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Public Header */
+        .landing-header {
+            background: #FFFFFF;
+            border-bottom: 1px solid #E2E8F0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        }
+        .landing-header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0.85rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .brand-logo-area {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: #0F172A;
+        }
+        .brand-icon-box {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            background: #2563EB;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+        }
+        .brand-text {
+            font-weight: 800;
+            font-size: 1.15rem;
+            letter-spacing: -0.01em;
+            color: #0F172A;
+            text-transform: uppercase;
+        }
+
+        /* Hero Section */
+        .landing-hero {
+            background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+            color: #FFFFFF;
+            padding: 4.5rem 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 2.5rem;
+            align-items: center;
+        }
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 1rem;
+            color: #FFFFFF;
+        }
+        .hero-subtitle {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            opacity: 0.92;
+            margin-bottom: 1.75rem;
+            color: #EFF6FF;
+        }
+        .hero-cta-btn {
+            background: #FFFFFF;
+            color: #1D4ED8;
+            font-weight: 700;
+            font-size: 1rem;
+            padding: 0.85rem 1.75rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.2s ease;
+        }
+        .hero-cta-btn:hover {
+            background: #F8FAFC;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15);
+        }
+        .hero-card {
+            background: #FFFFFF;
+            color: #0F172A;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* 4-Step Documentation Workflow */
+        .workflow-section {
+            max-width: 1200px;
+            margin: -2.5rem auto 3rem auto;
+            padding: 0 1.5rem;
+            position: relative;
+            z-index: 10;
+        }
+        .workflow-card {
+            background: #FFFFFF;
+            border-radius: 12px;
+            padding: 1.75rem 2rem;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+        .workflow-title {
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #64748B;
+            margin-bottom: 1.5rem;
+        }
+        .workflow-steps-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.25rem;
+            position: relative;
+        }
+        .step-item {
+            text-align: center;
+            position: relative;
+            padding: 1rem 0.5rem;
+        }
+        .step-number-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #EFF6FF;
+            color: #2563EB;
+            font-weight: 800;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.75rem auto;
+            border: 2px solid #BFDBFE;
+        }
+        .step-heading {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 0.35rem;
+        }
+        .step-desc {
+            font-size: 0.75rem;
+            color: #64748B;
+            line-height: 1.4;
+        }
+
+        /* Services Showcase Section */
+        .services-section {
+            max-width: 1200px;
+            margin: 0 auto 4rem auto;
+            padding: 0 1.5rem;
+        }
+        .section-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .section-header h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #0F172A;
+            margin: 0 0 0.5rem 0;
+            text-transform: uppercase;
+        }
+        .section-header p {
+            color: #64748B;
+            font-size: 0.875rem;
+            margin: 0;
+        }
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.25rem;
+        }
+        .service-box {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 1.25rem;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .service-box:hover {
+            transform: translateY(-2px);
+            border-color: #93C5FD;
+        }
+
+        /* Modals - Modern Non-Flat Glassmorphic Design */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.72);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2500;
+            padding: 1.25rem;
+            backdrop-filter: blur(8px);
+            animation: fadeInModal 0.2s ease-out;
+        }
+        @keyframes fadeInModal {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .modal-container {
+            background: #FFFFFF;
+            border-radius: 18px;
+            width: 100%;
+            max-height: 94vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2);
+            border: 1px solid #E2E8F0;
+            animation: slideUpModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes slideUpModal {
+            from { transform: translateY(20px) scale(0.97); opacity: 0.8; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        .modal-container-side-by-side {
+            max-width: 1020px;
+        }
+        .modal-container-auth {
+            max-width: 460px;
+        }
+        .modal-header-bar {
+            padding: 1.25rem 1.75rem;
+            border-bottom: 1px solid #F1F5F9;
+            background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top-left-radius: 18px;
+            border-top-right-radius: 18px;
+        }
+        .modal-close-btn {
+            background: #F1F5F9;
+            border: 1px solid #E2E8F0;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            font-size: 1rem;
+            color: #64748B;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+        }
+        .modal-close-btn:hover {
+            background: #E2E8F0;
+            color: #0F172A;
+            transform: scale(1.05);
+        }
+
+        /* Category toggle pills - Modern non-flat cards */
+        .category-pill-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+        .cat-pill {
+            padding: 0.85rem 1rem;
+            text-align: center;
+            border: 2px solid #E2E8F0;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.875rem;
+            cursor: pointer;
+            background: #FFFFFF;
+            color: #475569;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .cat-pill:hover {
+            border-color: #93C5FD;
+            transform: translateY(-1px);
+        }
+        .cat-pill.active {
+            border-color: #2563EB;
+            background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+            color: #1D4ED8;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        }
+
+        /* Modern input styling */
+        .form-label-modern {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #334155;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            margin-bottom: 0.3rem;
+        }
+        .input-group-modern {
+            position: relative;
+        }
+        .input-group-modern i.icon-prefix {
+            position: absolute;
+            left: 0.9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94A3B8;
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+        .form-control-modern {
+            width: 100%;
+            padding: 0.65rem 0.9rem 0.65rem 2.4rem;
+            border: 1.5px solid #CBD5E1;
+            border-radius: 9px;
+            font-size: 0.875rem;
+            color: #0F172A;
+            background: #FFFFFF;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) inset;
+        }
+        .form-control-modern:focus {
+            outline: none;
+            border-color: #2563EB;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+        }
+        .form-control-modern.input-error {
+            border-color: #DC2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+        }
+
+        @media (max-width: 860px) {
+            .hero-inner {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .workflow-steps-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .modal-side-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        @media (max-width: 520px) {
+            .workflow-steps-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Public Header Navigation -->
+    <header class="landing-header">
+        <div class="landing-header-inner">
+            <!-- Left Section: App Logo & System Title -->
+            <a href="/" class="brand-logo-area" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+                <img src="{% static 'images/barangay_logo.png' %}" alt="Barangay.ph Logo" style="height: 46px; width: auto; object-fit: contain;">
+                <span class="brand-text" style="font-weight: 800; font-size: 1.15rem; color: #0F172A;">BARANGAY.PH</span>
+            </a>
+
+            <!-- Right Section: Clean Login Button / Dashboard Link -->
+            <div>
+                {% if request.user.is_authenticated %}
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <a href="{% url 'appointments:list' %}" class="btn btn-secondary btn-sm" style="font-weight: 700; min-height: 40px; display: inline-flex; align-items: center;">
+                        <i class="fa-solid fa-calendar-check" style="margin-right: 0.35rem;"></i> Appointments
+                    </a>
+                    <a href="{% url 'accounts:profile' %}" class="btn btn-primary btn-sm" style="font-weight: 700; min-height: 40px; display: inline-flex; align-items: center;">
+                        <i class="fa-solid fa-circle-user" style="margin-right: 0.35rem;"></i> {{ request.user.get_full_name|default:request.user.username }}
+                    </a>
+                </div>
+                {% else %}
+                <a href="{% url 'accounts:login' %}" class="btn btn-primary" style="font-weight: 700; min-height: 40px; padding: 0.5rem 1.25rem; display: inline-flex; align-items: center;">
+                    <i class="fa-solid fa-right-to-bracket" style="margin-right: 0.35rem;"></i> Login
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="landing-hero">
+        <div class="hero-inner">
+            <div>
+                <span style="display: inline-block; background: rgba(255, 255, 255, 0.2); padding: 0.35rem 0.85rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 1rem;">
+                    Official Community Services & Health Center
+                </span>
+                <h1 class="hero-title">
+                    Fast, Seamless Barangay Appointments & Online Certifications
+                </h1>
+                <p class="hero-subtitle">
+                    Request official clearances, schedule health consultations, dental procedures, and track processing in real-time from anywhere.
+                </p>
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                    <button type="button" id="btn-hero-book-appointment" class="hero-cta-btn" onclick="openBookAppointmentModal()">
+                        <i class="fa-solid fa-calendar-check"></i> Book Appointment
+                    </button>
+                </div>
+            </div>
+
+            <!-- Crisp Hero Card -->
+            <div class="hero-card">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid #E2E8F0; padding-bottom: 0.75rem;">
+                    <span style="font-weight: 700; font-size: 0.8125rem; text-transform: uppercase; color: #0F172A;">
+                        <i class="fa-solid fa-circle-check" style="color: #16A34A; margin-right: 0.35rem;"></i> Daily Service Window
+                    </span>
+                    <span class="badge badge-primary">Open 8 AM - 5 PM</span>
+                </div>
+                <div style="font-size: 0.8125rem; color: #475569; margin-bottom: 0.75rem;">
+                    <i class="fa-solid fa-file-shield" style="color: #2563EB; width: 20px;"></i> <strong>Document Clearances:</strong> Same-day or next-day pickup.
+                </div>
+                <div style="font-size: 0.8125rem; color: #475569;">
+                    <i class="fa-solid fa-tooth" style="color: #2563EB; width: 20px;"></i> <strong>Health Center:</strong> Dental, consultations & check-ups.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4-Step Documentation Flow -->
+    <section class="workflow-section">
+        <div class="workflow-card">
+            <div class="workflow-title">4-Step Appointment & Request Process</div>
+            <div class="workflow-steps-grid">
+                <!-- Step 1 -->
+                <div class="step-item">
+                    <div class="step-number-badge">1</div>
+                    <div class="step-heading">Select Service</div>
+                    <div class="step-desc">Choose a document clearance or medical/dental procedure.</div>
+                </div>
+                <!-- Step 2 -->
+                <div class="step-item">
+                    <div class="step-number-badge">2</div>
+                    <div class="step-heading">Pick Date & Time</div>
+                    <div class="step-desc">Select an open slot directly from the live calendar queue.</div>
+                </div>
+                <!-- Step 3 -->
+                <div class="step-item">
+                    <div class="step-number-badge">3</div>
+                    <div class="step-heading">Admin Processing</div>
+                    <div class="step-desc">Barangay officers verify identity and prepare your request.</div>
+                </div>
+                <!-- Step 4 -->
+                <div class="step-item">
+                    <div class="step-number-badge">4</div>
+                    <div class="step-heading">Confirmation / Visit</div>
+                    <div class="step-desc">Receive real-time alert for document pickup or hall visit.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Available Services Section -->
+    <section class="services-section">
+        <div class="section-header">
+            <h2>Available Services & Consultations</h2>
+            <p>Select any service to begin booking an appointment or certification</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;" class="modal-side-grid">
+            <!-- Left: Document Requests -->
+            <div class="card" style="border: 1px solid #E2E8F0; border-radius: 8px; background: #FFFFFF; padding: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.25rem;">
+                    <i class="fa-solid fa-file-circle-check" style="font-size: 1.25rem; color: #2563EB;"></i>
+                    <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0; color: #0F172A;">Document Clearances</h3>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div class="service-box">
+                        <div style="font-weight: 700; color: #0F172A; font-size: 0.875rem;">Barangay Clearance</div>
+                        <div style="font-size: 0.75rem; color: #64748B;">Official certificate for employment, business, and postal identification.</div>
+                    </div>
+                    <div class="service-box">
+                        <div style="font-weight: 700; color: #0F172A; font-size: 0.875rem;">Certificate of Residency</div>
+                        <div style="font-size: 0.75rem; color: #64748B;">Proof of domicile required by banks, universities, and government agencies.</div>
+                    </div>
+                    <div class="service-box">
+                        <div style="font-weight: 700; color: #0F172A; font-size: 0.875rem;">Certificate of Indigency</div>
+                        <div style="font-size: 0.75rem; color: #64748B;">Financial, hospital, and legal aid qualification clearance.</div>
+                    </div>
+                    <div class="service-box">
+                        <div style="font-weight: 700; color: #0F172A; font-size: 0.875rem;">Notice of Award (NOA)</div>
+                        <div style="font-size: 0.75rem; color: #64748B;">Official verification and community grant approval notices.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Health Care Services -->
+            <div class="card" style="border: 1px solid #E2E8F0; border-radius: 8px; background: #FFFFFF; padding: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.25rem;">
+                    <i class="fa-solid fa-hospital-user" style="font-size: 1.25rem; color: #16A34A;"></i>
+                    <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0; color: #0F172A;">Health Center Services</h3>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    {% for svc in healthcare_services %}
+                    <div class="service-box">
+                        <div style="font-weight: 700; color: #0F172A; font-size: 0.875rem;">{{ svc.name }}</div>
+                        <div style="font-size: 0.75rem; color: #64748B;">{{ svc.description|default:"Available at Barangay Health Center." }}</div>
+                    </div>
+                    {% empty %}
+                    <div class="service-box">
+                        <div style="font-weight: 700; color: #0F172A; font-size: 0.875rem;">Dental Cleaning & Oral Care</div>
+                        <div style="font-size: 0.75rem; color: #64748B;">Free dental prophylaxis and oral health checkup.</div>
+                    </div>
+                    <div class="service-box">
+                        <div style="font-weight: 700; color: #0F172A; font-size: 0.875rem;">General Medical Consultation</div>
+                        <div style="font-size: 0.75rem; color: #64748B;">Physician consultation and basic health assessment.</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== ANNOUNCEMENTS & UPCOMING EVENTS SECTION ==================== -->
+    <section class="announcements-events-section" style="padding: 3.5rem 0; background: #F8FAFC; border-top: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;">
+            <div class="section-header" style="text-align: center; margin-bottom: 2.25rem;">
+                <h2 style="font-size: 1.85rem; font-weight: 800; color: #0F172A; margin: 0 0 0.5rem 0; letter-spacing: -0.02em;">Barangay Updates & Community Calendar</h2>
+                <p style="font-size: 0.95rem; color: #64748B; margin: 0;">Stay informed with the latest public advisories, official notices, and upcoming barangay events.</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 2rem;">
+                <!-- Column 1: Announcements -->
+                <div class="card" style="border: 1px solid #E2E8F0; border-radius: 12px; background: #FFFFFF; padding: 1.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; border-bottom: 1px solid #F1F5F9; padding-bottom: 0.85rem;">
+                        <div style="display: flex; align-items: center; gap: 0.65rem;">
+                            <span style="width: 38px; height: 38px; border-radius: 8px; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; font-size: 1.05rem;">
+                                <i class="fa-solid fa-bullhorn"></i>
+                            </span>
+                            <div>
+                                <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: #0F172A;">Latest Announcements</h3>
+                                <div style="font-size: 0.75rem; color: #64748B;">Official public notices & advisories</div>
+                            </div>
+                        </div>
+                        <span class="badge badge-primary" style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Public Notices</span>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 1rem; flex: 1;">
+                        {% for a in announcements %}
+                        <div style="padding: 1.1rem; border-radius: 8px; background: #F8FAFC; border: 1px solid #E2E8F0; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+                                <span class="badge" style="background: #DBEAFE; color: #1D4ED8; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; padding: 0.2rem 0.5rem; border-radius: 4px;">
+                                    {{ a.get_category_display|default:a.category }}
+                                </span>
+                                <span style="font-size: 0.75rem; color: #94A3B8; display: inline-flex; align-items: center;">
+                                    <i class="fa-regular fa-clock" style="margin-right: 0.3rem;"></i>{{ a.created_at|date:"M d, Y" }}
+                                </span>
+                            </div>
+                            <h4 style="font-size: 0.95rem; font-weight: 700; color: #0F172A; margin: 0.25rem 0 0.45rem 0; line-height: 1.4;">{{ a.title }}</h4>
+                            <p style="font-size: 0.8125rem; color: #475569; margin: 0; line-height: 1.55;">
+                                {{ a.content|truncatechars:150 }}
+                            </p>
+                        </div>
+                        {% empty %}
+                        <div style="text-align: center; padding: 2.5rem 1rem; color: #94A3B8;">
+                            <i class="fa-regular fa-clipboard" style="font-size: 2rem; margin-bottom: 0.75rem; display: block; opacity: 0.5;"></i>
+                            <p style="font-size: 0.875rem; margin: 0;">No active announcements at this time.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Column 2: Upcoming Events -->
+                <div class="card" style="border: 1px solid #E2E8F0; border-radius: 12px; background: #FFFFFF; padding: 1.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; border-bottom: 1px solid #F1F5F9; padding-bottom: 0.85rem;">
+                        <div style="display: flex; align-items: center; gap: 0.65rem;">
+                            <span style="width: 38px; height: 38px; border-radius: 8px; background: #ECFDF5; color: #16A34A; display: flex; align-items: center; justify-content: center; font-size: 1.05rem;">
+                                <i class="fa-solid fa-calendar-day"></i>
+                            </span>
+                            <div>
+                                <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: #0F172A;">Upcoming Events</h3>
+                                <div style="font-size: 0.75rem; color: #64748B;">Community activities & gatherings</div>
+                            </div>
+                        </div>
+                        <span class="badge badge-success" style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Community</span>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 1rem; flex: 1;">
+                        {% for ev in upcoming_events %}
+                        <div style="padding: 1.1rem; border-radius: 8px; background: #F8FAFC; border: 1px solid #E2E8F0; display: flex; gap: 1.1rem; align-items: flex-start;">
+                            <div style="background: #16A34A; color: #FFFFFF; border-radius: 8px; padding: 0.5rem 0.75rem; text-align: center; min-width: 62px; box-shadow: 0 2px 4px rgba(22, 163, 74, 0.25);">
+                                <div style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">{{ ev.created_at|date:"M" }}</div>
+                                <div style="font-size: 1.35rem; font-weight: 800; line-height: 1.1;">{{ ev.created_at|date:"d" }}</div>
+                            </div>
+                            <div style="flex: 1;">
+                                <h4 style="font-size: 0.95rem; font-weight: 700; color: #0F172A; margin: 0 0 0.35rem 0; line-height: 1.4;">{{ ev.title }}</h4>
+                                <p style="font-size: 0.8125rem; color: #475569; margin: 0; line-height: 1.55;">
+                                    {{ ev.content|truncatechars:140 }}
+                                </p>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div style="text-align: center; padding: 2.5rem 1rem; color: #94A3B8;">
+                            <i class="fa-regular fa-calendar-xmark" style="font-size: 2rem; margin-bottom: 0.75rem; display: block; opacity: 0.5;"></i>
+                            <p style="font-size: 0.875rem; margin: 0;">No upcoming events scheduled at this moment.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== MODAL 1: REGISTER ACCOUNT MODAL (If Not Logged In) ==================== -->
+    <div id="registerModal" class="modal-overlay">
+        <div class="modal-container modal-container-auth">
+            <div class="modal-header-bar">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fa-solid fa-user-plus" style="color: #2563EB;"></i>
+                    <h3 style="margin: 0; font-size: 1rem; font-weight: 700;">Create Resident Account</h3>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="closeRegisterModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div style="padding: 1.25rem;">
+                <p style="font-size: 0.8125rem; color: #64748B; margin-top: 0; margin-bottom: 1.25rem;">
+                    Please register or sign in to schedule appointments and track certificates.
+                </p>
+
+                <form method="post" action="{% url 'accounts:signup' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.75rem;">
+                        <div>
+                            <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase;">First Name</label>
+                            <input type="text" name="first_name" required class="form-control" style="font-size: 0.8125rem;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase;">Last Name</label>
+                            <input type="text" name="last_name" required class="form-control" style="font-size: 0.8125rem;">
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 0.75rem;">
+                        <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase;">Username</label>
+                        <input type="text" name="username" required class="form-control" style="font-size: 0.8125rem;">
+                    </div>
+
+                    <div style="margin-bottom: 0.75rem;">
+                        <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase;">Phone Number</label>
+                        <input type="text" name="phone_number" required class="form-control" placeholder="0919-000-0000" style="font-size: 0.8125rem;">
+                    </div>
+
+                    <div style="margin-bottom: 0.75rem;">
+                        <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase;">Purok Jurisdiction</label>
+                        <select name="purok" class="form-control" style="font-size: 0.8125rem;">
+                            <option value="Purok 1">Purok 1</option>
+                            <option value="Purok 2">Purok 2</option>
+                            <option value="Purok 3">Purok 3</option>
+                            <option value="Purok 4">Purok 4</option>
+                            <option value="Purok 5">Purok 5</option>
+                            <option value="Purok 6">Purok 6</option>
+                            <option value="Purok 7">Purok 7</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-bottom: 0.75rem;">
+                        <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase;">Password</label>
+                        <input type="password" name="password" required class="form-control" style="font-size: 0.8125rem;">
+                    </div>
+
+                    <div style="margin-bottom: 1.25rem;">
+                        <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase;">Confirm Password</label>
+                        <input type="password" name="password2" required class="form-control" style="font-size: 0.8125rem;">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; font-weight: 700; min-height: 42px;">
+                        Register & Continue
+                    </button>
+                </form>
+
+                <div style="margin-top: 1rem; text-align: center; font-size: 0.8125rem; color: #64748B;">
+                    Already registered? <a href="javascript:void(0)" onclick="switchToLogin()" style="color: #2563EB; font-weight: 700;">Sign in here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 2: LOGIN MODAL ==================== -->
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal-container modal-container-auth">
+            <div class="modal-header-bar">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fa-solid fa-right-to-bracket" style="color: #2563EB;"></i>
+                    <h3 style="margin: 0; font-size: 1rem; font-weight: 700;">Resident Sign In</h3>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="closeLoginModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div style="padding: 1.25rem;">
+                <form method="post" action="{% url 'accounts:login' %}">
+                    {% csrf_token %}
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.25rem;">Username or Email</label>
+                        <input type="text" name="username" required class="form-control">
+                    </div>
+                    <div style="margin-bottom: 1.25rem;">
+                        <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.25rem;">Password</label>
+                        <input type="password" name="password" required class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; font-weight: 700; min-height: 42px;">
+                        Sign In
+                    </button>
+                </form>
+                <div style="margin-top: 1rem; text-align: center; font-size: 0.8125rem; color: #64748B;">
+                    Don't have an account? <a href="javascript:void(0)" onclick="switchToRegister()" style="color: #2563EB; font-weight: 700;">Register Account</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 3: MODERN BOOK APPOINTMENT MODAL ==================== -->
+    <div id="bookAppointmentModal" class="modal-overlay">
+        <div class="modal-container modal-container-side-by-side">
+            <!-- Modal Header -->
+            <div class="modal-header-bar">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0F172A; letter-spacing: -0.01em;">Book an Appointment</h3>
+                        <p style="margin: 0; font-size: 0.75rem; color: #64748B;">Schedule your document request or barangay health center consultation</p>
+                    </div>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="closeBookAppointmentModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div style="padding: 1.5rem; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 1.75rem;" class="modal-side-grid" id="modal-body-container">
+                <!-- Left Panel: Interactive Modern Form -->
+                <div id="appointment-form-panel">
+                    <form id="public-booking-form" onsubmit="handlePublicBookingSubmit(event)">
+                        {% csrf_token %}
+
+                        <!-- Category Selector: Document Request vs Health Center -->
+                        <div style="margin-bottom: 1.15rem;">
+                            <label class="form-label-modern">
+                                <span><i class="fa-solid fa-layer-group" style="color: #2563EB; margin-right: 0.3rem;"></i> 1. Select Service Category <span style="color: #DC2626;">*</span></span>
+                            </label>
+                            <div class="category-pill-group">
+                                <div class="cat-pill active" id="pill-doc" onclick="switchCategory('document')">
+                                    <i class="fa-solid fa-file-shield" style="font-size: 1.05rem;"></i>
+                                    <div>
+                                        <div style="font-weight: 800;">Document Request</div>
+                                        <div style="font-size: 0.7rem; font-weight: 500; opacity: 0.85;">Clearances & Certifications</div>
+                                    </div>
+                                </div>
+                                <div class="cat-pill" id="pill-health" onclick="switchCategory('healthcare')">
+                                    <i class="fa-solid fa-heart-pulse" style="font-size: 1.05rem; color: #16A34A;"></i>
+                                    <div>
+                                        <div style="font-weight: 800;">Health Center</div>
+                                        <div style="font-size: 0.7rem; font-weight: 500; opacity: 0.85;">Medical & Dental Care</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="category" id="form-category-input" value="document">
+                        </div>
+
+                        <!-- Specific Service Dropdown -->
+                        <div id="subservice-doc-container" style="margin-bottom: 1rem;">
+                            <label class="form-label-modern">
+                                <span><i class="fa-solid fa-certificate" style="color: #2563EB; margin-right: 0.3rem;"></i> Select Document Type <span style="color: #DC2626;">*</span></span>
+                            </label>
+                            <div class="input-group-modern">
+                                <i class="fa-solid fa-file-contract icon-prefix"></i>
+                                <select name="document_type" id="modal-doc-select" class="form-control-modern" style="padding-left: 2.4rem;">
+                                    <option value="clearance">Barangay Clearance</option>
+                                    <option value="residency">Certificate of Residency</option>
+                                    <option value="indigency">Certificate of Indigency</option>
+                                    <option value="noa">Notice of Award (NOA)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="subservice-health-container" style="display: none; margin-bottom: 1rem;">
+                            <label class="form-label-modern">
+                                <span><i class="fa-solid fa-stethoscope" style="color: #16A34A; margin-right: 0.3rem;"></i> Select Health Center Service <span style="color: #DC2626;">*</span></span>
+                            </label>
+                            <div class="input-group-modern">
+                                <i class="fa-solid fa-hospital-user icon-prefix"></i>
+                                <select name="healthcare_service" id="modal-health-select" class="form-control-modern" style="padding-left: 2.4rem;">
+                                    {% for svc in healthcare_services %}
+                                    <option value="{{ svc.id }}">{{ svc.name }}</option>
+                                    {% empty %}
+                                    <option value="">Dental Cleaning & Oral Care</option>
+                                    <option value="">General Medical Consultation</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Schedule: Date & Time Window -->
+                        <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+                            <div>
+                                <label class="form-label-modern">
+                                    <span><i class="fa-regular fa-calendar" style="color: #2563EB; margin-right: 0.25rem;"></i> Preferred Date <span style="color: #DC2626;">*</span></span>
+                                </label>
+                                <div class="input-group-modern">
+                                    <i class="fa-regular fa-calendar-day icon-prefix"></i>
+                                    <input type="date" name="preferred_date" id="modal-date-input" required class="form-control-modern" style="padding-left: 2.4rem;">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label-modern">
+                                    <span><i class="fa-regular fa-clock" style="color: #2563EB; margin-right: 0.25rem;"></i> Time Window <span style="color: #DC2626;">*</span></span>
+                                </label>
+                                <div class="input-group-modern">
+                                    <i class="fa-solid fa-clock-rotate-left icon-prefix"></i>
+                                    <select name="preferred_time_slot" class="form-control-modern" style="padding-left: 2.4rem;">
+                                        <option value="morning">Morning (8:00 AM - 11:30 AM)</option>
+                                        <option value="afternoon">Afternoon (1:00 PM - 4:30 PM)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Applicant Identity Info: First Name, Middle Name, Last Name (All Required) -->
+                        <div style="margin-bottom: 1rem;">
+                            <label class="form-label-modern">
+                                <span><i class="fa-regular fa-id-card" style="color: #2563EB; margin-right: 0.3rem;"></i> 2. Applicant Identification <span style="color: #DC2626;">*</span></span>
+                            </label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;">
+                                <div class="input-group-modern">
+                                    <i class="fa-solid fa-user icon-prefix"></i>
+                                    <input type="text" name="first_name" id="input_first_name" placeholder="First Name *" value="{{ request.user.first_name }}" class="form-control-modern" required style="padding-left: 2.3rem;">
+                                </div>
+                                <div class="input-group-modern">
+                                    <i class="fa-regular fa-user icon-prefix"></i>
+                                    <input type="text" name="middle_name" id="input_middle_name" placeholder="Middle Name *" class="form-control-modern" required style="padding-left: 2.3rem;">
+                                </div>
+                                <div class="input-group-modern">
+                                    <i class="fa-solid fa-user-tag icon-prefix"></i>
+                                    <input type="text" name="last_name" id="input_last_name" placeholder="Last Name *" value="{{ request.user.last_name }}" class="form-control-modern" required style="padding-left: 2.3rem;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Age & Residential Address (All Required) -->
+                        <div style="display: grid; grid-template-columns: 0.7fr 1.3fr; gap: 0.75rem; margin-bottom: 1rem;">
+                            <div>
+                                <label class="form-label-modern">
+                                    <span><i class="fa-solid fa-hashtag" style="color: #2563EB; margin-right: 0.25rem;"></i> Age <span style="color: #DC2626;">*</span></span>
+                                </label>
+                                <div class="input-group-modern">
+                                    <i class="fa-solid fa-person icon-prefix"></i>
+                                    <input type="number" name="age" id="input_age" min="1" max="120" placeholder="e.g. 28" required class="form-control-modern" style="padding-left: 2.4rem;">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label-modern">
+                                    <span><i class="fa-solid fa-location-dot" style="color: #2563EB; margin-right: 0.25rem;"></i> Residential Address <span style="color: #DC2626;">*</span></span>
+                                </label>
+                                <div class="input-group-modern">
+                                    <i class="fa-solid fa-house-chimney icon-prefix"></i>
+                                    <input type="text" name="address" id="input_address" placeholder="House #, Street, Purok..." required class="form-control-modern" style="padding-left: 2.4rem;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Email Address (Abstract API Validation) & Phone Number (11 Digits Only) -->
+                        <div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 0.75rem; margin-bottom: 1rem;">
+                            <div>
+                                <label class="form-label-modern">
+                                    <span><i class="fa-regular fa-envelope" style="color: #2563EB; margin-right: 0.25rem;"></i> Email Address <span style="color: #DC2626;">*</span></span>
+                                </label>
+                                <div class="input-group-modern">
+                                    <i class="fa-solid fa-at icon-prefix"></i>
+                                    <input type="email" name="email" id="input_email" placeholder="active.email@example.com" value="{{ request.user.email }}" required class="form-control-modern" style="padding-left: 2.4rem;" onblur="validateEmailLive(this.value)">
+                                </div>
+                                <div id="email-verification-feedback" style="font-size: 0.72rem; margin-top: 0.3rem; min-height: 18px; display: flex; align-items: center; gap: 0.35rem;"></div>
+                            </div>
+                            <div>
+                                <label class="form-label-modern">
+                                    <span><i class="fa-solid fa-mobile-screen" style="color: #2563EB; margin-right: 0.25rem;"></i> Phone Number <span style="color: #DC2626;">*</span></span>
+                                    <span style="font-size: 0.65rem; color: #64748B; font-weight: 500;">11 digits</span>
+                                </label>
+                                <div class="input-group-modern">
+                                    <i class="fa-solid fa-phone icon-prefix"></i>
+                                    <input type="tel" name="phone_number" id="input_phone_number" maxlength="11" placeholder="09XXXXXXXXX" value="{{ request.user.phone_number }}" required class="form-control-modern" style="padding-left: 2.4rem;" oninput="enforcePhone11Digits(this)">
+                                </div>
+                                <div id="phone-feedback" style="font-size: 0.72rem; color: #64748B; margin-top: 0.3rem; min-height: 18px;">
+                                    Must be 11 digits starting with 09
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Purpose / Symptoms / Notes -->
+                        <div style="margin-bottom: 1rem;">
+                            <label class="form-label-modern">
+                                <span><i class="fa-regular fa-comment-dots" style="color: #2563EB; margin-right: 0.25rem;"></i> Purpose or Symptoms / Consultation Notes <span style="color: #DC2626;">*</span></span>
+                            </label>
+                            <textarea name="purpose" id="input_purpose" rows="2" class="form-control-modern" style="padding-left: 0.9rem; font-family: inherit; resize: vertical;" placeholder="Describe the purpose of your clearance or health consultation notes..." required></textarea>
+                        </div>
+
+                        <!-- Optional Supporting ID / Document -->
+                        <div style="margin-bottom: 1.25rem;">
+                            <label class="form-label-modern">
+                                <span><i class="fa-solid fa-paperclip" style="color: #64748B; margin-right: 0.25rem;"></i> Supporting ID / Document (Optional)</span>
+                            </label>
+                            <input type="file" name="supporting_id" class="form-control-modern" style="padding: 0.45rem 0.9rem; font-size: 0.8rem;" accept="image/*,application/pdf">
+                        </div>
+
+                        <!-- Error Banner (Hidden by default) -->
+                        <div id="booking-error-banner" style="display: none; background: #FEF2F2; border: 1.5px solid #FCA5A5; border-radius: 9px; padding: 0.75rem 1rem; margin-bottom: 1rem; color: #991B1B; font-size: 0.8125rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fa-solid fa-triangle-exclamation" style="color: #DC2626; font-size: 1rem;"></i>
+                                <span id="booking-error-text" style="font-weight: 600;">Please check your input fields.</span>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" id="btn-submit-public-booking" class="btn btn-primary" style="width: 100%; font-weight: 800; min-height: 46px; font-size: 0.95rem; border-radius: 9px; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);">
+                            <i class="fa-solid fa-paper-plane"></i> Submit Appointment Request
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Right Panel: Modern Interactive Calendar & Contact Info -->
+                <div style="background: linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%); border: 1px solid #E2E8F0; border-radius: 14px; padding: 1.15rem; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                            <span style="font-weight: 800; font-size: 0.8125rem; color: #0F172A; text-transform: uppercase; letter-spacing: 0.04em;">
+                                <i class="fa-solid fa-calendar-days" style="color: #2563EB; margin-right: 0.35rem;"></i> Select Appointment Date
+                            </span>
+                        </div>
+                        <div id="booking-modal-calendar" style="min-height: 340px; background: #FFFFFF; border-radius: 10px; padding: 0.5rem; border: 1px solid #E2E8F0;"></div>
+                        <div style="font-size: 0.72rem; color: #64748B; margin-top: 0.75rem; text-align: center; line-height: 1.4;">
+                            <i class="fa-solid fa-circle-info" style="color: #2563EB; margin-right: 0.25rem;"></i> Tap any available date on the calendar to update your booking.
+                        </div>
+                    </div>
+
+                    <!-- Admin Assistance Hotline Card -->
+                    <div style="margin-top: 1.25rem; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 0.85rem; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+                        <div style="display: flex; align-items: center; gap: 0.65rem;">
+                            <div style="width: 34px; height: 34px; border-radius: 8px; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+                                <i class="fa-solid fa-headset"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #64748B;">Barangay Admin Contact</div>
+                                <div style="font-size: 0.875rem; font-weight: 800; color: #0F172A;">
+                                    <i class="fa-solid fa-phone" style="font-size: 0.75rem; color: #16A34A; margin-right: 0.25rem;"></i> {{ admin_phone|default:"0917-111-2222" }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUCCESS CONFIRMATION MODAL STATE -->
+            <div id="modal-success-container" style="display: none; padding: 2.5rem 1.75rem; text-align: center;">
+                <div style="width: 72px; height: 72px; border-radius: 50%; background: #ECFDF5; color: #16A34A; display: flex; align-items: center; justify-content: center; font-size: 2.25rem; margin: 0 auto 1.25rem auto; box-shadow: 0 0 0 10px #D1FAE5; animation: pingSuccess 1s ease;">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <h2 style="font-size: 1.5rem; font-weight: 800; color: #0F172A; margin: 0 0 0.5rem 0;">
+                    Appointment Booked Successfully!
+                </h2>
+                <div>
+                    <span id="success-ref-badge" class="badge badge-primary" style="font-size: 0.95rem; font-weight: 800; padding: 0.4rem 0.9rem; border-radius: 9999px; letter-spacing: 0.03em;">
+                        REF #APT-0000
+                    </span>
+                </div>
+
+                <!-- REQUIRED NOTIFICATION NOTICE -->
+                <div style="max-width: 680px; margin: 1.5rem auto; background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); border: 1.5px solid #93C5FD; border-radius: 14px; padding: 1.25rem 1.5rem; text-align: left; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);">
+                    <div style="display: flex; gap: 0.85rem; align-items: flex-start;">
+                        <span style="font-size: 1.5rem; color: #2563EB; line-height: 1;">
+                            <i class="fa-solid fa-envelope-circle-check"></i>
+                        </span>
+                        <div>
+                            <div style="font-size: 0.95rem; font-weight: 700; color: #1E3A8A; margin-bottom: 0.35rem;">
+                                Confirmation & Verification in Progress
+                            </div>
+                            <p style="font-size: 0.875rem; line-height: 1.6; color: #1E40AF; margin: 0;" id="success-required-message">
+                                Wait for the email sent for approved your appointment date. We will notify via email please keep track on you email. Thank you if you have any question please contact <strong>{{ admin_phone|default:"0917-111-2222" }}</strong>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Summary Card -->
+                <div style="max-width: 680px; margin: 0 auto 1.75rem auto; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.15rem; text-align: left; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;" class="modal-side-grid">
+                    <div>
+                        <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #64748B;">Applicant Name</div>
+                        <div style="font-size: 0.95rem; font-weight: 700; color: #0F172A;" id="summary-applicant-name">-</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #64748B;">Requested Service</div>
+                        <div style="font-size: 0.95rem; font-weight: 700; color: #2563EB;" id="summary-service-title">-</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #64748B;">Scheduled Date & Time</div>
+                        <div style="font-size: 0.875rem; font-weight: 700; color: #0F172A;" id="summary-schedule">-</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #64748B;">Notification Email & Phone</div>
+                        <div style="font-size: 0.875rem; font-weight: 700; color: #0F172A;" id="summary-contact">-</div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: center; gap: 0.75rem;">
+                    <button type="button" class="btn btn-secondary" onclick="resetAndBookAnother()" style="font-weight: 700; min-height: 42px; padding: 0 1.25rem;">
+                        <i class="fa-solid fa-plus" style="margin-right: 0.35rem;"></i> Book Another
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="closeBookAppointmentModal()" style="font-weight: 700; min-height: 42px; padding: 0 1.5rem; background: #2563EB;">
+                        <i class="fa-solid fa-check" style="margin-right: 0.35rem;"></i> Done & Return Home
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        var bookingCalendar = null;
+        var emailValidationTimeout = null;
+        var isEmailChecking = false;
+
+        function openRegisterModal() {
+            closeLoginModal();
+            document.getElementById('registerModal').style.display = 'flex';
+        }
+        function closeRegisterModal() {
+            document.getElementById('registerModal').style.display = 'none';
+        }
+
+        function openLoginModal() {
+            closeRegisterModal();
+            document.getElementById('loginModal').style.display = 'flex';
+        }
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+
+        function switchToLogin() {
+            closeRegisterModal();
+            openLoginModal();
+        }
+        function switchToRegister() {
+            closeLoginModal();
+            openRegisterModal();
+        }
+
+        function openBookAppointmentModal() {
+            var modal = document.getElementById('bookAppointmentModal');
+            document.getElementById('modal-body-container').style.display = 'grid';
+            document.getElementById('modal-success-container').style.display = 'none';
+            modal.style.display = 'flex';
+
+            // Set default date to tomorrow
+            var tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            var dateStr = tomorrow.toISOString().split('T')[0];
+            var dateInput = document.getElementById('modal-date-input');
+            if (dateInput && !dateInput.value) {
+                dateInput.value = dateStr;
+                dateInput.min = new Date().toISOString().split('T')[0];
+            }
+
+            // Initialize or render calendar
+            setTimeout(function() {
+                var calEl = document.getElementById('booking-modal-calendar');
+                if (calEl && !bookingCalendar) {
+                    bookingCalendar = new FullCalendar.Calendar(calEl, {
+                        initialView: 'dayGridMonth',
+                        headerToolbar: {
+                            left: 'prev,next',
+                            center: 'title',
+                            right: 'today'
+                        },
+                        selectable: true,
+                        dateClick: function(info) {
+                            var todayStr = new Date().toISOString().split('T')[0];
+                            if (info.dateStr < todayStr) {
+                                alert("Please select today or a future date for appointments.");
+                                return;
+                            }
+                            document.getElementById('modal-date-input').value = info.dateStr;
+                        }
+                    });
+                    bookingCalendar.render();
+                } else if (bookingCalendar) {
+                    bookingCalendar.updateSize();
+                }
+            }, 100);
+        }
+
+        function closeBookAppointmentModal() {
+            document.getElementById('bookAppointmentModal').style.display = 'none';
+        }
+
+        function switchCategory(cat) {
+            var pillDoc = document.getElementById('pill-doc');
+            var pillHealth = document.getElementById('pill-health');
+            var catInput = document.getElementById('form-category-input');
+            var docContainer = document.getElementById('subservice-doc-container');
+            var healthContainer = document.getElementById('subservice-health-container');
+
+            if (cat === 'document') {
+                pillDoc.classList.add('active');
+                pillHealth.classList.remove('active');
+                catInput.value = 'document';
+                docContainer.style.display = 'block';
+                healthContainer.style.display = 'none';
+            } else {
+                pillHealth.classList.add('active');
+                pillDoc.classList.remove('active');
+                catInput.value = 'healthcare';
+                docContainer.style.display = 'none';
+                healthContainer.style.display = 'block';
+            }
+        }
+
+        // Phone number restriction: strictly 11 digits
+        function enforcePhone11Digits(input) {
+            var val = input.value.replace(/[^0-9]/g, '');
+            if (val.length > 11) {
+                val = val.substring(0, 11);
+            }
+            input.value = val;
+
+            var feedback = document.getElementById('phone-feedback');
+            if (val.length === 11) {
+                if (val.startsWith('09')) {
+                    feedback.innerHTML = '<span style="color: #16A34A;"><i class="fa-solid fa-check"></i> Valid 11-digit mobile number</span>';
+                    input.classList.remove('input-error');
+                } else {
+                    feedback.innerHTML = '<span style="color: #DC2626;"><i class="fa-solid fa-xmark"></i> Must start with 09 (e.g. 09171234567)</span>';
+                    input.classList.add('input-error');
+                }
+            } else if (val.length > 0) {
+                feedback.innerHTML = '<span style="color: #D97706;">' + val.length + '/11 digits entered</span>';
+            } else {
+                feedback.innerHTML = 'Must be 11 digits starting with 09';
+                input.classList.remove('input-error');
+            }
+        }
+
+        // Live Abstract API Email validation
+        function validateEmailLive(email) {
+            var feedback = document.getElementById('email-verification-feedback');
+            var emailInput = document.getElementById('input_email');
+            email = (email || '').trim();
+
+            if (!email) {
+                feedback.innerHTML = '';
+                emailInput.classList.remove('input-error');
+                return;
+            }
+
+            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                feedback.innerHTML = '<span style="color: #DC2626;"><i class="fa-solid fa-circle-exclamation"></i> Invalid email format</span>';
+                emailInput.classList.add('input-error');
+                return;
+            }
+
+            fetch('/appointments/api/validate-email/?email=' + encodeURIComponent(email))
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (data.valid) {
+                        feedback.innerHTML = '';
+                        emailInput.classList.remove('input-error');
+                    } else {
+                        feedback.innerHTML = '<span style="color: #DC2626; font-weight: 600;"><i class="fa-solid fa-circle-exclamation"></i> ' + (data.message || 'Suspicious or invalid email') + '</span>';
+                        emailInput.classList.add('input-error');
+                    }
+                })
+                .catch(function() {
+                    feedback.innerHTML = '';
+                    emailInput.classList.remove('input-error');
+                });
+        }
+
+        // Handle AJAX submission
+        function handlePublicBookingSubmit(e) {
+            e.preventDefault();
+            var form = document.getElementById('public-booking-form');
+            var btn = document.getElementById('btn-submit-public-booking');
+            var errBanner = document.getElementById('booking-error-banner');
+            var errText = document.getElementById('booking-error-text');
+
+            // Quick phone check
+            var phoneVal = document.getElementById('input_phone_number').value.replace(/[^0-9]/g, '');
+            if (phoneVal.length !== 11) {
+                errBanner.style.display = 'block';
+                errText.innerText = "Phone number must be exactly 11 digits (e.g. 09171234567).";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting & Verifying with Abstract API...';
+            errBanner.style.display = 'none';
+
+            var formData = new FormData(form);
+
+            fetch('/appointments/api/public-book/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(function(response) {
+                return response.json().then(function(data) {
+                    return { ok: response.ok, data: data };
+                });
+            })
+            .then(function(res) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Appointment Request';
+
+                if (res.ok && res.data.status === 'ok') {
+                    // Populate success view
+                    document.getElementById('success-ref-badge').innerText = res.data.ref_number || 'REF #APT-NEW';
+                    document.getElementById('summary-applicant-name').innerText = res.data.applicant_name;
+                    document.getElementById('summary-service-title').innerText = res.data.service_title;
+                    document.getElementById('summary-schedule').innerText = res.data.scheduled_date + ' (' + res.data.time_slot + ')';
+                    document.getElementById('summary-contact').innerText = res.data.applicant_email + ' | ' + res.data.applicant_phone;
+                    document.getElementById('success-required-message').innerHTML = 'Wait for the email sent for approved your appointment date. We will notify via email please keep track on you email. Thank you if you have any question please contact <strong>' + (res.data.admin_phone || '0917-111-2222') + '</strong>.';
+
+                    // Swap view
+                    document.getElementById('modal-body-container').style.display = 'none';
+                    document.getElementById('modal-success-container').style.display = 'block';
+                    form.reset();
+                } else {
+                    errBanner.style.display = 'block';
+                    if (res.data.errors) {
+                        var firstErrKey = Object.keys(res.data.errors)[0];
+                        errText.innerText = res.data.errors[firstErrKey];
+                    } else {
+                        errText.innerText = res.data.message || 'Error booking appointment. Please review the form.';
+                    }
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Appointment Request';
+                errBanner.style.display = 'block';
+                errText.innerText = 'Network error or connection timed out. Please try again.';
+            });
+        }
+
+        function resetAndBookAnother() {
+            document.getElementById('modal-body-container').style.display = 'grid';
+            document.getElementById('modal-success-container').style.display = 'none';
+        }
+
+        // Close on backdrop click
+        document.addEventListener('click', function(e) {
+            var regModal = document.getElementById('registerModal');
+            var logModal = document.getElementById('loginModal');
+            var bookModal = document.getElementById('bookAppointmentModal');
+
+            if (e.target === regModal) closeRegisterModal();
+            if (e.target === logModal) closeLoginModal();
+            if (e.target === bookModal) closeBookAppointmentModal();
+        });
+    </script>
+</body>
+</html>

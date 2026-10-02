@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Barangay Records Hub - Barangay e-Portal{% endblock %}
+
+{% block content %}
+<div class="records-hub-container">
+
+    <!-- Page Header -->
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+        <div>
+            <h1 style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin: 0; text-transform: uppercase;">
+                Official Barangay Records & Archives
+            </h1>
+            <p style="color: #64748B; font-size: 0.8125rem; margin: 0.25rem 0 0 0;">
+                Comprehensive archives of Peace & Order blotters, Katarungang Pambarangay, Finance, Assets, and RBI Demographics
+            </p>
+        </div>
+    </div>
+
+    <!-- Tri-Tab Navigation Header (Without Icons) -->
+    <div class="records-tri-tab" style="display: flex; gap: 0.5rem; border-bottom: 2px solid #E2E8F0; margin-bottom: 1.5rem; overflow-x: auto;">
+        <a href="{% url 'records_hub' %}?tab=peace_order" class="btn {% if active_tab == 'peace_order' %}btn-primary{% else %}btn-secondary{% endif %}" style="font-weight: 700; border-bottom: none; border-radius: 8px 8px 0 0; min-height: 44px; min-width: 140px; display: inline-flex; align-items: center; justify-content: center;">
+            Blotter
+        </a>
+        <a href="{% url 'records_hub' %}?tab=finance_assets" class="btn {% if active_tab == 'finance_assets' %}btn-primary{% else %}btn-secondary{% endif %}" style="font-weight: 700; border-bottom: none; border-radius: 8px 8px 0 0; min-height: 44px; min-width: 140px; display: inline-flex; align-items: center; justify-content: center;">
+            Finance
+        </a>
+        <a href="{% url 'records_hub' %}?tab=rbi" class="btn {% if active_tab == 'rbi' %}btn-primary{% else %}btn-secondary{% endif %}" style="font-weight: 700; border-bottom: none; border-radius: 8px 8px 0 0; min-height: 44px; min-width: 140px; display: inline-flex; align-items: center; justify-content: center;">
+            Residents
+        </a>
+    </div>
+
+    <!-- TAB 1: PEACE & ORDER / BLOTTER -->
+    {% if active_tab == 'peace_order' %}
+    <div class="card" style="border: 1px solid #E2E8F0; border-radius: 12px; background: #FFFFFF; padding: 4.5rem 1.5rem; text-align: center; box-shadow: none;">
+        <div style="font-size: 0.8125rem; font-weight: 700; color: #2563EB; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem;">
+            Blotter Records & Katarungang Pambarangay
+        </div>
+        <h2 style="font-size: 2.25rem; font-weight: 800; color: #0F172A; margin: 0 0 0.5rem 0; letter-spacing: -0.02em;">
+            Coming Soon
+        </h2>
+        <p style="color: #64748B; font-size: 0.9375rem; max-width: 480px; margin: 0 auto; line-height: 1.5;">
+            The incident blotter archive and mediation management system is currently being revamped.
+        </p>
+    </div>
+
+    <!-- TAB 2: FINANCE & ASSETS -->
+    {% elif active_tab == 'finance_assets' %}
+    <div class="card" style="border: 1px solid #E2E8F0; border-radius: 12px; background: #FFFFFF; padding: 4.5rem 1.5rem; text-align: center; box-shadow: none;">
+        <div style="font-size: 0.8125rem; font-weight: 700; color: #2563EB; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem;">
+            Barangay Finance & Asset Inventory
+        </div>
+        <h2 style="font-size: 2.25rem; font-weight: 800; color: #0F172A; margin: 0 0 0.5rem 0; letter-spacing: -0.02em;">
+            Coming Soon
+        </h2>
+        <p style="color: #64748B; font-size: 0.9375rem; max-width: 480px; margin: 0 auto; line-height: 1.5;">
+            The financial logs and municipal asset tracking module will be available in an upcoming update.
+        </p>
+    </div>
+
+    <!-- TAB 3: RBI / RESIDENTS ARCHIVE -->
+    {% elif active_tab == 'rbi' %}
+    <div class="card" style="border: 1px solid #E2E8F0; border-radius: 12px; background: #FFFFFF; padding: 4.5rem 1.5rem; text-align: center; box-shadow: none;">
+        <div style="font-size: 0.8125rem; font-weight: 700; color: #2563EB; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem;">
+            Registry of Inhabitants Archive
+        </div>
+        <h2 style="font-size: 2.25rem; font-weight: 800; color: #0F172A; margin: 0 0 0.5rem 0; letter-spacing: -0.02em;">
+            Coming Soon
+        </h2>
+        <p style="color: #64748B; font-size: 0.9375rem; max-width: 480px; margin: 0 auto; line-height: 1.5;">
+            Demographic reports and historical inhabitant archives are currently under preparation.
+        </p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

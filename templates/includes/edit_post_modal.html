@@ -1,0 +1,82 @@
+<div id="editPostModal" class="modal-backdrop" style="display: none;" onclick="if(event.target === this) closeEditPostModal();">
+  <div class="post-modal-content" onclick="event.stopPropagation();">
+    
+    <div class="post-modal-header">
+      <h3 class="modal-title">Edit Announcement / Post</h3>
+      <button type="button" class="btn-close-modal" onclick="closeEditPostModal()" aria-label="Close edit dialog">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <form id="editPostForm" action="" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="hidden" name="clear_image" id="editClearImageFlag" value="0">
+
+      <div class="post-author-bar">
+        {% if user.avatar %}
+          <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="post-modal-avatar">
+        {% else %}
+          <div class="post-modal-avatar-initial">{{ user.first_name|slice:":1"|default:user.username|slice:":1"|upper }}</div>
+        {% endif %}
+        <div>
+          <span class="author-name">{{ user.get_full_name|default:user.username }}</span>
+          
+          <!-- Dynamic Category Selector below author name -->
+          <div class="category-select-pill">
+            <i class="fa-solid fa-tag"></i>
+            <select name="category" id="editPostCategorySelect" aria-label="Select post category">
+              {% if dynamic_categories %}
+                {% for cat in dynamic_categories %}
+                  <option value="{{ cat.name }}">{{ cat.name }}</option>
+                {% endfor %}
+              {% else %}
+                {% for key, label in categories %}
+                  <option value="{{ key }}">{{ label }}</option>
+                {% endfor %}
+              {% endif %}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="post-body-area">
+        <input type="text" name="title" id="editPostTitleInput" class="post-title-input" placeholder="Title / Headline (optional)">
+        <textarea name="content" id="editPostContentInput" rows="4" placeholder="Update your announcement details..." required></textarea>
+        
+        <!-- Live Image Preview Container -->
+        <div id="editImagePreviewWrapper" class="image-preview-container" style="display: none;">
+          <img id="editImagePreviewElement" src="" alt="Post image preview">
+          <button type="button" class="btn-remove-preview" onclick="clearEditSelectedImage()" title="Remove photo" aria-label="Remove image">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Hidden file input for Photo / Media -->
+      <input type="file" name="image" id="editPostImageFileInput" accept="image/*" style="display: none;" onchange="handleEditImageSelection(this)">
+
+      <div class="add-to-post-card">
+        <span class="add-label">Update post media</span>
+        <div class="attachment-icons">
+          <button type="button" class="icon-btn media" title="Replace Photo / Poster" onclick="document.getElementById('editPostImageFileInput').click();" aria-label="Replace Photo">
+            <i class="fa-solid fa-images"></i>
+          </button>
+          <label class="icon-btn pin" title="Pin to top of feed" style="cursor: pointer; margin: 0;" aria-label="Pin to top">
+            <input type="checkbox" name="is_pinned" id="editPostIsPinned" value="1" style="display: none;" onchange="this.parentElement.style.opacity = this.checked ? '1' : '0.5'">
+            <i class="fa-solid fa-thumbtack"></i>
+          </label>
+        </div>
+      </div>
+
+      <div class="post-modal-footer" style="display: flex; gap: 0.75rem;">
+        <button type="button" class="btn btn-secondary" onclick="closeEditPostModal()" style="flex: 1; border-radius: 6px; padding: 0.625rem; font-weight: 600;">
+          Cancel
+        </button>
+        <button type="submit" id="btnEditPostSubmit" class="btn-post-submit" style="flex: 2;">
+          Save Changes
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

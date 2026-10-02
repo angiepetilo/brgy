@@ -1,0 +1,43 @@
+<!-- Right Sidebar Panel (Stats & On-Duty Roster) -->
+<aside class="fb-right-sidebar scrollable-panel" id="fb-right-sidebar">
+    
+    <!-- A. Top Section: 4 Unique Real-Time Stat Cards -->
+    <div class="right-panel-section stats-section">
+        <div class="panel-section-header">
+            <span>KEY BARANGAY METRICS</span>
+        </div>
+
+        <div class="stats-cards-grid">
+            <!-- Stat Card 1 -->
+            <div class="stat-card-item">
+                <div class="stat-label"><i class="fa-solid fa-clock-rotate-left"></i> PENDING DOCUMENT REQUESTS</div>
+                <div class="stat-value">{{ stat_pending_docs_count }}</div>
+                <div class="stat-sub">Unique residents awaiting clearance/certs</div>
+            </div>
+
+            <!-- Stat Card 2 -->
+            <div class="stat-card-item">
+                <div class="stat-label"><i class="fa-solid fa-user-clock"></i> PENDING RESIDENTS APPROVAL</div>
+                <div class="stat-value stat-warning">{{ stat_pending_residents_count }}</div>
+                <div class="stat-sub">Unverified resident registration accounts</div>
+            </div>
+
+            <!-- Stat Card 3 -->
+            <div class="stat-card-item">
+                <div class="stat-label"><i class="fa-solid fa-address-book"></i> TOTAL RESIDENTS</div>
+                <div class="stat-value stat-primary">{{ stat_total_residents_count }}</div>
+                <div class="stat-sub">Verified inhabitants in RBI registry</div>
+            </div>
+
+            <!-- Stat Card 4 -->
+            <div class="stat-card-item">
+                <div class="stat-label"><i class="fa-solid fa-circle-check"></i> TOTAL REQUESTS HANDLED</div>
+                <div class="stat-value stat-success">{{ stat_handled_requests_count }}</div>
+                <div class="stat-sub">Unique residents served with completed certs</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- B. Bottom Section: Staff Roster Component -->
+    {% include 'includes/staff_roster.html' %}
+</aside>

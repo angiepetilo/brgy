@@ -1,0 +1,68 @@
+<!-- Collapsible Left Sidebar -->
+<aside class="fb-left-sidebar" id="fb-left-sidebar">
+    <div class="sidebar-toggle-bar">
+        <button class="btn-sidebar-collapse" id="sidebar-collapse-btn" title="Toggle Sidebar Collapsed/Expanded">
+            <span class="collapse-label-expanded">
+                <i class="fa-solid fa-chevron-left"></i>
+                <span class="collapse-text">Collapse</span>
+            </span>
+            <span class="collapse-label-collapsed">
+                <i class="fa-solid fa-chevron-right"></i>
+                <span class="collapse-text">Expand</span>
+            </span>
+        </button>
+    </div>
+
+    <nav class="sidebar-links-list scrollable-panel">
+        <a href="{% url 'appointments:list' %}" class="sidebar-link-item {% if 'appointment' in request.path %}active{% endif %}" title="Appointments">
+            <i class="fa-solid fa-calendar-check sidebar-icon"></i>
+            <span class="link-label">Appointments</span>
+        </a>
+        <a href="{% url 'chat:inbox' %}" class="sidebar-link-item {% if 'chat' in request.path or 'messages' in request.path %}active{% endif %}" title="Messages">
+            <i class="fa-solid fa-comments sidebar-icon"></i>
+            <span class="link-label">Messages</span>
+            {% if unread_messages_count > 0 %}
+            <span class="badge badge-primary">{{ unread_messages_count }}</span>
+            {% endif %}
+        </a>
+        
+        <!-- Residents (Admin / Staff Only) -->
+        {% if request.user.is_admin_user or request.user.is_kapitan_user %}
+        <a href="{% url 'accounts:residents_tabbed' %}" class="sidebar-link-item {% if 'residents' in request.path or 'approval' in request.path or 'profile' in request.path and not 'settings' in request.path %}active{% endif %}" title="Residents">
+            <i class="fa-solid fa-users sidebar-icon"></i>
+            <span class="link-label">Residents</span>
+            {% if pending_approvals_count > 0 %}
+            <span class="badge badge-warning">{{ pending_approvals_count }}</span>
+            {% endif %}
+        </a>
+        {% endif %}
+
+        <!-- Records Module (Admin: Full database / Resident: Personal records) -->
+        <a href="{% url 'records_hub' %}" class="sidebar-link-item {% if 'records' in request.path or 'blotter' in request.path or 'finance' in request.path %}active{% endif %}" title="Records">
+            <i class="fa-solid fa-folder-open sidebar-icon"></i>
+            <span class="link-label">Records</span>
+        </a>
+
+        {% if request.user.is_superuser %}
+        <a href="/admin/" target="_blank" class="sidebar-link-item admin-item" title="Django Admin">
+            <i class="fa-solid fa-screwdriver-wrench sidebar-icon"></i>
+            <span class="link-label">Django Admin</span>
+            <span class="badge badge-danger">ROOT</span>
+        </a>
+        {% endif %}
+    </nav>
+
+    <div class="sidebar-user-footer">
+        <div class="footer-avatar-initials">
+            {% if request.user.avatar %}
+                <img src="{{ request.user.avatar.url }}" alt="{{ request.user.username }}" style="width: 100%; height: 100%; object-fit: cover;">
+            {% else %}
+                {{ request.user.initials }}
+            {% endif %}
+        </div>
+        <div class="footer-user-details">
+            <div class="footer-username">{{ request.user.get_full_name|default:request.user.username }}</div>
+            <div class="footer-role">{{ request.user.get_role_display|upper }}</div>
+        </div>
+    </div>
+</aside>

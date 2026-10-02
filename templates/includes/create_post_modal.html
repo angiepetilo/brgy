@@ -1,0 +1,79 @@
+<div id="createPostModal" class="modal-backdrop" style="display: none;" onclick="if(event.target === this) closeCreatePostModal();">
+  <div class="post-modal-content" onclick="event.stopPropagation();">
+    
+    <div class="post-modal-header">
+      <h3 class="modal-title">Create Announcement / Post</h3>
+      <button type="button" class="btn-close-modal" onclick="closeCreatePostModal()" aria-label="Close dialog">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <form id="createPostForm" action="{% url 'communications:feed' %}" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="hidden" name="create_post" value="1">
+
+      <div class="post-author-bar">
+        {% if user.avatar %}
+          <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="post-modal-avatar">
+        {% else %}
+          <div class="post-modal-avatar-initial">{{ user.first_name|slice:":1"|default:user.username|slice:":1"|upper }}</div>
+        {% endif %}
+        <div>
+          <span class="author-name">{{ user.get_full_name|default:user.username }}</span>
+          
+          <!-- Dynamic Category Selector below the user's name (replacing Friends / Public) -->
+          <div class="category-select-pill">
+            <i class="fa-solid fa-tag"></i>
+            <select name="category" id="postCategorySelect" aria-label="Select post category">
+              {% if dynamic_categories %}
+                {% for cat in dynamic_categories %}
+                  <option value="{{ cat.name }}">{{ cat.name }}</option>
+                {% endfor %}
+              {% else %}
+                {% for key, label in categories %}
+                  <option value="{{ key }}">{{ label }}</option>
+                {% endfor %}
+              {% endif %}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="post-body-area">
+        <input type="text" name="title" id="postTitleInput" class="post-title-input" placeholder="Title / Headline (optional)">
+        <textarea name="content" id="postContentInput" rows="4" placeholder="What's on your mind, {{ user.first_name|default:user.username }}?" oninput="toggleSubmitButton()" required></textarea>
+        
+        <!-- Live Image Preview Container -->
+        <div id="imagePreviewWrapper" class="image-preview-container" style="display: none;">
+          <img id="imagePreviewElement" src="" alt="Selected attachment preview">
+          <button type="button" class="btn-remove-preview" onclick="clearSelectedImage()" title="Remove photo" aria-label="Remove image">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Hidden file input for Photo / Media -->
+      <input type="file" name="image" id="postImageFileInput" accept="image/*" style="display: none;" onchange="handleImageSelection(this)">
+
+      <div class="add-to-post-card">
+        <span class="add-label">Add to your post</span>
+        <div class="attachment-icons">
+          <button type="button" class="icon-btn media" title="Attach Photo / Poster" onclick="document.getElementById('postImageFileInput').click();" aria-label="Attach Photo">
+            <i class="fa-solid fa-images"></i>
+          </button>
+          <label class="icon-btn pin" title="Pin to top of feed" style="cursor: pointer; margin: 0;" aria-label="Pin to top">
+            <input type="checkbox" name="is_pinned" value="1" style="display: none;" onchange="this.parentElement.style.opacity = this.checked ? '1' : '0.5'">
+            <i class="fa-solid fa-thumbtack"></i>
+          </label>
+        </div>
+      </div>
+
+      <div class="post-modal-footer">
+        <button type="submit" id="btnPostSubmit" class="btn-post-submit" disabled>
+          Post
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

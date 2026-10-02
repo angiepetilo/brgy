@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ announcement.title }} - Barangay Announcements{% endblock %}
+
+
+{% block content %}
+<div style="margin-bottom: 1.5rem;">
+    <a href="{% url 'communications:feed' %}" style="font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; margin-bottom: 0.5rem; text-transform: uppercase;">
+        BACK TO COMMUNITY FEED
+    </a>
+</div>
+
+<div style="display: grid; grid-template-columns: 2.5fr 1fr; gap: 2rem;">
+    <!-- Main Article Body -->
+    <article class="card">
+        {% if announcement.image %}
+        <div style="max-height: 420px; overflow: hidden; background: #e2e8f0;">
+            <img src="{{ announcement.image.url }}" alt="{{ announcement.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+        {% endif %}
+
+        <div class="card-body" style="padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="badge badge-primary">{{ announcement.get_category_display }}</span>
+                    {% if announcement.is_pinned %}
+                    <span class="badge badge-warning" style="font-size: 0.65rem;"><i class="fa-solid fa-thumbtack"></i> PINNED</span>
+                    {% endif %}
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="font-size: 0.75rem; color: #64748b;">Published {{ announcement.created_at|date:"F d, Y at h:i A" }}</span>
+                    {% if request.user.is_admin_user or request.user.is_kapitan_user or request.user.is_staff %}
+                    <div class="post-card-menu-container">
+                        <button type="button" class="post-menu-trigger" onclick="togglePostMenu(event, 'post-detail-menu')" aria-label="Post actions" title="More options">
+                            <i class="fa-solid fa-ellipsis"></i>
+                        </button>
+                        <div id="post-detail-menu" class="post-dropdown-menu">
+                            <a href="{% url 'communications:edit_announcement' announcement.id %}" class="dropdown-item">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit Post
+                            </a>
+                            <form action="{% url 'communications:delete_announcement' announcement.id %}" method="post" style="margin: 0;" onsubmit="return confirm('Are you sure you want to permanently delete this announcement?');">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item danger">
+                                    <i class="fa-solid fa-trash"></i> Delete Post
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <h1 style="font-size: 1.25rem; font-weight: 600; color: #0f172a; margin-bottom: 1rem; line-height: 1.2;">
+                {{ announcement.title }}
+            </h1>
+
+            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #e2e8f0;">
+                By <strong>{{ announcement.author.get_full_name|default:announcement.author.username|default:"Barangay Hall Admin" }}</strong>
+            </div>
+
+            <!-- Rendered Markdown Content -->
+            <div class="announcement-content" style="line-height: 1.8; color: #334155; font-size: 1rem;">
+                {{ announcement.rendered_html|safe }}
+            </div>
+
+            {% if request.user.is_admin_user or request.user.is_kapitan_user or request.user.is_staff %}
+            <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0;">
+                <a href="{% url 'communications:edit_announcement' announcement.id %}" class="btn btn-secondary btn-sm">
+                    EDIT POST
+                </a>
+                <form action="{% url 'communications:delete_announcement' announcement.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to permanently delete this announcement?');">
+                        DELETE
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </article>
+
+    <!-- Sidebar: Other Notices -->
+    <div>
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="font-size: 1rem;">Other Bulletins</h3>
+            </div>
+            <div class="card-body">
+                {% if recent_others %}
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    {% for item in recent_others %}
+                    <div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
+                        <span style="font-size: 0.75rem; color: #94a3b8;">{{ item.created_at|date:"M d, Y" }}</span>
+                        <h4 style="font-size: 0.9rem; font-weight: 700; margin: 0.2rem 0;">
+                            <a href="{% url 'communications:announcement_detail' item.id %}" style="color: #0f172a;">
+                                {{ item.title }}
+                            </a>
+                        </h4>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p style="font-size: 0.85rem; color: #94a3b8;">No other bulletins available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{% static 'js/post_modal.js' %}"></script>
+{% endblock %}
+

@@ -1,0 +1,2815 @@
+@import "variables";
+@import "components/roster";
+@import "components/tables";
+@import "components/chat";
+@import "components/post_modal";
+
+// ==========================================
+// Base Reset & Typography (Pure Flat Design)
+// ==========================================
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+body {
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  line-height: $line-height-normal;
+  color: $secondary-800;
+  background-color: $main-bg;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: $primary-500;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.1s ease;
+  &:hover {
+    color: $primary-700;
+  }
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+// ==========================================
+// Modern Flat Vector Icon System & Alignment
+// ==========================================
+i[class*="fa-"], .fa-solid, .fa-regular, .fa-brands {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  vertical-align: middle;
+  color: inherit;
+}
+
+// Flat alignment for interactive elements containing vector icons
+.btn,
+.btn-flat,
+.btn-top-action,
+.top-nav-pill,
+.sidebar-link-item,
+.bottom-nav-item,
+.reaction-btn,
+.settings-nav-item,
+.panel-section-header,
+.stat-label,
+.drawer-header-title {
+  display: inline-flex;
+  align-items: center;
+  gap: $icon-gap;
+
+  i[class*="fa-"], .fa-solid, .fa-regular, .fa-brands {
+    color: inherit;
+  }
+}
+
+// ==========================================
+// Hover-Only Scrollbars & Tooltips (Facebook Web UI)
+// ==========================================
+/* Hide scrollbar by default, reveal subtle overlay track on hover */
+.scrollable-panel {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.3s ease;
+
+  &:hover {
+    scrollbar-color: #CBD5E1 transparent;
+  }
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 4px;
+  }
+  &:hover::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+  }
+}
+
+// Custom CSS Tooltips for Icon-Only Navigation
+[data-tooltip] {
+  position: relative;
+
+  &::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: rgba(15, 23, 42, 0.9);
+    color: #FFFFFF;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.25rem 0.55rem;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    z-index: 1200;
+    line-height: 1.2;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  &:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+// ==========================================
+// Layout Wrapper
+// ==========================================
+.app-wrapper {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+// Sidebar - Pure Flat Dark Navy
+.sidebar {
+  width: $sidebar-width;
+  background: $sidebar-bg;
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1000;
+  border-right: 1px solid #2d3748;
+  transition: transform 0.2s ease-in-out;
+
+  .sidebar-header {
+    height: $topbar-height;
+    display: flex;
+    align-items: center;
+    padding: 0 1.5rem;
+    border-bottom: 1px solid #2d3748;
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 800;
+      font-size: 1rem;
+      color: #ffffff;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+
+      .brand-badge {
+        background: $primary-500;
+        color: #ffffff;
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 0.2rem 0.45rem;
+        border-radius: 2px;
+        letter-spacing: 0.08em;
+      }
+    }
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+
+    .nav-label {
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.6;
+      color: #94a3b8;
+      padding: 0.75rem 0.85rem 0.25rem;
+      font-weight: 700;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.45rem 0.85rem;
+      color: #94a3b8;
+      font-weight: 500;
+      font-size: 0.8125rem;
+      border-left: 4px solid transparent;
+      transition: all 0.1s ease;
+
+      &:hover {
+        background: #242f3e;
+        color: #ffffff;
+      }
+
+      &.active {
+        background: #242f3e;
+        color: #ffffff;
+        font-weight: 700;
+        border-left: 4px solid $primary-500;
+      }
+
+      .badge-counter {
+        background: $danger;
+        color: #ffffff;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        padding: 0.1rem 0.45rem;
+        border-radius: 2px;
+      }
+    }
+  }
+
+  .sidebar-footer {
+    padding: 0.75rem 0.85rem;
+    border-top: 1px solid #2d3748;
+    background: #141b24;
+
+    .user-profile-badge {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+
+      .info {
+        flex: 1;
+        overflow: hidden;
+        .name {
+          font-size: 0.8125rem;
+          font-weight: 700;
+          color: #f8fafc;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .role {
+          font-size: 0.6875rem;
+          color: #64748b;
+          text-transform: uppercase;
+          font-weight: 600;
+          letter-spacing: 0.05em;
+        }
+      }
+
+      .btn-logout {
+        background: #242f3e;
+        border: 1px solid #334155;
+        color: #cbd5e1;
+        font-size: 0.725rem;
+        font-weight: 700;
+        padding: 0.35rem 0.65rem;
+        border-radius: 2px;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        &:hover {
+          background: $danger;
+          border-color: $danger;
+          color: #ffffff;
+        }
+      }
+    }
+  }
+}
+
+// Main Content
+.main-wrapper {
+  margin-left: $sidebar-width;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: calc(100% - #{$sidebar-width});
+
+  &.full-width, &.no-sidebar {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+.d-none {
+  display: none !important;
+}
+
+// Topbar - Pure Flat
+.topbar {
+  height: $topbar-height;
+  background: #ffffff;
+  border-bottom: 1px solid $border-color;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 900;
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .mobile-menu-btn {
+      display: none;
+      background: $secondary-100;
+      border: 1px solid $secondary-300;
+      color: $secondary-800;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.4rem 0.75rem;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+// Kapitan Live Status Text Pill (Zero Emojis / Zero Dots)
+.kapitan-status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 2px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+
+  &.on_duty {
+    background: $success-bg;
+    color: #15803d;
+    border-color: $success-border;
+  }
+
+  &.on_leave {
+    background: $warning-bg;
+    color: #c2410c;
+    border-color: $warning-border;
+  }
+}
+
+// Notification Text Button & Dropdown
+.notification-bell-container {
+  position: relative;
+
+  .btn-notification-text {
+    background: #ffffff;
+    border: 1px solid $secondary-300;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: $secondary-800;
+    cursor: pointer;
+    border-radius: 2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    &:hover {
+      background: $secondary-100;
+      border-color: $secondary-400;
+    }
+
+    &.has-unread {
+      background: $danger;
+      border-color: $danger;
+      color: #ffffff;
+    }
+  }
+
+  .notification-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 120%;
+    width: 360px;
+    background: #ffffff;
+    border: 1px solid $secondary-300;
+    border-radius: 2px;
+    z-index: 1050;
+
+    &.show {
+      display: block;
+    }
+
+    .dropdown-header {
+      padding: 0.75rem 1rem;
+      background: $secondary-100;
+      border-bottom: 1px solid $secondary-200;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 0.775rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .dropdown-body {
+      max-height: 320px;
+      overflow-y: auto;
+
+      .notification-item {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid $secondary-200;
+        display: block;
+        transition: background 0.1s;
+
+        &:hover {
+          background: $secondary-50;
+        }
+
+        &.unread {
+          background: #eff6ff;
+          border-left: 3px solid $primary-500;
+        }
+
+        .item-title {
+          font-weight: 700;
+          font-size: 0.8rem;
+          color: $secondary-900;
+          margin-bottom: 0.15rem;
+        }
+
+        .item-desc {
+          font-size: 0.75rem;
+          color: $secondary-600;
+          line-height: 1.35;
+        }
+
+        .item-time {
+          font-size: 0.7rem;
+          color: #94a3b8;
+          margin-top: 0.25rem;
+          text-transform: uppercase;
+          font-weight: 600;
+        }
+      }
+
+      .empty-state {
+        padding: 2rem;
+        text-align: center;
+        color: #94a3b8;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+      }
+    }
+  }
+}
+
+.notification-item-row {
+  transition: background 0.1s ease;
+  &.unread {
+    background: #f8fafc;
+  }
+}
+
+// Main Page Content Area
+.content-container {
+  flex: 1;
+  padding: 1.25rem 1.5rem;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+// Module & Page Headers
+.page-header, .module-header {
+  margin-bottom: 1.25rem;
+
+  .page-title, .module-title, h1 {
+    font-size: $font-size-lg; // 1.25rem (20px)
+    font-weight: 600;
+    color: $secondary-900;
+    line-height: $line-height-tight;
+  }
+
+  .page-subtitle, .module-subtitle, p {
+    font-size: $font-size-sm; // 0.8125rem (13px)
+    color: #64748b;
+    margin-top: 0.2rem;
+    line-height: $line-height-normal;
+  }
+}
+
+h1, .h1 {
+  font-size: $font-size-lg; // 1.25rem (20px)
+  font-weight: 600;
+  color: $secondary-900;
+  line-height: $line-height-tight;
+}
+
+h2, .h2 {
+  font-size: $font-size-md; // 1rem (16px)
+  font-weight: 600;
+  color: $secondary-900;
+  line-height: $line-height-tight;
+}
+
+h3, .h3 {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  color: $secondary-900;
+}
+
+// Flash Messages - Flat Style
+.messages-container {
+  margin-bottom: 1rem;
+
+  .alert {
+    padding: 0.6rem 0.85rem;
+    border-radius: 2px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    border: 1px solid transparent;
+
+    &.alert-success {
+      background: $success-bg;
+      color: #15803d;
+      border-color: $success-border;
+    }
+    &.alert-danger, &.alert-error {
+      background: $danger-bg;
+      color: #b91c1c;
+      border-color: $danger-border;
+    }
+    &.alert-warning {
+      background: $warning-bg;
+      color: #c2410c;
+      border-color: $warning-border;
+    }
+    &.alert-info {
+      background: $info-bg;
+      color: #0369a1;
+      border-color: $info-border;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: $font-size-xs;
+      font-weight: 700;
+      cursor: pointer;
+      color: inherit;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  }
+}
+
+// Cards & Stat Cards - Minimalist Flat White Rounded Cards
+.card, .stat-card {
+  background: $bg-surface;
+  border: 1px solid $border-subtle !important;
+  border-radius: $border-radius-card !important;
+  box-shadow: none !important;
+  overflow: hidden;
+}
+
+.stat-card {
+  padding: 1rem 1.25rem;
+
+  .stat-label {
+    font-size: 0.6875rem; // 11px
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: #64748b;
+  }
+
+  .stat-number, .stat-value {
+    font-size: $font-size-xl; // 1.5rem (24px)
+    font-weight: 800;
+    line-height: $line-height-tight;
+    margin: 0.2rem 0;
+  }
+
+  .stat-subtext, .stat-link {
+    font-size: $font-size-xs;
+    font-weight: 600;
+  }
+}
+
+.card {
+  padding: 1rem 1.25rem;
+
+  &:has(.card-header), &:has(.card-body) {
+    padding: 0;
+  }
+
+  .card-header {
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid $border-subtle;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .card-title {
+      font-size: $font-size-md; // 1rem (16px)
+      font-weight: 700;
+      color: $text-primary;
+      letter-spacing: 0.02em;
+    }
+  }
+
+  .card-body {
+    padding: 1rem 1.25rem;
+  }
+
+  .card-footer {
+    padding: 0.65rem 1.25rem;
+    background: $bg-app;
+    border-top: 1px solid $border-subtle;
+  }
+}
+
+// Buttons - Pure Flat Solids (Zero Gradients / Zero Shadows)
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.775rem;
+  padding: 0.55rem 1rem;
+  border-radius: 2px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: background 0.1s ease, border-color 0.1s ease, color 0.1s ease;
+
+  &.btn-primary {
+    background: $primary-500;
+    color: #ffffff;
+    border-color: $primary-500;
+    &:hover {
+      background: $primary-700;
+      border-color: $primary-700;
+    }
+  }
+
+  &.btn-secondary {
+    background: #ffffff;
+    color: $secondary-800;
+    border-color: $secondary-300;
+    &:hover {
+      background: $secondary-100;
+      border-color: $secondary-400;
+      color: $secondary-900;
+    }
+  }
+
+  &.btn-success {
+    background: $success;
+    color: #ffffff;
+    border-color: $success;
+    &:hover {
+      background: #15803d;
+      border-color: #15803d;
+    }
+  }
+
+  &.btn-danger {
+    background: $danger;
+    color: #ffffff;
+    border-color: $danger;
+    &:hover {
+      background: #b91c1c;
+      border-color: #b91c1c;
+    }
+  }
+
+  &.btn-sm {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.725rem;
+  }
+}
+
+// Status Badges - Pure Flat Text Pills
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 1px solid transparent;
+
+  &.badge-secondary {
+    background: $secondary-100;
+    color: $secondary-700;
+    border-color: $secondary-300;
+  }
+  &.badge-warning {
+    background: $warning-bg;
+    color: #c2410c;
+    border-color: $warning-border;
+  }
+  &.badge-info {
+    background: $info-bg;
+    color: #0369a1;
+    border-color: $info-border;
+  }
+  &.badge-primary {
+    background: $primary-50;
+    color: $primary-700;
+    border-color: $primary-200;
+  }
+  &.badge-success {
+    background: $success-bg;
+    color: #15803d;
+    border-color: $success-border;
+  }
+  &.badge-danger {
+    background: $danger-bg;
+    color: #b91c1c;
+    border-color: $danger-border;
+  }
+}
+
+// Forms - Crisp Flat Inputs
+.form-group {
+  margin-bottom: 0.85rem;
+
+  label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: $font-size-xs;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: $secondary-700;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    font-size: $font-size-sm; // 0.8125rem (13px)
+    font-family: inherit;
+    color: $secondary-900;
+    background-color: #ffffff;
+    border: 1px solid $border-color;
+    border-radius: $radius-input;
+    transition: border-color 0.1s ease;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-500;
+    }
+  }
+
+  textarea.form-control {
+    resize: vertical;
+    min-height: 70px;
+  }
+
+  .form-help {
+    font-size: $font-size-xs;
+    color: #64748b;
+    margin-top: 0.25rem;
+  }
+
+  .form-error {
+    font-size: $font-size-xs;
+    color: $danger;
+    margin-top: 0.25rem;
+    font-weight: 600;
+  }
+}
+
+// Tables - Crisp Lines & Light Neutral Slate Table Headers
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table, .table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: $font-size-sm; // 0.8125rem (13px)
+
+  thead th, th {
+    padding: 0.65rem 0.85rem;
+    background-color: #F1F5F9 !important;
+    color: #475569 !important;
+    font-weight: 600 !important;
+    font-size: 0.75rem; // 12px
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #E2E8F0 !important;
+  }
+
+  td {
+    padding: 0.65rem 0.85rem;
+    background: #FFFFFF;
+    border-bottom: 1px solid #E2E8F0;
+    color: $secondary-800;
+    font-size: 0.8125rem; // 13px
+    vertical-align: middle;
+  }
+
+  tr:hover td {
+    background-color: #F8FAFC;
+  }
+}
+
+// Toast Notifications Container - Pure Flat
+.toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+
+  .toast {
+    pointer-events: auto;
+    width: 340px;
+    background: #ffffff;
+    border: 1px solid $secondary-300;
+    border-left: 4px solid $primary-500;
+    padding: 0.85rem 1rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    border-radius: 2px;
+
+    &.toast-success { border-left-color: $success; }
+    &.toast-warning { border-left-color: $warning; }
+    &.toast-danger { border-left-color: $danger; }
+
+    .toast-content {
+      flex: 1;
+      .toast-title {
+        font-weight: 700;
+        font-size: 0.8rem;
+        margin-bottom: 0.15rem;
+        color: $secondary-900;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .toast-body {
+        font-size: 0.775rem;
+        color: $secondary-600;
+      }
+    }
+
+    .toast-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #94a3b8;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      &:hover { color: $secondary-800; }
+    }
+  }
+}
+
+// Stepper Progress for Appointments - Pure Flat
+.status-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  margin: 1.5rem 0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: $border-color;
+    transform: translateY(-50%);
+    z-index: 1;
+  }
+
+  .step-item {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+
+    .step-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 2px;
+      background: #ffffff;
+      border: 2px solid $secondary-300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.75rem;
+      color: $secondary-600;
+    }
+
+    .step-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: $secondary-600;
+      text-align: center;
+      max-width: 90px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    &.completed {
+      .step-circle {
+        background: $success;
+        border-color: $success;
+        color: #fff;
+      }
+      .step-label {
+        color: $success;
+      }
+    }
+
+    &.active {
+      .step-circle {
+        background: $primary-500;
+        border-color: $primary-500;
+        color: #fff;
+      }
+      .step-label {
+        color: $primary-700;
+        font-weight: 800;
+      }
+    }
+
+    &.rejected {
+      .step-circle {
+        background: $danger;
+        border-color: $danger;
+        color: #fff;
+      }
+      .step-label {
+        color: $danger;
+      }
+    }
+  }
+}
+
+// Chat UI - Pure Flat
+.chat-window {
+  display: flex;
+  flex-direction: column;
+  height: 560px;
+  background: #ffffff;
+  border-radius: 4px;
+  border: 1px solid $border-color;
+  overflow: hidden;
+
+  .chat-header {
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid $border-color;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: $secondary-50;
+
+    .chat-user-info {
+      .chat-name {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: $secondary-900;
+      }
+      .chat-meta {
+        font-size: 0.725rem;
+        color: #64748b;
+      }
+    }
+  }
+
+  .chat-messages {
+    flex: 1;
+    padding: 1.25rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    background: #f8fafc;
+
+    .chat-bubble {
+      max-width: 70%;
+      padding: 0.65rem 0.85rem;
+      border-radius: 3px;
+      font-size: 0.85rem;
+      line-height: 1.4;
+      border: 1px solid transparent;
+
+      .bubble-meta {
+        font-size: 0.675rem;
+        margin-top: 0.25rem;
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+
+      &.sent {
+        align-self: flex-end;
+        background: $primary-500;
+        color: #ffffff;
+        border-color: $primary-500;
+        .bubble-meta { text-align: right; color: #dbe4ff; }
+      }
+
+      &.received {
+        align-self: flex-start;
+        background: #ffffff;
+        color: $secondary-900;
+        border-color: $border-color;
+        .bubble-meta { color: #94a3b8; }
+      }
+    }
+  }
+
+  .chat-composer {
+    padding: 0.85rem 1rem;
+    background: #ffffff;
+    border-top: 1px solid $border-color;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+
+    input {
+      flex: 1;
+      padding: 0.55rem 0.75rem;
+      border: 1px solid $secondary-300;
+      border-radius: 2px;
+      font-size: 0.85rem;
+      outline: none;
+      &:focus {
+        border-color: $primary-500;
+      }
+    }
+  }
+}
+
+// ==========================================
+// Mobile-First Bottom-Nav UI & Modular Drawer Architecture
+// ==========================================
+
+// Global minimum 48px tap target rules for touch elements
+.btn, .btn-flat, .bottom-nav-item, .btn-drawer-menu, .drawer-close-btn {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+// Brand Title in Topbar
+.topbar .topbar-left .brand-title {
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: #0F172A;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+// Topbar MENU [X] Flat Button
+.btn-drawer-menu {
+  background: #0F172A;
+  color: #FFFFFF;
+  border: 1px solid #0F172A;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  min-height: 44px;
+  min-width: 80px;
+  padding: 0.45rem 1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  transition: background 0.1s ease;
+
+  &:hover {
+    background: $primary-500;
+    border-color: $primary-500;
+  }
+
+  .menu-unread-badge {
+    color: #FBBF24;
+    font-weight: 800;
+  }
+}
+
+// ==========================================
+// Bottom Center Navigation Bar (Mobile-First)
+// ==========================================
+.bottom-nav-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: #1B2430;
+  border-top: 2px solid #0F172A;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  z-index: 1000;
+  padding: 0;
+  margin: 0;
+
+  .bottom-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    min-width: 48px;
+    padding: 0.25rem 0.15rem;
+    color: #94A3B8;
+    text-decoration: none;
+    text-align: center;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    transition: background 0.1s ease, color 0.1s ease;
+
+    &:last-child {
+      border-right: none;
+    }
+
+    .bnav-label {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+
+    &:hover {
+      background: #242F3E;
+      color: #FFFFFF;
+    }
+
+    // Solid Flat Accent Background for Active Route
+    &.active {
+      background: #2563EB !important;
+      color: #FFFFFF !important;
+      font-weight: 800;
+
+      .bnav-label {
+        color: #FFFFFF;
+      }
+    }
+  }
+}
+
+// ==========================================
+// Full-Height Slide-Over Drawer Overlay
+// ==========================================
+.drawer-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.65);
+  z-index: 1040;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+
+  &.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.slide-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 420px;
+  max-width: 88vw;
+  background: #FFFFFF;
+  border-left: 2px solid #0F172A;
+  z-index: 1050;
+  transform: translateX(100%);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: none !important;
+
+  &.active {
+    transform: translateX(0);
+  }
+
+  .drawer-header {
+    height: 56px;
+    background: #1B2430;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.25rem;
+    border-bottom: 2px solid #0F172A;
+    flex-shrink: 0;
+
+    .drawer-header-title {
+      font-size: 0.8125rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .drawer-close-btn {
+      background: transparent;
+      border: 1px solid #475569;
+      color: #FFFFFF;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.35rem 0.65rem;
+      cursor: pointer;
+      min-height: 36px;
+      min-width: 48px;
+
+      &:hover {
+        background: $danger;
+        border-color: $danger;
+      }
+    }
+  }
+
+  .drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: #F0F2F5;
+
+    .drawer-section-card {
+      background: #FFFFFF;
+      border: 1px solid $border-color;
+      border-radius: $radius-card;
+      padding: 1rem;
+
+      .drawer-card-heading {
+        font-size: 0.75rem;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #0F172A;
+        border-bottom: 1px solid #E2E8F0;
+        padding-bottom: 0.5rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+
+    // Profile Quick-Card
+    .profile-quick-card {
+      .profile-summary-header {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        margin-bottom: 0.75rem;
+
+        .profile-avatar-wrap {
+          width: 54px;
+          height: 54px;
+          background: #1B2430;
+          color: #FFFFFF;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 800;
+          font-size: 1rem;
+          border: 1px solid #334155;
+          flex-shrink: 0;
+
+          .profile-avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+        }
+
+        .profile-summary-info {
+          flex: 1;
+          .profile-name {
+            font-size: 0.9375rem;
+            font-weight: 700;
+            color: #0F172A;
+            line-height: 1.2;
+          }
+          .profile-role {
+            margin-top: 0.2rem;
+          }
+          .profile-duty-badge {
+            margin-top: 0.25rem;
+          }
+        }
+      }
+
+      .profile-status-message-box {
+        background: #F1F5F9;
+        border: 1px solid #E2E8F0;
+        padding: 0.5rem 0.65rem;
+        margin-bottom: 0.75rem;
+
+        .status-title {
+          font-size: 0.65rem;
+          font-weight: 800;
+          color: #64748B;
+          letter-spacing: 0.05em;
+          display: block;
+        }
+        .status-text {
+          font-size: 0.8125rem;
+          color: #334155;
+          font-style: italic;
+          margin: 0.15rem 0 0 0;
+        }
+      }
+
+      .profile-quick-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+
+        .btn-flat {
+          padding: 0.4rem 0.75rem;
+          font-size: 0.75rem;
+          font-weight: 700;
+          text-decoration: none;
+          min-height: 40px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .btn-flat-primary {
+          background: #2563EB;
+          color: #FFFFFF;
+          border: 1px solid #2563EB;
+          &:hover { background: #1D4ED8; }
+        }
+        .btn-flat-danger {
+          background: #DC2626;
+          color: #FFFFFF;
+          border: 1px solid #DC2626;
+          cursor: pointer;
+          &:hover { background: #B91C1C; }
+        }
+      }
+    }
+
+    // Tasks To-Do
+    .tasks-card {
+      .tasks-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .task-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0.5rem 0.65rem;
+          background: #F8FAFC;
+          border: 1px solid #E2E8F0;
+          text-decoration: none;
+          color: inherit;
+
+          &:hover {
+            background: #EFF6FF;
+            border-color: #2563EB;
+          }
+
+          .task-info {
+            flex: 1;
+            .task-name {
+              font-size: 0.8125rem;
+              font-weight: 700;
+              color: #0F172A;
+              margin-top: 0.15rem;
+            }
+            .task-sub {
+              font-size: 0.7rem;
+              color: #64748B;
+            }
+          }
+
+          .task-action-btn {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #2563EB;
+          }
+        }
+      }
+      .empty-state-text {
+        font-size: 0.75rem;
+        color: #94A3B8;
+        font-style: italic;
+        padding: 0.5rem 0;
+      }
+    }
+
+    // Notification Center
+    .notifs-card {
+      .drawer-notifs-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .drawer-notif-row {
+          padding: 0.6rem 0.65rem;
+          background: #F8FAFC;
+          border: 1px solid #E2E8F0;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 0.5rem;
+
+          .notif-text-col {
+            flex: 1;
+            .notif-title-text {
+              font-size: 0.8125rem;
+              font-weight: 700;
+              color: #0F172A;
+            }
+            .notif-body-text {
+              font-size: 0.75rem;
+              color: #475569;
+              margin: 0.15rem 0;
+              line-height: 1.3;
+            }
+            .notif-time-text {
+              font-size: 0.65rem;
+              color: #94A3B8;
+            }
+          }
+
+          .notif-btn-col {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+
+            .btn-flat-xs {
+              padding: 0.2rem 0.5rem;
+              font-size: 0.7rem;
+              font-weight: 700;
+              text-align: center;
+              cursor: pointer;
+            }
+            .btn-flat-secondary {
+              background: #E2E8F0;
+              color: #1E293B;
+              border: 1px solid #CBD5E1;
+              text-decoration: none;
+            }
+            .btn-flat-primary {
+              background: #2563EB;
+              color: #FFFFFF;
+              border: 1px solid #2563EB;
+            }
+          }
+        }
+      }
+
+      .drawer-card-footer {
+        margin-top: 0.5rem;
+        text-align: right;
+        .flat-text-link {
+          font-size: 0.75rem;
+          font-weight: 700;
+          color: #2563EB;
+          text-decoration: none;
+        }
+      }
+    }
+
+    // Settings Card
+    .settings-card {
+      .settings-nav-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+
+        .settings-nav-item {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0.65rem 0.75rem;
+          background: #F8FAFC;
+          border: 1px solid #E2E8F0;
+          font-size: 0.8125rem;
+          font-weight: 700;
+          color: #1E293B;
+          text-decoration: none;
+
+          &:hover {
+            background: #EFF6FF;
+            border-color: #2563EB;
+          }
+
+          &.admin-card-item {
+            border: 2px solid #DC2626;
+            background: #FEF2F2;
+            color: #991B1B;
+
+            &:hover {
+              background: #FEE2E2;
+            }
+          }
+
+          .nav-arrow {
+            font-size: 0.75rem;
+            color: #2563EB;
+          }
+        }
+      }
+    }
+
+    .drawer-logout-wrap {
+      margin-top: auto;
+      padding-top: 0.5rem;
+    }
+  }
+}
+
+// ==========================================
+// Responsive Layout Breakpoints
+// ==========================================
+
+// Mobile Viewport (< 1024px)
+@media (max-width: 1023px) {
+  .sidebar {
+    display: none !important;
+  }
+
+  .main-wrapper {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+
+  // Generous clearance for fixed bottom navigation bar
+  .content-container {
+    padding-bottom: 76px !important;
+  }
+
+  .bottom-nav-bar {
+    display: flex !important;
+  }
+}
+
+// Desktop Viewport (>= 1024px)
+@media (min-width: 1024px) {
+  .bottom-nav-bar {
+    display: none !important;
+  }
+
+  .sidebar {
+    display: flex !important;
+    transform: translateX(0) !important;
+  }
+
+  .main-wrapper {
+    margin-left: $sidebar-width;
+    width: calc(100% - #{$sidebar-width});
+  }
+
+  .content-container {
+    padding-bottom: 2rem !important;
+  }
+}
+
+// ========================================================
+// Facebook-Style 3-Column Layout Architecture & Flat Components
+// (Pure Flat Design System - Zero Icons)
+// ========================================================
+
+// 1. Top Bar Navigation System (Modern Facebook Web UI)
+.fb-topbar {
+  height: 56px;
+  background: #FFFFFF;
+  border-bottom: 1px solid $border-color;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: none !important;
+
+  .fb-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+
+    .fb-brand-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: #050505;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      text-decoration: none;
+      white-space: nowrap;
+
+      i {
+        font-size: 1.25rem;
+        color: $accent-primary !important;
+      }
+
+      &:hover {
+        color: $accent-primary;
+      }
+    }
+  }
+
+  .fb-topbar-center {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+    flex: 1;
+    max-width: 580px;
+    height: 100%;
+    margin: 0 1rem;
+
+    .top-nav-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 48px;
+      min-width: 84px;
+      padding: 0 1.25rem;
+      font-size: 1.25rem;
+      color: $text-secondary;
+      background: transparent;
+      border: none;
+      border-radius: $border-radius-card;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      position: relative;
+
+      i {
+        font-size: 1.25rem;
+        color: inherit;
+      }
+
+      &:hover {
+        background: #F1F5F9;
+        color: $text-primary;
+      }
+
+      &.active {
+        color: $accent-primary;
+        background: transparent;
+        border-radius: 0;
+        border-bottom: 3px solid $accent-primary;
+      }
+
+      &.pill-emergency {
+        color: $text-secondary;
+
+        &:hover {
+          background: #FEE2E2;
+          color: #DC2626;
+        }
+
+        &.active {
+          color: #DC2626;
+          border-bottom: 3px solid #DC2626;
+          border-radius: 0;
+        }
+      }
+    }
+  }
+
+  .fb-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+
+    .btn-top-action {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #F1F5F9;
+      color: $text-primary;
+      border: 1px solid $border-subtle;
+      font-size: 1.05rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s ease;
+
+      i {
+        font-size: 1.05rem;
+        color: inherit;
+      }
+
+      .action-count-pill {
+        position: absolute;
+        top: -3px;
+        right: -3px;
+        background: #DC2626;
+        color: #FFFFFF;
+        font-size: 0.65rem;
+        font-weight: 800;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 4px;
+        border-radius: 9px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #FFFFFF;
+        line-height: 1;
+      }
+
+      &:hover {
+        background: #E2E8F0;
+        color: $accent-primary;
+      }
+
+      &.has-badge {
+        background: #F1F5F9;
+        color: $text-primary;
+      }
+
+      &.btn-top-profile {
+        background: #F1F5F9;
+        color: $text-primary;
+        font-size: 1.15rem;
+
+        &:hover {
+          background: #E2E8F0;
+          color: $accent-primary;
+        }
+      }
+    }
+  }
+}
+
+// 2. Facebook 3-Column Layout Container
+.fb-main-container {
+  display: grid;
+  grid-template-columns: 240px 1fr 300px;
+  gap: 1.5rem;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 2rem 1rem;
+  align-items: start;
+  min-height: calc(100vh - 56px);
+  transition: grid-template-columns 0.2s ease;
+
+  &.sidebar-collapsed {
+    grid-template-columns: $sidebar-rail-width 1fr 300px;
+  }
+}
+
+// 3. Collapsible Left Sidebar
+.fb-left-sidebar {
+  background: #FFFFFF;
+  border: 1px solid $border-color;
+  border-radius: $radius-card;
+  position: sticky;
+  top: 72px;
+  max-height: calc(100vh - 88px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width 0.2s ease, min-width 0.2s ease;
+  width: 240px;
+
+  .sidebar-toggle-bar {
+    padding: 0.5rem 0.75rem;
+    background: #FFFFFF;
+    border-bottom: 1px solid $border-color;
+    border-radius: $radius-card $radius-card 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .btn-sidebar-collapse {
+      width: 100%;
+      padding: 0.35rem 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      background: $bg-app;
+      border: 1px solid $border-subtle;
+      color: $text-primary;
+      text-transform: uppercase;
+      cursor: pointer;
+      text-align: center;
+      border-radius: $border-radius-card;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+
+      &:hover {
+        background: $accent-primary;
+        color: #FFFFFF;
+        border-color: $accent-primary;
+      }
+
+      .collapse-label-expanded {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+      .collapse-label-collapsed {
+        display: none;
+      }
+    }
+  }
+
+  .sidebar-links-list {
+    padding: 0.5rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow-y: auto;
+    flex: 1;
+
+    .sidebar-link-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.55rem 0.85rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: #334155;
+      text-decoration: none;
+      border-left: 3px solid transparent;
+      transition: all 0.15s ease;
+      gap: 0.5rem;
+
+      .sidebar-icon {
+        width: 18px;
+        text-align: center;
+        font-size: 0.875rem;
+        color: #64748B;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.15s ease;
+      }
+
+      &:hover {
+        background: #F1F5F9;
+        color: #0F172A;
+        .sidebar-icon {
+          color: #0F172A;
+        }
+      }
+
+      &.active {
+        background: #EFF6FF;
+        color: #2563EB;
+        border-left-color: #2563EB;
+        font-weight: 700;
+        .sidebar-icon {
+          color: #2563EB;
+        }
+      }
+
+      &.admin-item {
+        color: #DC2626;
+        .sidebar-icon {
+          color: #DC2626;
+        }
+
+        &:hover {
+          background: #FEF2F2;
+          color: #991B1B;
+          .sidebar-icon {
+            color: #991B1B;
+          }
+        }
+
+        &.active {
+          border-left-color: #DC2626;
+        }
+      }
+
+      .link-label {
+        display: inline-block;
+        flex: 1;
+      }
+    }
+
+    .sidebar-divider {
+      height: 1px;
+      background: #E2E8F0;
+      margin: 0.5rem 0.75rem;
+    }
+  }
+
+  .sidebar-user-footer {
+    padding: 0.65rem 0.85rem;
+    background: #F8FAFC;
+    border-top: 1px solid #E2E8F0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .footer-avatar-initials {
+      font-size: 0.75rem;
+      font-weight: 800;
+      background: #1B2430;
+      color: #FFFFFF;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #334155;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .footer-user-details {
+      flex: 1;
+      overflow: hidden;
+
+      .footer-username {
+        font-size: 0.8125rem;
+        font-weight: 700;
+        color: #0F172A;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .footer-role {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        color: #64748B;
+        text-transform: uppercase;
+      }
+    }
+  }
+
+  // Collapsed Sidebar State (Only vector icons in a 48px rail)
+  &.collapsed {
+    width: $sidebar-rail-width;
+    min-width: $sidebar-rail-width;
+
+    .sidebar-toggle-bar {
+      padding: 0.5rem 0.15rem;
+
+      .btn-sidebar-collapse {
+        padding: 0.35rem 0.1rem;
+        font-size: 0.75rem;
+
+        .collapse-label-expanded {
+          display: none;
+        }
+        .collapse-label-collapsed {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+        }
+        .collapse-text {
+          display: none !important;
+        }
+      }
+    }
+
+    .sidebar-links-list {
+      .sidebar-link-item {
+        padding: 0.75rem 0;
+        justify-content: center;
+        text-align: center;
+        border-left: none;
+        border-bottom: 2px solid transparent;
+
+        &.active {
+          border-bottom-color: #2563EB;
+          background: #EFF6FF;
+          .sidebar-icon {
+            color: #2563EB;
+          }
+        }
+
+        .sidebar-icon {
+          font-size: 1.15rem;
+          width: 100%;
+          margin: 0 auto;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .link-label {
+          display: none !important;
+          opacity: 0;
+        }
+
+        .badge {
+          display: none !important;
+        }
+      }
+    }
+
+    .sidebar-user-footer {
+      justify-content: center;
+      padding: 0.5rem 0;
+
+      .footer-user-details {
+        display: none !important;
+      }
+    }
+  }
+}
+
+// 4. Center Content Column
+.fb-center-content {
+  min-width: 0;
+  width: 100%;
+
+  &.full-width {
+    max-width: 760px;
+    margin: 0 auto;
+    grid-column: 1 / -1;
+  }
+}
+
+// 5. Right Sidebar Panel (Stats & On-Duty Roster)
+.fb-right-sidebar {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  position: sticky;
+  top: 72px;
+  max-height: calc(100vh - 88px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  .right-panel-section.stats-section {
+    background: #FFFFFF;
+    border: 1px solid $border-subtle;
+    border-radius: $border-radius-card;
+    padding: 1rem;
+  }
+
+  .panel-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #050505;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid $border-color;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .stats-cards-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .stat-card-item {
+      background: #F0F2F5;
+      border: 1px solid $border-color;
+      padding: 0.75rem 0.85rem;
+      border-radius: $radius-card;
+      transition: border-color 0.15s ease, background 0.15s ease;
+
+      &:hover {
+        border-color: #1877F2;
+        background: #FFFFFF;
+      }
+
+      .stat-label {
+        font-size: 0.6875rem;
+        font-weight: 800;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        line-height: 1.25;
+        margin-bottom: 0.25rem;
+      }
+
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #0F172A;
+        line-height: 1.1;
+        margin-bottom: 0.2rem;
+
+        &.stat-warning {
+          color: #D97706;
+        }
+
+        &.stat-primary {
+          color: #1877F2;
+        }
+
+        &.stat-success {
+          color: #16A34A;
+        }
+      }
+
+      .stat-sub {
+        font-size: 0.6875rem;
+        color: #64748B;
+        line-height: 1.3;
+      }
+    }
+  }
+
+  .officers-roster-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .officer-roster-item {
+      background: #F0F2F5;
+      border: 1px solid $border-color;
+      padding: 0.65rem 0.75rem;
+      border-radius: $radius-card;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+
+      .officer-top-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        .officer-avatar-initials {
+          font-size: 0.75rem;
+          font-weight: 800;
+          background: #1B2430;
+          color: #FFFFFF;
+          padding: 2px 5px;
+          border: 1px solid #334155;
+          flex-shrink: 0;
+        }
+
+        .officer-identity {
+          flex: 1;
+          overflow: hidden;
+
+          .officer-fullname {
+            font-size: 0.8125rem;
+            font-weight: 700;
+            color: #0F172A;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+
+          .officer-role-sub {
+            font-size: 0.6875rem;
+            font-weight: 700;
+            color: #64748B;
+            text-transform: uppercase;
+          }
+        }
+      }
+
+      .officer-status-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+
+        .tag-on-duty {
+          background: #DCFCE7;
+          color: #166534;
+          border: 1px solid #16A34A;
+          font-weight: 800;
+          font-size: 0.7rem;
+          padding: 2px 6px;
+        }
+
+        .btn-message-staff {
+          display: inline-block;
+          background: #2563EB;
+          color: #FFFFFF;
+          font-size: 0.7rem;
+          font-weight: 800;
+          padding: 3px 8px;
+          border: 1px solid #2563EB;
+          border-radius: 2px;
+          text-decoration: none;
+          text-transform: uppercase;
+
+          &:hover {
+            background: #1D4ED8;
+            color: #FFFFFF;
+          }
+        }
+
+        .tag-on-leave {
+          background: #FFEDD5;
+          color: #9A3412;
+          border: 1px solid #EA580C;
+          font-weight: 800;
+          font-size: 0.7rem;
+          padding: 2px 6px;
+        }
+
+        .tag-absent {
+          background: #F1F5F9;
+          color: #475569;
+          border: 1px solid #94A3B8;
+          font-weight: 800;
+          font-size: 0.7rem;
+          padding: 2px 6px;
+        }
+      }
+
+      .roster-leave-details {
+        width: 100%;
+        font-size: 0.6875rem;
+        color: #9A3412;
+        background: #FFF7ED;
+        padding: 0.35rem 0.5rem;
+        border: 1px solid #FED7AA;
+        border-radius: 2px;
+
+        .roster-return-date {
+          font-weight: 700;
+        }
+        .roster-leave-reason {
+          margin-top: 0.15rem;
+          font-style: italic;
+        }
+      }
+
+      .officer-status-msg {
+        font-size: 0.7rem;
+        color: #475569;
+        font-style: italic;
+        padding: 0.2rem 0.4rem;
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 2px;
+      }
+    }
+
+    .empty-roster-note {
+      font-size: 0.75rem;
+      color: #94A3B8;
+      font-style: italic;
+      text-align: center;
+      padding: 0.75rem;
+    }
+  }
+}
+
+// 6. Responsive Breakpoints for Facebook Layout
+@media (max-width: 1199px) {
+  .fb-main-container {
+    grid-template-columns: 200px 1fr 260px;
+    gap: 1rem;
+
+    &.sidebar-collapsed {
+      grid-template-columns: $sidebar-rail-width 1fr 260px;
+    }
+  }
+}
+
+@media (max-width: 1023px) {
+  .fb-topbar {
+    .fb-topbar-center {
+      display: none;
+    }
+  }
+
+  .fb-main-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 1rem 0.75rem 80px 0.75rem;
+
+    .fb-left-sidebar {
+      position: static;
+      width: 100%;
+      max-height: none;
+
+      &.collapsed {
+        width: 100%;
+        .link-label { display: inline-block !important; }
+        .link-compact { display: none !important; }
+        .sidebar-links-list .sidebar-link-item {
+          justify-content: space-between;
+          padding: 0.55rem 0.85rem;
+        }
+        .sidebar-user-footer .footer-user-details {
+          display: block !important;
+        }
+      }
+    }
+
+    .fb-right-sidebar {
+      position: static;
+      width: 100%;
+      max-height: none;
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .fb-topbar {
+    padding: 0 0.75rem;
+
+    .fb-brand-title {
+      font-size: 0.85rem;
+    }
+
+    .kapitan-status-pill {
+      font-size: 0.65rem;
+      padding: 0.2rem 0.4rem;
+    }
+
+    .fb-topbar-right {
+      .btn-top-action:not(.btn-top-profile) {
+        display: none;
+      }
+    }
+  }
+}
+
+/* =========================================================
+   Facebook-Style Floating Action Dropdowns
+   ========================================================= */
+.fb-nav-dropdown-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.fb-dropdown-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 360px;
+  max-height: 85vh;
+  background: #FFFFFF;
+  border-radius: 8px;
+  border: 1px solid #E4E6EB;
+  box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  z-index: 2100;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+
+  &.show {
+    display: flex;
+    animation: fbDropdownIn 0.15s ease-out forwards;
+  }
+}
+
+@keyframes fbDropdownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fb-dropdown-header {
+  padding: 12px 16px 8px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .fb-dropdown-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #050505;
+    letter-spacing: -0.02em;
+  }
+
+  .fb-dropdown-header-actions {
+    display: flex;
+    gap: 8px;
+
+    .fb-icon-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: #65676B;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 0.95rem;
+
+      &:hover {
+        background: #F0F2F5;
+        color: #050505;
+      }
+    }
+  }
+}
+
+.fb-dropdown-search-wrap {
+  margin: 4px 16px 8px 16px;
+  background: #F0F2F5;
+  border-radius: 20px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  i {
+    color: #65676B;
+    font-size: 0.85rem;
+  }
+
+  input {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 0.875rem;
+    width: 100%;
+    color: #050505;
+
+    &::placeholder {
+      color: #65676B;
+    }
+  }
+}
+
+.fb-dropdown-tabs {
+  padding: 4px 16px 8px 16px;
+  display: flex;
+  gap: 8px;
+
+  .fb-tab-pill {
+    border: none;
+    background: transparent;
+    color: #65676B;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border-radius: 18px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: #F0F2F5;
+    }
+
+    &.active {
+      background: #E7F3FF;
+      color: #1877F2;
+    }
+  }
+}
+
+.fb-dropdown-list {
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 4px 8px;
+
+  .fb-group-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 8px 4px 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #050505;
+
+    .fb-group-action {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #1877F2;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .fb-chat-item, .fb-notif-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.15s ease;
+    cursor: pointer;
+
+    &:hover {
+      background: #F2F2F2;
+    }
+
+    .fb-avatar-wrap {
+      position: relative;
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+
+      .fb-avatar-img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      .fb-avatar-initials {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: #2563EB;
+        color: #FFFFFF;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+      }
+
+      .fb-online-dot {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        width: 12px;
+        height: 12px;
+        background: #31A24C;
+        border-radius: 50%;
+        border: 2px solid #FFFFFF;
+      }
+
+      .fb-notif-badge-icon {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: #EFF6FF;
+        color: #2563EB;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+
+        &.muted {
+          background: #F1F5F9;
+          color: #64748B;
+        }
+      }
+    }
+
+    .fb-item-content {
+      flex: 1;
+      min-width: 0;
+
+      .fb-item-name, .fb-item-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #050505;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .fb-item-snippet {
+        font-size: 0.8125rem;
+        color: #65676B;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .fb-item-time {
+        font-size: 0.75rem;
+        color: #8A8D91;
+        margin-top: 2px;
+      }
+    }
+
+    .fb-unread-dot {
+      width: 10px;
+      height: 10px;
+      background: #2563EB;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+  }
+
+  .fb-empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: #65676B;
+
+    i {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      opacity: 0.5;
+    }
+    div {
+      font-size: 0.85rem;
+    }
+  }
+}
+
+.fb-dropdown-footer {
+  padding: 8px 16px;
+  border-top: 1px solid #E4E6EB;
+  text-align: center;
+
+  .fb-footer-link {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1877F2;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+/* Profile Dropdown Specifics */
+.fb-profile-dropdown {
+  width: 320px;
+  padding: 8px;
+
+  .fb-profile-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    background: #FFFFFF;
+    margin-bottom: 8px;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: #F2F2F2;
+    }
+
+    .fb-profile-avatar-box {
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+
+      .fb-avatar-img, .fb-avatar-initials {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+      }
+      .fb-avatar-initials {
+        background: #2563EB;
+        color: #FFFFFF;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+      }
+    }
+
+    .fb-profile-header-info {
+      flex: 1;
+      .fb-profile-name {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #050505;
+      }
+      .fb-profile-sub {
+        font-size: 0.75rem;
+        color: #65676B;
+      }
+    }
+  }
+
+  .fb-dropdown-divider {
+    height: 1px;
+    background: #E4E6EB;
+    margin: 4px 0;
+  }
+
+  .fb-menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .fb-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #050505;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: background 0.15s ease;
+
+      &:hover {
+        background: #F2F2F2;
+      }
+
+      .fb-menu-icon-circle {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #E4E6EB;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        color: #050505;
+      }
+
+      .fb-menu-label {
+        flex: 1;
+      }
+
+      .fb-menu-arrow {
+        color: #65676B;
+        font-size: 0.85rem;
+      }
+    }
+  }
+}
+
+// Unified Standard Page Layout Grid & Alignment
+@import "layout";
+
+

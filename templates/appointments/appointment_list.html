@@ -1,0 +1,1428 @@
+{% extends 'base.html' %}
+
+{% block title %}Appointments & Public Services - Barangay e-Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ==================== MODERN NON-FLAT DESIGN SYSTEM ==================== */
+    .appointment-module-wrapper {
+        padding: 0.5rem 0 2.5rem 0;
+    }
+
+    /* KPI Summary Stats Bar */
+    .stats-grid-modern {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card-modern {
+        background: #FFFFFF;
+        border-radius: 14px;
+        padding: 1.15rem 1.25rem;
+        border: 1px solid #E2E8F0;
+        box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .stat-card-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px -3px rgba(15, 23, 42, 0.08);
+    }
+
+    .stat-icon-box {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    /* 3-Tab Header - Modern Floating Nav Pills */
+    .modern-tabs-nav {
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        background: #F1F5F9;
+        padding: 0.4rem;
+        border-radius: 14px;
+        border: 1px solid #E2E8F0;
+        width: fit-content;
+        flex-wrap: wrap;
+    }
+
+    .tab-pill-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.65rem 1.25rem;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.875rem;
+        color: #475569;
+        text-decoration: none;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .tab-pill-btn:hover {
+        color: #0F172A;
+        background: rgba(255, 255, 255, 0.6);
+    }
+
+    .tab-pill-btn.active {
+        background: #FFFFFF;
+        color: #1D4ED8;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .tab-counter-badge {
+        padding: 0.15rem 0.5rem;
+        border-radius: 9999px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        background: #EFF6FF;
+        color: #2563EB;
+    }
+
+    .tab-pill-btn.active .tab-counter-badge {
+        background: #2563EB;
+        color: #FFFFFF;
+    }
+
+    /* Table Control Toolbar */
+    .table-toolbar-card {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-top-left-radius: 16px;
+        border-top-right-radius: 16px;
+        padding: 1.15rem 1.25rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        border-bottom: 1px solid #F1F5F9;
+    }
+
+    .toolbar-left-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        flex: 1;
+    }
+
+    /* Modern Search Bar */
+    .modern-search-wrapper {
+        position: relative;
+        min-width: 260px;
+        max-width: 340px;
+        flex: 1;
+    }
+
+    .modern-search-wrapper i.search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94A3B8;
+        font-size: 0.9rem;
+        pointer-events: none;
+    }
+
+    .modern-search-input {
+        width: 100%;
+        padding: 0.6rem 1rem 0.6rem 2.5rem;
+        border-radius: 10px;
+        border: 1.5px solid #CBD5E1;
+        background: #F8FAFC;
+        color: #0F172A;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+    }
+
+    .modern-search-input:focus {
+        outline: none;
+        border-color: #2563EB;
+        background: #FFFFFF;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    /* Modern Dropdowns */
+    .modern-filter-select {
+        padding: 0.6rem 2rem 0.6rem 0.9rem;
+        border-radius: 10px;
+        border: 1.5px solid #CBD5E1;
+        background: #F8FAFC url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") no-repeat right 0.75rem center;
+        background-size: 1rem;
+        -webkit-appearance: none;
+        appearance: none;
+        color: #1E293B;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .modern-filter-select:focus {
+        outline: none;
+        border-color: #2563EB;
+        background-color: #FFFFFF;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    /* Add Appointment Button */
+    .btn-add-appointment {
+        background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+        color: #FFFFFF;
+        font-weight: 700;
+        font-size: 0.875rem;
+        padding: 0.65rem 1.25rem;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        text-decoration: none;
+    }
+
+    .btn-add-appointment:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+        background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%);
+        color: #FFFFFF;
+    }
+
+    /* Modern Table Styling */
+    .modern-table-container {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-top: none;
+        border-bottom-left-radius: 16px;
+        border-bottom-right-radius: 16px;
+        overflow-x: auto;
+        box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05);
+    }
+
+    .modern-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        text-align: left;
+    }
+
+    .modern-table th {
+        background: #F8FAFC;
+        color: #475569;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 0.9rem 1.25rem;
+        border-bottom: 1px solid #E2E8F0;
+    }
+
+    .modern-table td {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #F1F5F9;
+        vertical-align: middle;
+        font-size: 0.875rem;
+        color: #1E293B;
+        transition: background 0.15s ease;
+    }
+
+    .modern-table tbody tr:hover td {
+        background: #F8FAFC;
+    }
+
+    .modern-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Action Buttons on the Right Side */
+    .action-col-right {
+        text-align: right;
+    }
+
+    .btn-action-modern {
+        background: #FFFFFF;
+        border: 1.5px solid #CBD5E1;
+        color: #2563EB;
+        font-weight: 700;
+        font-size: 0.8125rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 8px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        text-decoration: none;
+        transition: all 0.15s ease;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .btn-action-modern:hover {
+        background: #EFF6FF;
+        border-color: #2563EB;
+        color: #1D4ED8;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(37, 99, 235, 0.15);
+    }
+
+    /* Vibrant Status Badges - Not Flat */
+    .status-badge-modern {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.3rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .status-submitted {
+        background: #F1F5F9;
+        color: #475569;
+        border: 1px solid #CBD5E1;
+    }
+
+    .status-under_review {
+        background: #FEF3C7;
+        color: #92400E;
+        border: 1px solid #FCD34D;
+    }
+
+    .status-approved_scheduled {
+        background: #E0F2FE;
+        color: #0369A1;
+        border: 1px solid #BAE6FD;
+    }
+
+    .status-ready_for_pickup {
+        background: #F3E8FF;
+        color: #6B21A8;
+        border: 1px solid #E9D5FF;
+    }
+
+    .status-completed {
+        background: #DCFCE7;
+        color: #15803D;
+        border: 1px solid #86EFAC;
+    }
+
+    .status-rejected {
+        background: #FEE2E2;
+        color: #B91C1C;
+        border: 1px solid #FCA5A5;
+    }
+
+    /* Stepper Bar */
+    .stepper-container {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+    }
+
+    .stepper-steps-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .step-node {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .step-circle {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #EFF6FF;
+        color: #2563EB;
+        font-weight: 800;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #BFDBFE;
+    }
+
+    /* ==================== MODERN NON-FLAT POPUP MODALS ==================== */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.72);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 2500;
+        padding: 1.25rem;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        animation: modalFadeIn 0.22s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .modal-container {
+        background: #FFFFFF;
+        border-radius: 20px;
+        width: 100%;
+        max-height: 92vh;
+        overflow-y: auto;
+        box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.15);
+        border: 1px solid #E2E8F0;
+        animation: modalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalSlideUp {
+        from { transform: translateY(24px) scale(0.96); opacity: 0.8; }
+        to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .modal-container-side-by-side {
+        max-width: 860px;
+    }
+
+    .modal-header-bar {
+        padding: 1.25rem 1.6rem;
+        border-bottom: 1px solid #F1F5F9;
+        background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+    }
+
+    .modal-close-btn {
+        background: #F1F5F9;
+        border: 1px solid #E2E8F0;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        font-size: 1rem;
+        color: #64748B;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.18s ease;
+    }
+
+    .modal-close-btn:hover {
+        background: #E2E8F0;
+        color: #0F172A;
+        transform: scale(1.08);
+    }
+
+    /* Category Pill Group (Modern Non-Flat Cards) */
+    .category-pill-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .cat-pill {
+        padding: 0.85rem 1rem;
+        border: 2px solid #E2E8F0;
+        border-radius: 14px;
+        font-weight: 700;
+        font-size: 0.875rem;
+        cursor: pointer;
+        background: #FFFFFF;
+        color: #475569;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .cat-pill:hover {
+        border-color: #93C5FD;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px -2px rgba(37, 99, 235, 0.1);
+    }
+
+    .cat-pill.active {
+        border-color: #2563EB;
+        background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+        color: #1D4ED8;
+        box-shadow: 0 6px 18px rgba(37, 99, 235, 0.18);
+    }
+
+    /* Modern Non-Flat Form Inputs */
+    .form-label-modern {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #334155;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        margin-bottom: 0.35rem;
+    }
+
+    .input-group-modern {
+        position: relative;
+    }
+
+    .input-group-modern i.icon-prefix {
+        position: absolute;
+        left: 0.9rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94A3B8;
+        font-size: 0.9rem;
+        pointer-events: none;
+    }
+
+    .form-control-modern {
+        width: 100%;
+        padding: 0.65rem 0.9rem 0.65rem 2.4rem;
+        border: 1.5px solid #CBD5E1;
+        border-radius: 10px;
+        font-size: 0.875rem;
+        color: #0F172A;
+        background: #FFFFFF;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) inset;
+    }
+
+    .form-control-modern:focus {
+        outline: none;
+        border-color: #2563EB;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="appointment-module-wrapper">
+
+    <!-- Top Header Area -->
+    <div
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="font-size: 1.5rem; font-weight: 800; color: #0F172A; margin: 0; letter-spacing: -0.02em;">
+                Appointment
+            </h1>
+            <p style="color: #64748B; font-size: 0.875rem; margin: 0.25rem 0 0 0;">
+                Manage resident certificates, official clearances, and community health center consultations
+            </p>
+        </div>
+        {% if active_tab == 'appointments' %}
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <button type="button" onclick="openAddAppointmentModal()" class="btn-add-appointment">
+                <i class="fa-solid fa-plus"></i> Book Appointment
+            </button>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- 3-TAB NAVIGATION -->
+    <div class="modern-tabs-nav">
+        <!-- TAB 1: APPOINTMENT -->
+        <a href="{% url 'appointments:list' %}?tab=appointments"
+            class="tab-pill-btn {% if active_tab == 'appointments' %}active{% endif %}">
+            <span>Appointment</span>
+            <span class="tab-counter-badge">{{ appointments.count }}</span>
+        </a>
+
+        <!-- TAB 2: DOCUMENT REQUEST -->
+        <a href="{% url 'appointments:list' %}?tab=documents"
+            class="tab-pill-btn {% if active_tab == 'documents' %}active{% endif %}">
+            <span>Document Request</span>
+            <span class="tab-counter-badge">{{ doc_appointments.count }}</span>
+        </a>
+
+        <!-- TAB 3: HEALTH SERVICES -->
+        <a href="{% url 'appointments:list' %}?tab=health_services"
+            class="tab-pill-btn {% if active_tab == 'health_services' %}active{% endif %}">
+            <span>Health Services</span>
+            <span class="tab-counter-badge">{{ health_services_list.count }}</span>
+        </a>
+    </div>
+
+    {% if active_tab == 'appointments' %}
+    <!-- ==================== TAB 1: APPOINTMENT TAB MODULE ==================== -->
+    <div class="appointment-tab-module">
+        <!-- Table Toolbar: Upper Left Search & Filter Dropdowns -->
+        <div class="table-toolbar-card">
+            <form method="get" action="{% url 'appointments:list' %}" class="toolbar-left-controls"
+                id="appointments-filter-form">
+                <input type="hidden" name="tab" value="appointments">
+
+                <!-- Modern Search Bar Style (Upper Left) -->
+                <div class="modern-search-wrapper">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" name="q" value="{{ search_query }}" class="modern-search-input"
+                        placeholder="Search ref #, applicant, purpose..."
+                        onkeydown="if(event.key==='Enter') this.form.submit()">
+                </div>
+
+                <!-- Modern Filter Dropdown 1: Today, Yesterday, Tomorrow -->
+                <select name="date_filter" class="modern-filter-select" onchange="this.form.submit()">
+                    <option value="">All Schedule Dates</option>
+                    <option value="today" {% if date_filter == 'today' %}selected{% endif %}>📅 Today</option>
+                    <option value="yesterday" {% if date_filter == 'yesterday' %}selected{% endif %}>⏪ Yesterday</option>
+                    <option value="tomorrow" {% if date_filter == 'tomorrow' %}selected{% endif %}>⏩ Tomorrow</option>
+                </select>
+
+                <!-- Modern Filter Dropdown 2: Status -->
+                <select name="status" class="modern-filter-select" onchange="this.form.submit()">
+                    <option value="">All Statuses</option>
+                    {% for code, label in status_choices %}
+                    <option value="{{ code }}" {% if status_filter == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+
+                <!-- Modern Filter Dropdown 3: Service Dropdown -->
+                <select name="service" class="modern-filter-select" onchange="this.form.submit()">
+                    <option value="">All Services</option>
+                    <optgroup label="Document Clearances">
+                        <option value="doc_clearance" {% if service_filter == 'doc_clearance' %}selected{% endif %}>Barangay Clearance</option>
+                        <option value="doc_residency" {% if service_filter == 'doc_residency' %}selected{% endif %}>Certificate of Residency</option>
+                        <option value="doc_indigency" {% if service_filter == 'doc_indigency' %}selected{% endif %}>Certificate of Indigency</option>
+                        <option value="doc_noa" {% if service_filter == 'doc_noa' %}selected{% endif %}>Notice of Award (NOA)</option>
+                    </optgroup>
+                    <optgroup label="Health Center Services">
+                        {% for hs in active_health_services %}
+                        <option value="health_{{ hs.id }}" {% if service_filter == 'health_'|add:hs.id|stringformat:'s' %}selected{% endif %}>{{ hs.name }}</option>
+                        {% endfor %}
+                    </optgroup>
+                </select>
+
+                {% if search_query or date_filter or status_filter or service_filter %}
+                <a href="{% url 'appointments:list' %}?tab=appointments" class="btn btn-sm btn-secondary"
+                    style="font-weight: 700; border-radius: 8px; color: #DC2626;">
+                    <i class="fa-solid fa-xmark"></i> Clear Filters
+                </a>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Appointment Module Table: REF #, APPLICANT, SERVICE, SCHEDULE, STATUS, ACTION -->
+        <div class="modern-table-container">
+            {% if appointments %}
+            {% include 'appointments/table.html' %}
+            {% else %}
+            <!-- Modern Empty State -->
+            <div style="text-align: center; padding: 3.5rem 1.5rem; color: #64748B;">
+                <div
+                    style="width: 56px; height: 56px; border-radius: 50%; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 1rem auto;">
+                    <i class="fa-regular fa-calendar-xmark"></i>
+                </div>
+                <h3 style="font-size: 1.1rem; font-weight: 800; color: #0F172A; margin: 0 0 0.4rem 0;">No Appointments
+                    Found</h3>
+                <p style="font-size: 0.85rem; max-width: 420px; margin: 0 auto 1.25rem auto;">
+                    {% if search_query or date_filter or status_filter or service_filter %}
+                    No appointment records match your applied search and filters. Try clearing filters or searching
+                    another keyword.
+                    {% else %}
+                    There are no appointments registered in the queue yet. Click the button below to schedule an
+                    appointment.
+                    {% endif %}
+                </p>
+                <button type="button" onclick="openAddAppointmentModal()" class="btn-add-appointment">
+                    <i class="fa-solid fa-plus"></i> Add Appointment
+                </button>
+            </div>
+            {% endif %}
+        </div>
+        <div id="fullcalendar-view" style="display: none;"></div>
+    </div>
+
+    {% elif active_tab == 'documents' %}
+    <!-- ==================== TAB 2: DOCUMENTS REQUEST TAB ==================== -->
+    <div class="documents-tab-module">
+        <!-- Document Stepper Bar -->
+        <div class="stepper-container">
+            <div
+                style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #64748B; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
+                DOCUMENT APPLICATION PROCESSING STEPPER
+            </div>
+            <div class="stepper-steps-wrapper">
+                <div class="step-node">
+                    <div class="step-circle">1</div>
+                    <span style="font-weight: 700; font-size: 0.8125rem; color: #0F172A;">Submitted</span>
+                </div>
+                <i class="fa-solid fa-arrow-right" style="color: #CBD5E1; font-size: 0.8rem;"></i>
+                <div class="step-node">
+                    <div class="step-circle" style="background: #FEF3C7; color: #D97706; border-color: #FCD34D;">2</div>
+                    <span style="font-weight: 700; font-size: 0.8125rem; color: #0F172A;">Under Review</span>
+                </div>
+                <i class="fa-solid fa-arrow-right" style="color: #CBD5E1; font-size: 0.8rem;"></i>
+                <div class="step-node">
+                    <div class="step-circle" style="background: #E0F2FE; color: #0284C7; border-color: #BAE6FD;">3</div>
+                    <span style="font-weight: 700; font-size: 0.8125rem; color: #0F172A;">Approved</span>
+                </div>
+                <i class="fa-solid fa-arrow-right" style="color: #CBD5E1; font-size: 0.8rem;"></i>
+                <div class="step-node">
+                    <div class="step-circle" style="background: #F3E8FF; color: #7C3AED; border-color: #E9D5FF;">4</div>
+                    <span style="font-weight: 700; font-size: 0.8125rem; color: #0F172A;">Ready for Pickup</span>
+                </div>
+                <i class="fa-solid fa-arrow-right" style="color: #CBD5E1; font-size: 0.8rem;"></i>
+                <div class="step-node">
+                    <div class="step-circle" style="background: #DCFCE7; color: #16A34A; border-color: #86EFAC;">5</div>
+                    <span style="font-weight: 700; font-size: 0.8125rem; color: #0F172A;">Completed</span>
+                </div>
+            </div>
+        </div>
+
+    <!-- ==================== TAB 2: DOCUMENT REQUEST MODULE ==================== -->
+    <div class="documents-tab-module">
+        <div class="card" style="border: 1px solid #E2E8F0; border-radius: 16px; background: #FFFFFF; padding: 2.5rem 1.5rem; box-shadow: 0 4px 14px rgba(0,0,0,0.04); max-width: 680px; margin: 1rem auto; text-align: center;">
+            <div style="width: 58px; height: 58px; border-radius: 16px; background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); color: #2563EB; display: inline-flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 1.25rem; box-shadow: 0 4px 10px rgba(37,99,235,0.15);">
+                <i class="fa-solid fa-file-circle-plus"></i>
+            </div>
+            <h2 style="font-size: 1.35rem; font-weight: 800; color: #0F172A; margin: 0 0 0.5rem 0;">
+                Document Clearance & Certification Requests
+            </h2>
+            <p style="color: #64748B; font-size: 0.875rem; margin: 0 auto 2rem auto; max-width: 480px; line-height: 1.5;">
+                Submit official applications for resident certifications and clearances directly to the barangay officer in-charge.
+            </p>
+
+            <div>
+                <button type="button" onclick="openAddDocumentModal()" class="btn-add-appointment" style="font-size: 0.95rem; padding: 0.8rem 2rem; border-radius: 10px; margin: 0 auto;">
+                    <i class="fa-solid fa-plus"></i> Add New Document
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {% elif active_tab == 'health_services' %}
+    <!-- ==================== TAB 3: HEALTH SERVICES TAB ==================== -->
+    <div class="health-services-tab-module">
+        <!-- Health Center Header Cards -->
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+                <h2 style="font-size: 1.25rem; font-weight: 800; color: #0F172A; margin: 0;">
+                    Barangay Health Center Consultation Services
+                </h2>
+                <p style="font-size: 0.8125rem; color: #64748B; margin: 0.2rem 0 0 0;">
+                    Available clinic consultations, preventive health check-ups, and dental care
+                </p>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="button" onclick="openAddHealthServiceModal()" class="btn-add-appointment" style="border-radius: 9px;">
+                    <i class="fa-solid fa-plus"></i> Add New Service
+                </button>
+            </div>
+        </div>
+
+        <!-- Health Care Services Catalog Grid -->
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+            {% for svc in health_services_list %}
+            <div class="stat-card-modern" style="flex-direction: column; align-items: flex-start; gap: 0.6rem;">
+                <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span
+                            style="width: 34px; height: 34px; border-radius: 8px; background: #ECFDF5; color: #16A34A; display: flex; align-items: center; justify-content: center; font-size: 0.95rem;">
+                            <i class="fa-solid fa-heart-pulse"></i>
+                        </span>
+                        <strong style="color: #0F172A; font-size: 0.95rem;">{{ svc.name }}</strong>
+                    </div>
+                    {% if svc.is_active %}
+                    <span class="badge badge-success" style="font-size: 0.7rem;">Active</span>
+                    {% else %}
+                    <span class="badge badge-secondary" style="font-size: 0.7rem;">Inactive</span>
+                    {% endif %}
+                </div>
+                <p style="font-size: 0.78rem; color: #64748B; margin: 0; line-height: 1.45; white-space: pre-line;">
+                    {{ svc.description|default:"Available for community residents at the Barangay Health Center." }}
+                </p>
+            </div>
+            {% empty %}
+            <div class="stat-card-modern" style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #64748B;">
+                <div>No health services configured yet. Click <strong>"Add New Service"</strong> to create one.</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% elif active_tab == 'schedule' %}
+    <!-- ==================== TAB 4 (OPTIONAL / INTEGRATION): SCHEDULE & CAPACITY ==================== -->
+    <div class="schedule-tab-module">
+        <div class="table-toolbar-card" style="margin-bottom: 1.5rem; border-radius: 16px;">
+            <div style="font-weight: 800; font-size: 1rem; color: #0F172A;">
+                <i class="fa-solid fa-calendar-day" style="color: #2563EB; margin-right: 0.35rem;"></i>
+                HOURLY SLOT CAPACITY FOR: {{ selected_date|date:"F d, Y" }}
+            </div>
+            <button type="button" onclick="openAddAppointmentModal()" class="btn-add-appointment">
+                <i class="fa-solid fa-plus"></i> Book Appointment
+            </button>
+        </div>
+
+        <div class="stats-grid-modern"
+            style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-bottom: 1.5rem;">
+            {% for slot in hourly_slots %}
+            <div class="stat-card-modern" style="display: block;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                    <div style="font-weight: 800; font-size: 0.9rem; color: #0F172A;">{{ slot.label }}</div>
+                    <span
+                        class="status-badge-modern {% if slot.is_full %}status-rejected{% else %}status-completed{% endif %}"
+                        style="font-size: 0.7rem;">
+                        {% if slot.is_full %}FULL{% else %}{{ slot.available }} SLOTS{% endif %}
+                    </span>
+                </div>
+                <div style="font-size: 0.78rem; color: #64748B;">
+                    Max: <strong>{{ slot.capacity }}</strong> | Booked: <strong>{{ slot.booked }}</strong>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- FullCalendar Canvas Wrapper -->
+        <div class="modern-table-container"
+            style="border-top: 1px solid #E2E8F0; border-radius: 16px; padding: 1.5rem;">
+            <div style="font-weight: 800; font-size: 1rem; color: #0F172A; margin-bottom: 1rem;">
+                <i class="fa-solid fa-calendar-check" style="color: #2563EB; margin-right: 0.35rem;"></i> Interactive
+                Schedule
+            </div>
+            <div id="fullcalendar-view"
+                style="min-height: 480px; background: #FFFFFF; border-radius: 12px; padding: 1rem; border: 1px solid #E2E8F0;">
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- ==================== INTEGRATED MODERN ADD APPOINTMENT POPUP MODAL ==================== -->
+<div id="moduleAddAppointmentModal" class="modal-overlay" style="display: none;">
+    <div class="modal-container modal-container-side-by-side">
+        <!-- Header -->
+        <div class="modal-header-bar">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div
+                    style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);">
+                    <i class="fa-solid fa-calendar-plus"></i>
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0F172A;">Schedule New
+                        Appointment</h3>
+                    <p style="margin: 0; font-size: 0.75rem; color: #64748B;">Select service, date & time slot, and
+                        applicant details</p>
+                </div>
+            </div>
+            <button type="button" class="modal-close-btn" onclick="closeAddAppointmentModal()"><i
+                    class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div style="padding: 1.5rem;" id="modal-form-wrapper">
+            <form id="module-appointment-form" onsubmit="handleModuleAppointmentSubmit(event)">
+                {% csrf_token %}
+
+                <!-- Service Category Selector -->
+                <div style="margin-bottom: 1.15rem;">
+                    <label class="form-label-modern">
+                        <span><i class="fa-solid fa-layer-group" style="color: #2563EB; margin-right: 0.3rem;"></i> 1.
+                            Select Service Category <span style="color: #DC2626;">*</span></span>
+                    </label>
+                    <div class="category-pill-group">
+                        <div class="cat-pill active" id="modal-pill-doc" onclick="switchModalCategory('document')">
+                            <i class="fa-solid fa-file-shield" style="font-size: 1.05rem;"></i>
+                            <div>
+                                <div style="font-weight: 800;">Document Request</div>
+                                <div style="font-size: 0.7rem; font-weight: 500; opacity: 0.85;">Official Clearances
+                                </div>
+                            </div>
+                        </div>
+                        <div class="cat-pill" id="modal-pill-health" onclick="switchModalCategory('healthcare')">
+                            <i class="fa-solid fa-heart-pulse" style="font-size: 1.05rem; color: #16A34A;"></i>
+                            <div>
+                                <div style="font-weight: 800;">Health Center</div>
+                                <div style="font-size: 0.7rem; font-weight: 500; opacity: 0.85;">Consultation & Care
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="category" id="modal-category-input" value="document">
+                </div>
+
+                <!-- Specific Service Selector -->
+                <div id="modal-doc-type-box" style="margin-bottom: 1rem;">
+                    <label class="form-label-modern">
+                        <span><i class="fa-solid fa-certificate" style="color: #2563EB; margin-right: 0.3rem;"></i>
+                            Select Document Type <span style="color: #DC2626;">*</span></span>
+                    </label>
+                    <div class="input-group-modern">
+                        <i class="fa-solid fa-file-contract icon-prefix"></i>
+                        <select name="document_type" id="modal-document-select" class="form-control-modern"
+                            style="padding-left: 2.4rem;">
+                            <option value="clearance">Barangay Clearance</option>
+                            <option value="residency">Certificate of Residency</option>
+                            <option value="indigency">Certificate of Indigency</option>
+                            <option value="noa">Notice of Award (NOA)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="modal-health-type-box" style="display: none; margin-bottom: 1rem;">
+                    <label class="form-label-modern">
+                        <span><i class="fa-solid fa-stethoscope" style="color: #16A34A; margin-right: 0.3rem;"></i>
+                            Select Health Center Service <span style="color: #DC2626;">*</span></span>
+                    </label>
+                    <div class="input-group-modern">
+                        <i class="fa-solid fa-hospital-user icon-prefix"></i>
+                        <select name="healthcare_service" id="modal-healthcare-select" class="form-control-modern"
+                            style="padding-left: 2.4rem;">
+                            {% for svc in active_health_services %}
+                            <option value="{{ svc.id }}">{{ svc.name }}</option>
+                            {% empty %}
+                            <option value="">Dental Cleaning & Oral Care</option>
+                            <option value="">General Medical Consultation</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Date & Time Window -->
+                <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+                    <div>
+                        <label class="form-label-modern">
+                            <span><i class="fa-regular fa-calendar" style="color: #2563EB; margin-right: 0.25rem;"></i>
+                                Select Date <span style="color: #DC2626;">*</span></span>
+                        </label>
+                        <div class="input-group-modern">
+                            <i class="fa-regular fa-calendar-day icon-prefix"></i>
+                            <input type="date" name="preferred_date" id="modal-pref-date" required
+                                class="form-control-modern" style="padding-left: 2.4rem;">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label-modern">
+                            <span><i class="fa-regular fa-clock" style="color: #2563EB; margin-right: 0.25rem;"></i>
+                                Select Time Window <span style="color: #DC2626;">*</span></span>
+                        </label>
+                        <div class="input-group-modern">
+                            <i class="fa-solid fa-clock-rotate-left icon-prefix"></i>
+                            <select name="preferred_time_slot" class="form-control-modern"
+                                style="padding-left: 2.4rem;">
+                                <option value="morning">Morning (8:00 AM - 11:30 AM)</option>
+                                <option value="afternoon">Afternoon (1:00 PM - 4:30 PM)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Applicant Identification: First, Middle, Last Name -->
+                <div style="margin-bottom: 1rem;">
+                    <label class="form-label-modern">
+                        <span><i class="fa-regular fa-id-card" style="color: #2563EB; margin-right: 0.3rem;"></i> 2.
+                            Applicant Full Name <span style="color: #DC2626;">*</span></span>
+                    </label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;">
+                        <div class="input-group-modern">
+                            <i class="fa-solid fa-user icon-prefix"></i>
+                            <input type="text" name="first_name" placeholder="First Name *"
+                                value="{{ request.user.first_name }}" class="form-control-modern" required
+                                style="padding-left: 2.3rem;">
+                        </div>
+                        <div class="input-group-modern">
+                            <i class="fa-regular fa-user icon-prefix"></i>
+                            <input type="text" name="middle_name" placeholder="Middle Name *"
+                                class="form-control-modern" required style="padding-left: 2.3rem;">
+                        </div>
+                        <div class="input-group-modern">
+                            <i class="fa-solid fa-user-tag icon-prefix"></i>
+                            <input type="text" name="last_name" placeholder="Last Name *"
+                                value="{{ request.user.last_name }}" class="form-control-modern" required
+                                style="padding-left: 2.3rem;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Age & Address -->
+                <div style="display: grid; grid-template-columns: 0.7fr 1.3fr; gap: 0.75rem; margin-bottom: 1rem;">
+                    <div>
+                        <label class="form-label-modern">
+                            <span><i class="fa-solid fa-hashtag" style="color: #2563EB; margin-right: 0.25rem;"></i> Age
+                                <span style="color: #DC2626;">*</span></span>
+                        </label>
+                        <div class="input-group-modern">
+                            <i class="fa-solid fa-person icon-prefix"></i>
+                            <input type="number" name="age" min="1" max="120" placeholder="e.g. 28" required
+                                class="form-control-modern" style="padding-left: 2.4rem;">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label-modern">
+                            <span><i class="fa-solid fa-location-dot"
+                                    style="color: #2563EB; margin-right: 0.25rem;"></i> Address <span
+                                    style="color: #DC2626;">*</span></span>
+                        </label>
+                        <div class="input-group-modern">
+                            <i class="fa-solid fa-house-chimney icon-prefix"></i>
+                            <input type="text" name="address" placeholder="House #, Street, Purok..." required
+                                class="form-control-modern" style="padding-left: 2.4rem;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email (Abstract API) & Phone (11 Digits Only) -->
+                <div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 0.75rem; margin-bottom: 1rem;">
+                    <div>
+                        <label class="form-label-modern">
+                            <span><i class="fa-regular fa-envelope" style="color: #2563EB; margin-right: 0.25rem;"></i>
+                                Email Address <span style="color: #DC2626;">*</span></span>
+                        </label>
+                        <div class="input-group-modern">
+                            <i class="fa-solid fa-at icon-prefix"></i>
+                            <input type="email" name="email" id="modal_input_email"
+                                placeholder="active.email@example.com" value="{{ request.user.email }}" required
+                                class="form-control-modern" style="padding-left: 2.4rem;"
+                                onblur="validateModalEmailLive(this.value)">
+                        </div>
+                        <div id="modal-email-feedback"
+                            style="font-size: 0.72rem; margin-top: 0.3rem; min-height: 18px;"></div>
+                    </div>
+                    <div>
+                        <label class="form-label-modern">
+                            <span><i class="fa-solid fa-mobile-screen"
+                                    style="color: #2563EB; margin-right: 0.25rem;"></i> Phone Number <span
+                                    style="color: #DC2626;">*</span></span>
+                            <span style="font-size: 0.65rem; color: #64748B;">11 digits</span>
+                        </label>
+                        <div class="input-group-modern">
+                            <i class="fa-solid fa-phone icon-prefix"></i>
+                            <input type="tel" name="phone_number" id="modal_input_phone" maxlength="11"
+                                placeholder="09XXXXXXXXX" value="{{ request.user.phone_number }}" required
+                                class="form-control-modern" style="padding-left: 2.4rem;"
+                                oninput="enforceModalPhone11Digits(this)">
+                        </div>
+                        <div id="modal-phone-feedback"
+                            style="font-size: 0.72rem; color: #64748B; margin-top: 0.3rem; min-height: 18px;">
+                            Must be 11 digits starting with 09
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Purpose / Symptoms -->
+                <div style="margin-bottom: 1rem;">
+                    <label class="form-label-modern">
+                        <span><i class="fa-regular fa-comment-dots" style="color: #2563EB; margin-right: 0.25rem;"></i>
+                            Purpose or Symptoms / Consultation Notes <span style="color: #DC2626;">*</span></span>
+                    </label>
+                    <textarea name="purpose" rows="2" class="form-control-modern"
+                        style="padding-left: 0.9rem; font-family: inherit; resize: vertical;"
+                        placeholder="Provide the purpose of this appointment..." required></textarea>
+                </div>
+
+                <!-- Error Banner -->
+                <div id="modal-error-banner"
+                    style="display: none; background: #FEF2F2; border: 1.5px solid #FCA5A5; border-radius: 9px; padding: 0.75rem 1rem; margin-bottom: 1rem; color: #991B1B; font-size: 0.8125rem;">
+                    <i class="fa-solid fa-triangle-exclamation" style="color: #DC2626; margin-right: 0.35rem;"></i>
+                    <span id="modal-error-text">Please review your input.</span>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="btn-submit-modal-appointment" class="btn btn-primary"
+                    style="width: 100%; font-weight: 800; min-height: 46px; font-size: 0.95rem; border-radius: 9px; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);">
+                    <i class="fa-solid fa-paper-plane"></i> Book Appointment Now
+                </button>
+            </form>
+        </div>
+
+        <!-- Success Modal Confirmation View -->
+        <div id="modal-success-wrapper" style="display: none; padding: 2.5rem 1.75rem; text-align: center;">
+            <div
+                style="width: 68px; height: 68px; border-radius: 50%; background: #ECFDF5; color: #16A34A; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1.25rem auto; box-shadow: 0 0 0 8px #D1FAE5;">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h2 style="font-size: 1.4rem; font-weight: 800; color: #0F172A; margin: 0 0 0.5rem 0;">
+                Appointment Booked Successfully!
+            </h2>
+            <div style="margin-bottom: 1.25rem;">
+                <span id="modal-success-ref" class="badge badge-primary"
+                    style="font-size: 0.95rem; font-weight: 800; padding: 0.4rem 0.9rem; border-radius: 9999px;">
+                    REF #APT-0000
+                </span>
+            </div>
+
+            <!-- REQUIRED NOTIFICATION NOTICE -->
+            <div
+                style="max-width: 620px; margin: 1.25rem auto; background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); border: 1.5px solid #93C5FD; border-radius: 12px; padding: 1.25rem 1.5rem; text-align: left;">
+                <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+                    <span style="font-size: 1.5rem; color: #2563EB;">
+                        <i class="fa-solid fa-envelope-circle-check"></i>
+                    </span>
+                    <p style="font-size: 0.875rem; line-height: 1.6; color: #1E40AF; margin: 0;">
+                        Wait for the email sent for approved your appointment date. We will notify via email please keep track on you email. Thank you if you have any question please contact <strong>{{ admin_phone|default:"0917-111-2222" }}</strong>.
+                    </p>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: center; gap: 0.75rem; margin-top: 1.5rem;">
+                <button type="button" class="btn btn-secondary" onclick="resetModalForm()"
+                    style="font-weight: 700; min-height: 42px;">
+                    <i class="fa-solid fa-plus"></i> Add Another
+                </button>
+                <button type="button" class="btn btn-primary" onclick="closeAndReload()"
+                    style="font-weight: 700; min-height: 42px; background: #2563EB;">
+                    <i class="fa-solid fa-rotate-right"></i> Refresh Table
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add New Document Request -->
+<div id="addDocumentModal" class="modal-overlay" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.72); display: none; align-items: center; justify-content: center; z-index: 2500; padding: 1.25rem; backdrop-filter: blur(8px);">
+    <div class="modal-container" style="background: #FFFFFF; border-radius: 20px; width: 100%; max-width: 580px; box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.15); border: 1px solid #E2E8F0; overflow: hidden;">
+        <div class="modal-header-bar">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); color: #2563EB; display: inline-flex; align-items: center; justify-content: center; font-size: 1.15rem; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);">
+                    <i class="fa-solid fa-file-circle-plus"></i>
+                </span>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0F172A; letter-spacing: -0.01em;">Add New Document</h3>
+                    <p style="margin: 0.15rem 0 0 0; font-size: 0.78rem; color: #64748B;">Specify clearance type, required documents, and assigning officer</p>
+                </div>
+            </div>
+            <button type="button" class="modal-close-btn" onclick="closeAddDocumentModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form method="post" action="{% url 'appointments:list' %}?tab=documents" style="padding: 1.5rem;">
+            {% csrf_token %}
+            <input type="hidden" name="create_document_request" value="1">
+            <div style="margin-bottom: 1.25rem;">
+                <label class="form-label-modern">
+                    <span><i class="fa-solid fa-file-lines" style="color: #2563EB; margin-right: 0.35rem;"></i> Document Type <span style="color: #DC2626;">*</span></span>
+                </label>
+                <div class="input-group-modern">
+                    <i class="fa-solid fa-file-contract icon-prefix"></i>
+                    <select name="document_type" class="form-control-modern" required style="padding-left: 2.4rem;">
+                        <option value="clearance">Barangay Clearance</option>
+                        <option value="residency">Certificate of Residency</option>
+                        <option value="indigency">Certificate of Indigency</option>
+                        <option value="noa">Notice of Award (NOA)</option>
+                    </select>
+                </div>
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+                <label class="form-label-modern">
+                    <span><i class="fa-solid fa-list-check" style="color: #2563EB; margin-right: 0.35rem;"></i> Requirements Needed <span style="color: #DC2626;">*</span></span>
+                </label>
+                <div class="input-group-modern">
+                    <textarea name="requirements_needed" rows="3" class="form-control-modern" placeholder="Specify requirements needed (e.g. Valid Government ID, Cedula 2026, 6-Month Proof of Residency)..." required style="padding: 0.75rem 0.9rem; line-height: 1.5;"></textarea>
+                </div>
+            </div>
+            <div style="margin-bottom: 1.5rem;">
+                <label class="form-label-modern">
+                    <span><i class="fa-solid fa-user-tie" style="color: #2563EB; margin-right: 0.35rem;"></i> Submit To: Officer In-Charge <span style="color: #DC2626;">*</span></span>
+                </label>
+                <div class="input-group-modern">
+                    <i class="fa-solid fa-user-shield icon-prefix"></i>
+                    <select name="officer_in_charge" class="form-control-modern" required style="padding-left: 2.4rem;">
+                        {% for off in officers %}
+                        <option value="{{ off.id }}">{{ off.get_full_name|default:off.username }} ({{ off.get_role_display }})</option>
+                        {% empty %}
+                        <option value="">Barangay Administration</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; padding-top: 1.25rem; border-top: 1px solid #F1F5F9;">
+                <button type="button" class="btn btn-secondary" onclick="closeAddDocumentModal()" style="font-weight: 600; padding: 0.6rem 1.25rem; border-radius: 10px;">Cancel</button>
+                <button type="submit" class="btn-add-appointment" style="font-size: 0.875rem; padding: 0.65rem 1.4rem;">
+                    <i class="fa-solid fa-paper-plane" style="margin-right: 0.35rem;"></i> Submit Document Request
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Add New Service -->
+<div id="addHealthServiceModal" class="modal-overlay" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.72); display: none; align-items: center; justify-content: center; z-index: 2500; padding: 1.25rem; backdrop-filter: blur(8px);">
+    <div class="modal-container" style="background: #FFFFFF; border-radius: 20px; width: 100%; max-width: 580px; box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.15); border: 1px solid #E2E8F0; overflow: hidden;">
+        <div class="modal-header-bar">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%); color: #16A34A; display: inline-flex; align-items: center; justify-content: center; font-size: 1.15rem; box-shadow: 0 2px 8px rgba(22, 163, 74, 0.15);">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                </span>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0F172A; letter-spacing: -0.01em;">Add New Service</h3>
+                    <p style="margin: 0.15rem 0 0 0; font-size: 0.78rem; color: #64748B;">Register community health consultation or clinic schedule</p>
+                </div>
+            </div>
+            <button type="button" class="modal-close-btn" onclick="closeAddHealthServiceModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form method="post" action="{% url 'appointments:list' %}?tab=health_services" style="padding: 1.5rem;">
+            {% csrf_token %}
+            <input type="hidden" name="create_health_service" value="1">
+            <div style="margin-bottom: 1.25rem;">
+                <label class="form-label-modern">
+                    <span><i class="fa-solid fa-briefcase-medical" style="color: #16A34A; margin-right: 0.35rem;"></i> Name of the Service <span style="color: #DC2626;">*</span></span>
+                </label>
+                <div class="input-group-modern">
+                    <i class="fa-solid fa-stethoscope icon-prefix"></i>
+                    <input type="text" name="name" class="form-control-modern" placeholder="e.g. Tooth Extraction, Dental Cleaning, Infant Consultation" required style="padding-left: 2.4rem;">
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                <div>
+                    <label class="form-label-modern">
+                        <span><i class="fa-regular fa-calendar" style="color: #16A34A; margin-right: 0.35rem;"></i> Date <span style="color: #DC2626;">*</span></span>
+                    </label>
+                    <div class="input-group-modern">
+                        <i class="fa-regular fa-calendar-day icon-prefix"></i>
+                        <input type="date" name="service_date" class="form-control-modern" required style="padding-left: 2.4rem;">
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label-modern">
+                        <span><i class="fa-regular fa-clock" style="color: #16A34A; margin-right: 0.35rem;"></i> Time <span style="color: #DC2626;">*</span></span>
+                    </label>
+                    <div class="input-group-modern">
+                        <i class="fa-solid fa-clock-rotate-left icon-prefix"></i>
+                        <input type="time" name="service_time" class="form-control-modern" required style="padding-left: 2.4rem;">
+                    </div>
+                </div>
+            </div>
+            <div style="margin-bottom: 1.5rem;">
+                <label class="form-label-modern">
+                    <span><i class="fa-solid fa-file-prescription" style="color: #16A34A; margin-right: 0.35rem;"></i> Description / Consultation Details</span>
+                </label>
+                <div class="input-group-modern">
+                    <textarea name="description" rows="3" class="form-control-modern" placeholder="Detailed service coverage or clinic hours notes..." style="padding: 0.75rem 0.9rem; line-height: 1.5;"></textarea>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; padding-top: 1.25rem; border-top: 1px solid #F1F5F9;">
+                <button type="button" class="btn btn-secondary" onclick="closeAddHealthServiceModal()" style="font-weight: 600; padding: 0.6rem 1.25rem; border-radius: 10px;">Cancel</button>
+                <button type="submit" class="btn-add-appointment" style="font-size: 0.875rem; padding: 0.65rem 1.4rem; background: linear-gradient(135deg, #16A34A 0%, #15803D 100%); box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);">
+                    <i class="fa-solid fa-plus" style="margin-right: 0.35rem;"></i> Create Service
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openAddDocumentModal() {
+        document.getElementById('addDocumentModal').style.display = 'flex';
+    }
+    function closeAddDocumentModal() {
+        document.getElementById('addDocumentModal').style.display = 'none';
+    }
+    function openAddHealthServiceModal() {
+        document.getElementById('addHealthServiceModal').style.display = 'flex';
+    }
+    function closeAddHealthServiceModal() {
+        document.getElementById('addHealthServiceModal').style.display = 'none';
+    }
+    function openAddAppointmentModal(docPreset, isHealth, serviceId) {
+        var modal = document.getElementById('moduleAddAppointmentModal');
+        document.getElementById('modal-form-wrapper').style.display = 'block';
+        document.getElementById('modal-success-wrapper').style.display = 'none';
+
+        var dateInput = document.getElementById('modal-pref-date');
+        if (dateInput && !dateInput.value) {
+            var tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            dateInput.value = tomorrow.toISOString().split('T')[0];
+            dateInput.min = new Date().toISOString().split('T')[0];
+        }
+
+        if (isHealth) {
+            switchModalCategory('healthcare');
+            if (serviceId) {
+                document.getElementById('modal-healthcare-select').value = serviceId;
+            }
+        } else {
+            switchModalCategory('document');
+            if (docPreset) {
+                document.getElementById('modal-document-select').value = docPreset;
+            }
+        }
+
+        modal.style.display = 'flex';
+    }
+
+    function closeAddAppointmentModal() {
+        document.getElementById('moduleAddAppointmentModal').style.display = 'none';
+    }
+
+    function closeAndReload() {
+        closeAddAppointmentModal();
+        window.location.reload();
+    }
+
+    function resetModalForm() {
+        document.getElementById('module-appointment-form').reset();
+        document.getElementById('modal-form-wrapper').style.display = 'block';
+        document.getElementById('modal-success-wrapper').style.display = 'none';
+    }
+
+    function switchModalCategory(cat) {
+        var pillDoc = document.getElementById('modal-pill-doc');
+        var pillHealth = document.getElementById('modal-pill-health');
+        var catInput = document.getElementById('modal-category-input');
+        var docBox = document.getElementById('modal-doc-type-box');
+        var healthBox = document.getElementById('modal-health-type-box');
+
+        if (cat === 'document') {
+            pillDoc.classList.add('active');
+            pillHealth.classList.remove('active');
+            catInput.value = 'document';
+            docBox.style.display = 'block';
+            healthBox.style.display = 'none';
+        } else {
+            pillHealth.classList.add('active');
+            pillDoc.classList.remove('active');
+            catInput.value = 'healthcare';
+            docBox.style.display = 'none';
+            healthBox.style.display = 'block';
+        }
+    }
+
+    function enforceModalPhone11Digits(input) {
+        var val = input.value.replace(/[^0-9]/g, '');
+        if (val.length > 11) {
+            val = val.substring(0, 11);
+        }
+        input.value = val;
+
+        var feedback = document.getElementById('modal-phone-feedback');
+        if (val.length === 11) {
+            if (val.startsWith('09')) {
+                feedback.innerHTML = '<span style="color: #16A34A;"><i class="fa-solid fa-check"></i> Valid 11-digit mobile number</span>';
+                input.classList.remove('input-error');
+            } else {
+                feedback.innerHTML = '<span style="color: #DC2626;"><i class="fa-solid fa-xmark"></i> Must start with 09 (e.g. 09171234567)</span>';
+                input.classList.add('input-error');
+            }
+        } else if (val.length > 0) {
+            feedback.innerHTML = '<span style="color: #D97706;">' + val.length + '/11 digits entered</span>';
+        } else {
+            feedback.innerHTML = 'Must be 11 digits starting with 09';
+            input.classList.remove('input-error');
+        }
+    }
+
+    function validateModalEmailLive(email) {
+        var feedback = document.getElementById('modal-email-feedback');
+        var emailInput = document.getElementById('modal_input_email');
+        email = (email || '').trim();
+
+        if (!email) {
+            feedback.innerHTML = '';
+            emailInput.classList.remove('input-error');
+            return;
+        }
+
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            feedback.innerHTML = '<span style="color: #DC2626;"><i class="fa-solid fa-circle-exclamation"></i> Invalid email format</span>';
+            emailInput.classList.add('input-error');
+            return;
+        }
+
+        fetch('/appointments/api/validate-email/?email=' + encodeURIComponent(email))
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data.valid) {
+                    feedback.innerHTML = '';
+                    emailInput.classList.remove('input-error');
+                } else {
+                    feedback.innerHTML = '<span style="color: #DC2626; font-weight: 600;"><i class="fa-solid fa-circle-exclamation"></i> ' + (data.message || 'Invalid email address') + '</span>';
+                    emailInput.classList.add('input-error');
+                }
+            })
+            .catch(function () {
+                feedback.innerHTML = '';
+                emailInput.classList.remove('input-error');
+            });
+    }
+
+    function handleModuleAppointmentSubmit(e) {
+        e.preventDefault();
+        var form = document.getElementById('module-appointment-form');
+        var btn = document.getElementById('btn-submit-modal-appointment');
+        var errBanner = document.getElementById('modal-error-banner');
+        var errText = document.getElementById('modal-error-text');
+
+        var phoneVal = document.getElementById('modal_input_phone').value.replace(/[^0-9]/g, '');
+        if (phoneVal.length !== 11) {
+            errBanner.style.display = 'block';
+            errText.innerText = "Phone number must be exactly 11 digits (e.g. 09171234567).";
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting & Verifying...';
+        errBanner.style.display = 'none';
+
+        var formData = new FormData(form);
+
+        fetch('/appointments/api/public-book/', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+            .then(function (res) {
+                return res.json().then(function (data) { return { ok: res.ok, data: data }; });
+            })
+            .then(function (res) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Book Appointment Now';
+
+                if (res.ok && res.data.status === 'ok') {
+                    document.getElementById('modal-success-ref').innerText = res.data.ref_number || 'REF #APT-NEW';
+                    document.getElementById('modal-form-wrapper').style.display = 'none';
+                    document.getElementById('modal-success-wrapper').style.display = 'block';
+                    form.reset();
+                } else {
+                    errBanner.style.display = 'block';
+                    if (res.data.errors) {
+                        var firstKey = Object.keys(res.data.errors)[0];
+                        errText.innerText = res.data.errors[firstKey];
+                    } else {
+                        errText.innerText = res.data.message || 'Error saving appointment.';
+                    }
+                }
+            })
+            .catch(function () {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Book Appointment Now';
+                errBanner.style.display = 'block';
+                errText.innerText = 'Network error. Please try again.';
+            });
+    }
+
+    document.addEventListener('click', function (e) {
+        var modal = document.getElementById('moduleAddAppointmentModal');
+        if (e.target === modal) closeAddAppointmentModal();
+    });
+</script>
+{% endblock %}

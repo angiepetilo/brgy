@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - Barangay e-Portal{% endblock %}
+
+{% block content %}
+<div class="post-standalone-card-container">
+    
+    <a href="{{ next_url|default:'/communications/' }}" class="post-standalone-back">
+        <i class="fa-solid fa-arrow-left"></i> BACK TO FEED
+    </a>
+
+    <div class="post-modal-content" style="max-width: 100%; border: 1px solid #E2E8F0; box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;">
+        
+        <div class="post-modal-header">
+            <h3 class="modal-title">{% if is_edit %}Edit Announcement / Post{% else %}Create Announcement / Post{% endif %}</h3>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next_url|default:'' }}">
+            <input type="hidden" name="clear_image" id="standaloneClearImageFlag" value="0">
+
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger" style="margin: 1rem 1.25rem 0;">
+                {% for error in form.non_field_errors %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="post-author-bar">
+                {% if user.avatar %}
+                    <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="post-modal-avatar">
+                {% else %}
+                    <div class="post-modal-avatar-initial">{{ user.first_name|slice:":1"|default:user.username|slice:":1"|upper }}</div>
+                {% endif %}
+                <div>
+                    <span class="author-name">{{ user.get_full_name|default:user.username }}</span>
+                    
+                    <!-- Dynamic Category Pill Select -->
+                    <div class="category-select-pill">
+                        <i class="fa-solid fa-tag"></i>
+                        <select name="category" id="standaloneCategorySelect" aria-label="Select post category">
+                            {% if dynamic_categories %}
+                                {% for cat in dynamic_categories %}
+                                    <option value="{{ cat.name }}" {% if announcement and announcement.category_ref == cat or announcement and announcement.category == cat.name|lower %}selected{% endif %}>
+                                        {{ cat.name }}
+                                    </option>
+                                {% endfor %}
+                            {% else %}
+                                {% for key, label in form.fields.category.choices|default:categories %}
+                                    <option value="{{ key }}" {% if form.category.value == key %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="post-body-area">
+                <input type="text" name="title" id="standaloneTitleInput" class="post-title-input" placeholder="Title / Headline (optional)" value="{{ form.title.value|default:'' }}">
+                
+                <textarea name="content" id="standaloneContentInput" rows="5" placeholder="What is the latest announcement or update for the barangay?" required>{{ form.content.value|default:'' }}</textarea>
+                
+                <!-- Live Image Preview Container -->
+                <div id="standaloneImagePreviewWrapper" class="image-preview-container" style="{% if not announcement or not announcement.image %}display: none;{% endif %}">
+                    <img id="standaloneImagePreviewElement" src="{% if announcement and announcement.image %}{{ announcement.image.url }}{% endif %}" alt="Attached media preview">
+                    <button type="button" class="btn-remove-preview" onclick="clearStandaloneImage()" title="Remove photo" aria-label="Remove image">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Hidden file input for Photo / Media -->
+            <input type="file" name="image" id="standaloneImageFileInput" accept="image/*" style="display: none;" onchange="handleStandaloneImage(this)">
+
+            <div class="add-to-post-card">
+                <span class="add-label">Update post media</span>
+                <div class="attachment-icons">
+                    <button type="button" class="icon-btn media" title="Attach / Replace Photo" onclick="document.getElementById('standaloneImageFileInput').click();" aria-label="Attach Photo">
+                        <i class="fa-solid fa-images"></i>
+                    </button>
+                    <label class="icon-btn pin" title="Pin to top of feed" style="cursor: pointer; margin: 0; opacity: {% if form.is_pinned.value %}1{% else %}0.5{% endif %};" aria-label="Pin to top">
+                        <input type="checkbox" name="is_pinned" id="standaloneIsPinned" value="1" {% if form.is_pinned.value %}checked{% endif %} style="display: none;" onchange="this.parentElement.style.opacity = this.checked ? '1' : '0.5'">
+                        <i class="fa-solid fa-thumbtack"></i>
+                    </label>
+                </div>
+            </div>
+
+            <div class="post-modal-footer" style="display: flex; gap: 0.75rem;">
+                <a href="{{ next_url|default:'/feed/' }}" class="btn btn-secondary" style="flex: 1; border-radius: 6px; padding: 0.625rem; font-weight: 600; text-align: center;">
+                    CANCEL
+                </a>
+                <button type="submit" class="btn-post-submit" style="flex: 2;">
+                    {% if is_edit %}SAVE CHANGES{% else %}PUBLISH BROADCAST{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function handleStandaloneImage(fileInput) {
+    const previewWrapper = document.getElementById('standaloneImagePreviewWrapper');
+    const previewImg = document.getElementById('standaloneImagePreviewElement');
+    if (fileInput && fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            if (previewImg && previewWrapper) {
+                previewImg.src = e.target.result;
+                previewWrapper.style.display = 'block';
+            }
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+    }
+}
+
+function clearStandaloneImage() {
+    const fileInput = document.getElementById('standaloneImageFileInput');
+    const previewWrapper = document.getElementById('standaloneImagePreviewWrapper');
+    const previewImg = document.getElementById('standaloneImagePreviewElement');
+    const clearFlag = document.getElementById('standaloneClearImageFlag');
+    if (fileInput) fileInput.value = '';
+    if (previewImg) previewImg.src = '';
+    if (previewWrapper) previewWrapper.style.display = 'none';
+    if (clearFlag) clearFlag.value = '1';
+}
+</script>
+{% endblock %}

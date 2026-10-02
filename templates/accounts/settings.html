@@ -1,0 +1,367 @@
+{% extends 'base.html' %}
+
+{% block title %}Security & Privacy Settings - Barangay e-Portal{% endblock %}
+
+{% block content %}
+<div class="settings-module-container" style="max-width: 860px; margin: 0 auto; padding: 1.5rem 1rem 3rem 1rem;">
+
+    <!-- Page Header -->
+    <div style="margin-bottom: 1.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.25rem;">
+                <span style="width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </span>
+                <h1 style="font-size: 1.4rem; font-weight: 800; color: #0F172A; margin: 0; letter-spacing: -0.01em;">
+                    Security & Privacy Settings
+                </h1>
+            </div>
+            <p style="color: #64748B; font-size: 0.85rem; margin: 0; padding-left: 3.1rem;">
+                Manage your credentials, personal profile, contact information, and active duty roster status.
+            </p>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            {% if user_obj.duty_status == 'on_duty' %}
+            <span class="badge badge-success" style="font-weight: 700; padding: 0.4rem 0.85rem; font-size: 0.75rem; border-radius: 9999px;">
+                <i class="fa-solid fa-circle-check" style="margin-right: 0.3rem;"></i> ON-DUTY
+            </span>
+            {% elif user_obj.duty_status == 'on_leave' %}
+            <span class="badge badge-warning" style="font-weight: 700; padding: 0.4rem 0.85rem; font-size: 0.75rem; border-radius: 9999px;">
+                <i class="fa-solid fa-clock" style="margin-right: 0.3rem;"></i> ON-LEAVE
+            </span>
+            {% else %}
+            <span class="badge badge-danger" style="font-weight: 700; padding: 0.4rem 0.85rem; font-size: 0.75rem; border-radius: 9999px;">
+                <i class="fa-solid fa-circle-xmark" style="margin-right: 0.3rem;"></i> ABSENT
+            </span>
+            {% endif %}
+            <span class="badge badge-primary" style="font-weight: 700; padding: 0.4rem 0.85rem; font-size: 0.75rem; border-radius: 9999px;">
+                {{ user_obj.get_role_display }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Django Admin Backdoor Card (Superuser Guarded) -->
+    {% if is_superuser %}
+    <div class="card" style="margin-bottom: 1.5rem; border: 1.5px solid #FCA5A5; background: #FEF2F2; border-radius: 12px; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.08);">
+        <div style="background: #991B1B; color: #FFFFFF; padding: 0.75rem 1.25rem; border-top-left-radius: 10px; border-top-right-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700; font-size: 0.8rem; letter-spacing: 0.05em; text-transform: uppercase;">
+                <i class="fa-solid fa-screwdriver-wrench" style="margin-right: 0.4rem;"></i> DJANGO SYSTEM ADMINISTRATION
+            </span>
+            <span class="badge badge-danger" style="font-size: 0.65rem; background: #7F1D1D; color: #FEE2E2;">SUPERUSER ONLY</span>
+        </div>
+        <div style="padding: 1.15rem 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <div style="font-weight: 700; font-size: 0.9rem; color: #7F1D1D;">CORE DATABASE & PERMISSIONS ADMIN</div>
+                <div style="font-size: 0.8rem; color: #991B1B; margin-top: 0.2rem;">
+                    Direct access to low-level Django admin panel for raw database models, authentication groups, and system audits.
+                </div>
+            </div>
+            <a href="/admin/" target="_blank" class="btn btn-danger" style="font-weight: 700; font-size: 0.85rem; padding: 0.5rem 1.25rem; border-radius: 8px;">
+                [ENTER DJANGO ADMIN]
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Modern Segmented Tabs Navigation -->
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid #E2E8F0; padding-bottom: 0.5rem; overflow-x: auto;">
+        <button type="button" class="tab-btn-pill {% if active_tab == 'personal' %}active{% endif %}" onclick="showTab('personal')" id="tab-btn-personal" style="padding: 0.65rem 1.2rem; border-radius: 10px; border: none; font-weight: 700; font-size: 0.875rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s ease;">
+            <i class="fa-solid fa-user-pen"></i> Personal Information
+        </button>
+        <button type="button" class="tab-btn-pill {% if active_tab == 'security' %}active{% endif %}" onclick="showTab('security')" id="tab-btn-security" style="padding: 0.65rem 1.2rem; border-radius: 10px; border: none; font-weight: 700; font-size: 0.875rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s ease;">
+            <i class="fa-solid fa-lock"></i> Change Password
+        </button>
+        <button type="button" class="tab-btn-pill {% if active_tab == 'duty' %}active{% endif %}" onclick="showTab('duty')" id="tab-btn-duty" style="padding: 0.65rem 1.2rem; border-radius: 10px; border: none; font-weight: 700; font-size: 0.875rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s ease;">
+            <i class="fa-solid fa-user-clock"></i> Duty Status
+        </button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 1: PERSONAL INFORMATION                 -->
+    <!-- ========================================== -->
+    <div id="tab-content-personal" class="settings-tab-panel" style="display: {% if active_tab == 'personal' %}block{% else %}none{% endif %};">
+        <div class="card" style="border: 1px solid #E2E8F0; border-radius: 14px; background: #FFFFFF; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); overflow: hidden;">
+            <div style="background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%); padding: 1.15rem 1.5rem; border-bottom: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <h3 style="font-size: 1rem; font-weight: 800; color: #0F172A; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fa-solid fa-address-card" style="color: #2563EB;"></i> Personal & Residential Information
+                    </h3>
+                    <p style="font-size: 0.78rem; color: #64748B; margin: 0.2rem 0 0 0;">
+                        Update your registered name, contact number, verified email, and residential details.
+                    </p>
+                </div>
+            </div>
+
+            <div style="padding: 1.75rem 1.5rem;">
+                <form action="{% url 'accounts:settings' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="personal_info">
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+                        <div>
+                            <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569; display: block; margin-bottom: 0.35rem;">
+                                First Name <span style="color: #DC2626;">*</span>
+                            </label>
+                            {{ personal_form.first_name }}
+                            {% if personal_form.first_name.errors %}
+                            <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">{{ personal_form.first_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569; display: block; margin-bottom: 0.35rem;">
+                                Last Name <span style="color: #DC2626;">*</span>
+                            </label>
+                            {{ personal_form.last_name }}
+                            {% if personal_form.last_name.errors %}
+                            <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">{{ personal_form.last_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+                        <div>
+                            <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569; display: block; margin-bottom: 0.35rem;">
+                                Email Address <span style="color: #DC2626;">*</span>
+                            </label>
+                            {{ personal_form.email }}
+                            {% if personal_form.email.errors %}
+                            <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">{{ personal_form.email.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569; display: block; margin-bottom: 0.35rem;">
+                                Contact Mobile Number
+                            </label>
+                            {{ personal_form.phone_number }}
+                            {% if personal_form.phone_number.errors %}
+                            <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">{{ personal_form.phone_number.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1.25rem;">
+                        <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569; display: block; margin-bottom: 0.35rem;">
+                            Residential Address (House / Unit #, Street Name)
+                        </label>
+                        {{ personal_form.street_address }}
+                        {% if personal_form.street_address.errors %}
+                        <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">{{ personal_form.street_address.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+                        <div>
+                            <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569; display: block; margin-bottom: 0.35rem;">
+                                Purok / Zone Jurisdiction
+                            </label>
+                            {{ personal_form.purok }}
+                            {% if personal_form.purok.errors %}
+                            <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">{{ personal_form.purok.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569; display: block; margin-bottom: 0.35rem;">
+                                Civil Status
+                            </label>
+                            {{ personal_form.civil_status }}
+                            {% if personal_form.civil_status.errors %}
+                            <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">{{ personal_form.civil_status.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1.75rem;">
+                        <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569; display: block; margin-bottom: 0.35rem;">
+                            Occupation / Livelihood
+                        </label>
+                        {{ personal_form.occupation }}
+                        {% if personal_form.occupation.errors %}
+                        <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">{{ personal_form.occupation.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end;">
+                        <button type="submit" class="btn btn-primary" style="font-weight: 700; min-height: 44px; padding: 0.65rem 2rem; border-radius: 9px; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);">
+                            <i class="fa-solid fa-floppy-disk" style="margin-right: 0.4rem;"></i> Save Personal Information
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: CHANGE PASSWORD                      -->
+    <!-- ========================================== -->
+    <div id="tab-content-security" class="settings-tab-panel" style="display: {% if active_tab == 'security' %}block{% else %}none{% endif %};">
+        <div class="card" style="border: 1px solid #E2E8F0; border-radius: 14px; background: #FFFFFF; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); overflow: hidden;">
+            <div style="background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%); padding: 1.15rem 1.5rem; border-bottom: 1px solid #E2E8F0;">
+                <h3 style="font-size: 1rem; font-weight: 800; color: #0F172A; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fa-solid fa-key" style="color: #2563EB;"></i> Change Password
+                </h3>
+                <p style="font-size: 0.78rem; color: #64748B; margin: 0.2rem 0 0 0;">
+                    Update your account credentials to keep your portal access protected and secure.
+                </p>
+            </div>
+
+            <div style="padding: 1.75rem 1.5rem;">
+                <form action="{% url 'accounts:settings' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="change_password">
+
+                    <div style="margin-bottom: 1.25rem;">
+                        <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569; display: block; margin-bottom: 0.35rem;">
+                            Current Password <span style="color: #DC2626;">*</span>
+                        </label>
+                        <input type="password" name="old_password" required class="form-control" placeholder="Enter current password" autocomplete="current-password">
+                        {% if password_form.old_password.errors %}
+                        <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">{{ password_form.old_password.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem;">
+                        <div>
+                            <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569; display: block; margin-bottom: 0.35rem;">
+                                New Password <span style="color: #DC2626;">*</span>
+                            </label>
+                            <input type="password" name="new_password1" required class="form-control" placeholder="Minimum 8 characters" autocomplete="new-password">
+                            {% if password_form.new_password1.errors %}
+                            <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">{{ password_form.new_password1.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569; display: block; margin-bottom: 0.35rem;">
+                                Confirm New Password <span style="color: #DC2626;">*</span>
+                            </label>
+                            <input type="password" name="new_password2" required class="form-control" placeholder="Re-type new password" autocomplete="new-password">
+                            {% if password_form.new_password2.errors %}
+                            <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">{{ password_form.new_password2.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 0.85rem 1rem; margin-bottom: 1.5rem;">
+                        <div style="font-size: 0.75rem; font-weight: 700; color: #334155; margin-bottom: 0.25rem;">
+                            <i class="fa-solid fa-circle-info" style="color: #2563EB; margin-right: 0.3rem;"></i> Password Requirements:
+                        </div>
+                        <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.75rem; color: #64748B; line-height: 1.5;">
+                            <li>Must contain at least 8 characters.</li>
+                            <li>Cannot be too similar to your username or personal attributes.</li>
+                            <li>Cannot be an entirely numeric password or common sequence.</li>
+                        </ul>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end;">
+                        <button type="submit" class="btn btn-primary" style="font-weight: 700; min-height: 44px; padding: 0.65rem 2rem; border-radius: 9px; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);">
+                            <i class="fa-solid fa-lock" style="margin-right: 0.4rem;"></i> Update Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: SET STATUS ON-DUTY OR ON-LEAVE       -->
+    <!-- ========================================== -->
+    <div id="tab-content-duty" class="settings-tab-panel" style="display: {% if active_tab == 'duty' %}block{% else %}none{% endif %};">
+        <div class="card" style="border: 1px solid #E2E8F0; border-radius: 14px; background: #FFFFFF; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); overflow: hidden;">
+            <div style="background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%); padding: 1.15rem 1.5rem; border-bottom: 1px solid #E2E8F0;">
+                <h3 style="font-size: 1rem; font-weight: 800; color: #0F172A; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fa-solid fa-user-clock" style="color: #2563EB;"></i> Officer Duty Status & Availability
+                </h3>
+                <p style="font-size: 0.78rem; color: #64748B; margin: 0.2rem 0 0 0;">
+                    Broadcast your active roster status to residents and barangay staff directory.
+                </p>
+            </div>
+
+            <div style="padding: 1.75rem 1.5rem;">
+                <form action="{% url 'accounts:settings' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="set_duty_status">
+
+                    <div style="margin-bottom: 1.25rem;">
+                        <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569; display: block; margin-bottom: 0.35rem;">
+                            Active Duty Status <span style="color: #DC2626;">*</span>
+                        </label>
+                        {{ duty_form.duty_status }}
+                        <div style="font-size: 0.75rem; color: #64748B; margin-top: 0.25rem;">
+                            Select <strong>On-Duty</strong> for active desk presence, <strong>On-Leave</strong> for planned absence, or <strong>Absent</strong>.
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1.25rem;">
+                        <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569; display: block; margin-bottom: 0.35rem;">
+                            Status Message / Note for Staff & Residents
+                        </label>
+                        {{ duty_form.status_message }}
+                        <div style="font-size: 0.75rem; color: #64748B; margin-top: 0.25rem;">
+                            e.g. <em>Available at Barangay Hall until 5:00 PM</em> or <em>Attending municipal seminar</em>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.75rem;">
+                        <div>
+                            <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569; display: block; margin-bottom: 0.35rem;">
+                                Expected Return Date (If On-Leave)
+                            </label>
+                            {{ duty_form.duty_return_date }}
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569; display: block; margin-bottom: 0.35rem;">
+                                Leave Reason / Official Purpose
+                            </label>
+                            {{ duty_form.duty_leave_reason }}
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end;">
+                        <button type="submit" class="btn btn-primary" style="font-weight: 700; min-height: 44px; padding: 0.65rem 2rem; border-radius: 9px; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);">
+                            <i class="fa-solid fa-clock-rotate-left" style="margin-right: 0.4rem;"></i> Update Duty Status
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .tab-btn-pill {
+        background: #F1F5F9;
+        color: #475569;
+    }
+    .tab-btn-pill:hover {
+        background: #E2E8F0;
+        color: #0F172A;
+    }
+    .tab-btn-pill.active {
+        background: #2563EB;
+        color: #FFFFFF;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+    }
+</style>
+
+<script>
+    function showTab(tabName) {
+        document.querySelectorAll('.settings-tab-panel').forEach(function(el) {
+            el.style.display = 'none';
+        });
+        document.querySelectorAll('.tab-btn-pill').forEach(function(btn) {
+            btn.classList.remove('active');
+        });
+
+        var panel = document.getElementById('tab-content-' + tabName);
+        var btn = document.getElementById('tab-btn-' + tabName);
+        if (panel) panel.style.display = 'block';
+        if (btn) btn.classList.add('active');
+
+        // Update URL query parameter without full reload
+        var url = new URL(window.location);
+        url.searchParams.set('tab', tabName);
+        window.history.replaceState({}, '', url);
+    }
+</script>
+{% endblock %}
