@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static core_tags %}
+
+{% block title %}Dashboard - Barangay Portal{% endblock %}
+
+{% block content %}
+<!-- Dashboard Container with HIG Layout -->
+<div class="hig-content-area">
+    <!-- Toolbar -->
+    <div class="hig-toolbar">
+        <div class="hig-toolbar-title">
+            <h1 class="hig-title-1">Dashboard</h1>
+            <p class="hig-body hig-text-secondary">Overview of barangay metrics and activities</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="hig-content-main">
+        <!-- KPI Cards Grid -->
+        <div class="hig-grid-4">
+            <!-- Card 1: Registered Residents -->
+            <div class="hig-card hig-card-accent-blue">
+                <div class="hig-card-header">
+                    <span class="hig-caption-1 hig-text-secondary">REGISTERED RESIDENTS</span>
+                    <div class="hig-icon-container hig-icon-blue">
+                        {% icon 'book-user' %}
+                    </div>
+                </div>
+                <div class="hig-card-value hig-text-blue">
+                    {{ metrics.registered_residents_count|default:0 }}
+                </div>
+                <div class="hig-card-footer">
+                    <span class="hig-caption-1 hig-text-tertiary">Verified inhabitants in registry</span>
+                </div>
+            </div>
+
+            <!-- Card 2: Portal Accounts -->
+            <div class="hig-card hig-card-accent-green">
+                <div class="hig-card-header">
+                    <span class="hig-caption-1 hig-text-secondary">PORTAL ACCOUNTS</span>
+                    <div class="hig-icon-container hig-icon-green">
+                        {% icon 'user-check' %}
+                    </div>
+                </div>
+                <div class="hig-card-value hig-text-primary">
+                    {{ metrics.portal_accounts_count|default:0 }}
+                </div>
+                <div class="hig-card-footer">
+                    <span class="hig-caption-1 hig-text-tertiary">Active online user accounts</span>
+                </div>
+            </div>
+
+            {% if metrics.needs_attention_count is not None %}
+            <!-- Card 3: Needs Attention -->
+            <div class="hig-card hig-card-accent-orange">
+                <div class="hig-card-header">
+                    <span class="hig-caption-1 hig-text-secondary">NEEDS ATTENTION</span>
+                    <div class="hig-icon-container hig-icon-orange">
+                        {% icon 'hand-heart' %}
+                    </div>
+                </div>
+                <div class="hig-card-value hig-text-orange">
+                    {{ metrics.needs_attention_count }}
+                </div>
+                <div class="hig-card-footer">
+                    <span class="hig-caption-1 hig-text-tertiary">Senior, PWD, assistance recipients</span>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Card 4: Pending Registrations -->
+            <div class="hig-card hig-card-accent-red">
+                <div class="hig-card-header">
+                    <span class="hig-caption-1 hig-text-secondary">PENDING REGISTRATIONS</span>
+                    <div class="hig-icon-container hig-icon-red">
+                        {% icon 'hourglass' %}
+                    </div>
+                </div>
+                <div class="hig-card-value hig-text-red">
+                    {{ metrics.pending_registrations_count|default:0 }}
+                </div>
+                <div class="hig-card-footer">
+                    <span class="hig-caption-1 hig-text-tertiary">Awaiting staff verification</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Purok Leader Distribution Table -->
+        <div class="hig-card hig-card-table">
+            <div class="hig-table-header">
+                <div>
+                    <h2 class="hig-title-3">Residents Per Purok Leader</h2>
+                    <p class="hig-caption-1 hig-text-secondary">Distribution of inhabitants across barangay zones</p>
+                </div>
+            </div>
+
+            <div class="hig-table-container">
+                <table class="hig-table hig-table-compact">
+                    <thead>
+                        <tr>
+                            <th class="hig-table-col-left">Purok Zone</th>
+                            <th class="hig-table-col-left">Assigned Leader</th>
+                            <th class="hig-table-col-right">Population</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in residents_per_purok_leader %}
+                        <tr>
+                            <td class="hig-table-col-left">
+                                <div class="hig-table-cell-with-icon">
+                                    {% icon 'map' %}
+                                    <span class="hig-body-semibold">{{ item.purok_name }}</span>
+                                </div>
+                            </td>
+                            <td class="hig-table-col-left">
+                                {% if item.leader_name == 'no leader assigned' %}
+                                    <span class="hig-badge hig-badge-gray">No leader assigned</span>
+                                {% else %}
+                                    <div class="hig-table-cell-with-icon">
+                                        {% icon 'user-round' %}
+                                        <span class="hig-body">{{ item.leader_name }}</span>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td class="hig-table-col-right">
+                                <span class="hig-body-semibold hig-text-blue">{{ item.resident_count }}</span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="hig-table-empty">
+                                <span class="hig-body hig-text-secondary">No purok zones registered</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
