@@ -20,6 +20,7 @@
     overflow: hidden;
     background: var(--color-canvas);
     font-family: var(--font-family-base);
+    color: var(--color-text-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -277,6 +278,21 @@
   /* ============================================
      CONTENT SECTIONS
      ============================================ */
+  
+  /* Content Area Wrapper */
+  .hig-content-area {
+    min-height: 100vh;
+    padding: var(--content-padding);
+    background: var(--color-canvas-secondary);
+    color: var(--color-text-primary);
+  }
+  
+  /* Content Main (Inside content-area) */
+  .hig-content-main {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    color: var(--color-text-primary);
+  }
   
   /* Section Header */
   .hig-section-header {

@@ -22,6 +22,7 @@
     overflow: hidden;
     background: var(--color-canvas);
     font-family: var(--font-family-base);
+    color: var(--color-text-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -29,6 +30,18 @@
   /* Hide desktop sidebar on mobile */
   .hig-sidebar {
     display: none;
+  }
+  
+  /* Content Area for Mobile */
+  .hig-content-area {
+    flex: 1;
+    padding: var(--mobile-margin);
+    background: var(--color-canvas-secondary);
+    color: var(--color-text-primary);
+  }
+  
+  .hig-content-main {
+    color: var(--color-text-primary);
   }
   
   
