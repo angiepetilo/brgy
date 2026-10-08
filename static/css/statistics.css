@@ -1,0 +1,47 @@
+/* Statistics page. Plain CSS so main.css (compiled from SCSS) does not need a rebuild. */
+.stats-page { padding: 1.25rem 0; }
+.stats-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem; }
+.stats-header h1 { font-size: 1.6rem; font-weight: 800; color: #111827; margin: 0; display: flex; align-items: center; gap: 0.65rem; }
+.stats-header p { color: #6B7280; margin: 0.35rem 0 0; font-size: 0.875rem; }
+.stats-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.stats-btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 0.9rem; border-radius: 8px; border: 1px solid #D1D5DB; background: #FFFFFF; color: #111827; font-weight: 600; font-size: 0.875rem; cursor: pointer; text-decoration: none; }
+.stats-btn:hover { background: #F3F4F6; }
+.stats-btn.primary { background: #1E3A8A; border-color: #1E3A8A; color: #FFFFFF; }
+.stats-btn.primary:hover { background: #1E3A8A; }
+
+.stats-filters { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: flex-end; background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 0.9rem 1rem; margin-bottom: 1rem; }
+.stats-filters label { display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; margin-bottom: 0.25rem; }
+.stats-filters input, .stats-filters select { padding: 0.45rem 0.6rem; border: 1px solid #D1D5DB; border-radius: 8px; font-size: 0.875rem; min-width: 10rem; background: #FFFFFF; }
+.stats-range { color: #6B7280; font-size: 0.875rem; margin: 0 0 1rem; }
+.stats-note { color: #4B5563; font-size: 0.875rem; margin: 0 0 0.35rem; }
+.stats-error a { color: #DC2626; font-weight: 700; text-decoration: underline; }
+
+.stats-error { background: #FFFFFF; border: 1px solid #DC2626; color: #DC2626; border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1rem; }
+
+.stats-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin-bottom: 1.25rem; }
+.stats-kpi { background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 0.85rem 1rem; }
+.stats-kpi-label { font-size: 0.875rem; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.03em; }
+.stats-kpi-value { font-size: 1.6rem; font-weight: 800; color: #111827; margin-top: 0.2rem; }
+
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+.stats-card { background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1rem; display: flex; flex-direction: column; min-width: 0; }
+.stats-card.wide { grid-column: 1 / -1; }
+.stats-card-head { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+.stats-card-head h2 { font-size: 1rem; font-weight: 800; color: #111827; margin: 0; }
+.stats-toggle { background: none; border: none; color: #1E3A8A; font-size: 0.875rem; font-weight: 600; cursor: pointer; padding: 0.2rem 0.4rem; }
+.stats-chart-wrap { position: relative; height: 260px; }
+.stats-chart-wrap.tall { height: 340px; }
+.stats-state { display: none; color: #6B7280; text-align: center; padding: 2rem 1rem; font-size: 0.9rem; }
+.stats-card[data-state="loading"] .stats-state-loading { display: block; }
+.stats-card[data-state="empty"] .stats-state-empty { display: block; }
+.stats-card[data-state="loading"] .stats-chart-wrap, .stats-card[data-state="empty"] .stats-chart-wrap { display: none; }
+.stats-card[data-state="empty"] .stats-table-wrap, .stats-card[data-state="loading"] .stats-table-wrap { display: none; }
+.stats-table-wrap { margin-top: 0.75rem; overflow-x: auto; }
+.stats-table-wrap[hidden] { display: none; }
+.stats-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.stats-table th, .stats-table td { padding: 0.4rem 0.6rem; border-bottom: 1px solid #E5E7EB; text-align: left; }
+.stats-table th { color: #4B5563; font-size: 0.875rem; text-transform: uppercase; }
+.stats-table td.num, .stats-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.stats-table tr.is-highest td { background: #F3F4F6; font-weight: 700; }
+.stats-flag { display: inline-block; margin-left: 0.4rem; font-size: 0.875rem; font-weight: 800; color: #374151; background: #D1D5DB; border-radius: 999px; padding: 0.05rem 0.45rem; }
+.stats-sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }

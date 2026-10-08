@@ -1,0 +1,26 @@
+/* Printable blotter case summary (templates/blotter/case_print.html). */
+body.blotter-print { font-family: var(--font-sans, system-ui, sans-serif); margin: 0; padding: 2cm; color: #111827; background: #FFFFFF; font-size: 10.5pt; }
+.letterhead { text-align: center; border-bottom: 2px solid #111827; padding-bottom: 10px; margin-bottom: 18px; }
+.letterhead h1 { font-size: 15pt; margin: 2px 0; text-transform: uppercase; }
+.letterhead h2 { font-size: 12pt; margin: 10px 0 0; }
+.letterhead p { margin: 0; color: #374151; font-size: 9.5pt; }
+h3 { font-size: 11pt; margin: 18px 0 6px; text-transform: uppercase; border-bottom: 1px solid #D1D5DB; padding-bottom: 3px; }
+table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+th, td { border: 1px solid #D1D5DB; padding: 5px 8px; text-align: left; vertical-align: top; }
+th { background: #F9FAFB; }
+table.meta th { width: 16%; }
+.narrative { line-height: 1.5; margin: 0; }
+.toolbar { margin-bottom: 20px; background: #F3F4F6; border: 1px solid #D1D5DB; padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
+.toolbar button { background: #1E3A8A; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+.signatures { margin-top: 48px; display: flex; justify-content: space-between; }
+.signature { text-align: center; width: 220px; }
+.signature div:first-child { border-top: 1px solid #111827; padding-top: 5px; font-weight: bold; }
+.signature div:last-child { font-size: 9pt; color: #4B5563; }
+.generated { margin-top: 24px; font-size: 8.5pt; color: #6B7280; text-align: right; }
+
+@media print {
+    .no-print { display: none !important; }
+    body.blotter-print { padding: 1cm; }
+    tr { page-break-inside: avoid; }
+    @page { size: A4; margin: 1cm; }
+}
