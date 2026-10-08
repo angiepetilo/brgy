@@ -80,7 +80,7 @@
     <!-- ========================================== -->
     <!-- TAB 1: PERSONAL INFORMATION                 -->
     <!-- ========================================== -->
-    <div id="tab-content-personal" class="settings-tab-panel" style="display: {% if active_tab == 'personal' %}block{% else %}none{% endif %};">
+    <div id="tab-content-personal" class="settings-tab-panel"{% if active_tab != 'personal' %} style="display: none;"{% endif %}>
         <div class="card" style="border: 1px solid #E2E8F0; border-radius: 14px; background: #FFFFFF; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); overflow: hidden;">
             <div style="background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%); padding: 1.15rem 1.5rem; border-bottom: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: space-between;">
                 <div>
@@ -194,7 +194,7 @@
     <!-- ========================================== -->
     <!-- TAB 2: CHANGE PASSWORD                      -->
     <!-- ========================================== -->
-    <div id="tab-content-security" class="settings-tab-panel" style="display: {% if active_tab == 'security' %}block{% else %}none{% endif %};">
+    <div id="tab-content-security" class="settings-tab-panel"{% if active_tab != 'security' %} style="display: none;"{% endif %}>
         <div class="card" style="border: 1px solid #E2E8F0; border-radius: 14px; background: #FFFFFF; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); overflow: hidden;">
             <div style="background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%); padding: 1.15rem 1.5rem; border-bottom: 1px solid #E2E8F0;">
                 <h3 style="font-size: 1rem; font-weight: 800; color: #0F172A; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
@@ -265,7 +265,7 @@
     <!-- ========================================== -->
     <!-- TAB 3: SET STATUS ON-DUTY OR ON-LEAVE       -->
     <!-- ========================================== -->
-    <div id="tab-content-duty" class="settings-tab-panel" style="display: {% if active_tab == 'duty' %}block{% else %}none{% endif %};">
+    <div id="tab-content-duty" class="settings-tab-panel"{% if active_tab != 'duty' %} style="display: none;"{% endif %}>
         <div class="card" style="border: 1px solid #E2E8F0; border-radius: 14px; background: #FFFFFF; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); overflow: hidden;">
             <div style="background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%); padding: 1.15rem 1.5rem; border-bottom: 1px solid #E2E8F0;">
                 <h3 style="font-size: 1rem; font-weight: 800; color: #0F172A; margin: 0; display: flex; align-items: center; gap: 0.5rem;">

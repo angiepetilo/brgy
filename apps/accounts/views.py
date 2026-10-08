@@ -16,7 +16,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.core.mail import send_mail
 
-from apps.accounts.models import User, Household
+from apps.accounts.models import User, Household, Purok
 from apps.accounts.forms import ResidentRegistrationForm, UserLoginForm, ProfileUpdateForm, SettingsForm, PersonalInfoForm, DutyStatusForm
 from apps.appointments.models import Appointment
 from apps.communications.models import Announcement, KapitanStatus
@@ -583,5 +583,54 @@ def settings_view(request):
         'is_superuser': user.is_superuser or user.is_staff,
     }
     return render(request, 'accounts/settings.html', context)
+
+
+@login_required
+@user_passes_test(is_kapitan_or_admin)
+def resident_edit_view(request, user_id):
+    resident = get_object_or_404(User, id=user_id, role=User.ROLE_RESIDENT)
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        phone_number = request.POST.get('phone_number', '').strip()
+        email = request.POST.get('email', '').strip()
+        street_address = request.POST.get('street_address', '').strip()
+        purok_name = request.POST.get('purok', '').strip()
+        civil_status = request.POST.get('civil_status', resident.civil_status)
+
+        if first_name:
+            resident.first_name = first_name
+        if last_name:
+            resident.last_name = last_name
+        if email:
+            resident.email = email
+        resident.phone_number = phone_number
+        resident.street_address = street_address
+        resident.civil_status = civil_status
+
+        if purok_name:
+            purok_obj, _ = Purok.objects.get_or_create(name=purok_name)
+            resident.purok = purok_obj
+
+        resident.save()
+        messages.success(request, f"Resident profile for {resident.get_full_name() or resident.username} has been updated.")
+        return redirect(request.META.get('HTTP_REFERER') or reverse('accounts:residents_tabbed'))
+
+    return redirect('accounts:residents_tabbed')
+
+
+@login_required
+@user_passes_test(is_kapitan_or_admin)
+def resident_delete_view(request, user_id):
+    resident = get_object_or_404(User, id=user_id, role=User.ROLE_RESIDENT)
+    if request.method == 'POST':
+        name = resident.get_full_name() or resident.username
+        resident.delete()
+        messages.success(request, f"Resident account for {name} has been deleted.")
+        return redirect(request.META.get('HTTP_REFERER') or reverse('accounts:residents_tabbed'))
+
+    messages.warning(request, "Invalid request method for deleting resident.")
+    return redirect('accounts:residents_tabbed')
+
 
 

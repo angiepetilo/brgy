@@ -2,6 +2,85 @@
 
 {% block title %}Residents Management - Barangay e-Portal{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Floating 3-Dots Action Dropdown Menu */
+    .action-dropdown-container {
+        position: relative;
+        display: inline-block;
+    }
+    .action-dropdown-menu {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: calc(100% + 4px);
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.18), 0 4px 6px -2px rgba(15, 23, 42, 0.05);
+        z-index: 1050;
+        min-width: 135px;
+        padding: 0.35rem;
+        text-align: left;
+    }
+    .action-dropdown-menu.show {
+        display: block;
+        animation: fadeInMenu 0.15s ease-out;
+    }
+    @keyframes fadeInMenu {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .action-menu-item {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #1E293B;
+        background: none;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background 0.15s ease, color 0.15s ease;
+        box-sizing: border-box;
+    }
+    .action-menu-item:hover {
+        background: #F1F5F9;
+        color: #0F172A;
+    }
+    .action-menu-item.text-danger {
+        color: #DC2626;
+    }
+    .action-menu-item.text-danger:hover {
+        background: #FEF2F2;
+        color: #B91C1C;
+    }
+    .form-control-modern {
+        width: 100%;
+        padding: 0.65rem 0.9rem 0.65rem 2.4rem;
+        border: 1.5px solid #CBD5E1;
+        border-radius: 9px;
+        font-size: 0.875rem;
+        color: #0F172A;
+        background: #FFFFFF;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+    }
+    .form-control-modern:focus {
+        outline: none;
+        border-color: #2563EB;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+    }
+    .form-control-modern.has-clear {
+        padding-right: 2.4rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="residents-management-container">
 
@@ -40,49 +119,60 @@
     </div>
     {% else %}
 
-    <!-- Filter & Search Controls (Single Select Dropdown: Pending, Approved, Rejected) -->
-    <div class="card" style="margin-bottom: 1.25rem; border: 1px solid #E2E8F0; border-radius: 8px; box-shadow: none;">
-        <div class="card-body" style="padding: 0.85rem 1rem;">
-            <form method="get" action="{% url 'accounts:residents_tabbed' %}" style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+    <!-- Modern Filter & Search Controls (Without Filter Button) -->
+    <div class="card" style="margin-bottom: 1.25rem; border: 1px solid #E2E8F0; border-radius: 14px; background: #FFFFFF; box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.04);">
+        <div class="card-body" style="padding: 1rem 1.25rem;">
+            <form id="residents-filter-form" method="get" action="{% url 'accounts:residents_tabbed' %}" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
                 <input type="hidden" name="main_tab" value="residents">
-                <!-- Single Select Filter Dropdown -->
-                <div style="flex: 1.2; min-width: 180px;">
-                    <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 0.2rem;">Application Status</label>
-                    <select name="tab" class="form-control" onchange="this.form.submit()" style="font-weight: 600;">
-                        <option value="pending" {% if active_tab == 'pending' %}selected{% endif %}>Pending ({{ pending_count }})</option>
-                        <option value="approved" {% if active_tab == 'approved' %}selected{% endif %}>Approved ({{ approved_count }})</option>
-                        <option value="rejected" {% if active_tab == 'rejected' %}selected{% endif %}>Rejected ({{ rejected_count }})</option>
-                    </select>
+                
+                <!-- Modern Application Status Dropdown -->
+                <div style="flex: 1.1; min-width: 200px;">
+                    <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.72rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.35rem; letter-spacing: 0.03em;">
+                        <i class="fa-solid fa-layer-group" style="color: #2563EB;"></i> Application Status
+                    </label>
+                    <div style="position: relative;">
+                        <i class="fa-solid fa-users" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94A3B8; font-size: 0.88rem; pointer-events: none;"></i>
+                        <select name="tab" class="form-control-modern" onchange="this.form.submit()" style="font-weight: 600; cursor: pointer; appearance: auto;">
+                            <option value="pending" {% if active_tab == 'pending' %}selected{% endif %}>Pending ({{ pending_count }})</option>
+                            <option value="approved" {% if active_tab == 'approved' %}selected{% endif %}>Approved ({{ approved_count }})</option>
+                            <option value="rejected" {% if active_tab == 'rejected' %}selected{% endif %}>Rejected ({{ rejected_count }})</option>
+                        </select>
+                    </div>
                 </div>
 
-                <!-- Text Search -->
-                <div style="flex: 2; min-width: 200px;">
-                    <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 0.2rem;">Search Resident</label>
-                    <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Search resident name, username, phone, or email...">
+                <!-- Modern Search Bar -->
+                <div style="flex: 2; min-width: 260px;">
+                    <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.72rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.35rem; letter-spacing: 0.03em;">
+                        <i class="fa-solid fa-magnifying-glass" style="color: #2563EB;"></i> Search Resident
+                    </label>
+                    <div style="position: relative;">
+                        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94A3B8; font-size: 0.88rem; pointer-events: none;"></i>
+                        <input type="text" name="q" value="{{ search_query }}" class="form-control-modern{% if search_query %} has-clear{% endif %}" placeholder="Search resident name, username, phone, or email..." onkeydown="if(event.key === 'Enter'){ this.form.submit(); }">
+                        {% if search_query %}
+                        <a href="{% url 'accounts:residents_tabbed' %}?tab={{ active_tab }}" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #94A3B8; text-decoration: none; font-size: 0.95rem; cursor: pointer;" title="Clear search">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </a>
+                        {% endif %}
+                    </div>
                 </div>
 
                 {% if active_tab == 'approved' %}
-                <div style="flex: 1.2; min-width: 160px;">
-                    <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 0.2rem;">Purok Jurisdiction</label>
-                    <select name="purok" class="form-control" onchange="this.form.submit()">
-                        <option value="">All Puroks</option>
-                        {% for code, label in purok_choices %}
-                        <option value="{{ code }}" {% if purok_filter == code %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
+                <!-- Modern Purok Jurisdiction Dropdown -->
+                <div style="flex: 1.1; min-width: 180px;">
+                    <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.72rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.35rem; letter-spacing: 0.03em;">
+                        <i class="fa-solid fa-location-dot" style="color: #2563EB;"></i> Purok Jurisdiction
+                    </label>
+                    <div style="position: relative;">
+                        <i class="fa-solid fa-map-pin" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94A3B8; font-size: 0.88rem; pointer-events: none;"></i>
+                        <select name="purok" class="form-control-modern" onchange="this.form.submit()" style="font-weight: 600; cursor: pointer; appearance: auto;">
+                            <option value="">All Puroks</option>
+                            {% for code, label in purok_choices %}
+                            <option value="{{ code }}" {% if purok_filter == code %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
                 {% endif %}
-
-                <div style="display: flex; gap: 0.5rem; align-self: flex-end; padding-bottom: 1px;">
-                    <button type="submit" class="btn btn-secondary btn-sm" style="font-weight: 700; min-height: 38px;">
-                        <i class="fa-solid fa-filter" style="margin-right: 0.25rem;"></i> Filter
-                    </button>
-                    {% if search_query or purok_filter %}
-                    <a href="{% url 'accounts:residents_tabbed' %}?tab={{ active_tab }}" class="btn btn-secondary btn-sm" style="color: #DC2626; font-weight: 700; min-height: 38px;">
-                        Clear
-                    </a>
-                    {% endif %}
-                </div>
             </form>
         </div>
     </div>
@@ -133,21 +223,33 @@
                             <td style="color: #334155; font-size: 0.8125rem;">
                                 {{ resident.date_joined|date:"Y-m-d" }}
                             </td>
-                            <td style="text-align: center;">
-                                <button type="button" class="btn-action-circle open-resident-modal-btn" 
-                                    data-id="{{ resident.id }}"
-                                    data-name="{{ resident.get_full_name|default:resident.username }}"
-                                    data-username="{{ resident.username }}"
-                                    data-email="{{ resident.email|default:'N/A' }}"
-                                    data-phone="{{ resident.phone_number|default:'N/A' }}"
-                                    data-address="{{ resident.address|default:'N/A' }}"
-                                    data-purok="{{ resident.get_purok_display|default:'Unassigned' }}"
-                                    data-date="{{ resident.date_joined|date:'M d, Y' }}"
-                                    data-idproof="{% if resident.id_proof %}{{ resident.id_proof.url }}{% endif %}"
-                                    data-status="pending"
-                                    title="View Applicant Details">
-                                    <i class="fa-solid fa-ellipsis-vertical"></i>
-                                </button>
+                            <td style="text-align: center; position: relative;">
+                                <div class="action-dropdown-container">
+                                    <button type="button" class="btn-action-circle" onclick="toggleActionMenu(event, this)" title="Resident Options">
+                                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                                    </button>
+                                    <div class="action-dropdown-menu">
+                                        <button type="button" class="action-menu-item open-resident-modal-btn" 
+                                            data-id="{{ resident.id }}"
+                                            data-name="{{ resident.get_full_name|default:resident.username }}"
+                                            data-username="{{ resident.username }}"
+                                            data-email="{{ resident.email|default:'N/A' }}"
+                                            data-phone="{{ resident.phone_number|default:'N/A' }}"
+                                            data-address="{{ resident.street_address|default:resident.address|default:'N/A' }}"
+                                            data-purok="{{ resident.get_purok_display|default:'Unassigned' }}"
+                                            data-date="{{ resident.date_joined|date:'M d, Y' }}"
+                                            data-idproof="{% if resident.id_proof %}{{ resident.id_proof.url }}{% endif %}"
+                                            data-status="pending">
+                                            <i class="fa-regular fa-eye" style="color: #2563EB; width: 16px;"></i> View
+                                        </button>
+                                        <button type="button" class="action-menu-item" onclick="openEditResidentModal({id: '{{ resident.id }}', first_name: '{{ resident.first_name|escapejs }}', last_name: '{{ resident.last_name|escapejs }}', username: '{{ resident.username|escapejs }}', email: '{{ resident.email|escapejs }}', phone: '{{ resident.phone_number|escapejs }}', address: '{{ resident.street_address|default:resident.address|escapejs }}', purok: '{{ resident.get_purok_display|escapejs }}', civil: '{{ resident.civil_status|escapejs }}'})">
+                                            <i class="fa-regular fa-pen-to-square" style="color: #D97706; width: 16px;"></i> Edit
+                                        </button>
+                                        <button type="button" class="action-menu-item text-danger" onclick="openDeleteResidentModal('{{ resident.id }}', '{{ resident.get_full_name|default:resident.username|escapejs }}')">
+                                            <i class="fa-regular fa-trash-can" style="color: #DC2626; width: 16px;"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -224,21 +326,33 @@
                             <td style="color: #334155; font-size: 0.8125rem;">
                                 {{ resident.date_joined|date:"Y-m-d" }}
                             </td>
-                            <td style="text-align: center;">
-                                <button type="button" class="btn-action-circle open-resident-modal-btn" 
-                                    data-id="{{ resident.id }}"
-                                    data-name="{{ resident.get_full_name|default:resident.username }}"
-                                    data-username="{{ resident.username }}"
-                                    data-email="{{ resident.email|default:'N/A' }}"
-                                    data-phone="{{ resident.phone_number|default:'N/A' }}"
-                                    data-address="{{ resident.address|default:'N/A' }}"
-                                    data-purok="{{ resident.get_purok_display|default:'Unassigned' }}"
-                                    data-date="{{ resident.date_joined|date:'M d, Y' }}"
-                                    data-idproof="{% if resident.id_proof %}{{ resident.id_proof.url }}{% endif %}"
-                                    data-status="approved"
-                                    title="View Resident Record">
-                                    <i class="fa-solid fa-ellipsis-vertical"></i>
-                                </button>
+                            <td style="text-align: center; position: relative;">
+                                <div class="action-dropdown-container">
+                                    <button type="button" class="btn-action-circle" onclick="toggleActionMenu(event, this)" title="Resident Options">
+                                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                                    </button>
+                                    <div class="action-dropdown-menu">
+                                        <button type="button" class="action-menu-item open-resident-modal-btn" 
+                                            data-id="{{ resident.id }}"
+                                            data-name="{{ resident.get_full_name|default:resident.username }}"
+                                            data-username="{{ resident.username }}"
+                                            data-email="{{ resident.email|default:'N/A' }}"
+                                            data-phone="{{ resident.phone_number|default:'N/A' }}"
+                                            data-address="{{ resident.street_address|default:resident.address|default:'N/A' }}"
+                                            data-purok="{{ resident.get_purok_display|default:'Unassigned' }}"
+                                            data-date="{{ resident.date_joined|date:'M d, Y' }}"
+                                            data-idproof="{% if resident.id_proof %}{{ resident.id_proof.url }}{% endif %}"
+                                            data-status="approved">
+                                            <i class="fa-regular fa-eye" style="color: #2563EB; width: 16px;"></i> View
+                                        </button>
+                                        <button type="button" class="action-menu-item" onclick="openEditResidentModal({id: '{{ resident.id }}', first_name: '{{ resident.first_name|escapejs }}', last_name: '{{ resident.last_name|escapejs }}', username: '{{ resident.username|escapejs }}', email: '{{ resident.email|escapejs }}', phone: '{{ resident.phone_number|escapejs }}', address: '{{ resident.street_address|default:resident.address|escapejs }}', purok: '{{ resident.get_purok_display|escapejs }}', civil: '{{ resident.civil_status|escapejs }}'})">
+                                            <i class="fa-regular fa-pen-to-square" style="color: #D97706; width: 16px;"></i> Edit
+                                        </button>
+                                        <button type="button" class="action-menu-item text-danger" onclick="openDeleteResidentModal('{{ resident.id }}', '{{ resident.get_full_name|default:resident.username|escapejs }}')">
+                                            <i class="fa-regular fa-trash-can" style="color: #DC2626; width: 16px;"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -320,22 +434,34 @@
                             <td style="color: #334155; font-size: 0.8125rem;">
                                 {{ resident.date_joined|date:"Y-m-d" }}
                             </td>
-                            <td style="text-align: center;">
-                                <button type="button" class="btn-action-circle open-resident-modal-btn" 
-                                    data-id="{{ resident.id }}"
-                                    data-name="{{ resident.get_full_name|default:resident.username }}"
-                                    data-username="{{ resident.username }}"
-                                    data-email="{{ resident.email|default:'N/A' }}"
-                                    data-phone="{{ resident.phone_number|default:'N/A' }}"
-                                    data-address="{{ resident.address|default:'N/A' }}"
-                                    data-purok="{{ resident.get_purok_display|default:'Unassigned' }}"
-                                    data-date="{{ resident.date_joined|date:'M d, Y' }}"
-                                    data-idproof="{% if resident.id_proof %}{{ resident.id_proof.url }}{% endif %}"
-                                    data-reason="{{ resident.rejection_reason|default:'' }}"
-                                    data-status="rejected"
-                                    title="View Rejected Applicant">
-                                    <i class="fa-solid fa-ellipsis-vertical"></i>
-                                </button>
+                            <td style="text-align: center; position: relative;">
+                                <div class="action-dropdown-container">
+                                    <button type="button" class="btn-action-circle" onclick="toggleActionMenu(event, this)" title="Resident Options">
+                                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                                    </button>
+                                    <div class="action-dropdown-menu">
+                                        <button type="button" class="action-menu-item open-resident-modal-btn" 
+                                            data-id="{{ resident.id }}"
+                                            data-name="{{ resident.get_full_name|default:resident.username }}"
+                                            data-username="{{ resident.username }}"
+                                            data-email="{{ resident.email|default:'N/A' }}"
+                                            data-phone="{{ resident.phone_number|default:'N/A' }}"
+                                            data-address="{{ resident.street_address|default:resident.address|default:'N/A' }}"
+                                            data-purok="{{ resident.get_purok_display|default:'Unassigned' }}"
+                                            data-date="{{ resident.date_joined|date:'M d, Y' }}"
+                                            data-idproof="{% if resident.id_proof %}{{ resident.id_proof.url }}{% endif %}"
+                                            data-reason="{{ resident.rejection_reason|default:'' }}"
+                                            data-status="rejected">
+                                            <i class="fa-regular fa-eye" style="color: #2563EB; width: 16px;"></i> View
+                                        </button>
+                                        <button type="button" class="action-menu-item" onclick="openEditResidentModal({id: '{{ resident.id }}', first_name: '{{ resident.first_name|escapejs }}', last_name: '{{ resident.last_name|escapejs }}', username: '{{ resident.username|escapejs }}', email: '{{ resident.email|escapejs }}', phone: '{{ resident.phone_number|escapejs }}', address: '{{ resident.street_address|default:resident.address|escapejs }}', purok: '{{ resident.get_purok_display|escapejs }}', civil: '{{ resident.civil_status|escapejs }}'})">
+                                            <i class="fa-regular fa-pen-to-square" style="color: #D97706; width: 16px;"></i> Edit
+                                        </button>
+                                        <button type="button" class="action-menu-item text-danger" onclick="openDeleteResidentModal('{{ resident.id }}', '{{ resident.get_full_name|default:resident.username|escapejs }}')">
+                                            <i class="fa-regular fa-trash-can" style="color: #DC2626; width: 16px;"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -481,7 +607,152 @@
     </div>
 </div>
 
+<!-- EDIT RESIDENT MODAL -->
+<div id="editResidentModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: #FFFFFF; border-radius: 12px; width: 100%; max-width: 540px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); overflow: hidden; animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: space-between; background: #F8FAFC;">
+            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: #FEF3C7; color: #D97706; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
+                    <i class="fa-solid fa-user-pen"></i>
+                </div>
+                <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #0F172A;">Edit Resident Details</h3>
+            </div>
+            <button type="button" onclick="closeEditResidentModal()" style="border: none; background: transparent; color: #64748B; font-size: 1.25rem; cursor: pointer;">&times;</button>
+        </div>
+        <form id="editResidentForm" method="post" action="">
+            {% csrf_token %}
+            <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; max-height: 70vh; overflow-y: auto;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem; text-transform: uppercase;">First Name</label>
+                        <input type="text" name="first_name" id="edit-res-first-name" class="form-control" style="font-size: 0.875rem;" required>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem; text-transform: uppercase;">Last Name</label>
+                        <input type="text" name="last_name" id="edit-res-last-name" class="form-control" style="font-size: 0.875rem;" required>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem; text-transform: uppercase;">Email Address</label>
+                        <input type="email" name="email" id="edit-res-email" class="form-control" style="font-size: 0.875rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem; text-transform: uppercase;">Contact Number</label>
+                        <input type="text" name="phone_number" id="edit-res-phone" class="form-control" style="font-size: 0.875rem;">
+                    </div>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem; text-transform: uppercase;">Purok Jurisdiction</label>
+                    <input type="text" name="purok" id="edit-res-purok" class="form-control" style="font-size: 0.875rem;" placeholder="e.g. Purok 1, Riverside">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem; text-transform: uppercase;">Complete Street Address</label>
+                    <textarea name="street_address" id="edit-res-address" rows="2" class="form-control" style="font-size: 0.875rem; resize: vertical;"></textarea>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem; text-transform: uppercase;">Civil Status</label>
+                    <select name="civil_status" id="edit-res-civil" class="form-control" style="font-size: 0.875rem;">
+                        <option value="Single">Single</option>
+                        <option value="Married">Married</option>
+                        <option value="Widowed">Widowed</option>
+                        <option value="Separated">Separated</option>
+                    </select>
+                </div>
+            </div>
+            <div style="padding: 1rem 1.5rem; background: #F8FAFC; border-top: 1px solid #E2E8F0; display: flex; justify-content: flex-end; gap: 0.75rem;">
+                <button type="button" onclick="closeEditResidentModal()" class="btn btn-secondary" style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1rem;">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="font-size: 0.8125rem; font-weight: 700; padding: 0.45rem 1.25rem; background: #2563EB;">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- DELETE RESIDENT MODAL -->
+<div id="deleteResidentModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: #FFFFFF; border-radius: 12px; width: 100%; max-width: 440px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); overflow: hidden; animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #FEE2E2; background: #FEF2F2; display: flex; align-items: center; gap: 0.75rem;">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: #FEE2E2; border: 2px solid #FCA5A5; color: #DC2626; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h3 style="margin: 0; font-size: 1rem; font-weight: 700; color: #991B1B;">Delete Resident Account</h3>
+                <p style="margin: 0; font-size: 0.75rem; color: #B91C1C;">This action cannot be undone.</p>
+            </div>
+        </div>
+        <form id="deleteResidentForm" method="post" action="">
+            {% csrf_token %}
+            <div style="padding: 1.25rem 1.5rem; color: #334155; font-size: 0.875rem; line-height: 1.5;">
+                Are you sure you want to permanently delete resident account for <strong id="delete-resident-name" style="color: #0F172A;"></strong>? All associated registrations and profile information will be removed.
+            </div>
+            <div style="padding: 1rem 1.5rem; background: #F8FAFC; border-top: 1px solid #E2E8F0; display: flex; justify-content: flex-end; gap: 0.75rem;">
+                <button type="button" onclick="closeDeleteResidentModal()" class="btn btn-secondary" style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1rem;">Cancel</button>
+                <button type="submit" class="btn btn-danger" style="font-size: 0.8125rem; font-weight: 700; padding: 0.45rem 1.25rem; background: #DC2626; border-color: #DC2626;">Yes, Delete Account</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
+function toggleActionMenu(event, btn) {
+    event.stopPropagation();
+    var menu = btn.nextElementSibling;
+    if (!menu) return;
+    var isOpen = menu.classList.contains('show');
+    
+    // Close any other open dropdowns
+    document.querySelectorAll('.action-dropdown-menu.show').forEach(function(el) {
+        el.classList.remove('show');
+    });
+    
+    if (!isOpen) {
+        menu.classList.add('show');
+        
+        // Break completely out of table-responsive / overflow containers using fixed viewport coordinates
+        var rect = btn.getBoundingClientRect();
+        menu.style.position = 'fixed';
+        menu.style.zIndex = '99999';
+        
+        var menuWidth = menu.offsetWidth || 140;
+        var menuHeight = menu.offsetHeight || 135;
+        
+        // Align right edge of menu to right edge of button
+        var left = rect.right - menuWidth;
+        if (left < 10) left = 10;
+        menu.style.left = left + 'px';
+        menu.style.right = 'auto';
+        
+        // Check if menu goes below bottom of viewport
+        if (rect.bottom + menuHeight > window.innerHeight && rect.top > menuHeight) {
+            menu.style.top = (rect.top - menuHeight - 4) + 'px';
+        } else {
+            menu.style.top = (rect.bottom + 4) + 'px';
+        }
+    }
+}
+
+// Close dropdowns on scroll or resize so fixed menu doesn't detach
+window.addEventListener('scroll', function() {
+    document.querySelectorAll('.action-dropdown-menu.show').forEach(function(el) {
+        el.classList.remove('show');
+    });
+}, true);
+
+window.addEventListener('resize', function() {
+    document.querySelectorAll('.action-dropdown-menu.show').forEach(function(el) {
+        el.classList.remove('show');
+    });
+});
+
+// Close dropdowns on outside click
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.action-dropdown-container') && !e.target.closest('.action-dropdown-menu')) {
+        document.querySelectorAll('.action-dropdown-menu.show').forEach(function(el) {
+            el.classList.remove('show');
+        });
+    }
+});
+
 function openResidentModal(data) {
     document.getElementById('m-name').textContent = data.name;
     document.getElementById('m-username').textContent = '@' + data.username;
@@ -536,10 +807,62 @@ function closeResidentModal() {
     modal.style.display = 'none';
 }
 
+function openEditResidentModal(data) {
+    // Close any open menus
+    document.querySelectorAll('.action-dropdown-menu.show').forEach(function(el) {
+        el.classList.remove('show');
+    });
+    
+    var form = document.getElementById('editResidentForm');
+    form.action = '/accounts/residents/' + data.id + '/edit/';
+    
+    document.getElementById('edit-res-first-name').value = data.first_name || '';
+    document.getElementById('edit-res-last-name').value = data.last_name || '';
+    document.getElementById('edit-res-email').value = data.email === 'N/A' ? '' : (data.email || '');
+    document.getElementById('edit-res-phone').value = data.phone === 'N/A' ? '' : (data.phone || '');
+    document.getElementById('edit-res-purok').value = data.purok === 'Unassigned' ? '' : (data.purok || '');
+    document.getElementById('edit-res-address').value = data.address === 'N/A' ? '' : (data.address || '');
+    
+    var civilSelect = document.getElementById('edit-res-civil');
+    if (civilSelect && data.civil) {
+        civilSelect.value = data.civil;
+    }
+    
+    var modal = document.getElementById('editResidentModal');
+    modal.style.display = 'flex';
+}
+
+function closeEditResidentModal() {
+    document.getElementById('editResidentModal').style.display = 'none';
+}
+
+function openDeleteResidentModal(id, name) {
+    // Close any open menus
+    document.querySelectorAll('.action-dropdown-menu.show').forEach(function(el) {
+        el.classList.remove('show');
+    });
+    
+    var form = document.getElementById('deleteResidentForm');
+    form.action = '/accounts/residents/' + id + '/delete/';
+    document.getElementById('delete-resident-name').textContent = name;
+    
+    var modal = document.getElementById('deleteResidentModal');
+    modal.style.display = 'flex';
+}
+
+function closeDeleteResidentModal() {
+    document.getElementById('deleteResidentModal').style.display = 'none';
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     var buttons = document.querySelectorAll('.open-resident-modal-btn');
     buttons.forEach(function(btn) {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            // Close any open menus
+            document.querySelectorAll('.action-dropdown-menu.show').forEach(function(el) {
+                el.classList.remove('show');
+            });
             var data = {
                 id: this.getAttribute('data-id'),
                 name: this.getAttribute('data-name'),
@@ -557,14 +880,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    var modal = document.getElementById('residentDetailModal');
-    if (modal) {
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                closeResidentModal();
-            }
-        });
-    }
+    // Close on backdrop click for all modals
+    ['residentDetailModal', 'editResidentModal', 'deleteResidentModal'].forEach(function(modalId) {
+        var modal = document.getElementById(modalId);
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+    });
 });
 </script>
 {% endblock %}

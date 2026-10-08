@@ -1,0 +1,360 @@
+/**
+ * Apple HIG Design Tokens
+ * Barangay Portal - Unified Design System
+ * 
+ * Based on:
+ * - macOS Human Interface Guidelines (Desktop)
+ * - iOS Human Interface Guidelines (Mobile)
+ * 
+ * Usage: Load this file before any other custom CSS
+ */
+
+:root {
+  /* ============================================
+     TYPOGRAPHY SYSTEM
+     ============================================ */
+  
+  /* Font Families - Apple System Stack */
+  --font-family-base: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-family-display: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-family-mono: "SF Mono", "Menlo", "Consolas", "Courier New", monospace;
+  
+  /* Desktop Typography Scale (macOS HIG) */
+  --text-display: 24px;         /* KPI numbers, big metrics */
+  --text-title: 22px;           /* Window/page titles */
+  --text-section: 18px;         /* Section headers */
+  --text-body: 13px;            /* Table cells, body text, standard inputs */
+  --text-label: 11px;           /* Column headers, field labels */
+  --text-caption: 10px;         /* Badges, timestamps, metadata */
+  
+  /* Mobile Typography Scale (iOS HIG) */
+  --text-mobile-large-title: 34px;    /* Large title (collapses on scroll) */
+  --text-mobile-title1: 28px;         /* Title 1 */
+  --text-mobile-title2: 22px;         /* Title 2 */
+  --text-mobile-title3: 20px;         /* Title 3 */
+  --text-mobile-headline: 17px;       /* Headline (emphasized) */
+  --text-mobile-body: 17px;           /* Body (primary content) */
+  --text-mobile-callout: 16px;        /* Callout (secondary) */
+  --text-mobile-subhead: 15px;        /* Subhead (tertiary) */
+  --text-mobile-footnote: 13px;       /* Footnote */
+  --text-mobile-caption1: 12px;       /* Caption 1 */
+  --text-mobile-caption2: 11px;       /* Caption 2 */
+  
+  /* Font Weights */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-heavy: 800;
+  
+  /* Letter Spacing (Tracking) */
+  --tracking-tight: -0.26px;    /* Large titles */
+  --tracking-normal: -0.08px;   /* Body text */
+  --tracking-wide: 0.06px;      /* Labels */
+  --tracking-wider: 0.12px;     /* Captions, uppercase */
+  
+  /* Line Heights */
+  --leading-tight: 1.2;
+  --leading-normal: 1.4;
+  --leading-relaxed: 1.6;
+  
+  
+  /* ============================================
+     COLOR SYSTEM
+     ============================================ */
+  
+  /* Apple System Neutrals - Light Mode */
+  --color-canvas: #FFFFFF;
+  --color-canvas-secondary: #F9FAFB;
+  --color-sidebar: #F5F5F7;
+  --color-hover: #F2F2F7;
+  --color-hover-secondary: #E8E8ED;
+  --color-border: #E5E5E7;
+  --color-border-strong: #D1D1D6;
+  --color-divider: #C7C7CC;
+  
+  /* Text Colors - Light Mode */
+  --color-text-primary: #1D1D1F;
+  --color-text-secondary: #86868B;
+  --color-text-tertiary: #A1A1A6;
+  --color-text-quaternary: #C7C7CC;
+  --color-text-inverse: #FFFFFF;
+  
+  /* Semantic Colors - Light Mode */
+  --color-accent-blue: #0071E3;
+  --color-accent-blue-hover: #005BB5;
+  --color-accent-blue-subtle: #E8F2FF;
+  
+  --color-success-green: #34C759;
+  --color-success-green-hover: #2DA949;
+  --color-success-green-subtle: rgba(52, 199, 89, 0.15);
+  
+  --color-error-red: #FF3B30;
+  --color-error-red-hover: #D92B20;
+  --color-error-red-subtle: rgba(255, 59, 48, 0.15);
+  
+  --color-warning-orange: #FF9500;
+  --color-warning-orange-hover: #E08600;
+  --color-warning-orange-subtle: rgba(255, 149, 0, 0.15);
+  
+  --color-info-teal: #5AC8FA;
+  --color-info-teal-hover: #4AB8EA;
+  --color-info-teal-subtle: rgba(90, 200, 250, 0.15);
+  
+  --color-purple: #AF52DE;
+  --color-purple-hover: #9F42CE;
+  --color-purple-subtle: rgba(175, 82, 222, 0.15);
+  
+  
+  /* ============================================
+     SPACING SYSTEM (8pt Grid)
+     ============================================ */
+  
+  --space-0: 0;
+  --space-1: 2px;               /* 0.25x */
+  --space-2: 4px;               /* 0.5x */
+  --space-3: 8px;               /* 1x - base unit */
+  --space-4: 12px;              /* 1.5x */
+  --space-5: 16px;              /* 2x */
+  --space-6: 20px;              /* 2.5x */
+  --space-7: 24px;              /* 3x */
+  --space-8: 32px;              /* 4x */
+  --space-9: 40px;              /* 5x */
+  --space-10: 48px;             /* 6x */
+  --space-11: 64px;             /* 8x */
+  
+  
+  /* ============================================
+     LAYOUT DIMENSIONS
+     ============================================ */
+  
+  /* Desktop Dimensions (macOS HIG) */
+  --toolbar-height: 52px;
+  --toolbar-height-compact: 48px;
+  --sidebar-width: 240px;
+  --sidebar-width-collapsed: 64px;
+  --content-padding: 24px;
+  --content-padding-compact: 16px;
+  --table-header-height: 32px;
+  --table-row-height: 42px;
+  --table-row-height-compact: 40px;
+  --button-height: 32px;
+  --button-height-compact: 28px;
+  --input-height: 32px;
+  --input-height-large: 36px;
+  
+  /* Mobile Dimensions (iOS HIG) */
+  --mobile-nav-bar: 44px;
+  --mobile-nav-bar-large: 96px;
+  --mobile-tab-bar: 49px;
+  --mobile-touch-target: 44px;
+  --mobile-margin: 16px;
+  --mobile-list-row: 44px;
+  
+  /* Container Max Widths */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1440px;
+  
+  
+  /* ============================================
+     BORDER RADIUS
+     ============================================ */
+  
+  /* Desktop (macOS HIG - Subtle) */
+  --radius-sm: 4px;
+  --radius-md: 6px;             /* Standard for buttons, inputs */
+  --radius-lg: 10px;            /* Cards, modals */
+  --radius-xl: 12px;
+  
+  /* Mobile (iOS HIG - More Rounded) */
+  --radius-mobile-sm: 8px;
+  --radius-mobile-md: 12px;
+  --radius-mobile-lg: 16px;
+  --radius-mobile-xl: 20px;
+  
+  /* Special */
+  --radius-pill: 999px;
+  --radius-circle: 50%;
+  
+  
+  /* ============================================
+     SHADOWS & DEPTH
+     ============================================ */
+  
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.10);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.15);
+  --shadow-2xl: 0 24px 48px rgba(0, 0, 0, 0.20);
+  
+  /* Focus States */
+  --shadow-focus: 0 0 0 3px rgba(0, 113, 227, 0.25);
+  --shadow-focus-error: 0 0 0 3px rgba(255, 59, 48, 0.25);
+  
+  
+  /* ============================================
+     TRANSITIONS & ANIMATIONS
+     ============================================ */
+  
+  --transition-fast: 0.1s ease;
+  --transition-base: 0.15s ease;
+  --transition-slow: 0.2s ease;
+  --transition-slower: 0.3s ease;
+  
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  
+  
+  /* ============================================
+     Z-INDEX SCALE
+     ============================================ */
+  
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-fixed: 1200;
+  --z-modal-backdrop: 1300;
+  --z-modal: 1400;
+  --z-popover: 1500;
+  --z-tooltip: 1600;
+  --z-notification: 1700;
+}
+
+
+/* ============================================
+   DARK MODE
+   ============================================ */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Apple System Neutrals - Dark Mode */
+    --color-canvas: #1E1E1E;
+    --color-canvas-secondary: #2C2C2E;
+    --color-sidebar: #161617;
+    --color-hover: #2C2C2E;
+    --color-hover-secondary: #3A3A3C;
+    --color-border: #38383A;
+    --color-border-strong: #48484A;
+    --color-divider: #545456;
+    
+    /* Text Colors - Dark Mode */
+    --color-text-primary: #F5F5F7;
+    --color-text-secondary: #A1A1A6;
+    --color-text-tertiary: #8E8E93;
+    --color-text-quaternary: #636366;
+    --color-text-inverse: #1D1D1F;
+    
+    /* Semantic Colors - Dark Mode (Higher saturation) */
+    --color-accent-blue: #2997FF;
+    --color-accent-blue-hover: #147CE5;
+    --color-accent-blue-subtle: rgba(41, 151, 255, 0.20);
+    
+    --color-success-green: #30D158;
+    --color-success-green-hover: #26B648;
+    --color-success-green-subtle: rgba(48, 209, 88, 0.20);
+    
+    --color-error-red: #FF453A;
+    --color-error-red-hover: #E5342A;
+    --color-error-red-subtle: rgba(255, 69, 58, 0.20);
+    
+    --color-warning-orange: #FF9F0A;
+    --color-warning-orange-hover: #E58900;
+    --color-warning-orange-subtle: rgba(255, 159, 10, 0.20);
+    
+    --color-info-teal: #64D2FF;
+    --color-info-teal-hover: #4AB8EA;
+    --color-info-teal-subtle: rgba(100, 210, 255, 0.20);
+    
+    --color-purple: #BF5AF2;
+    --color-purple-hover: #AF4AE2;
+    --color-purple-subtle: rgba(191, 90, 242, 0.20);
+    
+    /* Shadows in dark mode (lighter, more subtle) */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.25);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.30);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.40);
+    --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.45);
+    --shadow-2xl: 0 24px 48px rgba(0, 0, 0, 0.50);
+  }
+}
+
+
+/* ============================================
+   ACCESSIBILITY OVERRIDES
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0.01ms;
+    --transition-base: 0.01ms;
+    --transition-slow: 0.01ms;
+    --transition-slower: 0.01ms;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --color-border: #B3B3B3;
+    --color-border-strong: #999999;
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-border: #666666;
+      --color-border-strong: #7F7F7F;
+    }
+  }
+}
+
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+/* Screen Reader Only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Focus Visible */
+.focus-visible:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+/* Truncate Text */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Line Clamp */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

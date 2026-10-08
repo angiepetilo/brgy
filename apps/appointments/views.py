@@ -2,6 +2,7 @@ from datetime import date, timedelta
 import json
 import re
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
@@ -13,7 +14,7 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
 from apps.accounts.models import User
-from apps.appointments.models import Appointment, HealthCareService, IssuedDocumentLog
+from apps.appointments.models import Appointment, HealthCareService, IssuedDocumentLog, DocumentType
 from apps.appointments.forms import AppointmentCreateForm, AppointmentStatusUpdateForm, HealthCareServiceForm
 from apps.appointments.email_validator import validate_email_address
 from apps.chat.models import Notification
@@ -44,22 +45,32 @@ def appointment_list_view(request):
         svc_date = request.POST.get('service_date', '').strip()
         svc_time = request.POST.get('service_time', '').strip()
         svc_desc = request.POST.get('description', '').strip()
-        time_notes = []
-        if svc_date:
-            time_notes.append(f"Date: {svc_date}")
-        if svc_time:
-            time_notes.append(f"Time: {svc_time}")
-        if time_notes:
-            sched_str = " | ".join(time_notes)
-            svc_desc = f"{svc_desc}\nSchedule: {sched_str}".strip() if svc_desc else f"Schedule: {sched_str}"
         if svc_name:
-            HealthCareService.objects.create(name=svc_name, description=svc_desc, is_active=True)
+            HealthCareService.objects.create(
+                name=svc_name,
+                available_date=svc_date,
+                available_time=svc_time,
+                description=svc_desc,
+                is_active=True
+            )
             messages.success(request, f"New Health Service '{svc_name}' created successfully!")
             return redirect(f"{reverse('appointments:list')}?tab=health_services")
 
     if request.method == 'POST' and 'create_document_request' in request.POST:
-        doc_type = request.POST.get('document_type', Appointment.DOC_CLEARANCE)
+        custom_doc_name = request.POST.get('custom_document_name', '').strip()
+        doc_type = request.POST.get('document_type', '').strip()
         reqs = request.POST.get('requirements_needed', '').strip()
+
+        if custom_doc_name or doc_type == '__custom__':
+            doc_type = custom_doc_name or "Custom Document"
+            # Persist custom document type in catalog
+            DocumentType.objects.get_or_create(
+                name=doc_type,
+                defaults={'requirements_needed': reqs, 'is_active': True}
+            )
+        elif not doc_type:
+            doc_type = Appointment.DOC_CLEARANCE
+
         officer_id = request.POST.get('officer_in_charge')
         officer = User.objects.filter(id=officer_id).first() if officer_id else None
         officer_name = officer.get_full_name() if officer else "Barangay Administration"
@@ -77,7 +88,7 @@ def appointment_list_view(request):
             applicant_email=user.email,
             applicant_phone=user.phone_number,
         )
-        messages.success(request, f"Document request submitted to {officer_name} successfully!")
+        messages.success(request, f"Document request for '{doc_type}' submitted to {officer_name} successfully!")
         return redirect(f"{reverse('appointments:list')}?tab=documents")
 
     if user.is_admin_user or user.is_kapitan_user:
@@ -244,6 +255,7 @@ def appointment_list_view(request):
         'search_query': search_query,
         'status_choices': Appointment.STATUS_CHOICES,
         'doc_choices': Appointment.DOCUMENT_CHOICES,
+        'document_types': DocumentType.objects.filter(is_active=True).order_by('name'),
         'admin_phone': admin_phone,
         'today': today,
         'selected_date': today,
@@ -369,7 +381,11 @@ def public_appointment_book_view(request):
     if errors:
         return JsonResponse({'status': 'error', 'errors': errors, 'message': 'Please correct the highlighted fields.'}, status=400)
 
-    # Resident user linking / auto-creation
+    # Resident user linking:
+    # Resident registrations go to Resident Module (/accounts/signup/).
+    # Appointments go to Appointment Module (/appointments/).
+    # If authenticated, link to current user; if matching an existing resident account, link to it.
+    # Otherwise, keep resident as None and retain applicant details directly on the Appointment model.
     resident = None
     if request.user.is_authenticated:
         resident = request.user
@@ -377,25 +393,6 @@ def public_appointment_book_view(request):
         existing_user = User.objects.filter(email__iexact=email).first() or User.objects.filter(phone_number=clean_phone).first()
         if existing_user:
             resident = existing_user
-        else:
-            clean_first = re.sub(r'[^a-zA-Z0-9]', '', first_name.lower()) or 'user'
-            suffix = clean_phone[-4:] if len(clean_phone) >= 4 else '0001'
-            base_user = f"res_{clean_first}_{suffix}"
-            candidate = base_user
-            ctr = 1
-            while User.objects.filter(username=candidate).exists():
-                candidate = f"{base_user}_{ctr}"
-                ctr += 1
-            resident = User.objects.create_user(
-                username=candidate,
-                email=email,
-                first_name=first_name,
-                last_name=last_name,
-                phone_number=clean_phone,
-                street_address=address,
-                role=User.ROLE_RESIDENT,
-                is_approved=False
-            )
 
     # Create Appointment
     appointment = Appointment.objects.create(
@@ -543,6 +540,9 @@ def healthcare_service_update_view(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, f"Health Care Service '{service.name}' updated successfully.")
+            referer = request.META.get('HTTP_REFERER')
+            if referer and 'appointments/services' not in referer:
+                return redirect(referer)
             return redirect('appointments:service_list')
     else:
         form = HealthCareServiceForm(instance=service)
@@ -565,6 +565,9 @@ def healthcare_service_delete_view(request, pk):
         svc_name = service.name
         service.delete()
         messages.success(request, f"Health Care Service '{svc_name}' deleted successfully.")
+        referer = request.META.get('HTTP_REFERER')
+        if referer and 'appointments/services' not in referer:
+            return redirect(referer)
         return redirect('appointments:service_list')
 
     return render(request, 'appointments/healthcare_service_confirm_delete.html', {
@@ -582,6 +585,57 @@ def api_services_view(request):
         'health_services': health_services,
         'documents': documents
     })
+
+
+@login_required
+def appointment_edit_view(request, pk):
+    user = request.user
+    if not (user.is_admin_user or user.is_kapitan_user):
+        messages.error(request, "Permission denied. Admin privileges required.")
+        return redirect('appointments:list')
+
+    appointment = get_object_or_404(Appointment, pk=pk)
+    if request.method == 'POST':
+        preferred_date = request.POST.get('preferred_date')
+        preferred_time_slot = request.POST.get('preferred_time_slot')
+        status = request.POST.get('status')
+        purpose = request.POST.get('purpose')
+        admin_notes = request.POST.get('admin_notes', '')
+
+        if preferred_date:
+            appointment.preferred_date = preferred_date
+        if preferred_time_slot:
+            appointment.preferred_time_slot = preferred_time_slot
+        if status:
+            appointment.status = status
+            appointment.processed_by = user
+        if purpose is not None:
+            appointment.purpose = purpose
+        appointment.admin_notes = admin_notes
+        appointment.save()
+
+        messages.success(request, f"Appointment record APT-{appointment.id:04d} updated successfully.")
+        return redirect(request.META.get('HTTP_REFERER') or reverse('appointments:list'))
+
+    return redirect('appointments:detail', pk=pk)
+
+
+@login_required
+def appointment_delete_view(request, pk):
+    user = request.user
+    if not (user.is_admin_user or user.is_kapitan_user):
+        messages.error(request, "Permission denied. Admin privileges required.")
+        return redirect('appointments:list')
+
+    appointment = get_object_or_404(Appointment, pk=pk)
+    if request.method == 'POST':
+        apt_ref = f"APT-{appointment.id:04d}"
+        appointment.delete()
+        messages.success(request, f"Appointment {apt_ref} has been deleted successfully.")
+        return redirect(request.META.get('HTTP_REFERER') or reverse('appointments:list'))
+
+    messages.warning(request, "Invalid request method for deleting appointment.")
+    return redirect('appointments:list')
 
 
 @login_required

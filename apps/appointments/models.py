@@ -14,6 +14,8 @@ class HealthCareService(models.Model):
     """
     name = models.CharField(max_length=150, help_text='Name of the health care service')
     description = models.TextField(blank=True, help_text='Detailed description of the health service offered')
+    available_date = models.CharField(max_length=120, blank=True, default='', help_text='Days or dates available (e.g. Mon, Wed, Fri or 2026-10-15)')
+    available_time = models.CharField(max_length=120, blank=True, default='', help_text='Operating hours or time window (e.g. 8:00 AM - 12:00 PM)')
     is_active = models.BooleanField(default=True, help_text='Designates whether this service is active and bookable')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -22,6 +24,35 @@ class HealthCareService(models.Model):
         ordering = ['name']
         verbose_name = 'Health Care Service'
         verbose_name_plural = 'Health Care Services'
+
+    def __str__(self):
+        return self.name
+
+    def get_schedule_display(self):
+        parts = []
+        if self.available_date:
+            parts.append(self.available_date)
+        if self.available_time:
+            parts.append(self.available_time)
+        return " • ".join(parts) if parts else "Mon - Fri • 8:00 AM - 5:00 PM"
+
+
+class DocumentType(models.Model):
+    """
+    Catalog of official clearance and certification document types offered by the Barangay.
+    """
+    name = models.CharField(max_length=150, unique=True, help_text='Name of the document type (e.g. Barangay Clearance)')
+    code = models.CharField(max_length=50, blank=True, default='', help_text='Short code identifier')
+    description = models.TextField(blank=True, default='', help_text='Description or purpose of this document')
+    requirements_needed = models.TextField(blank=True, default='', help_text='Default requirements needed')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Document Type'
+        verbose_name_plural = 'Document Types'
 
     def __str__(self):
         return self.name
@@ -115,7 +146,7 @@ class Appointment(models.Model):
     )
 
     document_type = models.CharField(
-        max_length=50,
+        max_length=150,
         choices=DOCUMENT_CHOICES,
         blank=True,
         default=DOC_CLEARANCE
@@ -200,7 +231,8 @@ class Appointment(models.Model):
         if self.category == self.CATEGORY_HEALTHCARE and self.healthcare_service:
             return self.healthcare_service.name
         elif self.document_type:
-            return self.get_document_type_display()
+            display_dict = dict(self.DOCUMENT_CHOICES)
+            return display_dict.get(self.document_type, self.document_type)
         return "Appointment Request"
 
     def __str__(self):

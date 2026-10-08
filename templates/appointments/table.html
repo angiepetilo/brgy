@@ -65,11 +65,37 @@
                 </div>
             </td>
 
-            <!-- Column 7: ACTION (Circular Button with Vertical Dots) -->
-            <td style="text-align: center;">
-                <a href="{% url 'appointments:detail' apt.id %}" class="btn-action-circle" title="View Appointment Details">
-                    <i class="fa-solid fa-ellipsis-vertical"></i>
-                </a>
+            <!-- Column 7: ACTION (Floating Action Menu: View, Edit, Delete) -->
+            <td style="text-align: center; position: relative;">
+                <div class="action-dropdown-container">
+                    <button type="button" class="btn-action-circle" onclick="toggleActionMenu(event, this)" title="Appointment Actions">
+                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                    </button>
+                    <div class="action-dropdown-menu">
+                        <a href="{% url 'appointments:detail' apt.id %}" class="action-menu-item">
+                            <i class="fa-regular fa-eye" style="color: #2563EB; width: 16px;"></i> View
+                        </a>
+                        <button type="button" class="action-menu-item" 
+                            onclick="openEditAppointmentModal(this)"
+                            data-id="{{ apt.id }}"
+                            data-ref="APT-{{ apt.id }}"
+                            data-name="{{ apt.get_applicant_name }}"
+                            data-date="{{ apt.preferred_date|date:'Y-m-d' }}"
+                            data-slot="{{ apt.preferred_time_slot }}"
+                            data-status="{{ apt.status }}"
+                            data-purpose="{{ apt.purpose }}"
+                            data-notes="{{ apt.admin_notes }}">
+                            <i class="fa-regular fa-pen-to-square" style="color: #D97706; width: 16px;"></i> Edit
+                        </button>
+                        <button type="button" class="action-menu-item text-danger" 
+                            onclick="openDeleteAppointmentModal(this)"
+                            data-id="{{ apt.id }}"
+                            data-ref="APT-{{ apt.id }}"
+                            data-name="{{ apt.get_applicant_name }}">
+                            <i class="fa-regular fa-trash-can" style="color: #DC2626; width: 16px;"></i> Delete
+                        </button>
+                    </div>
+                </div>
             </td>
         </tr>
         {% endfor %}

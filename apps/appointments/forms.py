@@ -6,9 +6,11 @@ from apps.appointments.models import Appointment, HealthCareService
 class HealthCareServiceForm(forms.ModelForm):
     class Meta:
         model = HealthCareService
-        fields = ['name', 'description', 'is_active']
+        fields = ['name', 'available_date', 'available_time', 'description', 'is_active']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Service name (e.g. Dental Cleaning)'}),
+            'available_date': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Every Monday & Wednesday or 2026-10-15'}),
+            'available_time': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 8:00 AM - 12:00 PM'}),
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,

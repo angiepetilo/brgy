@@ -67,22 +67,30 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
                     <div>
                         <span style="font-size: 0.775rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Applicant Name</span>
-                        <div style="font-weight: 700; font-size: 0.95rem; margin-top: 0.2rem;">
-                            {{ appointment.resident.get_full_name|default:appointment.resident.username }}
+                        <div style="font-weight: 700; font-size: 0.95rem; margin-top: 0.2rem; color: #0f172a;">
+                            {{ appointment.get_applicant_name }}
                         </div>
+                        {% if appointment.resident %}
+                        <div style="font-size: 0.75rem; color: #64748b;">@{{ appointment.resident.username }} (Registered Resident)</div>
+                        {% else %}
+                        <div style="font-size: 0.75rem; color: #0284c7; font-weight: 600;">Public / Guest Applicant</div>
+                        {% endif %}
                     </div>
                     <div>
-                        <span style="font-size: 0.775rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Contact Number</span>
-                        <div style="font-weight: 600; font-size: 0.95rem; margin-top: 0.2rem;">
-                            {{ appointment.resident.phone_number|default:"Not specified" }}
+                        <span style="font-size: 0.775rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Contact Details</span>
+                        <div style="font-weight: 600; font-size: 0.95rem; margin-top: 0.2rem; color: #0f172a;">
+                            {{ appointment.get_applicant_phone|default:"Not specified" }}
                         </div>
+                        {% if appointment.get_applicant_email %}
+                        <div style="font-size: 0.75rem; color: #64748b;">{{ appointment.get_applicant_email }}</div>
+                        {% endif %}
                     </div>
                 </div>
 
                 <div style="margin-bottom: 1.25rem;">
-                    <span style="font-size: 0.775rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Registered Address</span>
-                    <div style="font-size: 0.9rem; margin-top: 0.2rem;">
-                        {{ appointment.resident.address|default:"Not specified" }}
+                    <span style="font-size: 0.775rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Address / Location</span>
+                    <div style="font-size: 0.9rem; margin-top: 0.2rem; color: #334155;">
+                        {{ appointment.get_applicant_address|default:"Not specified" }}
                     </div>
                 </div>
 

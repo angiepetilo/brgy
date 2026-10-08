@@ -56,6 +56,20 @@ function clearSelectedImage() {
 
 /* ================= Edit Modal ================= */
 function openEditPostModal(postData) {
+  // Support passing a DOM element with data attributes (e.g. openEditPostModal(this))
+  if (postData && (postData instanceof HTMLElement || postData.dataset)) {
+    const el = postData;
+    postData = {
+      id: el.dataset.id,
+      title: el.dataset.title || '',
+      content: el.dataset.content || '',
+      category: el.dataset.category || '',
+      imageUrl: el.dataset.imageUrl || '',
+      isPinned: el.dataset.isPinned === 'true',
+      actionUrl: el.dataset.actionUrl || ''
+    };
+  }
+
   // Close any open menus
   closeAllPostMenus();
 

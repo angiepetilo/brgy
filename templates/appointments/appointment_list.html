@@ -5,6 +5,62 @@
 {% block extra_css %}
 <style>
     /* ==================== MODERN NON-FLAT DESIGN SYSTEM ==================== */
+    /* Floating 3-Dots Action Dropdown Menu */
+    .action-dropdown-container {
+        position: relative;
+        display: inline-block;
+    }
+    .action-dropdown-menu {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: calc(100% + 4px);
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.18), 0 4px 6px -2px rgba(15, 23, 42, 0.05);
+        z-index: 1050;
+        min-width: 135px;
+        padding: 0.35rem;
+        text-align: left;
+    }
+    .action-dropdown-menu.show {
+        display: block;
+        animation: fadeInMenu 0.15s ease-out;
+    }
+    @keyframes fadeInMenu {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .action-menu-item {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #1E293B;
+        background: none;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background 0.15s ease, color 0.15s ease;
+        box-sizing: border-box;
+    }
+    .action-menu-item:hover {
+        background: #F1F5F9;
+        color: #0F172A;
+    }
+    .action-menu-item.text-danger {
+        color: #DC2626;
+    }
+    .action-menu-item.text-danger:hover {
+        background: #FEF2F2;
+        color: #B91C1C;
+    }
+
     .appointment-module-wrapper {
         padding: 0.5rem 0 2.5rem 0;
     }
@@ -745,7 +801,7 @@
         <div
             style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
             {% for svc in health_services_list %}
-            <div class="stat-card-modern" style="flex-direction: column; align-items: flex-start; gap: 0.6rem;">
+            <div class="stat-card-modern" style="flex-direction: column; align-items: flex-start; gap: 0.6rem; position: relative;">
                 <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <span
@@ -754,12 +810,45 @@
                         </span>
                         <strong style="color: #0F172A; font-size: 0.95rem;">{{ svc.name }}</strong>
                     </div>
-                    {% if svc.is_active %}
-                    <span class="badge badge-success" style="font-size: 0.7rem;">Active</span>
-                    {% else %}
-                    <span class="badge badge-secondary" style="font-size: 0.7rem;">Inactive</span>
-                    {% endif %}
+                    <div style="display: flex; align-items: center; gap: 0.4rem;">
+                        {% if svc.is_active %}
+                        <span class="badge badge-success" style="font-size: 0.7rem;">Active</span>
+                        {% else %}
+                        <span class="badge badge-secondary" style="font-size: 0.7rem;">Inactive</span>
+                        {% endif %}
+
+                        <!-- Floating 3 Dots Menu -->
+                        <div class="action-dropdown-container" style="position: relative;">
+                            <button type="button" class="btn-action-circle" onclick="toggleActionMenu(event, this)" title="Service Options" style="width: 28px; height: 28px; font-size: 0.82rem;">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <div class="action-dropdown-menu">
+                                <button type="button" class="action-menu-item" onclick="openViewHealthServiceModal({id: '{{ svc.id }}', name: '{{ svc.name|escapejs }}', date: '{{ svc.available_date|default:'Monday - Friday'|escapejs }}', time: '{{ svc.available_time|default:'8:00 AM - 5:00 PM'|escapejs }}', desc: '{{ svc.description|escapejs }}', active: {{ svc.is_active|yesno:'true,false' }}})">
+                                    <i class="fa-regular fa-eye" style="color: #2563EB; width: 16px;"></i> View
+                                </button>
+                                <button type="button" class="action-menu-item" onclick="openEditHealthServiceModal({id: '{{ svc.id }}', name: '{{ svc.name|escapejs }}', date: '{{ svc.available_date|default:'Monday - Friday'|escapejs }}', time: '{{ svc.available_time|default:'8:00 AM - 5:00 PM'|escapejs }}', desc: '{{ svc.description|escapejs }}', active: {{ svc.is_active|yesno:'true,false' }}})">
+                                    <i class="fa-regular fa-pen-to-square" style="color: #D97706; width: 16px;"></i> Edit
+                                </button>
+                                <button type="button" class="action-menu-item text-danger" onclick="openDeleteHealthServiceModal('{{ svc.id }}', '{{ svc.name|escapejs }}')">
+                                    <i class="fa-regular fa-trash-can" style="color: #DC2626; width: 16px;"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Available Time & Date Schedule Pill -->
+                <div style="display: flex; flex-wrap: wrap; gap: 0.4rem 0.75rem; margin: 0.15rem 0; padding: 0.45rem 0.65rem; background: #F8FAFC; border-radius: 8px; border: 1px solid #E2E8F0; width: 100%; font-size: 0.76rem; color: #334155; box-sizing: border-box;">
+                    <div style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                        <i class="fa-regular fa-calendar" style="color: #2563EB;"></i>
+                        <span style="font-weight: 600;">{{ svc.available_date|default:"Monday - Friday" }}</span>
+                    </div>
+                    <div style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                        <i class="fa-regular fa-clock" style="color: #16A34A;"></i>
+                        <span>{{ svc.available_time|default:"8:00 AM - 5:00 PM" }}</span>
+                    </div>
+                </div>
+
                 <p style="font-size: 0.78rem; color: #64748B; margin: 0; line-height: 1.45; white-space: pre-line;">
                     {{ svc.description|default:"Available for community residents at the Barangay Health Center." }}
                 </p>
@@ -1117,17 +1206,39 @@
             {% csrf_token %}
             <input type="hidden" name="create_document_request" value="1">
             <div style="margin-bottom: 1.25rem;">
-                <label class="form-label-modern">
-                    <span><i class="fa-solid fa-file-lines" style="color: #2563EB; margin-right: 0.35rem;"></i> Document Type <span style="color: #DC2626;">*</span></span>
-                </label>
-                <div class="input-group-modern">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                    <label class="form-label-modern" style="margin-bottom: 0;">
+                        <span><i class="fa-solid fa-file-lines" style="color: #2563EB; margin-right: 0.35rem;"></i> Document Type <span style="color: #DC2626;">*</span></span>
+                    </label>
+                    <button type="button" id="btn-toggle-custom-doc" onclick="toggleCustomDocMode()" style="background: none; border: none; font-size: 0.76rem; font-weight: 700; color: #2563EB; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem;">
+                        <i class="fa-solid fa-plus-circle"></i> <span id="toggle-doc-text">+ Add Another / Custom Document</span>
+                    </button>
+                </div>
+                <div id="doc_select_wrapper" class="input-group-modern">
                     <i class="fa-solid fa-file-contract icon-prefix"></i>
-                    <select name="document_type" class="form-control-modern" required style="padding-left: 2.4rem;">
-                        <option value="clearance">Barangay Clearance</option>
-                        <option value="residency">Certificate of Residency</option>
-                        <option value="indigency">Certificate of Indigency</option>
-                        <option value="noa">Notice of Award (NOA)</option>
+                    <select name="document_type" id="doc_type_select" class="form-control-modern" onchange="handleDocSelectChange(this.value)" required style="padding-left: 2.4rem;">
+                        <optgroup label="Official Barangay Clearances">
+                            {% for dt in document_types %}
+                            <option value="{{ dt.name }}" data-reqs="{{ dt.requirements_needed }}">{{ dt.name }}</option>
+                            {% empty %}
+                            <option value="clearance">Barangay Clearance</option>
+                            <option value="residency">Certificate of Residency</option>
+                            <option value="indigency">Certificate of Indigency</option>
+                            <option value="noa">Notice of Award (NOA)</option>
+                            {% endfor %}
+                        </optgroup>
+                        <option value="__custom__">+ Add Another / Specify New Document...</option>
                     </select>
+                </div>
+                <!-- Custom Document Name Input -->
+                <div id="custom_doc_wrapper" style="display: none; margin-top: 0.65rem;">
+                    <div class="input-group-modern">
+                        <i class="fa-solid fa-pen-nib icon-prefix" style="color: #2563EB;"></i>
+                        <input type="text" name="custom_document_name" id="custom_doc_input" class="form-control-modern" placeholder="Enter new document name (e.g. Certificate of Good Moral, Business Clearance)..." style="padding-left: 2.4rem;">
+                    </div>
+                    <div style="font-size: 0.72rem; color: #64748B; margin-top: 0.35rem;">
+                        <i class="fa-solid fa-circle-info" style="color: #2563EB;"></i> This will create and register this new document into the Barangay documents catalog.
+                    </div>
                 </div>
             </div>
             <div style="margin-bottom: 1.25rem;">
@@ -1228,6 +1339,220 @@
     </div>
 </div>
 
+<!-- Modal: Edit Appointment -->
+<div id="editAppointmentModal" class="modal-overlay" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.72); display: none; align-items: center; justify-content: center; z-index: 2500; padding: 1.25rem; backdrop-filter: blur(8px);">
+    <div class="modal-container" style="background: #FFFFFF; border-radius: 20px; width: 100%; max-width: 580px; box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.35); border: 1px solid #E2E8F0; overflow: hidden;">
+        <div class="modal-header-bar">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); color: #D97706; display: inline-flex; align-items: center; justify-content: center; font-size: 1.15rem;">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </span>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0F172A;" id="edit-apt-title">Edit Appointment</h3>
+                    <p style="margin: 0.15rem 0 0 0; font-size: 0.78rem; color: #64748B;" id="edit-apt-subtitle">Update schedule date, time slot, status, and remarks</p>
+                </div>
+            </div>
+            <button type="button" class="modal-close-btn" onclick="closeEditAppointmentModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form id="editAppointmentForm" method="post" action="" style="padding: 1.5rem;">
+            {% csrf_token %}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                <div>
+                    <label class="form-label-modern"><span><i class="fa-regular fa-calendar" style="color: #2563EB;"></i> Preferred Date <span style="color: #DC2626;">*</span></span></label>
+                    <div class="input-group-modern">
+                        <i class="fa-regular fa-calendar-day icon-prefix"></i>
+                        <input type="date" name="preferred_date" id="edit-apt-date" class="form-control-modern" required style="padding-left: 2.4rem;">
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label-modern"><span><i class="fa-regular fa-clock" style="color: #2563EB;"></i> Time Slot <span style="color: #DC2626;">*</span></span></label>
+                    <div class="input-group-modern">
+                        <i class="fa-solid fa-clock icon-prefix"></i>
+                        <select name="preferred_time_slot" id="edit-apt-slot" class="form-control-modern" required style="padding-left: 2.4rem;">
+                            <option value="morning">Morning (8:00 AM - 11:30 AM)</option>
+                            <option value="afternoon">Afternoon (1:00 PM - 4:30 PM)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+                <label class="form-label-modern"><span><i class="fa-solid fa-sliders" style="color: #2563EB;"></i> Request Status <span style="color: #DC2626;">*</span></span></label>
+                <div class="input-group-modern">
+                    <i class="fa-solid fa-circle-check icon-prefix"></i>
+                    <select name="status" id="edit-apt-status" class="form-control-modern" required style="padding-left: 2.4rem;">
+                        <option value="submitted">Submitted (Pending Review)</option>
+                        <option value="under_review">Under Review</option>
+                        <option value="approved_scheduled">Approved / Scheduled</option>
+                        <option value="ready_for_pickup">Ready for Pickup</option>
+                        <option value="completed">Completed</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+                <label class="form-label-modern"><span><i class="fa-solid fa-file-lines" style="color: #2563EB;"></i> Purpose / Remarks</span></label>
+                <div class="input-group-modern">
+                    <textarea name="purpose" id="edit-apt-purpose" rows="2" class="form-control-modern" style="padding: 0.75rem 0.9rem; line-height: 1.5;"></textarea>
+                </div>
+            </div>
+            <div style="margin-bottom: 1.5rem;">
+                <label class="form-label-modern"><span><i class="fa-solid fa-comment-medical" style="color: #2563EB;"></i> Administrative Notes / Instructions</span></label>
+                <div class="input-group-modern">
+                    <textarea name="admin_notes" id="edit-apt-notes" rows="2" class="form-control-modern" placeholder="Add administrative remarks or pickup instructions..." style="padding: 0.75rem 0.9rem; line-height: 1.5;"></textarea>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; padding-top: 1.25rem; border-top: 1px solid #F1F5F9;">
+                <button type="button" class="btn btn-secondary" onclick="closeEditAppointmentModal()" style="font-weight: 600; padding: 0.6rem 1.25rem; border-radius: 10px;">Cancel</button>
+                <button type="submit" class="btn-add-appointment" style="font-size: 0.875rem; padding: 0.65rem 1.4rem;">
+                    <i class="fa-solid fa-floppy-disk" style="margin-right: 0.35rem;"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Delete Appointment Confirmation -->
+<div id="deleteAppointmentModal" class="modal-overlay" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.72); display: none; align-items: center; justify-content: center; z-index: 2500; padding: 1.25rem; backdrop-filter: blur(8px);">
+    <div class="modal-container" style="background: #FFFFFF; border-radius: 20px; width: 100%; max-width: 460px; box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.35); border: 1px solid #E2E8F0; overflow: hidden; padding: 2rem 1.75rem; text-align: center;">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: #FEE2E2; color: #DC2626; display: inline-flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem;">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; font-weight: 800; color: #0F172A;">Delete Appointment Record?</h3>
+        <p style="color: #64748B; font-size: 0.875rem; margin: 0 0 1.5rem 0; line-height: 1.5;">
+            Are you sure you want to permanently delete appointment <strong id="delete-apt-ref" style="color: #0F172A;"></strong> for <span id="delete-apt-name" style="font-weight: 700; color: #0F172A;"></span>?
+        </p>
+        <form id="deleteAppointmentForm" method="post" action="">
+            {% csrf_token %}
+            <div style="display: flex; gap: 0.75rem; justify-content: center;">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteAppointmentModal()" style="font-weight: 600; padding: 0.65rem 1.4rem; border-radius: 10px;">Cancel</button>
+                <button type="submit" class="btn btn-danger" style="font-weight: 700; padding: 0.65rem 1.4rem; border-radius: 10px; background: #DC2626; color: #FFFFFF; border: none;">
+                    <i class="fa-solid fa-trash-can" style="margin-right: 0.35rem;"></i> Confirm Delete
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: View Health Service Details -->
+<div id="viewHealthServiceModal" class="modal-overlay" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.72); display: none; align-items: center; justify-content: center; z-index: 2500; padding: 1.25rem; backdrop-filter: blur(8px);">
+    <div class="modal-container" style="background: #FFFFFF; border-radius: 20px; width: 100%; max-width: 520px; box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.35); border: 1px solid #E2E8F0; overflow: hidden;">
+        <div class="modal-header-bar">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="width: 40px; height: 40px; border-radius: 12px; background: #ECFDF5; color: #16A34A; display: inline-flex; align-items: center; justify-content: center; font-size: 1.15rem;">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                </span>
+                <div>
+                    <h3 id="view-svc-name" style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0F172A;">Health Service</h3>
+                    <p style="margin: 0.15rem 0 0 0; font-size: 0.78rem; color: #64748B;">Barangay Health Center Consultation Service</p>
+                </div>
+            </div>
+            <button type="button" class="modal-close-btn" onclick="closeViewHealthServiceModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div style="padding: 1.5rem;">
+            <div style="display: flex; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 180px; padding: 0.75rem; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px;">
+                    <div style="font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase;">Available Date / Days</div>
+                    <div id="view-svc-date" style="font-weight: 700; color: #0F172A; font-size: 0.9rem; margin-top: 0.2rem;">-</div>
+                </div>
+                <div style="flex: 1; min-width: 180px; padding: 0.75rem; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px;">
+                    <div style="font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase;">Operating Hours / Time</div>
+                    <div id="view-svc-time" style="font-weight: 700; color: #0F172A; font-size: 0.9rem; margin-top: 0.2rem;">-</div>
+                </div>
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+                <div style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 0.4rem;">Service Description & Guidelines</div>
+                <div id="view-svc-desc" style="padding: 0.85rem; background: #F1F5F9; border-radius: 10px; font-size: 0.825rem; color: #334155; line-height: 1.5; white-space: pre-line;">-</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid #F1F5F9;">
+                <span id="view-svc-status-badge" class="badge badge-success">Active</span>
+                <button type="button" class="btn btn-secondary" onclick="closeViewHealthServiceModal()" style="font-weight: 600; padding: 0.55rem 1.25rem; border-radius: 10px;">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Edit Health Service -->
+<div id="editHealthServiceModal" class="modal-overlay" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.72); display: none; align-items: center; justify-content: center; z-index: 2500; padding: 1.25rem; backdrop-filter: blur(8px);">
+    <div class="modal-container" style="background: #FFFFFF; border-radius: 20px; width: 100%; max-width: 580px; box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.35); border: 1px solid #E2E8F0; overflow: hidden;">
+        <div class="modal-header-bar">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); color: #D97706; display: inline-flex; align-items: center; justify-content: center; font-size: 1.15rem;">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </span>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0F172A;">Edit Health Service</h3>
+                    <p style="margin: 0.15rem 0 0 0; font-size: 0.78rem; color: #64748B;">Update schedule, availability, and description</p>
+                </div>
+            </div>
+            <button type="button" class="modal-close-btn" onclick="closeEditHealthServiceModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form id="editHealthServiceForm" method="post" action="" style="padding: 1.5rem;">
+            {% csrf_token %}
+            <div style="margin-bottom: 1.25rem;">
+                <label class="form-label-modern"><span><i class="fa-solid fa-briefcase-medical" style="color: #16A34A; margin-right: 0.35rem;"></i> Name of Service <span style="color: #DC2626;">*</span></span></label>
+                <div class="input-group-modern">
+                    <i class="fa-solid fa-stethoscope icon-prefix"></i>
+                    <input type="text" name="name" id="edit-svc-name" class="form-control-modern" required style="padding-left: 2.4rem;">
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                <div>
+                    <label class="form-label-modern"><span><i class="fa-regular fa-calendar" style="color: #16A34A; margin-right: 0.35rem;"></i> Available Date / Days <span style="color: #DC2626;">*</span></span></label>
+                    <div class="input-group-modern">
+                        <i class="fa-regular fa-calendar-day icon-prefix"></i>
+                        <input type="text" name="available_date" id="edit-svc-date" class="form-control-modern" placeholder="e.g. Every Mon & Wed or 2026-10-15" required style="padding-left: 2.4rem;">
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label-modern"><span><i class="fa-regular fa-clock" style="color: #16A34A; margin-right: 0.35rem;"></i> Available Time Slot <span style="color: #DC2626;">*</span></span></label>
+                    <div class="input-group-modern">
+                        <i class="fa-solid fa-clock-rotate-left icon-prefix"></i>
+                        <input type="text" name="available_time" id="edit-svc-time" class="form-control-modern" placeholder="e.g. 8:00 AM - 12:00 PM" required style="padding-left: 2.4rem;">
+                    </div>
+                </div>
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+                <label class="form-label-modern"><span><i class="fa-solid fa-file-prescription" style="color: #16A34A; margin-right: 0.35rem;"></i> Description / Notes</span></label>
+                <div class="input-group-modern">
+                    <textarea name="description" id="edit-svc-desc" rows="3" class="form-control-modern" style="padding: 0.75rem 0.9rem; line-height: 1.5;"></textarea>
+                </div>
+            </div>
+            <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <input type="checkbox" name="is_active" id="edit-svc-active" value="true" style="width: 18px; height: 18px; accent-color: #16A34A;">
+                <label for="edit-svc-active" style="font-size: 0.85rem; font-weight: 600; color: #0F172A; cursor: pointer;">Active & Available for Booking</label>
+            </div>
+            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; padding-top: 1.25rem; border-top: 1px solid #F1F5F9;">
+                <button type="button" class="btn btn-secondary" onclick="closeEditHealthServiceModal()" style="font-weight: 600; padding: 0.6rem 1.25rem; border-radius: 10px;">Cancel</button>
+                <button type="submit" class="btn-add-appointment" style="font-size: 0.875rem; padding: 0.65rem 1.4rem; background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);">
+                    <i class="fa-solid fa-floppy-disk" style="margin-right: 0.35rem;"></i> Save Service
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Delete Health Service Confirmation -->
+<div id="deleteHealthServiceModal" class="modal-overlay" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.72); display: none; align-items: center; justify-content: center; z-index: 2500; padding: 1.25rem; backdrop-filter: blur(8px);">
+    <div class="modal-container" style="background: #FFFFFF; border-radius: 20px; width: 100%; max-width: 460px; box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.35); border: 1px solid #E2E8F0; overflow: hidden; padding: 2rem 1.75rem; text-align: center;">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: #FEE2E2; color: #DC2626; display: inline-flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem;">
+            <i class="fa-solid fa-trash-can"></i>
+        </div>
+        <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; font-weight: 800; color: #0F172A;">Delete Health Service?</h3>
+        <p style="color: #64748B; font-size: 0.875rem; margin: 0 0 1.5rem 0; line-height: 1.5;">
+            Are you sure you want to delete <strong id="delete-svc-name" style="color: #0F172A;"></strong> from the health consultation services catalog?
+        </p>
+        <form id="deleteHealthServiceForm" method="post" action="">
+            {% csrf_token %}
+            <div style="display: flex; gap: 0.75rem; justify-content: center;">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteHealthServiceModal()" style="font-weight: 600; padding: 0.65rem 1.4rem; border-radius: 10px;">Cancel</button>
+                <button type="submit" class="btn btn-danger" style="font-weight: 700; padding: 0.65rem 1.4rem; border-radius: 10px; background: #DC2626; color: #FFFFFF; border: none;">
+                    <i class="fa-solid fa-trash-can" style="margin-right: 0.35rem;"></i> Confirm Delete
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     function openAddDocumentModal() {
         document.getElementById('addDocumentModal').style.display = 'flex';
@@ -1241,6 +1566,188 @@
     function closeAddHealthServiceModal() {
         document.getElementById('addHealthServiceModal').style.display = 'none';
     }
+
+    function toggleCustomDocMode() {
+        var customWrapper = document.getElementById('custom_doc_wrapper');
+        var customInput = document.getElementById('custom_doc_input');
+        var select = document.getElementById('doc_type_select');
+        var toggleText = document.getElementById('toggle-doc-text');
+
+        if (customWrapper.style.display === 'none') {
+            customWrapper.style.display = 'block';
+            customInput.required = true;
+            select.removeAttribute('required');
+            toggleText.textContent = "Select from standard list";
+            customInput.focus();
+        } else {
+            customWrapper.style.display = 'none';
+            customInput.required = false;
+            select.setAttribute('required', 'required');
+            toggleText.textContent = "+ Add Another / Custom Document";
+        }
+    }
+
+    function handleDocSelectChange(val) {
+        var customWrapper = document.getElementById('custom_doc_wrapper');
+        var customInput = document.getElementById('custom_doc_input');
+        var toggleText = document.getElementById('toggle-doc-text');
+        if (val === '__custom__') {
+            customWrapper.style.display = 'block';
+            customInput.required = true;
+            toggleText.textContent = "Select from standard list";
+            customInput.focus();
+        } else {
+            customWrapper.style.display = 'none';
+            customInput.required = false;
+            toggleText.textContent = "+ Add Another / Custom Document";
+        }
+    }
+
+    function toggleActionMenu(event, btn) {
+        event.stopPropagation();
+        var menu = btn.nextElementSibling;
+        if (!menu) return;
+        var isOpen = menu.classList.contains('show');
+
+        var allMenus = document.querySelectorAll('.action-dropdown-menu');
+        allMenus.forEach(function(m) {
+            m.classList.remove('show');
+        });
+
+        if (!isOpen) {
+            menu.classList.add('show');
+
+            // Break completely out of table-responsive / overflow containers using fixed viewport coordinates
+            var rect = btn.getBoundingClientRect();
+            menu.style.position = 'fixed';
+            menu.style.zIndex = '99999';
+
+            var menuWidth = menu.offsetWidth || 140;
+            var menuHeight = menu.offsetHeight || 135;
+
+            // Align right edge of menu to right edge of button
+            var left = rect.right - menuWidth;
+            if (left < 10) left = 10;
+            menu.style.left = left + 'px';
+            menu.style.right = 'auto';
+
+            // Check if menu goes below bottom of viewport
+            if (rect.bottom + menuHeight > window.innerHeight && rect.top > menuHeight) {
+                menu.style.top = (rect.top - menuHeight - 4) + 'px';
+            } else {
+                menu.style.top = (rect.bottom + 4) + 'px';
+            }
+        }
+    }
+
+    // Close dropdowns on scroll or resize so fixed menu doesn't detach
+    window.addEventListener('scroll', function() {
+        document.querySelectorAll('.action-dropdown-menu.show').forEach(function(el) {
+            el.classList.remove('show');
+        });
+    }, true);
+
+    window.addEventListener('resize', function() {
+        document.querySelectorAll('.action-dropdown-menu.show').forEach(function(el) {
+            el.classList.remove('show');
+        });
+    });
+
+    function openEditAppointmentModal(btnOrData) {
+        var data = (btnOrData && btnOrData.dataset) ? {
+            id: btnOrData.dataset.id,
+            ref: btnOrData.dataset.ref,
+            name: btnOrData.dataset.name,
+            date: btnOrData.dataset.date,
+            slot: btnOrData.dataset.slot,
+            status: btnOrData.dataset.status,
+            purpose: btnOrData.dataset.purpose,
+            notes: btnOrData.dataset.notes
+        } : btnOrData;
+
+        document.getElementById('edit-apt-title').textContent = 'Edit ' + (data.ref || 'Appointment');
+        document.getElementById('edit-apt-subtitle').textContent = 'Applicant: ' + (data.name || '');
+        document.getElementById('edit-apt-date').value = data.date || '';
+        document.getElementById('edit-apt-slot').value = data.slot || 'morning';
+        document.getElementById('edit-apt-status').value = data.status || 'submitted';
+        document.getElementById('edit-apt-purpose').value = data.purpose || '';
+        document.getElementById('edit-apt-notes').value = data.notes || '';
+        document.getElementById('editAppointmentForm').action = '/appointments/' + data.id + '/edit/';
+        document.getElementById('editAppointmentModal').style.display = 'flex';
+        document.querySelectorAll('.action-dropdown-menu.show').forEach(function(m) { m.classList.remove('show'); });
+    }
+    function closeEditAppointmentModal() {
+        document.getElementById('editAppointmentModal').style.display = 'none';
+    }
+
+    function openDeleteAppointmentModal(btnOrId, ref, name) {
+        var id = btnOrId;
+        if (btnOrId && btnOrId.dataset) {
+            id = btnOrId.dataset.id;
+            ref = btnOrId.dataset.ref;
+            name = btnOrId.dataset.name;
+        }
+        document.getElementById('delete-apt-ref').textContent = ref;
+        document.getElementById('delete-apt-name').textContent = name;
+        document.getElementById('deleteAppointmentForm').action = '/appointments/' + id + '/delete/';
+        document.getElementById('deleteAppointmentModal').style.display = 'flex';
+        document.querySelectorAll('.action-dropdown-menu.show').forEach(function(m) { m.classList.remove('show'); });
+    }
+    function closeDeleteAppointmentModal() {
+        document.getElementById('deleteAppointmentModal').style.display = 'none';
+    }
+
+    function openViewHealthServiceModal(data) {
+        document.getElementById('view-svc-name').textContent = data.name;
+        document.getElementById('view-svc-date').textContent = data.date || 'Monday - Friday';
+        document.getElementById('view-svc-time').textContent = data.time || '8:00 AM - 5:00 PM';
+        document.getElementById('view-svc-desc').textContent = data.desc || 'Available for community residents at the Barangay Health Center.';
+        var badge = document.getElementById('view-svc-status-badge');
+        if (data.active) {
+            badge.className = 'badge badge-success';
+            badge.textContent = 'Active';
+        } else {
+            badge.className = 'badge badge-secondary';
+            badge.textContent = 'Inactive';
+        }
+        document.getElementById('viewHealthServiceModal').style.display = 'flex';
+        document.querySelectorAll('.action-dropdown-menu.show').forEach(function(m) { m.classList.remove('show'); });
+    }
+    function closeViewHealthServiceModal() {
+        document.getElementById('viewHealthServiceModal').style.display = 'none';
+    }
+
+    function openEditHealthServiceModal(data) {
+        document.getElementById('edit-svc-name').value = data.name;
+        document.getElementById('edit-svc-date').value = data.date || '';
+        document.getElementById('edit-svc-time').value = data.time || '';
+        document.getElementById('edit-svc-desc').value = data.desc || '';
+        document.getElementById('edit-svc-active').checked = !!data.active;
+        document.getElementById('editHealthServiceForm').action = '/appointments/services/' + data.id + '/edit/';
+        document.getElementById('editHealthServiceModal').style.display = 'flex';
+        document.querySelectorAll('.action-dropdown-menu.show').forEach(function(m) { m.classList.remove('show'); });
+    }
+    function closeEditHealthServiceModal() {
+        document.getElementById('editHealthServiceModal').style.display = 'none';
+    }
+
+    function openDeleteHealthServiceModal(id, name) {
+        document.getElementById('delete-svc-name').textContent = name;
+        document.getElementById('deleteHealthServiceForm').action = '/appointments/services/' + id + '/delete/';
+        document.getElementById('deleteHealthServiceModal').style.display = 'flex';
+        document.querySelectorAll('.action-dropdown-menu.show').forEach(function(m) { m.classList.remove('show'); });
+    }
+    function closeDeleteHealthServiceModal() {
+        document.getElementById('deleteHealthServiceModal').style.display = 'none';
+    }
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.action-dropdown-container')) {
+            document.querySelectorAll('.action-dropdown-menu.show').forEach(function(m) {
+                m.classList.remove('show');
+            });
+        }
+    });
     function openAddAppointmentModal(docPreset, isHealth, serviceId) {
         var modal = document.getElementById('moduleAddAppointmentModal');
         document.getElementById('modal-form-wrapper').style.display = 'block';

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apple HIG Design System Demo - Barangay Portal</title>
+    {% load static core_tags %}
+    <!-- Apple HIG Design System -->
+    <link rel="stylesheet" href="{% static 'css/design-tokens.css' %}">
+    <link rel="stylesheet" href="{% static 'css/layout-desktop.css' %}">
+    <link rel="stylesheet" href="{% static 'css/layout-mobile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components-hig.css' %}">
+</head>
+<body data-icon-sprite="{% static 'vendor/lucide/sprite.svg' %}">
+
+<!-- Desktop + Mobile Adaptive Container -->
+<div class="hig-container">
+    
+    <!-- ============================================
+         SIDEBAR (Desktop Only, 240px)
+         ============================================ -->
+    <aside class="hig-sidebar">
+        <div class="hig-sidebar-header">
+            <img src="{% static 'images/barangay_logo.png' %}" alt="Logo" class="hig-sidebar-logo">
+            <span class="hig-sidebar-title">Barangay Portal</span>
+        </div>
+        
+        <nav class="hig-sidebar-nav">
+            <a href="#" class="hig-nav-item active">
+                {% icon 'layout-dashboard' cls='hig-nav-icon' %}
+                <span class="hig-nav-label">Dashboard</span>
+            </a>
+            <a href="#" class="hig-nav-item">
+                {% icon 'calendar-check' cls='hig-nav-icon' %}
+                <span class="hig-nav-label">Appointments</span>
+                <span class="hig-nav-badge">3</span>
+            </a>
+            <a href="#" class="hig-nav-item">
+                {% icon 'users' cls='hig-nav-icon' %}
+                <span class="hig-nav-label">Residents</span>
+            </a>
+            <a href="#" class="hig-nav-item">
+                {% icon 'file-text' cls='hig-nav-icon' %}
+                <span class="hig-nav-label">Records</span>
+            </a>
+            <a href="#" class="hig-nav-item">
+                {% icon 'scale' cls='hig-nav-icon' %}
+                <span class="hig-nav-label">Blotter</span>
+            </a>
+            <a href="#" class="hig-nav-item">
+                {% icon 'chart-column' cls='hig-nav-icon' %}
+                <span class="hig-nav-label">Statistics</span>
+            </a>
+            
+            <div class="hig-nav-section">
+                <div class="hig-nav-section-title">System</div>
+                <a href="#" class="hig-nav-item">
+                    {% icon 'settings' cls='hig-nav-icon' %}
+                    <span class="hig-nav-label">Settings</span>
+                </a>
+            </div>
+        </nav>
+    </aside>
+    
+    <!-- ============================================
+         MOBILE NAVIGATION BAR (Mobile Only, 44px)
+         ============================================ -->
+    <nav class="hig-mobile-nav">
+        <a href="#" class="hig-nav-back">
+            {% icon 'chevron-left' cls='hig-nav-back-icon' %}
+        </a>
+        <h1 class="hig-nav-title">Dashboard</h1>
+        <button class="hig-nav-action primary">Done</button>
+    </nav>
+    
+    <!-- ============================================
+         MAIN CONTENT AREA
+         ============================================ -->
+    <main class="hig-main">
+        
+        <!-- Toolbar (Desktop: 52px) -->
+        <header class="hig-toolbar">
+            <h1 class="hig-toolbar-title">Dashboard</h1>
+            <div class="hig-toolbar-actions">
+                <input type="search" class="hig-toolbar-search" placeholder="Search...">
+                <button class="hig-btn hig-btn-secondary">
+                    {% icon 'sliders-horizontal' %}
+                    Filter
+                </button>
+                <button class="hig-btn hig-btn-primary">
+                    {% icon 'plus' %}
+                    New Record
+                </button>
+            </div>
+        </header>
+        
+        <!-- Scrollable Content -->
+        <div class="hig-content">
+            
+            <!-- KPI Cards Grid -->
+            <div class="hig-section-header">
+                <div>
+                    <h2 class="hig-section-title">Key Metrics</h2>
+                    <p class="hig-section-description">Overview of barangay statistics</p>
+                </div>
+            </div>
+            
+            <div class="hig-grid hig-grid-4">
+                <div class="hig-kpi-card">
+                    <div class="hig-kpi-label">Registered Residents</div>
+                    <div class="hig-kpi-value">1,247</div>
+                    <div class="hig-kpi-change positive">
+                        {% icon 'trending-up' %}
+                        +12.5% from last month
+                    </div>
+                </div>
+                
+                <div class="hig-kpi-card">
+                    <div class="hig-kpi-label">Pending Appointments</div>
+                    <div class="hig-kpi-value">23</div>
+                    <div class="hig-kpi-change negative">
+                        {% icon 'trending-down' %}
+                        -5% from last week
+                    </div>
+                </div>
+                
+                <div class="hig-kpi-card">
+                    <div class="hig-kpi-label">Active Blotter Cases</div>
+                    <div class="hig-kpi-value">8</div>
+                    <div class="hig-kpi-change positive">
+                        {% icon 'minus' %}
+                        No change
+                    </div>
+                </div>
+                
+                <div class="hig-kpi-card">
+                    <div class="hig-kpi-label">Revenue This Month</div>
+                    <div class="hig-kpi-value">₱12,450</div>
+                    <div class="hig-kpi-change positive">
+                        {% icon 'trending-up' %}
+                        +8.2% from last month
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Appointments Table -->
+            <div class="hig-section-header">
+                <div>
+                    <h2 class="hig-section-title">Recent Appointments</h2>
+                    <p class="hig-section-description">Latest document and health service bookings</p>
+                </div>
+                <div class="hig-section-actions">
+                    <button class="hig-btn hig-btn-secondary">View All</button>
+                </div>
+            </div>
+            
+            <!-- Desktop Table (≥768px) -->
+            <div class="hig-table-container">
+                <table class="hig-table">
+                    <thead>
+                        <tr>
+                            <th class="align-left">Applicant</th>
+                            <th class="align-left">Service</th>
+                            <th class="align-left">Purok</th>
+                            <th class="align-right">Fee</th>
+                            <th class="align-center">Status</th>
+                            <th class="align-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="align-left">Juan Dela Cruz</td>
+                            <td class="align-left">Barangay Clearance</td>
+                            <td class="align-left">Purok 1</td>
+                            <td class="align-right">₱75.00</td>
+                            <td class="align-center">
+                                <span class="hig-badge hig-badge-success hig-badge-pill">Approved</span>
+                            </td>
+                            <td class="align-right">
+                                <div class="hig-table-actions">
+                                    <button class="hig-btn-icon" title="View">
+                                        {% icon 'eye' %}
+                                    </button>
+                                    <button class="hig-btn-icon" title="Edit">
+                                        {% icon 'square-pen' %}
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="align-left">Maria Santos</td>
+                            <td class="align-left">Certificate of Indigency</td>
+                            <td class="align-left">Purok 2</td>
+                            <td class="align-right">Free</td>
+                            <td class="align-center">
+                                <span class="hig-badge hig-badge-warning hig-badge-pill">Pending</span>
+                            </td>
+                            <td class="align-right">
+                                <div class="hig-table-actions">
+                                    <button class="hig-btn-icon" title="View">
+                                        {% icon 'eye' %}
+                                    </button>
+                                    <button class="hig-btn-icon" title="Edit">
+                                        {% icon 'square-pen' %}
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="align-left">Pedro Garcia</td>
+                            <td class="align-left">Business Permit</td>
+                            <td class="align-left">Purok 3</td>
+                            <td class="align-right">₱500.00</td>
+                            <td class="align-center">
+                                <span class="hig-badge hig-badge-success hig-badge-pill">Completed</span>
+                            </td>
+                            <td class="align-right">
+                                <div class="hig-table-actions">
+                                    <button class="hig-btn-icon" title="View">
+                                        {% icon 'eye' %}
+                                    </button>
+                                    <button class="hig-btn-icon" title="Print">
+                                        {% icon 'printer' %}
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="align-left">Ana Reyes</td>
+                            <td class="align-left">Health Check-up</td>
+                            <td class="align-left">Purok 1</td>
+                            <td class="align-right">Free</td>
+                            <td class="align-center">
+                                <span class="hig-badge hig-badge-error hig-badge-pill">Rejected</span>
+                            </td>
+                            <td class="align-right">
+                                <div class="hig-table-actions">
+                                    <button class="hig-btn-icon" title="View">
+                                        {% icon 'eye' %}
+                                    </button>
+                                    <button class="hig-btn-icon" title="Delete">
+                                        {% icon 'trash-2' %}
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Mobile List (<768px) -->
+            <ul class="hig-mobile-list">
+                <li>
+                    <a href="#" class="hig-list-item">
+                        <div class="hig-list-item-icon">
+                            {% icon 'file-text' %}
+                        </div>
+                        <div class="hig-list-item-content">
+                            <h3 class="hig-list-item-title">Juan Dela Cruz</h3>
+                            <p class="hig-list-item-subtitle">Barangay Clearance · ₱75.00</p>
+                        </div>
+                        <span class="hig-badge hig-badge-success hig-badge-pill">Approved</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="hig-list-item">
+                        <div class="hig-list-item-icon">
+                            {% icon 'file-text' %}
+                        </div>
+                        <div class="hig-list-item-content">
+                            <h3 class="hig-list-item-title">Maria Santos</h3>
+                            <p class="hig-list-item-subtitle">Certificate of Indigency · Free</p>
+                        </div>
+                        <span class="hig-badge hig-badge-warning hig-badge-pill">Pending</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="hig-list-item">
+                        <div class="hig-list-item-icon">
+                            {% icon 'file-text' %}
+                        </div>
+                        <div class="hig-list-item-content">
+                            <h3 class="hig-list-item-title">Pedro Garcia</h3>
+                            <p class="hig-list-item-subtitle">Business Permit · ₱500.00</p>
+                        </div>
+                        <span class="hig-badge hig-badge-success hig-badge-pill">Completed</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <!-- Alert Example -->
+            <div class="hig-alert hig-alert-success">
+                <svg class="hig-alert-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="m9 12 2 2 4-4"/>
+                </svg>
+                <div class="hig-alert-content">
+                    <h4 class="hig-alert-title">System Update Complete</h4>
+                    <p class="hig-alert-message">The Apple HIG design system has been successfully applied to your portal.</p>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+    
+    <!-- ============================================
+         MOBILE TAB BAR (Mobile Only, 49px)
+         ============================================ -->
+    <nav class="hig-mobile-tabs">
+        <a href="#" class="hig-tab-item active">
+            {% icon 'layout-dashboard' cls='hig-tab-icon' %}
+            <span class="hig-tab-label">Home</span>
+        </a>
+        <a href="#" class="hig-tab-item">
+            {% icon 'calendar-check' cls='hig-tab-icon' %}
+            <span class="hig-tab-label">Bookings</span>
+            <span class="hig-tab-badge">3</span>
+        </a>
+        <a href="#" class="hig-tab-item">
+            {% icon 'users' cls='hig-tab-icon' %}
+            <span class="hig-tab-label">Residents</span>
+        </a>
+        <a href="#" class="hig-tab-item">
+            {% icon 'settings' cls='hig-tab-icon' %}
+            <span class="hig-tab-label">Settings</span>
+        </a>
+    </nav>
+    
+</div>
+
+</body>
+</html>

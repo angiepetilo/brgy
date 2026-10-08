@@ -1,0 +1,497 @@
+/**
+ * Mobile Layout System (iOS HIG)
+ * Breakpoint: <768px
+ * 
+ * Architecture:
+ * - 44px navigation bar (top)
+ * - Full-screen scrollable content
+ * - 49px tab bar (bottom, 3-5 items)
+ * - Respects safe areas
+ */
+
+/* ============================================
+   MOBILE CONTAINER
+   ============================================ */
+
+@media (max-width: 767px) {
+  .hig-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height (iOS Safari) */
+    overflow: hidden;
+    background: var(--color-canvas);
+    font-family: var(--font-family-base);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Hide desktop sidebar on mobile */
+  .hig-sidebar {
+    display: none;
+  }
+  
+  
+  /* ============================================
+     NAVIGATION BAR (44px Height - iOS HIG)
+     ============================================ */
+  
+  .hig-mobile-nav {
+    height: var(--mobile-nav-bar);
+    min-height: var(--mobile-nav-bar);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--mobile-margin);
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-canvas);
+    flex-shrink: 0;
+    position: relative;
+  }
+  
+  /* Safe Area Inset (Top) */
+  .hig-mobile-nav {
+    padding-top: env(safe-area-inset-top);
+    height: calc(var(--mobile-nav-bar) + env(safe-area-inset-top));
+  }
+  
+  /* Back Button (Left) */
+  .hig-nav-back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    margin-left: calc(var(--space-3) * -1);
+    color: var(--color-accent-blue);
+    font-size: var(--text-mobile-body);
+    text-decoration: none;
+    border-radius: var(--radius-mobile-sm);
+    transition: background var(--transition-fast);
+    min-height: var(--mobile-touch-target);
+    min-width: var(--mobile-touch-target);
+    justify-content: center;
+  }
+  
+  .hig-nav-back:active {
+    background: var(--color-hover);
+  }
+  
+  .hig-nav-back-icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  /* Title (Center) */
+  .hig-nav-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: var(--text-mobile-headline);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 50%;
+  }
+  
+  /* Action Button (Right) */
+  .hig-nav-action {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-2) var(--space-3);
+    margin-right: calc(var(--space-3) * -1);
+    color: var(--color-accent-blue);
+    font-size: var(--text-mobile-body);
+    font-weight: var(--weight-regular);
+    text-decoration: none;
+    border-radius: var(--radius-mobile-sm);
+    transition: background var(--transition-fast);
+    min-height: var(--mobile-touch-target);
+    min-width: var(--mobile-touch-target);
+    justify-content: center;
+  }
+  
+  .hig-nav-action:active {
+    background: var(--color-hover);
+  }
+  
+  .hig-nav-action.primary {
+    color: var(--color-accent-blue);
+    font-weight: var(--weight-semibold);
+  }
+  
+  .hig-nav-action.destructive {
+    color: var(--color-error-red);
+  }
+  
+  
+  /* ============================================
+     LARGE TITLE NAVIGATION (iOS Style)
+     ============================================ */
+  
+  .hig-mobile-nav-large {
+    height: auto;
+    min-height: var(--mobile-nav-bar-large);
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0 var(--mobile-margin);
+    padding-top: calc(var(--space-3) + env(safe-area-inset-top));
+    padding-bottom: var(--space-3);
+  }
+  
+  .hig-mobile-nav-large .hig-nav-title {
+    position: static;
+    transform: none;
+    font-size: var(--text-mobile-large-title);
+    font-weight: var(--weight-bold);
+    max-width: 100%;
+    margin-top: var(--space-3);
+  }
+  
+  .hig-mobile-nav-large .hig-nav-actions {
+    position: absolute;
+    top: calc(var(--space-3) + env(safe-area-inset-top));
+    right: var(--mobile-margin);
+  }
+  
+  
+  /* ============================================
+     MAIN CONTENT (Scrollable)
+     ============================================ */
+  
+  .hig-mobile-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch; /* Smooth iOS scroll */
+    padding: var(--mobile-margin);
+    background: var(--color-canvas-secondary);
+  }
+  
+  /* Inset Lists (iOS Style) */
+  .hig-mobile-content.inset {
+    padding: var(--mobile-margin) var(--mobile-margin);
+    background: var(--color-canvas-secondary);
+  }
+  
+  /* Full Width Lists (Edge-to-Edge) */
+  .hig-mobile-content.full-width {
+    padding: 0;
+  }
+  
+  
+  /* ============================================
+     TAB BAR (49px Height - iOS HIG)
+     ============================================ */
+  
+  .hig-mobile-tabs {
+    height: var(--mobile-tab-bar);
+    min-height: var(--mobile-tab-bar);
+    display: flex;
+    align-items: stretch;
+    background: var(--color-sidebar);
+    border-top: 1px solid var(--color-border);
+    flex-shrink: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Tab Item */
+  .hig-tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-1);
+    text-decoration: none;
+    color: var(--color-text-secondary);
+    transition: color var(--transition-fast);
+    min-height: var(--mobile-touch-target);
+    position: relative;
+  }
+  
+  .hig-tab-item:active {
+    opacity: 0.6;
+  }
+  
+  .hig-tab-item.active {
+    color: var(--color-accent-blue);
+  }
+  
+  /* Tab Icon (25x25pt - iOS Standard) */
+  .hig-tab-icon {
+    width: 25px;
+    height: 25px;
+    flex-shrink: 0;
+  }
+  
+  /* Tab Label */
+  .hig-tab-label {
+    font-size: var(--text-mobile-caption1);
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.01em;
+  }
+  
+  /* Tab Badge */
+  .hig-tab-badge {
+    position: absolute;
+    top: 4px;
+    right: calc(50% - 18px);
+    min-width: 18px;
+    height: 18px;
+    padding: 0 var(--space-2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-error-red);
+    color: white;
+    font-size: var(--text-caption);
+    font-weight: var(--weight-semibold);
+    border-radius: var(--radius-pill);
+  }
+  
+  
+  /* ============================================
+     MOBILE LIST (iOS Style)
+     ============================================ */
+  
+  .hig-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  
+  /* List Item (Card Style) */
+  .hig-list-item {
+    background: var(--color-canvas);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-mobile-md);
+    padding: var(--mobile-margin);
+    min-height: var(--mobile-list-row);
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    text-decoration: none;
+    color: var(--color-text-primary);
+    transition: background var(--transition-fast);
+  }
+  
+  .hig-list-item:active {
+    background: var(--color-hover);
+  }
+  
+  /* Grouped List (iOS Inset Style) */
+  .hig-list-grouped {
+    background: var(--color-canvas);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-mobile-md);
+    overflow: hidden;
+  }
+  
+  .hig-list-grouped .hig-list-item {
+    border: none;
+    border-radius: 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  
+  .hig-list-grouped .hig-list-item:last-child {
+    border-bottom: none;
+  }
+  
+  /* List Item Content */
+  .hig-list-item-icon {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+  
+  .hig-list-item-content {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .hig-list-item-title {
+    font-size: var(--text-mobile-body);
+    font-weight: var(--weight-regular);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-1) 0;
+  }
+  
+  .hig-list-item-subtitle {
+    font-size: var(--text-mobile-footnote);
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+  
+  .hig-list-item-accessory {
+    flex-shrink: 0;
+    color: var(--color-text-tertiary);
+  }
+  
+  
+  /* ============================================
+     MOBILE SECTIONS
+     ============================================ */
+  
+  .hig-mobile-section {
+    margin-bottom: var(--space-7);
+  }
+  
+  .hig-mobile-section-header {
+    font-size: var(--text-mobile-subhead);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wider);
+    margin: 0 0 var(--space-3) var(--space-5);
+  }
+  
+  
+  /* ============================================
+     MOBILE CARDS
+     ============================================ */
+  
+  .hig-mobile-card {
+    background: var(--color-canvas);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-mobile-md);
+    padding: var(--mobile-margin);
+    margin-bottom: var(--space-5);
+  }
+  
+  .hig-mobile-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-4);
+  }
+  
+  .hig-mobile-card-title {
+    font-size: var(--text-mobile-headline);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+  
+  .hig-mobile-card-body {
+    font-size: var(--text-mobile-body);
+    color: var(--color-text-primary);
+    line-height: var(--leading-normal);
+  }
+  
+  
+  /* ============================================
+     PULL TO REFRESH (Native iOS)
+     ============================================ */
+  
+  .hig-mobile-content {
+    /* Browser will handle native pull-to-refresh */
+    overscroll-behavior-y: contain;
+  }
+  
+  
+  /* ============================================
+     SWIPE GESTURES
+     ============================================ */
+  
+  /* Swipe Actions (Left/Right) */
+  .hig-swipe-container {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .hig-swipe-actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    display: flex;
+    align-items: stretch;
+  }
+  
+  .hig-swipe-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--space-7);
+    color: white;
+    font-size: var(--text-mobile-footnote);
+    font-weight: var(--weight-semibold);
+    min-width: 80px;
+  }
+  
+  .hig-swipe-action.delete {
+    background: var(--color-error-red);
+  }
+  
+  .hig-swipe-action.archive {
+    background: var(--color-warning-orange);
+  }
+  
+  
+  /* ============================================
+     SAFE AREAS (iPhone Notch/Dynamic Island)
+     ============================================ */
+  
+  .hig-safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .hig-safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .hig-safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  
+  .hig-safe-right {
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+
+/* ============================================
+   SMALL MOBILE (<375px - iPhone SE)
+   ============================================ */
+
+@media (max-width: 374px) {
+  .hig-mobile-nav-title {
+    font-size: var(--text-mobile-callout);
+  }
+  
+  .hig-tab-label {
+    font-size: var(--text-caption);
+  }
+  
+  .hig-mobile-content {
+    padding: var(--space-4);
+  }
+  
+  .hig-mobile-card,
+  .hig-list-item {
+    padding: var(--space-4);
+  }
+}
+
+
+/* ============================================
+   LARGE MOBILE (≥414px - iPhone Pro Max)
+   ============================================ */
+
+@media (min-width: 414px) and (max-width: 767px) {
+  .hig-mobile-content {
+    padding: var(--space-6);
+  }
+  
+  .hig-mobile-card,
+  .hig-list-item {
+    padding: var(--space-6);
+  }
+}
