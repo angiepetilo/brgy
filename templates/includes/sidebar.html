@@ -1,68 +1,112 @@
-<!-- Collapsible Left Sidebar -->
-<aside class="fb-left-sidebar" id="fb-left-sidebar">
-    <div class="sidebar-toggle-bar">
-        <button class="btn-sidebar-collapse" id="sidebar-collapse-btn" title="Toggle Sidebar Collapsed/Expanded">
+{% load static core_tags perm_tags %}
+<!-- HIG Sidebar (macOS Style) -->
+<aside class="hig-sidebar fb-left-sidebar" id="fb-left-sidebar">
+    <!-- Sidebar Header -->
+    <div class="hig-sidebar-header">
+        <span class="hig-sidebar-menu-heading">Menu</span>
+        <button class="btn-sidebar-collapse" id="sidebar-collapse-btn" type="button" title="Toggle Sidebar Collapsed/Expanded" aria-label="Toggle Sidebar">
             <span class="collapse-label-expanded">
-                <i class="fa-solid fa-chevron-left"></i>
-                <span class="collapse-text">Collapse</span>
+                {% icon 'chevron-left' %}
+                <span class="collapse-text sr-only">Collapse</span>
             </span>
-            <span class="collapse-label-collapsed">
-                <i class="fa-solid fa-chevron-right"></i>
-                <span class="collapse-text">Expand</span>
+            <span class="collapse-label-collapsed" style="display: none;">
+                {% icon 'chevron-right' %}
+                <span class="collapse-text sr-only">Expand</span>
             </span>
         </button>
     </div>
 
-    <nav class="sidebar-links-list scrollable-panel">
-        <a href="{% url 'appointments:list' %}" class="sidebar-link-item {% if 'appointment' in request.path %}active{% endif %}" title="Appointments">
-            <i class="fa-solid fa-calendar-check sidebar-icon"></i>
-            <span class="link-label">Appointments</span>
+    <!-- Sidebar Navigation -->
+    <nav class="hig-sidebar-nav">
+        <!-- Appointment (All roles) -->
+        <a href="{% url 'appointments:list' %}" class="hig-nav-item {% if 'appointment' in request.path %}hig-nav-item-active{% endif %}" title="Appointments">
+            {% icon 'calendar-check' cls='hig-nav-icon' %}
+            <span class="hig-nav-label">Appointments</span>
         </a>
-        <a href="{% url 'chat:inbox' %}" class="sidebar-link-item {% if 'chat' in request.path or 'messages' in request.path %}active{% endif %}" title="Messages">
-            <i class="fa-solid fa-comments sidebar-icon"></i>
-            <span class="link-label">Messages</span>
+
+        <!-- Messages (All roles) -->
+        <a href="{% url 'chat:inbox' %}" class="hig-nav-item {% if 'chat' in request.path or 'messages' in request.path %}hig-nav-item-active{% endif %}" title="Messages">
+            {% icon 'messages-square' cls='hig-nav-icon' %}
+            <span class="hig-nav-label">Messages</span>
             {% if unread_messages_count > 0 %}
-            <span class="badge badge-primary">{{ unread_messages_count }}</span>
+            <span class="hig-nav-badge">{{ unread_messages_count }}</span>
             {% endif %}
         </a>
+
+        <!-- Section Divider -->
+        {% if request.user.is_admin_user or request.user.is_kapitan_user or request.user.is_staff %}
+        <div class="hig-nav-section">
+            <div class="hig-nav-section-title">Management</div>
+        </div>
+        {% endif %}
         
-        <!-- Residents (Admin / Staff Only) -->
-        {% if request.user.is_admin_user or request.user.is_kapitan_user %}
-        <a href="{% url 'accounts:residents_tabbed' %}" class="sidebar-link-item {% if 'residents' in request.path or 'approval' in request.path or 'profile' in request.path and not 'settings' in request.path %}active{% endif %}" title="Residents">
-            <i class="fa-solid fa-users sidebar-icon"></i>
-            <span class="link-label">Residents</span>
-            {% if pending_approvals_count > 0 %}
-            <span class="badge badge-warning">{{ pending_approvals_count }}</span>
+        <!-- Residents (Admin, Kapitan, & Staff Only) -->
+        {% if request.user.is_admin_user or request.user.is_kapitan_user or request.user.is_staff %}
+        <a href="{% url 'accounts:residents_tabbed' %}" class="hig-nav-item {% if 'residents' in request.path or 'approval' in request.path %}hig-nav-item-active{% endif %}" title="Residents">
+            {% icon 'users' cls='hig-nav-icon' %}
+            <span class="hig-nav-label">Residents</span>
+            {% if dashboard_metrics.pending_registrations_count > 0 or pending_approvals_count > 0 %}
+            <span class="hig-nav-badge">{{ dashboard_metrics.pending_registrations_count|default:pending_approvals_count }}</span>
             {% endif %}
         </a>
         {% endif %}
 
-        <!-- Records Module (Admin: Full database / Resident: Personal records) -->
-        <a href="{% url 'records_hub' %}" class="sidebar-link-item {% if 'records' in request.path or 'blotter' in request.path or 'finance' in request.path %}active{% endif %}" title="Records">
-            <i class="fa-solid fa-folder-open sidebar-icon"></i>
-            <span class="link-label">Records</span>
+        <!-- Records (Admin, Kapitan, & Staff Only) -->
+        {% if request.user.is_admin_user or request.user.is_kapitan_user or request.user.is_staff %}
+        <a href="{% url 'records:hub' %}" class="hig-nav-item {% if 'records' in request.path %}hig-nav-item-active{% endif %}" title="Records">
+            {% icon 'folder-open' cls='hig-nav-icon' %}
+            <span class="hig-nav-label">Records</span>
         </a>
+        {% endif %}
 
-        {% if request.user.is_superuser %}
-        <a href="/admin/" target="_blank" class="sidebar-link-item admin-item" title="Django Admin">
-            <i class="fa-solid fa-screwdriver-wrench sidebar-icon"></i>
-            <span class="link-label">Django Admin</span>
-            <span class="badge badge-danger">ROOT</span>
+        <!-- Blotter -->
+        {% if not request.user.is_resident_user %}{% user_can request.user 'blotter' 'view' as can_view_blotter %}{% endif %}
+        {% if can_view_blotter %}
+        <a href="{% url 'blotter:case_list' %}" class="hig-nav-item {% if '/blotter/' in request.path %}hig-nav-item-active{% endif %}" title="Blotter">
+            {% icon 'scale' cls='hig-nav-icon' %}
+            <span class="hig-nav-label">Blotter</span>
+        </a>
+        {% endif %}
+
+        <!-- Statistics -->
+        {% user_can request.user 'statistics' 'view' as can_view_statistics %}
+        {% if can_view_statistics %}
+        <a href="{% url 'statistics:overview' %}" class="hig-nav-item {% if 'statistics' in request.path %}hig-nav-item-active{% endif %}" title="Statistics">
+            {% icon 'chart-pie' cls='hig-nav-icon' %}
+            <span class="hig-nav-label">Statistics</span>
+        </a>
+        {% endif %}
+
+        <!-- Section Divider -->
+        {% if request.user.is_admin_user or request.user.is_superuser %}
+        <div class="hig-nav-section">
+            <div class="hig-nav-section-title">System</div>
+        </div>
+        {% endif %}
+
+        <!-- System Settings (Admin & Superuser Only) -->
+        {% if request.user.is_admin_user or request.user.is_superuser %}
+        <a href="{% url 'accounts:system_dashboard' %}" class="hig-nav-item {% if 'system' in request.path %}hig-nav-item-active{% endif %}" title="Settings">
+            {% icon 'settings' cls='hig-nav-icon' %}
+            <span class="hig-nav-label">Settings</span>
         </a>
         {% endif %}
     </nav>
 
-    <div class="sidebar-user-footer">
-        <div class="footer-avatar-initials">
-            {% if request.user.avatar %}
-                <img src="{{ request.user.avatar.url }}" alt="{{ request.user.username }}" style="width: 100%; height: 100%; object-fit: cover;">
-            {% else %}
-                {{ request.user.initials }}
-            {% endif %}
-        </div>
-        <div class="footer-user-details">
-            <div class="footer-username">{{ request.user.get_full_name|default:request.user.username }}</div>
-            <div class="footer-role">{{ request.user.get_role_display|upper }}</div>
+    <!-- Sidebar Footer -->
+    <div class="hig-sidebar-footer">
+        <div class="hig-footer-user">
+            <div class="hig-footer-avatar">
+                {% if request.user.avatar %}
+                    <img src="{{ request.user.avatar.url }}" alt="{{ request.user.username }}" class="hig-avatar-img">
+                {% else %}
+                    <div class="hig-avatar-initials">{{ request.user.initials }}</div>
+                {% endif %}
+            </div>
+            <div class="hig-footer-info">
+                <div class="hig-footer-name">{{ request.user.get_full_name|default:request.user.username|truncatechars:20 }}</div>
+                <div class="hig-footer-role">{{ request.user.get_role_display }}</div>
+            </div>
         </div>
     </div>
 </aside>

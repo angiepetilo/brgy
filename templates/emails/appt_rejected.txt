@@ -1,0 +1,14 @@
+Subject: About your appointment request ({{ reference_no }})
+
+Hi {{ first_name }},
+
+We looked at your request for {{ service }} on {{ date }}, {{ time_window }}, and we couldn't approve it.
+
+Reason: {{ reason }}
+
+You're welcome to book again for another date or time. You can do that after logging in here: {{ login_url }}
+
+If you have questions, message us through the portal or call {{ barangay_contact|default:contact_no|default:"(02) 8123-4567" }} (8 AM to 5 PM, Monday to Friday).
+
+Salamat po,
+Barangay {{ barangay_name }} Office

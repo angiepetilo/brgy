@@ -1,194 +1,298 @@
 /**
- * Desktop Layout System (macOS HIG)
- * Breakpoint: ≥768px
- * 
- * Architecture:
- * - Fixed 240px sidebar (persistent navigation)
- * - 52px toolbar header
- * - High-density content area
+ * Phase 2: Desktop Layout Architecture (macOS HIG)
+ * Implements split-view structure for ≥768px viewports
+ * - Fixed 240px sidebar
+ * - 52px toolbar
+ * - Content area with 24px padding
  */
 
 /* ============================================
-   DESKTOP CONTAINER
+   DESKTOP LAYOUT (≥768px)
    ============================================ */
 
 @media (min-width: 768px) {
-  .hig-container {
+  
+  /* Main App Container - Grid Layout (2-column default, 3-column with right sidebar) */
+  .app-container.desktop,
+  .fb-main-container.dashboard-layout {
     display: grid;
-    grid-template-columns: var(--sidebar-width) 1fr;
-    height: 100vh;
-    overflow: hidden;
-    background: var(--color-canvas);
-    font-family: var(--font-family-base);
-    color: var(--color-text-primary);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    grid-template-columns: 240px 1fr;
+    min-height: calc(100vh - var(--toolbar-height, 64px));
+    height: auto;
+    overflow: visible;
+    transition: grid-template-columns var(--transition-fast, 0.2s ease);
+  }
+
+  .fb-main-container.dashboard-layout.sidebar-collapsed {
+    grid-template-columns: 64px 1fr !important;
+  }
+
+  .fb-main-container.dashboard-layout:has(.fb-right-sidebar) {
+    grid-template-columns: 240px 1fr 300px;
+  }
+
+  .fb-main-container.dashboard-layout.sidebar-collapsed:has(.fb-right-sidebar) {
+    grid-template-columns: 64px 1fr 300px !important;
   }
   
-  
   /* ============================================
-     SIDEBAR (240px Fixed)
+     SIDEBAR (240px Fixed Width)
      ============================================ */
   
-  .hig-sidebar {
-    grid-column: 1;
-    display: flex;
-    flex-direction: column;
+  .hig-sidebar,
+  .fb-left-sidebar {
+    width: 240px;
     background: var(--color-sidebar);
     border-right: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 64px;
+    height: calc(100vh - 64px);
     overflow-y: auto;
     overflow-x: hidden;
+    transition: width var(--transition-fast, 0.2s ease);
   }
   
   /* Sidebar Header */
   .hig-sidebar-header {
-    height: var(--toolbar-height);
+    height: 52px;
+    min-height: 52px;
     display: flex;
     align-items: center;
-    gap: var(--space-3);
-    padding: 0 var(--space-5);
+    justify-content: space-between;
+    padding: 0 16px;
     border-bottom: 1px solid var(--color-border);
     flex-shrink: 0;
   }
-  
-  .hig-sidebar-logo {
-    width: 32px;
-    height: 32px;
-    border-radius: var(--radius-md);
-    object-fit: contain;
+
+  .hig-sidebar-menu-heading {
+    font-size: var(--text-label, 0.75rem);
+    font-weight: var(--weight-semibold, 700);
+    color: var(--color-text-secondary, #6B7280);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
-  
-  .hig-sidebar-title {
-    font-size: var(--text-body);
-    font-weight: var(--weight-semibold);
-    color: var(--color-text-primary);
-    letter-spacing: var(--tracking-normal);
+
+  .btn-sidebar-collapse {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: #FFFFFF;
+    border: 1px solid var(--color-border, #E5E7EB);
+    color: var(--color-text-secondary, #6B7280);
+    cursor: pointer;
+    transition: all var(--transition-fast, 0.15s ease);
+    padding: 0;
+  }
+  .btn-sidebar-collapse:hover {
+    background: var(--color-hover, #F3F4F6);
+    color: var(--color-text-primary, #111827);
+  }
+
+  /* Collapsed Sidebar */
+  .hig-sidebar.collapsed,
+  .fb-left-sidebar.collapsed {
+    width: 64px !important;
+    min-width: 64px !important;
+  }
+  .hig-sidebar.collapsed .hig-sidebar-header {
+    justify-content: center !important;
+    padding: 0 !important;
+  }
+  .hig-sidebar.collapsed .hig-sidebar-menu-heading {
+    display: none !important;
+  }
+  .hig-sidebar.collapsed .hig-nav-label,
+  .hig-sidebar.collapsed .hig-nav-section-title,
+  .hig-sidebar.collapsed .hig-footer-info {
+    display: none !important;
+  }
+  .hig-sidebar.collapsed .hig-nav-item {
+    justify-content: center !important;
+    padding: 0 !important;
+    width: 44px !important;
+    height: 44px !important;
+    margin: 4px auto !important;
+    border-radius: 10px !important;
+  }
+  .hig-sidebar.collapsed .hig-nav-section {
+    margin: 12px 8px !important;
+    border-top: 1px solid var(--color-border) !important;
+  }
+  .hig-sidebar.collapsed .hig-sidebar-footer {
+    padding: 12px 0 !important;
+  }
+  .hig-sidebar.collapsed .hig-footer-user {
+    justify-content: center !important;
+    padding: 0 !important;
+  }
+  .hig-sidebar.collapsed .collapse-label-expanded {
+    display: none !important;
+  }
+  .hig-sidebar.collapsed .collapse-label-collapsed {
+    display: inline-flex !important;
   }
   
   /* Sidebar Navigation */
   .hig-sidebar-nav {
     flex: 1;
-    padding: var(--space-3);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
+    padding: 12px 10px;
+    overflow-y: auto;
   }
   
-  /* Navigation Item (32px height) */
   .hig-nav-item {
     height: 32px;
+    padding: 0 10px;
     display: flex;
     align-items: center;
-    gap: var(--space-3);
-    padding: 6px 10px;
+    gap: 8px;
     border-radius: var(--radius-md);
-    text-decoration: none;
-    color: var(--color-text-primary);
     font-size: var(--text-body);
-    font-weight: var(--weight-regular);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-primary);
+    text-decoration: none;
     transition: background var(--transition-fast);
     cursor: pointer;
-    position: relative;
+    margin-bottom: 2px;
   }
   
-  .hig-nav-item:hover:not(.active) {
+  .hig-nav-item:hover:not(.hig-nav-item-active) {
     background: var(--color-hover);
   }
   
+  .hig-nav-item-active,
   .hig-nav-item.active {
     background: var(--color-accent-blue);
     color: var(--color-text-inverse);
-    font-weight: var(--weight-medium);
   }
   
-  .hig-nav-item:focus-visible {
-    outline: none;
-    box-shadow: var(--shadow-focus);
-  }
-  
-  /* Navigation Icon (16px SF Symbol style) */
   .hig-nav-icon {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     flex-shrink: 0;
-    opacity: 0.85;
   }
   
-  .hig-nav-item.active .hig-nav-icon {
-    opacity: 1;
-  }
-  
-  /* Navigation Label */
   .hig-nav-label {
     flex: 1;
-    letter-spacing: var(--tracking-normal);
-    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
   }
   
-  /* Navigation Badge */
   .hig-nav-badge {
-    height: 18px;
-    min-width: 18px;
-    padding: 0 var(--space-2);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: var(--color-error-red);
-    color: white;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.15);
     font-size: var(--text-caption);
     font-weight: var(--weight-semibold);
-    border-radius: var(--radius-pill);
-    letter-spacing: var(--tracking-wider);
   }
   
-  .hig-nav-item.active .hig-nav-badge {
-    background: rgba(255, 255, 255, 0.3);
+  .hig-nav-item-active .hig-nav-badge {
+    background: rgba(255, 255, 255, 0.25);
   }
   
-  /* Navigation Section */
+  /* Navigation Sections */
   .hig-nav-section {
-    margin-top: var(--space-5);
+    margin-top: 16px;
   }
   
   .hig-nav-section-title {
+    padding: 8px 10px 4px;
     font-size: var(--text-label);
-    font-weight: var(--weight-medium);
+    font-weight: var(--weight-semibold);
     color: var(--color-text-secondary);
     text-transform: uppercase;
     letter-spacing: var(--tracking-wide);
-    padding: 0 10px;
-    margin-bottom: var(--space-2);
   }
   
   /* Sidebar Footer */
   .hig-sidebar-footer {
-    padding: var(--space-5);
+    padding: 12px;
     border-top: 1px solid var(--color-border);
     flex-shrink: 0;
   }
   
+  .hig-footer-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .hig-footer-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-hover);
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  
+  .hig-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .hig-avatar-initials {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-secondary);
+  }
+  
+  .hig-footer-info {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .hig-footer-name {
+    font-size: var(--text-body);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .hig-footer-role {
+    font-size: var(--text-label);
+    color: var(--color-text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   
   /* ============================================
-     MAIN CONTENT AREA
+     CONTENT AREA
      ============================================ */
   
-  .hig-main {
-    grid-column: 2;
+  .content-area,
+  .fb-center-content {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    min-height: 100%;
+    overflow: visible;
     background: var(--color-canvas);
   }
   
-  
-  /* ============================================
-     TOOLBAR (52px Height)
-     ============================================ */
-  
+  /* Toolbar (52px Height) */
+  .toolbar,
   .hig-toolbar {
     height: var(--toolbar-height);
+    min-height: var(--toolbar-height);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -196,267 +300,167 @@
     border-bottom: 1px solid var(--color-border);
     background: var(--color-canvas);
     flex-shrink: 0;
-    gap: var(--space-5);
   }
   
-  /* Toolbar Title */
-  .hig-toolbar-title {
+  .toolbar-title,
+  .hig-toolbar-title h1,
+  .hig-title-1 {
     font-size: var(--text-title);
-    font-weight: var(--weight-bold);
+    font-weight: var(--weight-semibold);
     color: var(--color-text-primary);
-    letter-spacing: var(--tracking-tight);
     margin: 0;
+    line-height: 1.2;
   }
   
-  /* Toolbar Actions */
+  .toolbar-subtitle,
+  .hig-toolbar-title p {
+    font-size: var(--text-body);
+    color: var(--color-text-secondary);
+    margin: 2px 0 0 0;
+    line-height: 1.4;
+  }
+  
+  .toolbar-actions,
   .hig-toolbar-actions {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
+    gap: 8px;
   }
   
-  /* Toolbar Search */
-  .hig-toolbar-search {
-    width: 240px;
-    height: var(--input-height);
-    padding: 0 var(--space-4) 0 var(--space-8);
-    border: 1px solid var(--color-border);
+  /* Toolbar Buttons */
+  .btn-toolbar {
+    height: var(--button-height);
+    padding: 0 14px;
     border-radius: var(--radius-md);
-    background: var(--color-canvas);
-    color: var(--color-text-primary);
     font-size: var(--text-body);
-    font-family: var(--font-family-base);
-    transition: all var(--transition-base);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2386868B' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: 10px center;
-  }
-  
-  .hig-toolbar-search:focus {
-    outline: none;
-    border-color: var(--color-accent-blue);
-    box-shadow: var(--shadow-focus);
-  }
-  
-  .hig-toolbar-search::placeholder {
-    color: var(--color-text-tertiary);
-  }
-  
-  
-  /* ============================================
-     CONTENT BODY (Scrollable)
-     ============================================ */
-  
-  .hig-content {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: var(--content-padding);
-    background: var(--color-canvas-secondary);
-  }
-  
-  /* Scrollbar Styling (WebKit) */
-  .hig-content::-webkit-scrollbar {
-    width: 12px;
-  }
-  
-  .hig-content::-webkit-scrollbar-track {
+    font-weight: var(--weight-medium);
     background: transparent;
-  }
-  
-  .hig-content::-webkit-scrollbar-thumb {
-    background: var(--color-border);
-    border-radius: var(--radius-md);
-    border: 3px solid var(--color-canvas-secondary);
-  }
-  
-  .hig-content::-webkit-scrollbar-thumb:hover {
-    background: var(--color-border-strong);
-  }
-  
-  
-  /* ============================================
-     CONTENT SECTIONS
-     ============================================ */
-  
-  /* Content Area Wrapper */
-  .hig-content-area {
-    min-height: 100vh;
-    padding: var(--content-padding);
-    background: var(--color-canvas-secondary);
     color: var(--color-text-primary);
-  }
-  
-  /* Content Main (Inside content-area) */
-  .hig-content-main {
-    max-width: var(--content-max-width);
-    margin: 0 auto;
-    color: var(--color-text-primary);
-  }
-  
-  /* Section Header */
-  .hig-section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--space-5);
-    gap: var(--space-5);
-  }
-  
-  .hig-section-title {
-    font-size: var(--text-section);
-    font-weight: var(--weight-semibold);
-    color: var(--color-text-primary);
-    margin: 0;
-  }
-  
-  .hig-section-description {
-    font-size: var(--text-body);
-    color: var(--color-text-secondary);
-    margin: var(--space-2) 0 0 0;
-  }
-  
-  .hig-section-actions {
-    display: flex;
-    gap: var(--space-3);
-  }
-  
-  
-  /* ============================================
-     CARDS
-     ============================================ */
-  
-  .hig-card {
-    background: var(--color-canvas);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    padding: var(--space-5);
-    margin-bottom: var(--space-5);
+    cursor: pointer;
+    transition: all var(--transition-base);
   }
   
-  .hig-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--space-5);
+  .btn-toolbar:hover {
+    background: var(--color-hover);
   }
   
-  .hig-card-title {
+  .btn-toolbar-primary {
+    height: var(--button-height);
+    padding: 0 14px;
+    border-radius: var(--radius-md);
     font-size: var(--text-body);
-    font-weight: var(--weight-semibold);
-    color: var(--color-text-primary);
-    margin: 0;
+    font-weight: var(--weight-medium);
+    background: var(--color-accent-blue);
+    color: var(--color-text-inverse);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-base);
   }
   
-  .hig-card-body {
-    color: var(--color-text-primary);
-    font-size: var(--text-body);
+  .btn-toolbar-primary:hover {
+    background: var(--color-accent-blue-hover);
   }
   
-  
-  /* ============================================
-     GRID LAYOUTS
-     ============================================ */
-  
-  .hig-grid {
-    display: grid;
-    gap: var(--space-5);
+  /* Content Body (Scrollable) */
+  .content-body,
+  .hig-content-main,
+  .main-content-area {
+    flex: 1;
+    padding: var(--content-padding);
+    overflow: visible;
+    background: var(--color-bg-secondary);
   }
   
-  .hig-grid-2 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .hig-grid-3 {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  
-  .hig-grid-4 {
-    grid-template-columns: repeat(4, 1fr);
-  }
-  
-  /* Auto-fit Grid (Responsive) */
-  .hig-grid-auto {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  }
-  
-  
-  /* ============================================
-     SPLIT VIEW (Detail Panes)
-     ============================================ */
-  
-  .hig-split-view {
-    display: grid;
-    grid-template-columns: 1fr 360px;
-    gap: var(--space-5);
-    height: 100%;
-  }
-  
-  .hig-split-main {
-    overflow-y: auto;
-  }
-  
-  .hig-split-aside {
-    border-left: 1px solid var(--color-border);
-    padding-left: var(--space-5);
-    overflow-y: auto;
-  }
-}
-
-
-/* ============================================
-   COMPACT DESKTOP (768px - 1023px)
-   ============================================ */
-
-@media (min-width: 768px) and (max-width: 1023px) {
-  .hig-sidebar {
-    /* Narrower sidebar on tablets */
-    width: 200px;
-  }
-  
-  .hig-toolbar {
-    padding: 0 var(--content-padding-compact);
-  }
-  
-  .hig-content {
+  .content-body-compact {
     padding: var(--content-padding-compact);
   }
   
-  .hig-toolbar-search {
-    width: 180px;
-  }
+  /* ============================================
+     GRID SYSTEMS
+     ============================================ */
   
-  /* Collapse 4-col grid to 2-col */
-  .hig-grid-4 {
+  /* 2-Column Grid */
+  .hig-grid-2 {
+    display: grid;
     grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-5);
   }
   
-  /* Hide split view aside on tablets */
-  .hig-split-view {
-    grid-template-columns: 1fr;
+  /* 3-Column Grid */
+  .hig-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-5);
   }
   
-  .hig-split-aside {
-    display: none;
-  }
-}
-
-
-/* ============================================
-   LARGE DESKTOP (≥1440px)
-   ============================================ */
-
-@media (min-width: 1440px) {
-  .hig-content {
-    padding: var(--space-8);
+  /* 4-Column Grid */
+  .hig-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-5);
   }
   
-  .hig-toolbar-search {
-    width: 320px;
+  /* Responsive Grid (Auto-fit) */
+  .hig-grid-auto {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-5);
   }
   
-  /* More comfortable split view */
-  .hig-split-view {
-    grid-template-columns: 1fr 420px;
+  /* ============================================
+     UTILITY CLASSES
+     ============================================ */
+  
+  /* Spacing Utilities */
+  .mt-0 { margin-top: 0 !important; }
+  .mt-1 { margin-top: var(--space-3) !important; }
+  .mt-2 { margin-top: var(--space-5) !important; }
+  .mt-3 { margin-top: var(--space-7) !important; }
+  
+  .mb-0 { margin-bottom: 0 !important; }
+  .mb-1 { margin-bottom: var(--space-3) !important; }
+  .mb-2 { margin-bottom: var(--space-5) !important; }
+  .mb-3 { margin-bottom: var(--space-7) !important; }
+  
+  .pt-0 { padding-top: 0 !important; }
+  .pt-1 { padding-top: var(--space-3) !important; }
+  .pt-2 { padding-top: var(--space-5) !important; }
+  .pt-3 { padding-top: var(--space-7) !important; }
+  
+  .pb-0 { padding-bottom: 0 !important; }
+  .pb-1 { padding-bottom: var(--space-3) !important; }
+  .pb-2 { padding-bottom: var(--space-5) !important; }
+  .pb-3 { padding-bottom: var(--space-7) !important; }
+  
+  /* Section Spacing */
+  .section-gap {
+    margin-bottom: var(--space-7);
   }
+  
+  /* Container Max Widths */
+  .container-sm {
+    max-width: var(--container-sm);
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .container-md {
+    max-width: var(--container-md);
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .container-lg {
+    max-width: var(--container-lg);
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .container-xl {
+    max-width: var(--container-xl);
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
 }

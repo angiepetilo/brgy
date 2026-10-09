@@ -1,0 +1,17 @@
+Subject: Your barangay portal account is ready
+
+Hi {{ first_name }},
+
+An account has been created for you on the Barangay {{ barangay_name }} portal. You can log in here: {{ login_url }}
+
+Email: {{ email }}
+Temporary password: {{ temp_password }}
+
+This password is temporary. The system will ask you to set your own the first time you log in. It expires in 7 days, and if that happens, ask the admin to send you a new one.
+
+Your role is {{ position }}. What you can see and do depends on that role, and the admin can change it.
+
+Please keep your password private. Nobody from the barangay will ask you for it.
+
+Salamat po,
+Barangay {{ barangay_name }} Office

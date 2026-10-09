@@ -1,15 +1,17 @@
-<div id="editPostModal" class="modal-backdrop" style="display: none;" onclick="if(event.target === this) closeEditPostModal();">
-  <div class="post-modal-content" onclick="event.stopPropagation();">
+{% load core_tags %}
+<div id="editPostModal" class="modal-backdrop" style="display: none;" data-post-backdrop="edit">
+  <div class="post-modal-content">
     
     <div class="post-modal-header">
       <h3 class="modal-title">Edit Announcement / Post</h3>
-      <button type="button" class="btn-close-modal" onclick="closeEditPostModal()" aria-label="Close edit dialog">
-        <i class="fa-solid fa-xmark"></i>
+      <button type="button" class="btn-close-modal" data-post-action="close-edit" aria-label="Close edit dialog">
+        {% icon 'x' %} <span>Close</span>
       </button>
     </div>
 
     <form id="editPostForm" action="" method="post" enctype="multipart/form-data">
       {% csrf_token %}
+      <input type="hidden" name="next" value="communications:feed">
       <input type="hidden" name="clear_image" id="editClearImageFlag" value="0">
 
       <div class="post-author-bar">
@@ -23,7 +25,7 @@
           
           <!-- Dynamic Category Selector below author name -->
           <div class="category-select-pill">
-            <i class="fa-solid fa-tag"></i>
+            {% icon 'tag' %}
             <select name="category" id="editPostCategorySelect" aria-label="Select post category">
               {% if dynamic_categories %}
                 {% for cat in dynamic_categories %}
@@ -46,30 +48,30 @@
         <!-- Live Image Preview Container -->
         <div id="editImagePreviewWrapper" class="image-preview-container" style="display: none;">
           <img id="editImagePreviewElement" src="" alt="Post image preview">
-          <button type="button" class="btn-remove-preview" onclick="clearEditSelectedImage()" title="Remove photo" aria-label="Remove image">
-            <i class="fa-solid fa-xmark"></i>
+          <button type="button" class="btn-remove-preview" data-post-action="clear-edit-image" title="Remove photo" aria-label="Remove image">
+            {% icon 'x' %}
           </button>
         </div>
       </div>
 
       <!-- Hidden file input for Photo / Media -->
-      <input type="file" name="image" id="editPostImageFileInput" accept="image/*" style="display: none;" onchange="handleEditImageSelection(this)">
+      <input type="file" name="image" id="editPostImageFileInput" accept="image/*" style="display: none;">
 
       <div class="add-to-post-card">
         <span class="add-label">Update post media</span>
         <div class="attachment-icons">
-          <button type="button" class="icon-btn media" title="Replace Photo / Poster" onclick="document.getElementById('editPostImageFileInput').click();" aria-label="Replace Photo">
-            <i class="fa-solid fa-images"></i>
+          <button type="button" class="icon-btn media" title="Replace Photo / Poster" data-action="click-target" data-target="#editPostImageFileInput" aria-label="Replace Photo">
+            {% icon 'image' %} <span>Photo</span>
           </button>
           <label class="icon-btn pin" title="Pin to top of feed" style="cursor: pointer; margin: 0;" aria-label="Pin to top">
-            <input type="checkbox" name="is_pinned" id="editPostIsPinned" value="1" style="display: none;" onchange="this.parentElement.style.opacity = this.checked ? '1' : '0.5'">
-            <i class="fa-solid fa-thumbtack"></i>
+            <input type="checkbox" name="is_pinned" id="editPostIsPinned" value="1" style="display: none;" data-pin-toggle>
+            {% icon 'pin' %} <span>Pin to top</span>
           </label>
         </div>
       </div>
 
       <div class="post-modal-footer" style="display: flex; gap: 0.75rem;">
-        <button type="button" class="btn btn-secondary" onclick="closeEditPostModal()" style="flex: 1; border-radius: 6px; padding: 0.625rem; font-weight: 600;">
+        <button type="button" class="btn btn-secondary" data-post-action="close-edit" style="flex: 1; border-radius: 6px; padding: 0.625rem; font-weight: 600;">
           Cancel
         </button>
         <button type="submit" id="btnEditPostSubmit" class="btn-post-submit" style="flex: 2;">

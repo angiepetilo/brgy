@@ -1,211 +1,189 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required, user_passes_test
+"""
+HTML views for the Blotter module. Thin: permission decorator, form validation,
+one selector or service call, render or redirect. Rules live in policies/services.
+"""
 from django.contrib import messages
-from django.db.models import Q
-from django.utils import timezone
-from apps.accounts.models import User
-from apps.blotter.models import BlotterRecord, KPCase
-from apps.blotter.forms import BlotterRecordForm, KPCaseForm
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.paginator import Paginator
+from django.shortcuts import redirect, render
+from django.views.decorators.http import require_GET, require_http_methods, require_POST
+
+from apps.accounts.models import BarangayInfo
+from apps.accounts.permissions import require_perm
+from apps.blotter import forms, policies, selectors, services
+from apps.blotter.models import BlotterCase
+from apps.core.ratelimit import ratelimit
 
 
-def is_admin_or_kapitan(user):
-    return user.is_authenticated and (user.role in [User.ROLE_ADMIN, User.ROLE_KAPITAN] or user.is_staff or user.is_superuser)
+def _apply_service_errors(exc, form):
+    """Put a service ValidationError on the form; returns the party-level messages."""
+    party_errors = []
+    if hasattr(exc, 'error_dict'):
+        for field, errors in exc.message_dict.items():
+            if field == 'parties':
+                party_errors.extend(errors)
+            elif field in form.fields:
+                for error in errors:
+                    form.add_error(field, error)
+            else:
+                for error in errors:
+                    form.add_error(None, error)
+    else:
+        for error in exc.messages:
+            form.add_error(None, error)
+    return party_errors
 
 
-@login_required
-@user_passes_test(is_admin_or_kapitan)
-def blotter_dashboard_view(request):
-    status_filter = request.GET.get('status', '')
-    search_query = request.GET.get('q', '').strip()
-
-    records = BlotterRecord.objects.select_related('created_by', 'kp_case').all()
-
-    if status_filter:
-        records = records.filter(status=status_filter)
-    if search_query:
-        records = records.filter(
-            Q(case_number__icontains=search_query) |
-            Q(complainant_name__icontains=search_query) |
-            Q(respondent_name__icontains=search_query) |
-            Q(incident_type__icontains=search_query) |
-            Q(incident_location__icontains=search_query)
-        )
-
-    # Statistics
-    total_cases = BlotterRecord.objects.count()
-    open_cases = BlotterRecord.objects.filter(status=BlotterRecord.STATUS_OPEN).count()
-    settled_cases = BlotterRecord.objects.filter(status=BlotterRecord.STATUS_SETTLED).count()
-    referred_cases = BlotterRecord.objects.filter(status=BlotterRecord.STATUS_REFERRED).count()
-
-    # Upcoming KP hearings
-    upcoming_hearings = KPCase.objects.filter(
-        hearing_date__gte=timezone.now(),
-        blotter__status=BlotterRecord.STATUS_OPEN
-    ).select_related('blotter').order_by('hearing_date')[:5]
-
-    context = {
-        'records': records,
-        'status_filter': status_filter,
-        'search_query': search_query,
-        'status_choices': BlotterRecord.STATUS_CHOICES,
-        'total_cases': total_cases,
-        'open_cases': open_cases,
-        'settled_cases': settled_cases,
-        'referred_cases': referred_cases,
-        'upcoming_hearings': upcoming_hearings,
-    }
-    return render(request, 'blotter/dashboard.html', context)
+@require_perm('blotter', 'view')
+@require_GET
+def case_list(request):
+    error = ''
+    try:
+        filters = selectors.parse_case_filters(request.GET)
+    except selectors.FilterError as exc:
+        error, filters = str(exc), selectors.parse_case_filters({})
+    page = Paginator(selectors.case_list(request.user, filters), selectors.PAGE_SIZE).get_page(request.GET.get('page'))
+    query = request.GET.copy()
+    query.pop('page', None)
+    return render(request, 'blotter/case_list.html', {
+        'page_obj': page,
+        'filters': filters,
+        'filter_error': error,
+        'query_string': query.urlencode(),
+        'puroks': selectors.puroks_for(request.user),
+        'status_choices': BlotterCase.STATUS_CHOICES,
+        'type_choices': BlotterCase.INCIDENT_TYPE_CHOICES,
+        'can_create': policies.can(request.user, 'create'),
+    })
 
 
-@login_required
-@user_passes_test(is_admin_or_kapitan)
-def blotter_create_view(request):
+@require_perm('blotter', 'create')
+@require_http_methods(['GET', 'POST'])
+@ratelimit(key='user', rate='blotter_create')
+def case_create(request):
+    party_errors = []
     if request.method == 'POST':
-        form = BlotterRecordForm(request.POST)
+        form = forms.BlotterCaseForm(request.POST, user=request.user)
+        formset = forms.party_formset(request.POST)
+        if form.is_valid() and formset.is_valid():
+            try:
+                case = services.create_case(
+                    request.user, form.cleaned_data, forms.filled_parties(formset), request=request,
+                )
+            except ValidationError as exc:
+                party_errors = _apply_service_errors(exc, form)
+            except (PermissionDenied, ValueError) as exc:
+                form.add_error(None, str(exc))
+            else:
+                messages.success(request, f'Case {case.case_no} has been filed.')
+                return redirect('blotter:case_detail', pk=case.pk)
+    else:
+        form = forms.BlotterCaseForm(user=request.user)
+        formset = forms.party_formset()
+    return render(request, 'blotter/case_form.html', {
+        'form': form, 'formset': formset, 'party_errors': party_errors, 'is_edit': False,
+    })
+
+
+@require_perm('blotter', 'edit')
+@require_http_methods(['GET', 'POST'])
+def case_edit(request, pk):
+    case = selectors.case_detail(request.user, pk)
+    if not policies.can_edit(request.user, case):
+        messages.error(request, 'A closed case can no longer be edited.')
+        return redirect('blotter:case_detail', pk=case.pk)
+    if request.method == 'POST':
+        form = forms.BlotterCaseForm(request.POST, instance=case, user=request.user)
         if form.is_valid():
-            record = form.save(commit=False)
-            record.created_by = request.user
-            record.save()
-            messages.success(request, f"Blotter incident case #{record.case_number} logged successfully.")
-            return redirect('blotter:detail', pk=record.id)
+            try:
+                services.update_case(request.user, case, form.cleaned_data, request=request)
+            except ValidationError as exc:
+                _apply_service_errors(exc, form)
+            except (PermissionDenied, ValueError) as exc:
+                form.add_error(None, str(exc))
+            else:
+                messages.success(request, f'Case {case.case_no} has been updated.')
+                return redirect('blotter:case_detail', pk=case.pk)
     else:
-        # Suggest unique case number
-        year = timezone.now().year
-        next_count = BlotterRecord.objects.filter(created_at__year=year).count() + 1
-        suggested_num = f"BLOT-{year}-{next_count:04d}"
-        form = BlotterRecordForm(initial={'case_number': suggested_num, 'incident_date': timezone.now().strftime('%Y-%m-%dT%H:%M')})
-
-    return render(request, 'blotter/blotter_form.html', {'form': form, 'title': 'Log New Blotter Incident'})
+        form = forms.BlotterCaseForm(instance=case, user=request.user)
+    return render(request, 'blotter/case_form.html', {
+        'form': form, 'case': case, 'is_edit': True, 'party_errors': [],
+    })
 
 
-@login_required
-@user_passes_test(is_admin_or_kapitan)
-def blotter_detail_view(request, pk):
-    record = get_object_or_404(BlotterRecord.objects.select_related('created_by'), pk=pk)
-    kp_case, created = KPCase.objects.get_or_create(blotter=record)
+@require_perm('blotter', 'view')
+@require_GET
+def case_detail(request, pk):
+    case = selectors.case_detail(request.user, pk)
+    user = request.user
+    return render(request, 'blotter/case_detail.html', {
+        'case': case,
+        'timeline': selectors.status_timeline(case),
+        'transitions': policies.allowed_transitions(user, case),
+        'can_add_hearing': policies.can_add_hearing(user, case),
+        'can_edit': policies.can_edit(user, case),
+        'can_delete': policies.can_delete(user, case),
+        'hearing_form': forms.HearingForm(),
+        'transition_form': forms.TransitionForm(),
+    })
 
-    if request.method == 'POST':
-        if 'update_blotter' in request.POST:
-            blotter_form = BlotterRecordForm(request.POST, instance=record)
-            if blotter_form.is_valid():
-                blotter_form.save()
-                messages.success(request, "Blotter record updated successfully.")
-                return redirect('blotter:detail', pk=record.id)
-        elif 'update_kp' in request.POST:
-            kp_form = KPCaseForm(request.POST, request.FILES, instance=kp_case)
-            if kp_form.is_valid():
-                kp_form.save()
-                # If CFA issued, auto-suggest referred status
-                if kp_form.cleaned_data.get('certificate_to_file_action'):
-                    record.status = BlotterRecord.STATUS_REFERRED
-                    record.save()
-                messages.success(request, "Katarungang Pambarangay mediation details updated.")
-                return redirect('blotter:detail', pk=record.id)
+
+@require_perm('blotter', 'view')
+@require_POST
+def case_transition(request, pk):
+    case = selectors.case_detail(request.user, pk)
+    form = forms.TransitionForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, 'Choose a valid status.')
+        return redirect('blotter:case_detail', pk=case.pk)
+    try:
+        case = services.transition_case(
+            request.user, case, form.cleaned_data['to_status'], form.cleaned_data['notes'], request=request,
+        )
+    except ValueError as exc:
+        messages.error(request, str(exc))
     else:
-        blotter_form = BlotterRecordForm(instance=record)
-        kp_form = KPCaseForm(instance=kp_case)
-
-    context = {
-        'record': record,
-        'kp_case': kp_case,
-        'blotter_form': blotter_form,
-        'kp_form': kp_form,
-    }
-    return render(request, 'blotter/blotter_detail.html', context)
+        messages.success(request, f'Case {case.case_no} is now {case.get_status_display().lower()}.')
+    return redirect('blotter:case_detail', pk=case.pk)
 
 
-def records_hub_view(request):
-    """
-    Records Management Module (/records/)
-    Tri-Tab Interface:
-    PEACE & ORDER - Incident blotters, KP mediation case schedules, and settlement files.
-    FINANCE & ASSETS - Certificate revenue logs and barangay property inventory tracking.
-    RBI DIRECTORY - Demographic breakdowns by Purok, Senior Citizens, PWDs, and Households.
-    """
-    from apps.finance.models import AssetInventory
-    from apps.appointments.models import Appointment, IssuedDocumentLog
-    from apps.accounts.models import Household, User
+@require_perm('blotter', 'mediate')
+@require_POST
+def hearing_add(request, pk):
+    case = selectors.case_detail(request.user, pk)
+    form = forms.HearingForm(request.POST)
+    if not form.is_valid():
+        for field, errors in form.errors.items():
+            for error in errors:
+                messages.error(request, error if field == '__all__' else f'{form.fields[field].label}: {error}')
+        return redirect('blotter:case_detail', pk=case.pk)
+    try:
+        services.add_hearing(request.user, case, form.cleaned_data, request=request)
+    except ValidationError as exc:
+        messages.error(request, ' '.join(exc.messages))
+    except ValueError as exc:
+        messages.error(request, str(exc))
+    else:
+        messages.success(request, 'Hearing recorded.')
+    return redirect('blotter:case_detail', pk=case.pk)
 
-    active_tab = request.GET.get('tab', 'peace_order')
-    if active_tab not in ['peace_order', 'finance_assets', 'rbi']:
-        active_tab = 'peace_order'
 
-    search_query = request.GET.get('q', '').strip()
+@require_perm('blotter', 'delete')
+@require_POST
+def case_delete(request, pk):
+    case = selectors.case_detail(request.user, pk)
+    case_no = case.case_no
+    services.delete_case(request.user, case, request=request)
+    messages.success(request, f'Case {case_no} has been deleted.')
+    return redirect('blotter:case_list')
 
-    # 1. Peace & Order
-    blotters = BlotterRecord.objects.select_related('created_by', 'kp_case').all()
-    if search_query and active_tab == 'peace_order':
-        blotters = blotters.filter(
-            Q(case_number__icontains=search_query) |
-            Q(complainant_name__icontains=search_query) |
-            Q(respondent_name__icontains=search_query) |
-            Q(incident_type__icontains=search_query)
-        )
-    total_blotters = BlotterRecord.objects.count()
-    open_blotters = BlotterRecord.objects.filter(status=BlotterRecord.STATUS_OPEN).count()
-    settled_blotters = BlotterRecord.objects.filter(status=BlotterRecord.STATUS_SETTLED).count()
-    referred_blotters = BlotterRecord.objects.filter(status=BlotterRecord.STATUS_REFERRED).count()
-    kp_cases = KPCase.objects.select_related('blotter').order_by('-hearing_date')[:10]
 
-    # 2. Finance & Assets
-    issued_logs = IssuedDocumentLog.objects.select_related('appointment', 'issued_to', 'issued_by').all()
-    if search_query and active_tab == 'finance_assets':
-        issued_logs = issued_logs.filter(
-            Q(control_number__icontains=search_query) |
-            Q(issued_to__first_name__icontains=search_query) |
-            Q(issued_to__last_name__icontains=search_query) |
-            Q(appointment__document_type__icontains=search_query)
-        )
-    total_issued = IssuedDocumentLog.objects.count()
-    assets = AssetInventory.objects.all()
-    total_assets_qty = sum(a.quantity for a in assets)
-    good_assets_qty = sum(a.quantity for a in assets if a.condition == AssetInventory.CONDITION_GOOD)
-    maintenance_assets_qty = sum(a.quantity for a in assets if a.condition == AssetInventory.CONDITION_MAINTENANCE)
-
-    # 3. RBI Directory
-    rbi_residents = User.objects.filter(role=User.ROLE_RESIDENT, is_approved=True).select_related('household').order_by('last_name', 'first_name')
-    if search_query and active_tab == 'rbi':
-        rbi_residents = rbi_residents.filter(
-            Q(first_name__icontains=search_query) |
-            Q(last_name__icontains=search_query) |
-            Q(username__icontains=search_query) |
-            Q(address__icontains=search_query)
-        )
-    purok_breakdown = []
-    for p_code, p_label in User.PUROK_CHOICES:
-        count = User.objects.filter(role=User.ROLE_RESIDENT, is_approved=True, purok__name=p_code).count()
-        purok_breakdown.append({'code': p_code, 'label': p_label, 'count': count})
-
-    total_verified_residents = User.objects.filter(role=User.ROLE_RESIDENT, is_approved=True).count()
-    total_seniors = User.objects.filter(role=User.ROLE_RESIDENT, is_senior=True).count()
-    total_pwd = User.objects.filter(role=User.ROLE_RESIDENT, is_pwd=True).count()
-    total_4ps = User.objects.filter(role=User.ROLE_RESIDENT, is_4ps=True).count()
-    total_households = Household.objects.count()
-
-    context = {
-        'active_tab': active_tab,
-        'search_query': search_query,
-        # Peace & Order
-        'blotters': blotters[:20],
-        'total_blotters': total_blotters,
-        'open_blotters': open_blotters,
-        'settled_blotters': settled_blotters,
-        'referred_blotters': referred_blotters,
-        'kp_cases': kp_cases,
-        # Finance & Assets
-        'issued_logs': issued_logs[:20],
-        'total_issued': total_issued,
-        'assets': assets,
-        'total_assets_qty': total_assets_qty,
-        'good_assets_qty': good_assets_qty,
-        'maintenance_assets_qty': maintenance_assets_qty,
-        # RBI Directory
-        'rbi_residents': rbi_residents[:30],
-        'purok_breakdown': purok_breakdown,
-        'total_verified_residents': total_verified_residents,
-        'total_seniors': total_seniors,
-        'total_pwd': total_pwd,
-        'total_4ps': total_4ps,
-        'total_households': total_households,
-    }
-    return render(request, 'records/records_hub.html', context)
+@require_perm('blotter', 'view')
+@require_GET
+def case_print(request, pk):
+    case = selectors.case_detail(request.user, pk)
+    return render(request, 'blotter/case_print.html', {
+        'case': case,
+        'timeline': selectors.status_timeline(case),
+        'info': BarangayInfo.get_solo(),
+    })

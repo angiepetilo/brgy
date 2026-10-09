@@ -65,7 +65,7 @@
   
   /* Apple System Neutrals - Light Mode */
   --color-canvas: #FFFFFF;
-  --color-canvas-secondary: #F9FAFB;
+  --color-canvas-secondary: #F5F5F7;
   --color-sidebar: #F5F5F7;
   --color-hover: #F2F2F7;
   --color-hover-secondary: #E8E8ED;
@@ -80,6 +80,11 @@
   --color-text-quaternary: #C7C7CC;
   --color-text-inverse: #FFFFFF;
   
+  /* Background Aliases */
+  --color-bg-primary: #FFFFFF;
+  --color-bg-secondary: #F9FAFB;
+  --color-bg-tertiary: #F3F4F6;
+  
   /* Semantic Colors - Light Mode */
   --color-accent-blue: #0071E3;
   --color-accent-blue-hover: #005BB5;
@@ -87,23 +92,23 @@
   
   --color-success-green: #34C759;
   --color-success-green-hover: #2DA949;
-  --color-success-green-subtle: rgba(52, 199, 89, 0.15);
+  --color-success-green-subtle: #34C75926;
   
   --color-error-red: #FF3B30;
   --color-error-red-hover: #D92B20;
-  --color-error-red-subtle: rgba(255, 59, 48, 0.15);
+  --color-error-red-subtle: #FF3B3026;
   
   --color-warning-orange: #FF9500;
   --color-warning-orange-hover: #E08600;
-  --color-warning-orange-subtle: rgba(255, 149, 0, 0.15);
+  --color-warning-orange-subtle: #FF950026;
   
   --color-info-teal: #5AC8FA;
   --color-info-teal-hover: #4AB8EA;
-  --color-info-teal-subtle: rgba(90, 200, 250, 0.15);
+  --color-info-teal-subtle: #5AC8FA26;
   
   --color-purple: #AF52DE;
   --color-purple-hover: #9F42CE;
-  --color-purple-subtle: rgba(175, 82, 222, 0.15);
+  --color-purple-subtle: #AF52DE26;
   
   
   /* ============================================
@@ -192,8 +197,8 @@
   --shadow-2xl: 0 24px 48px rgba(0, 0, 0, 0.20);
   
   /* Focus States */
-  --shadow-focus: 0 0 0 3px rgba(0, 113, 227, 0.25);
-  --shadow-focus-error: 0 0 0 3px rgba(255, 59, 48, 0.25);
+  --shadow-focus: 0 0 0 3px #0071E340;
+  --shadow-focus-error: 0 0 0 3px #FF3B3040;
   
   
   /* ============================================
@@ -228,12 +233,15 @@
 
 
 /* ============================================
-   DARK MODE
+   DARK MODE - DISABLED FOR NOW
    ============================================ */
 
+/* Dark mode is temporarily disabled to ensure consistent light mode appearance
+   across all system preferences. Re-enable when dark mode support is needed. */
+
+/*
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Apple System Neutrals - Dark Mode */
     --color-canvas: #1E1E1E;
     --color-canvas-secondary: #2C2C2E;
     --color-sidebar: #161617;
@@ -243,39 +251,36 @@
     --color-border-strong: #48484A;
     --color-divider: #545456;
     
-    /* Text Colors - Dark Mode */
     --color-text-primary: #F5F5F7;
     --color-text-secondary: #A1A1A6;
     --color-text-tertiary: #8E8E93;
     --color-text-quaternary: #636366;
     --color-text-inverse: #1D1D1F;
     
-    /* Semantic Colors - Dark Mode (Higher saturation) */
     --color-accent-blue: #2997FF;
     --color-accent-blue-hover: #147CE5;
-    --color-accent-blue-subtle: rgba(41, 151, 255, 0.20);
+    --color-accent-blue-subtle: #2997FF33;
     
     --color-success-green: #30D158;
     --color-success-green-hover: #26B648;
-    --color-success-green-subtle: rgba(48, 209, 88, 0.20);
+    --color-success-green-subtle: #30D15833;
     
     --color-error-red: #FF453A;
     --color-error-red-hover: #E5342A;
-    --color-error-red-subtle: rgba(255, 69, 58, 0.20);
+    --color-error-red-subtle: #FF453A33;
     
     --color-warning-orange: #FF9F0A;
     --color-warning-orange-hover: #E58900;
-    --color-warning-orange-subtle: rgba(255, 159, 10, 0.20);
+    --color-warning-orange-subtle: #FF9F0A33;
     
     --color-info-teal: #64D2FF;
     --color-info-teal-hover: #4AB8EA;
-    --color-info-teal-subtle: rgba(100, 210, 255, 0.20);
+    --color-info-teal-subtle: #64D2FF33;
     
     --color-purple: #BF5AF2;
     --color-purple-hover: #AF4AE2;
-    --color-purple-subtle: rgba(191, 90, 242, 0.20);
+    --color-purple-subtle: #BF5AF233;
     
-    /* Shadows in dark mode (lighter, more subtle) */
     --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.25);
     --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.30);
     --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.35);
@@ -284,6 +289,7 @@
     --shadow-2xl: 0 24px 48px rgba(0, 0, 0, 0.50);
   }
 }
+*/
 
 
 /* ============================================
@@ -305,12 +311,15 @@
     --color-border-strong: #999999;
   }
   
+  /* Dark mode disabled - keeping light mode borders for high contrast */
+  /*
   @media (prefers-color-scheme: dark) {
     :root {
       --color-border: #666666;
       --color-border-strong: #7F7F7F;
     }
   }
+  */
 }
 
 

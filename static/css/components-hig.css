@@ -4,6 +4,30 @@
  */
 
 /* ============================================
+   GLOBAL OVERRIDES (Force HIG Colors)
+   ============================================ */
+
+/* Force white background in light mode */
+body {
+  background: #FFFFFF !important;
+  color: #1D1D1F !important;
+}
+
+/* Force HIG text colors on all HIG components */
+.hig-content-area *,
+.hig-content-main *,
+.hig-card *,
+.hig-table * {
+  color: inherit;
+}
+
+.hig-content-area,
+.hig-content-main {
+  background: #F9FAFB !important;
+  color: #1D1D1F !important;
+}
+
+/* ============================================
    BUTTONS
    ============================================ */
 
@@ -542,17 +566,17 @@
 }
 
 .hig-alert-success {
-  background: rgba(52, 199, 89, 0.1);
+  background: #34C7591A;
   border-left: 3px solid var(--color-success-green);
 }
 
 .hig-alert-warning {
-  background: rgba(255, 149, 0, 0.1);
+  background: #FF95001A;
   border-left: 3px solid var(--color-warning-orange);
 }
 
 .hig-alert-error {
-  background: rgba(255, 59, 48, 0.1);
+  background: #FF3B301A;
   border-left: 3px solid var(--color-error-red);
 }
 
@@ -841,7 +865,7 @@
 }
 
 .hig-dropdown-item-danger:hover {
-  background: rgba(255, 59, 48, 0.1);
+  background: #FF3B301A;
 }
 
 
@@ -885,7 +909,7 @@
 }
 
 .hig-step-approved .hig-step-circle {
-  background: rgba(0, 122, 255, 0.1);
+  background: #007AFF1A;
   border-color: var(--color-accent-blue);
   color: var(--color-accent-blue);
 }

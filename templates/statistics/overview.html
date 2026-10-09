@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load static core_tags %}
+{% block title %}Statistics & Analytics - Barangay.ph{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/statistics.css' %}">{% endblock %}
+
+{% block content %}
+<div class="container-fluid stats-page" id="stats-root"
+     data-api-summary="{% url 'statistics:api_summary' %}"
+     data-api-demographics="{% url 'statistics:api_demographics' %}"
+     data-api-purok-density="{% url 'statistics:api_purok_density' %}"
+     data-api-appointments="{% url 'statistics:api_appointments' %}"
+     data-api-revenue="{% url 'statistics:api_revenue' %}"
+     data-api-blotter="{% url 'statistics:api_blotter' %}"
+     data-export-csv="{% url 'statistics:export_excel' %}"
+     data-export-print="{% url 'statistics:export_pdf' %}">
+
+    <div class="stats-header">
+        <div>
+            <h1>{% icon 'chart-pie' cls='icon-primary' %} Barangay Statistics</h1>
+            <p>Live demographic, service and revenue figures from the barangay records.</p>
+        </div>
+        {% if can_export %}
+        <div class="stats-actions">
+            <a class="stats-btn" id="stats-export-csv" href="{% url 'statistics:export_excel' %}">{% icon 'file-spreadsheet' %} Export (CSV)</a>
+            <a class="stats-btn primary" id="stats-export-print" href="{% url 'statistics:export_pdf' %}" target="_blank" rel="noopener">{% icon 'printer' %} Print report</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <form class="stats-filters" id="stats-filters" method="get" action="{% url 'statistics:overview' %}">
+        <div>
+            <label for="stats-date-from">From</label>
+            <input type="date" id="stats-date-from" name="date_from" value="{{ date_from }}">
+        </div>
+        <div>
+            <label for="stats-date-to">To</label>
+            <input type="date" id="stats-date-to" name="date_to" value="{{ date_to }}">
+        </div>
+        <div>
+            <label for="stats-purok">Purok</label>
+            <select id="stats-purok" name="purok">
+                <option value="">All puroks</option>
+                {% for purok in puroks %}
+                <option value="{{ purok.pk }}" {% if purok.pk == selected_purok %}selected{% endif %}>{{ purok.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="stats-btn primary">Apply</button>
+        <a class="stats-btn" id="stats-reset" href="{% url 'statistics:overview' %}">Reset</a>
+    </form>
+
+    <p class="stats-note" id="stats-scope-note">
+        {% icon 'info' %}
+        Date filters apply to appointments, revenue and blotter cases only. Resident and household figures are a current snapshot.
+    </p>
+    <p class="stats-range" id="stats-range" aria-live="polite"></p>
+    <div class="stats-error" id="stats-error" role="alert" aria-live="assertive" {% if not filter_error %}hidden{% endif %}>{{ filter_error }}</div>
+
+    <section class="stats-kpis" aria-label="Key figures">
+        <div class="stats-kpi"><div class="stats-kpi-label">Population</div><div class="stats-kpi-value" data-kpi="population">-</div></div>
+        <div class="stats-kpi"><div class="stats-kpi-label">Households</div><div class="stats-kpi-value" data-kpi="households">-</div></div>
+        <div class="stats-kpi"><div class="stats-kpi-label">Seniors (60+)</div><div class="stats-kpi-value" data-kpi="seniors">-</div></div>
+        <div class="stats-kpi"><div class="stats-kpi-label">PWD</div><div class="stats-kpi-value" data-kpi="pwd">-</div></div>
+        <div class="stats-kpi"><div class="stats-kpi-label">Solo parents</div><div class="stats-kpi-value" data-kpi="solo_parents">-</div></div>
+        <div class="stats-kpi"><div class="stats-kpi-label">4Ps</div><div class="stats-kpi-value" data-kpi="four_ps">-</div></div>
+        <div class="stats-kpi"><div class="stats-kpi-label">Pending appointments</div><div class="stats-kpi-value" data-kpi="appointments_pending">-</div></div>
+        <div class="stats-kpi"><div class="stats-kpi-label">Documents issued</div><div class="stats-kpi-value" data-kpi="documents_issued">-</div></div>
+        <div class="stats-kpi"><div class="stats-kpi-label">Document revenue</div><div class="stats-kpi-value" data-kpi="revenue_total">-</div></div>
+        <div class="stats-kpi"><div class="stats-kpi-label">Blotter cases filed</div><div class="stats-kpi-value" data-kpi="blotter_cases">-</div></div>
+        <div class="stats-kpi"><div class="stats-kpi-label">Blotter settlement rate</div><div class="stats-kpi-value" data-kpi="settlement_rate">-</div></div>
+    </section>
+
+    <div class="stats-grid">
+        <section class="stats-card" data-chart="gender" data-state="loading">
+            <div class="stats-card-head"><h2>Gender</h2><button type="button" class="stats-toggle" data-toggle-table aria-expanded="false">View as table</button></div>
+            <div class="stats-state stats-state-loading" role="status">Loading...</div>
+            <div class="stats-state stats-state-empty">No data for the selected period</div>
+            <div class="stats-chart-wrap"><canvas role="img" aria-label="Gender distribution chart"></canvas></div>
+            <div class="stats-table-wrap" hidden><table class="stats-table"><caption class="stats-sr-only">Gender distribution</caption><thead></thead><tbody></tbody></table></div>
+        </section>
+
+        <section class="stats-card" data-chart="sectors" data-state="loading">
+            <div class="stats-card-head"><h2>Sectors</h2><button type="button" class="stats-toggle" data-toggle-table aria-expanded="false">View as table</button></div>
+            <div class="stats-state stats-state-loading" role="status">Loading...</div>
+            <div class="stats-state stats-state-empty">No data for the selected period</div>
+            <div class="stats-chart-wrap"><canvas role="img" aria-label="Sector counts chart"></canvas></div>
+            <div class="stats-table-wrap" hidden><table class="stats-table"><caption class="stats-sr-only">Sector counts</caption><thead></thead><tbody></tbody></table></div>
+        </section>
+
+        <section class="stats-card" data-chart="civil_status" data-state="loading">
+            <div class="stats-card-head"><h2>Civil status</h2><button type="button" class="stats-toggle" data-toggle-table aria-expanded="false">View as table</button></div>
+            <div class="stats-state stats-state-loading" role="status">Loading...</div>
+            <div class="stats-state stats-state-empty">No data for the selected period</div>
+            <div class="stats-chart-wrap"><canvas role="img" aria-label="Civil status chart"></canvas></div>
+            <div class="stats-table-wrap" hidden><table class="stats-table"><caption class="stats-sr-only">Civil status</caption><thead></thead><tbody></tbody></table></div>
+        </section>
+
+        <section class="stats-card" data-chart="age_bands" data-state="loading">
+            <div class="stats-card-head"><h2>Age bands</h2><button type="button" class="stats-toggle" data-toggle-table aria-expanded="false">View as table</button></div>
+            <div class="stats-state stats-state-loading" role="status">Loading...</div>
+            <div class="stats-state stats-state-empty">No data for the selected period</div>
+            <div class="stats-chart-wrap"><canvas role="img" aria-label="Age band chart"></canvas></div>
+            <div class="stats-table-wrap" hidden><table class="stats-table"><caption class="stats-sr-only">Age bands</caption><thead></thead><tbody></tbody></table></div>
+        </section>
+
+        <section class="stats-card wide" data-chart="purok_density" data-state="loading" data-table-open>
+            <div class="stats-card-head"><h2>Purok density (ranked by households)</h2><button type="button" class="stats-toggle" data-toggle-table aria-expanded="true">Hide table</button></div>
+            <div class="stats-state stats-state-loading" role="status">Loading...</div>
+            <div class="stats-state stats-state-empty">No data for the selected period</div>
+            <div class="stats-chart-wrap tall"><canvas role="img" aria-label="Households and residents per purok chart"></canvas></div>
+            <div class="stats-table-wrap"><table class="stats-table"><caption class="stats-sr-only">Purok density ranking</caption><thead></thead><tbody></tbody></table></div>
+        </section>
+
+        <section class="stats-card" data-chart="appointment_status" data-state="loading">
+            <div class="stats-card-head"><h2>Appointments by status</h2><button type="button" class="stats-toggle" data-toggle-table aria-expanded="false">View as table</button></div>
+            <div class="stats-state stats-state-loading" role="status">Loading...</div>
+            <div class="stats-state stats-state-empty">No data for the selected period</div>
+            <div class="stats-chart-wrap"><canvas role="img" aria-label="Appointments by status chart"></canvas></div>
+            <div class="stats-table-wrap" hidden><table class="stats-table"><caption class="stats-sr-only">Appointments by status</caption><thead></thead><tbody></tbody></table></div>
+        </section>
+
+        <section class="stats-card" data-chart="services" data-state="loading" data-table-open>
+            <div class="stats-card-head"><h2>Services requested</h2><button type="button" class="stats-toggle" data-toggle-table aria-expanded="true">Hide table</button></div>
+            <div class="stats-state stats-state-loading" role="status">Loading...</div>
+            <div class="stats-state stats-state-empty">No data for the selected period</div>
+            <div class="stats-chart-wrap"><canvas role="img" aria-label="Requests per document type and health service chart"></canvas></div>
+            <div class="stats-table-wrap"><table class="stats-table"><caption class="stats-sr-only">Requests per service</caption><thead></thead><tbody></tbody></table></div>
+        </section>
+
+        <section class="stats-card wide" data-chart="revenue" data-state="loading" data-table-open>
+            <div class="stats-card-head"><h2>Monthly document revenue</h2><button type="button" class="stats-toggle" data-toggle-table aria-expanded="true">Hide table</button></div>
+            <div class="stats-state stats-state-loading" role="status">Loading...</div>
+            <div class="stats-state stats-state-empty">No data for the selected period</div>
+            <div class="stats-chart-wrap"><canvas role="img" aria-label="Monthly revenue line chart"></canvas></div>
+            <div class="stats-table-wrap"><table class="stats-table"><caption class="stats-sr-only">Revenue per month</caption><thead></thead><tbody></tbody></table></div>
+        </section>
+
+        <section class="stats-card wide" data-chart="blotter" data-state="loading" data-table-open>
+            <div class="stats-card-head"><h2>Blotter cases: filed vs settled per month</h2><button type="button" class="stats-toggle" data-toggle-table aria-expanded="true">Hide table</button></div>
+            <p class="stats-note" id="stats-blotter-note" aria-live="polite"></p>
+            <div class="stats-state stats-state-loading" role="status">Loading...</div>
+            <div class="stats-state stats-state-empty">No blotter cases for the selected period</div>
+            <div class="stats-chart-wrap"><canvas role="img" aria-label="Blotter cases filed and settled per month line chart"></canvas></div>
+            <div class="stats-table-wrap"><table class="stats-table"><caption class="stats-sr-only">Blotter cases per month</caption><thead></thead><tbody></tbody></table></div>
+        </section>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'vendor/chartjs/chart.umd.js' %}"></script>
+<script src="{% static 'js/statistics.js' %}" defer></script>
+{% endblock %}

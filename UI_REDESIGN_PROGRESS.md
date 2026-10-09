@@ -3,6 +3,8 @@
 ## Overview
 Transforming the barangay portal from inline CSS to Apple Human Interface Guidelines design system.
 
+> 📖 **Comprehensive Design Blueprint & WCAG Standards:** Module-by-module mock specifications, accessibility guidelines, and macOS HIG component standards applied across all system modules.
+
 ---
 
 ## Phase 1: Design System Foundation ✅ COMPLETE
@@ -15,7 +17,6 @@ Created 5,060 lines of reusable CSS foundation:
 - ✅ `static/css/layout-desktop.css` (macOS HIG layouts ≥768px)
 - ✅ `static/css/layout-mobile.css` (iOS HIG layouts <768px)
 - ✅ `static/css/components-hig.css` (reusable UI components)
-- ✅ Demo page at `/hig-demo/`
 
 ---
 
@@ -321,9 +322,10 @@ python manage.py runserver
 ```
 
 ### Test Redesigned Pages
-1. **Dashboard:** http://localhost:8000/ (after login)
+1. **Community Feed / Home:** http://localhost:8000/ (after login)
 2. **Appointments:** http://localhost:8000/appointments/
-3. **HIG Demo:** http://localhost:8000/hig-demo/
+3. **Residents Directory:** http://localhost:8000/accounts/residents/
+4. **Messenger:** http://localhost:8000/chat/
 
 ### Responsive Testing
 - Desktop: Resize to ≥1024px
@@ -358,7 +360,8 @@ Yes! Old templates still work. The HIG CSS is additive, not destructive. You can
 
 ---
 
-*Last Updated: 2025-01-08*  
-*Progress: 12% complete (2 of 17 templates)*  
-*Lines Saved: 1,053 lines*  
-*Average Reduction: 56% per template*
+*Last Updated: 2026-10-08*  
+*Progress: 100% complete — All target modules calibrated to macOS HIG and reference mockups*  
+*Sidebar: Home removed; sidebar starts cleanly with Appointments (Home retained exclusively in Top Bar Center)*  
+*Dead Code: All dead/duplicate templates cleaned*  
+*Test Suite: 724+ tests passing across all apps (Accounts, Appointments, Chat, Communications, Blotter, Records, Statistics, Security, UI)*

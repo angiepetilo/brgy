@@ -1,0 +1,66 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ case.case_no }} - Blotter case summary</title>
+    <link rel="stylesheet" href="{% static 'css/blotter_print.css' %}">
+</head>
+<body class="blotter-print">
+    <div class="toolbar no-print">
+        <span><strong>Blotter case summary</strong> (ready for print or Save as PDF)</span>
+        <button type="button" data-action="print">Print / Save as PDF</button>
+    </div>
+
+    <header class="letterhead">
+        <p>Republic of the Philippines</p>
+        <h1>{{ info.name }}</h1>
+        <p>{% if info.city %}{{ info.city }}{% endif %}{% if info.city and info.province %}, {% endif %}{% if info.province %}{{ info.province }}{% endif %}</p>
+        {% if info.contact_no %}<p>Contact: {{ info.contact_no }}</p>{% endif %}
+        <h2>Lupong Tagapamayapa - Blotter Case Summary</h2>
+    </header>
+
+    <table class="meta">
+        <tr><th>Case no.</th><td>{{ case.case_no }}</td><th>Status</th><td>{{ case.get_status_display }}</td></tr>
+        <tr><th>Incident type</th><td>{{ case.get_incident_type_display }}</td><th>Filed</th><td>{{ case.filed_at|date:"M d, Y h:i A" }}</td></tr>
+        <tr><th>Incident date</th><td>{{ case.incident_date|date:"M d, Y" }}{% if case.incident_time %} {{ case.incident_time|time:"h:i A" }}{% endif %}</td><th>Purok</th><td>{{ case.purok.name|default:"-" }}</td></tr>
+        <tr><th>Location</th><td colspan="3">{{ case.location }}</td></tr>
+        {% if case.is_confidential %}<tr><th>Classification</th><td colspan="3"><strong>CONFIDENTIAL</strong></td></tr>{% endif %}
+    </table>
+
+    <h3>Parties</h3>
+    <table>
+        <thead><tr><th>Role</th><th>Name</th><th>Address</th><th>Mobile</th></tr></thead>
+        <tbody>
+            {% for party in case.parties.all %}
+            <tr><td>{{ party.get_role_display }}</td><td>{{ party.full_name }}</td><td>{{ party.address|default:"-" }}</td><td>{{ party.contact_no|default:"-" }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Narrative</h3>
+    <p class="narrative">{{ case.narrative|linebreaksbr }}</p>
+
+    {% if case.resolution_notes %}
+    <h3>Resolution</h3>
+    <p class="narrative">{{ case.resolution_notes|linebreaksbr }}</p>
+    {% endif %}
+
+    <h3>Timeline</h3>
+    <table>
+        <thead><tr><th>Date</th><th>Event</th><th>By</th></tr></thead>
+        <tbody>
+            {% for event in timeline %}
+            <tr><td>{{ event.at|date:"M d, Y h:i A" }}</td><td>{{ event.label }}{% if event.notes %}<br><small>{{ event.notes }}</small>{% endif %}</td><td>{{ event.actor|default:"-" }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="signatures">
+        <div class="signature"><div>LUPON SECRETARY</div><div>Recorded by</div></div>
+        <div class="signature"><div>PUNONG BARANGAY</div><div>Lupon Chairman</div></div>
+    </div>
+    <p class="generated">Generated {% now "F d, Y h:i A" %}</p>
+    <script src="{% static 'js/blotter.js' %}" defer></script>
+</body>
+</html>

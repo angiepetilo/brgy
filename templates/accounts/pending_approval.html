@@ -5,19 +5,19 @@
 {% block content %}
 <div style="max-width: 680px; margin: 3rem auto;">
     <div class="card" style="text-align: center;">
-        <div class="card-header" style="justify-content: center; background: #f8fafc; padding: 2rem 1.5rem 1.5rem; display: block;">
+        <div class="card-header" style="justify-content: center; background: #F9FAFB; padding: 2rem 1.5rem 1.5rem; display: block;">
             {% if user.rejection_reason %}
-            <div class="badge badge-danger" style="font-size: 0.85rem; margin-bottom: 0.75rem; letter-spacing: 0.05em;">
+            <div class="badge badge-danger" style="font-size: 0.875rem; margin-bottom: 0.75rem; letter-spacing: 0.05em;">
                 VERIFICATION DECLINED
             </div>
             <h2 class="card-title" style="color: #dc2626; font-size: 1.4rem; text-transform: uppercase;">Verification Declined</h2>
-            <p style="color: #64748b; font-size: 0.9rem; margin-top: 0.35rem;">Your account application was reviewed and could not be approved at this time.</p>
+            <p style="color: #6B7280; font-size: 0.9rem; margin-top: 0.35rem;">Your account application was reviewed and could not be approved at this time.</p>
             {% else %}
-            <div class="badge badge-warning" style="font-size: 0.85rem; margin-bottom: 0.75rem; letter-spacing: 0.05em;">
+            <div class="badge badge-warning" style="font-size: 0.875rem; margin-bottom: 0.75rem; letter-spacing: 0.05em;">
                 ACCOUNT UNDER VERIFICATION
             </div>
-            <h2 class="card-title" style="color: #ea580c; font-size: 1.4rem; text-transform: uppercase;">Account Under Verification</h2>
-            <p style="color: #64748b; font-size: 0.9rem; margin-top: 0.35rem;">Welcome, <strong>{{ user.get_full_name|default:user.username }}</strong>! Your application is in the verification queue.</p>
+            <h2 class="card-title" style="color: #374151; font-size: 1.4rem; text-transform: uppercase;">Account Under Verification</h2>
+            <p style="color: #6B7280; font-size: 0.9rem; margin-top: 0.35rem;">Welcome, <strong>{{ user.get_full_name|default:user.username }}</strong>! Your application is in the verification queue.</p>
             {% endif %}
         </div>
 
@@ -27,7 +27,7 @@
                 <strong>Reason for Decline:</strong><br>
                 {{ user.rejection_reason }}
             </div>
-            <p style="font-size: 0.875rem; color: #475569; margin-bottom: 1.5rem;">
+            <p style="font-size: 0.875rem; color: #4B5563; margin-bottom: 1.5rem;">
                 Please visit the Barangay Hall during office hours or re-register with a clear, valid government identification card.
             </p>
             {% else %}
@@ -35,22 +35,22 @@
                 <strong>GATED SECURITY NOTICE:</strong> To protect community records and ensure verified distribution of official documents, an authorized Barangay Administrator must inspect your uploaded ID proof before granting full access.
             </div>
 
-            <div style="background: #f8fafc; border-radius: 2px; padding: 1.25rem; border: 1px solid #e2e8f0; margin-bottom: 1.5rem;">
-                <h4 style="font-size: 0.85rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Submitted Details</h4>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.85rem;">
-                    <div><span style="color: #64748b;">Full Name:</span> <strong>{{ user.get_full_name|default:"Not specified" }}</strong></div>
-                    <div><span style="color: #64748b;">Username:</span> <strong>{{ user.username }}</strong></div>
-                    <div><span style="color: #64748b;">Contact:</span> <strong>{{ user.phone_number|default:"None" }}</strong></div>
-                    <div><span style="color: #64748b;">Registered:</span> <strong>{{ user.date_joined|date:"M d, Y" }}</strong></div>
+            <div style="background: #F9FAFB; border-radius: 2px; padding: 1.25rem; border: 1px solid #E5E7EB; margin-bottom: 1.5rem;">
+                <h4 style="font-size: 0.875rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Submitted Details</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.875rem;">
+                    <div><span style="color: #6B7280;">Full Name:</span> <strong>{{ user.get_full_name|default:"Not specified" }}</strong></div>
+                    <div><span style="color: #6B7280;">Username:</span> <strong>{{ user.username }}</strong></div>
+                    <div><span style="color: #6B7280;">Contact:</span> <strong>{{ user.phone_number|default:"None" }}</strong></div>
+                    <div><span style="color: #6B7280;">Registered:</span> <strong>{{ user.date_joined|date:"M d, Y" }}</strong></div>
                 </div>
-                <div style="margin-top: 0.75rem; font-size: 0.85rem;">
-                    <span style="color: #64748b;">Address:</span> <strong>{{ user.address|default:"None" }}</strong>
+                <div style="margin-top: 0.75rem; font-size: 0.875rem;">
+                    <span style="color: #6B7280;">Address:</span> <strong>{{ user.address|default:"None" }}</strong>
                 </div>
 
-                {% if user.id_proof %}
+                {% if user.resident_profile.id_photo %}
                 <div style="margin-top: 1rem;">
-                    <span style="color: #64748b; font-size: 0.85rem; display: block; margin-bottom: 0.35rem;">Uploaded Proof of ID:</span>
-                    <a href="{{ user.id_proof.url }}" target="_blank" class="btn btn-secondary btn-sm">
+                    <span style="color: #6B7280; font-size: 0.875rem; display: block; margin-bottom: 0.35rem;">Uploaded Proof of ID:</span>
+                    <a href="{{ user.resident_profile.id_photo_protected_url }}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">
                         VIEW UPLOADED DOCUMENT
                     </a>
                 </div>
@@ -65,7 +65,7 @@
                         SIGN OUT
                     </button>
                 </form>
-                <button type="button" class="btn btn-primary" onclick="window.location.reload();">
+                <button type="button" class="btn btn-primary" data-action="reload">
                     CHECK STATUS
                 </button>
             </div>

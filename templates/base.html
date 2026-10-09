@@ -5,14 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Barangay Information & Management System{% endblock %}</title>
     {% load static core_tags %}
-    <!-- Apple HIG Design System (New) -->
+    <!-- Legacy styles (load first) -->
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+    <!-- Apple HIG Design System (load last to override) -->
     <link rel="stylesheet" href="{% static 'css/design-tokens.css' %}">
     <link rel="stylesheet" href="{% static 'css/layout-desktop.css' %}">
     <link rel="stylesheet" href="{% static 'css/layout-mobile.css' %}">
     <link rel="stylesheet" href="{% static 'css/components-hig.css' %}">
-    <!-- Legacy styles (for gradual migration) -->
-    <link rel="stylesheet" href="{% static 'css/main.css' %}">
-    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+    <!-- Phase 3: Table Components -->
+    <link rel="stylesheet" href="{% static 'css/components/table-desktop.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components/table-mobile.css' %}">
+    <!-- Phase 4: Native Controls & Buttons -->
+    <link rel="stylesheet" href="{% static 'css/components/buttons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components/dropdowns.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components/cards.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body data-icon-sprite="{% static 'vendor/lucide/sprite.svg' %}" data-authenticated="{% if request.user.is_authenticated %}true{% else %}false{% endif %}" data-user-id="{% if request.user.is_authenticated %}{{ request.user.id }}{% endif %}">
@@ -21,7 +29,7 @@
     <!-- 1. Top Bar Navigation System (Facebook Style Clean Header) -->
     <header class="fb-topbar">
         <div class="fb-topbar-left">
-            <a href="{% url 'appointments:list' %}" class="fb-brand-title" title="Barangay.ph" data-tooltip="Barangay.ph" style="display: flex; align-items: center; gap: 0.65rem;">
+            <a href="{% if request.user.is_authenticated %}{% url 'home' %}{% else %}/{% endif %}" class="fb-brand-title" title="Barangay.ph - Back to Home" data-tooltip="Barangay.ph" style="display: flex; align-items: center; gap: 0.65rem;">
                 <img src="{% static 'images/barangay_logo.png' %}" alt="Barangay.ph Logo" style="height: 38px; width: auto; object-fit: contain;">
                 <span style="font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em; color: #111827;">BARANGAY.PH</span>
             </a>
@@ -30,11 +38,11 @@
         {% block topbar_center %}
         {% if request.user.is_authenticated and request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'signup' and request.path != '/' %}
         <nav class="fb-topbar-center" aria-label="Main">
-            <a href="{% url 'communications:feed' %}" class="fb-nav-tab {% if request.path == '/feed/' or request.resolver_match.url_name == 'feed' %}active{% endif %}" title="Home" data-tooltip="Home">
+            <a href="{% url 'home' %}" class="fb-nav-tab {% if request.path == '/home/' or request.path == '/feed/' or request.resolver_match.url_name == 'feed' or request.resolver_match.url_name == 'home' %}active{% endif %}" title="Home" data-tooltip="Home">
                 {% icon 'house' %}
                 <span class="nav-tab-label">Home</span>
             </a>
-            <a href="{% url 'communications:emergency_list' %}" class="fb-nav-tab fb-nav-tab-emergency {% if 'emergency' in request.path %}active{% endif %}" title="Emergency" data-tooltip="Emergency">
+            <a href="{% url 'communications:emergency_list' %}" class="fb-nav-tab {% if 'emergency' in request.path %}active{% endif %}" title="Emergency" data-tooltip="Emergency">
                 {% icon 'triangle-alert' %}
                 <span class="nav-tab-label">Emergency</span>
             </a>
@@ -54,7 +62,6 @@
             <div class="fb-nav-dropdown-wrapper" id="fb-messages-wrapper">
                 <button type="button" class="btn-top-action {% if unread_messages_count > 0 %}has-badge{% endif %}" id="fb-messages-toggle" title="Messages" data-tooltip="Messages" aria-label="Messages">
                     {% icon 'message-square' %}
-                    <span class="top-action-label" aria-hidden="true">Messages</span>
                     {% if unread_messages_count > 0 %}
                     <span class="action-count-pill">{{ unread_messages_count }}</span>
                     {% endif %}
@@ -126,7 +133,6 @@
             <div class="fb-nav-dropdown-wrapper" id="fb-notifs-wrapper">
                 <button type="button" class="btn-top-action {% if unread_notifications_count > 0 %}has-badge{% endif %}" id="fb-notifs-toggle" title="Notifications" data-tooltip="Notifications" aria-label="Notifications">
                     {% icon 'bell' %}
-                    <span class="top-action-label" aria-hidden="true">Notifications</span>
                     {% if unread_notifications_count > 0 %}
                     <span class="action-count-pill">{{ unread_notifications_count }}</span>
                     {% endif %}
@@ -218,10 +224,10 @@
                     {% endif %}
                 </button>
 
-                <!-- Facebook Style Profile Dropdown Panel -->
+                <!-- Modern Minimal Profile Dropdown Panel -->
                 <div class="fb-dropdown-panel fb-profile-dropdown" id="fb-dropdown-profile">
-                    <!-- Card Header: User Avatar + Full Name + Role -->
-                    <a href="{% url 'accounts:profile' %}" class="fb-profile-card-header">
+                    <!-- User Header Info -->
+                    <a href="{% url 'accounts:profile' %}" class="fb-profile-card-header" style="text-decoration: none;">
                         <div class="fb-profile-avatar-box">
                             {% if request.user.avatar %}
                             <img src="{{ request.user.avatar.url }}" alt="{{ request.user.username }}" class="fb-avatar-img">
@@ -237,7 +243,8 @@
 
                     <div class="fb-dropdown-divider"></div>
 
-                    <!-- Menu Links with right chevron icons -->
+                    <!-- Menu Action Links -->
+                    <div class="fb-profile-menu-items">
                         <a href="{% url 'accounts:profile' %}" class="fb-menu-item">
                             <div class="fb-menu-icon-circle">{% icon 'user-pen' %}</div>
                             <span class="fb-menu-label">My Profile</span>
@@ -293,10 +300,8 @@
         </main>
 
         {% if request.user.is_authenticated %}
-        <!-- 4. Right Sidebar Panel (Stats & On-Duty Roster) -->
-        {% block right_sidebar %}
-        {% include 'includes/right_sidebar.html' %}
-        {% endblock %}
+        <!-- 4. Optional Right Sidebar Panel (Stats & On-Duty Roster) -->
+        {% block right_sidebar %}{% endblock %}
         {% endif %}
     </div>
 
@@ -436,7 +441,7 @@
 
     <!-- Mobile Bottom Navigation Bar (retained for mobile viewports) -->
     <nav class="bottom-nav-bar" id="bottom-nav-bar" aria-label="Quick navigation">
-        <a href="{% url 'communications:feed' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'feed' %}active{% endif %}">
+        <a href="{% url 'home' %}" class="bottom-nav-item {% if request.path == '/home/' or request.path == '/feed/' or request.resolver_match.url_name in 'home,feed' %}active{% endif %}">
             {% icon 'house' %}
             <span class="bnav-label">HOME</span>
         </a>

@@ -11,10 +11,10 @@ class HealthCareServiceAdmin(admin.ModelAdmin):
 
 @admin.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'resident', 'document_type', 'preferred_date', 'preferred_time_slot', 'status', 'created_at')
-    list_filter = ('status', 'document_type', 'preferred_time_slot')
+    list_display = ('id', 'resident', 'document_type', 'appt_date', 'time_window', 'status', 'created_at')
+    list_filter = ('status', 'document_type', 'time_window')
     search_fields = ('resident__username', 'resident__first_name', 'resident__last_name', 'purpose')
-    readonly_fields = ('created_at', 'updated_at')
+    readonly_fields = ('status', 'processed_by', 'processed_at', 'rejection_reason', 'created_at', 'updated_at')
 
 
 @admin.register(IssuedDocumentLog)

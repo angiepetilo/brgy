@@ -1,22 +1,39 @@
 from django.contrib import admin
-from apps.blotter.models import BlotterRecord, KPCase
+
+from apps.blotter.models import BlotterCase, BlotterHearing, BlotterParty
 
 
-class KPCaseInline(admin.StackedInline):
-    model = KPCase
+class BlotterPartyInline(admin.TabularInline):
+    model = BlotterParty
     extra = 0
+    raw_id_fields = ('resident',)
 
 
-@admin.register(BlotterRecord)
-class BlotterRecordAdmin(admin.ModelAdmin):
-    list_display = ('case_number', 'complainant_name', 'respondent_name', 'incident_type', 'incident_date', 'status', 'created_at')
-    list_filter = ('status', 'incident_date')
-    search_fields = ('case_number', 'complainant_name', 'respondent_name', 'incident_location', 'narrative')
-    inlines = [KPCaseInline]
+class BlotterHearingInline(admin.TabularInline):
+    model = BlotterHearing
+    extra = 0
+    raw_id_fields = ('recorded_by',)
 
 
-@admin.register(KPCase)
-class KPCaseAdmin(admin.ModelAdmin):
-    list_display = ('blotter', 'hearing_date', 'certificate_to_file_action', 'created_at')
-    list_filter = ('certificate_to_file_action', 'hearing_date')
-    search_fields = ('blotter__case_number', 'blotter__complainant_name', 'mediator_notes')
+@admin.register(BlotterCase)
+class BlotterCaseAdmin(admin.ModelAdmin):
+    list_display = ('case_no', 'incident_type', 'status', 'purok', 'incident_date', 'filed_at', 'is_confidential')
+    list_filter = ('status', 'incident_type', 'purok', 'is_confidential')
+    search_fields = ('case_no', 'location', 'parties__full_name')
+    readonly_fields = ('case_no', 'filed_at', 'settled_at', 'escalated_at', 'closed_at', 'created_at', 'updated_at')
+    raw_id_fields = ('handled_by', 'recorded_by')
+    inlines = [BlotterPartyInline, BlotterHearingInline]
+
+
+@admin.register(BlotterParty)
+class BlotterPartyAdmin(admin.ModelAdmin):
+    list_display = ('full_name', 'role', 'case', 'contact_no')
+    list_filter = ('role',)
+    search_fields = ('full_name', 'case__case_no')
+    raw_id_fields = ('case', 'resident')
+
+
+@admin.register(BlotterHearing)
+class BlotterHearingAdmin(admin.ModelAdmin):
+    list_display = ('case', 'scheduled_at', 'complainant_attended', 'respondent_attended')
+    raw_id_fields = ('case', 'recorded_by')

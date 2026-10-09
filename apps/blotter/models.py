@@ -1,171 +1,169 @@
-from django.db import models
+"""
+Blotter (Katarungang Pambarangay) records.
+
+A BlotterCase moves through a fixed set of statuses (TRANSITIONS). Only
+apps.blotter.services changes a status; it also stamps settled_at,
+escalated_at and closed_at (closed_at is set on every terminal status so
+monthly settlement rates have a closure month for dismissed and withdrawn
+cases too).
+"""
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.db import models
+from django.utils import timezone
+
+from apps.core.validators import validate_ph_mobile
 
 
-class BlotterRecord(models.Model):
-    """
-    Blotter incident record filed at the Barangay.
+class BlotterCase(models.Model):
+    CASE_NO_PREFIX = 'BLT'
 
-    Normal-Form compliance:
-    1NF – all columns hold single, atomic values.  Complainant and respondent
-          identities are stored as separate FK + name fields to support both
-          registered residents (FK) and unregistered persons (plain name).
-    2NF – every non-key attribute depends fully on case_number / id (single-key
-          table, so 2NF is automatically satisfied).
-    3NF FIX – split the old complainant_name / respondent_name plain-text
-          columns.  When the person is a registered User we store the FK and
-          derive the name from the User record (no duplication).  When they are
-          NOT registered we store only the plain-text name.  This removes the
-          transitive dependency:  blotter.complainant_name → User.full_name.
-    """
-
-    STATUS_OPEN = 'Open'
-    STATUS_SETTLED = 'Settled'
-    STATUS_REFERRED = 'Referred to Court'
-
-    STATUS_CHOICES = [
-        (STATUS_OPEN, 'Open'),
-        (STATUS_SETTLED, 'Settled'),
-        (STATUS_REFERRED, 'Referred to Court'),
+    TYPE_DISPUTE = 'dispute'
+    TYPE_NOISE = 'noise'
+    TYPE_THEFT = 'theft'
+    TYPE_PHYSICAL_INJURY = 'physical_injury'
+    TYPE_PROPERTY_DAMAGE = 'property_damage'
+    TYPE_DOMESTIC = 'domestic'
+    TYPE_THREAT = 'threat'
+    TYPE_TRESPASSING = 'trespassing'
+    TYPE_OTHER = 'other'
+    INCIDENT_TYPE_CHOICES = [
+        (TYPE_DISPUTE, 'Dispute'),
+        (TYPE_NOISE, 'Noise complaint'),
+        (TYPE_THEFT, 'Theft'),
+        (TYPE_PHYSICAL_INJURY, 'Physical injury'),
+        (TYPE_PROPERTY_DAMAGE, 'Property damage'),
+        (TYPE_DOMESTIC, 'Domestic'),
+        (TYPE_THREAT, 'Threat'),
+        (TYPE_TRESPASSING, 'Trespassing'),
+        (TYPE_OTHER, 'Other'),
     ]
 
-    case_number = models.CharField(
-        max_length=50,
-        unique=True,
-        help_text="e.g. BLOT-2026-0001"
-    )
+    STATUS_FILED = 'filed'
+    STATUS_UNDER_MEDIATION = 'under_mediation'
+    STATUS_SETTLED = 'settled'
+    STATUS_ESCALATED = 'escalated'
+    STATUS_DISMISSED = 'dismissed'
+    STATUS_WITHDRAWN = 'withdrawn'
+    STATUS_CHOICES = [
+        (STATUS_FILED, 'Filed'),
+        (STATUS_UNDER_MEDIATION, 'Under mediation'),
+        (STATUS_SETTLED, 'Settled'),
+        (STATUS_ESCALATED, 'Escalated'),
+        (STATUS_DISMISSED, 'Dismissed'),
+        (STATUS_WITHDRAWN, 'Withdrawn'),
+    ]
 
-    # --- Complainant identity (3NF fix) ---
-    # FK used when the complainant is a registered system User.
-    complainant_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='blotter_complaints',
-        help_text="Link to registered resident account (if applicable)"
-    )
-    # Plain-text field used only when the complainant is NOT a registered user.
-    complainant_name = models.CharField(
-        max_length=200,
-        blank=True,
-        help_text="Full name of Complainant (for unregistered persons only)"
-    )
+    TERMINAL = frozenset({STATUS_SETTLED, STATUS_ESCALATED, STATUS_DISMISSED, STATUS_WITHDRAWN})
+    TRANSITIONS = {
+        STATUS_FILED: (STATUS_UNDER_MEDIATION, STATUS_DISMISSED, STATUS_WITHDRAWN),
+        STATUS_UNDER_MEDIATION: (STATUS_SETTLED, STATUS_ESCALATED, STATUS_WITHDRAWN),
+        STATUS_SETTLED: (),
+        STATUS_ESCALATED: (),
+        STATUS_DISMISSED: (),
+        STATUS_WITHDRAWN: (),
+    }
 
-    # --- Respondent identity (3NF fix) ---
-    respondent_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='blotter_respondents',
-        help_text="Link to registered resident account (if applicable)"
+    case_no = models.CharField(max_length=20, unique=True, editable=False)
+    incident_type = models.CharField(max_length=30, choices=INCIDENT_TYPE_CHOICES)
+    incident_date = models.DateField()
+    incident_time = models.TimeField(null=True, blank=True)
+    location = models.CharField(max_length=255)
+    purok = models.ForeignKey(
+        'accounts.Purok', on_delete=models.SET_NULL, null=True, blank=True, related_name='blotter_cases',
     )
-    respondent_name = models.CharField(
-        max_length=200,
-        blank=True,
-        help_text="Full name of Respondent (for unregistered persons only)"
+    narrative = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_FILED, db_index=True)
+    filed_at = models.DateTimeField(auto_now_add=True)
+    settled_at = models.DateTimeField(null=True, blank=True)
+    escalated_at = models.DateTimeField(null=True, blank=True)
+    closed_at = models.DateTimeField(null=True, blank=True)
+    resolution_notes = models.TextField(blank=True, default='')
+    handled_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='blotter_cases_handled',
     )
-
-    incident_type = models.CharField(
-        max_length=150,
-        help_text="e.g. Physical Injury, Property Damage, Neighborhood Altercation, Unjust Vexation"
+    recorded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='blotter_cases_recorded',
     )
-    incident_location = models.CharField(max_length=255)
-    incident_date = models.DateTimeField(
-        help_text="Date and time when the incident took place"
-    )
-    narrative = models.TextField(
-        help_text="Detailed statement and factual account of the complaint"
-    )
-    status = models.CharField(
-        max_length=50,
-        choices=STATUS_CHOICES,
-        default=STATUS_OPEN
-    )
-    created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='logged_blotters'
-    )
+    is_confidential = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['-created_at']
-        verbose_name = 'Blotter Incident Record'
-        verbose_name_plural = 'Blotter Incident Records'
-
-    def get_complainant_display(self):
-        """Single-source display name — prefers User full_name over free-text."""
-        if self.complainant_user:
-            return self.complainant_user.get_full_name() or self.complainant_user.username
-        return self.complainant_name or "Unknown Complainant"
-
-    def get_respondent_display(self):
-        """Single-source display name — prefers User full_name over free-text."""
-        if self.respondent_user:
-            return self.respondent_user.get_full_name() or self.respondent_user.username
-        return self.respondent_name or "Unknown Respondent"
+        ordering = ['-filed_at', '-id']
+        verbose_name = 'Blotter Case'
+        verbose_name_plural = 'Blotter Cases'
+        indexes = [
+            models.Index(fields=['status', 'filed_at']),
+            models.Index(fields=['purok', 'status']),
+        ]
 
     def __str__(self):
-        return (
-            f"{self.case_number}: "
-            f"{self.get_complainant_display()} vs. {self.get_respondent_display()} "
-            f"({self.status})"
-        )
+        return self.case_no or 'New blotter case'
+
+    def clean(self):
+        if self.incident_date and self.incident_date > timezone.localdate():
+            raise ValidationError({'incident_date': 'The incident date cannot be in the future.'})
 
     @property
-    def badge_class(self):
-        mapping = {
-            self.STATUS_OPEN: 'badge-danger',
-            self.STATUS_SETTLED: 'badge-success',
-            self.STATUS_REFERRED: 'badge-warning',
-        }
-        return mapping.get(self.status, 'badge-secondary')
+    def is_terminal(self):
+        return self.status in self.TERMINAL
+
+    @property
+    def next_statuses(self):
+        return self.TRANSITIONS.get(self.status, ())
+
+    @classmethod
+    def status_label(cls, code):
+        return dict(cls.STATUS_CHOICES).get(code, code)
 
 
-class KPCase(models.Model):
-    """
-    Katarungang Pambarangay (KP) Conciliation & Mediation Proceedings.
+class BlotterParty(models.Model):
+    ROLE_COMPLAINANT = 'complainant'
+    ROLE_RESPONDENT = 'respondent'
+    ROLE_WITNESS = 'witness'
+    ROLE_CHOICES = [
+        (ROLE_COMPLAINANT, 'Complainant'),
+        (ROLE_RESPONDENT, 'Respondent'),
+        (ROLE_WITNESS, 'Witness'),
+    ]
 
-    NF compliance:
-    1NF – all columns are atomic; settlement_document is a file reference (not
-          an embedded binary blob or comma-list).
-    2NF – fully satisfied; single PK.
-    3NF – all attributes depend on blotter (the entity key), not on each other.
-    """
-    blotter = models.OneToOneField(
-        BlotterRecord,
-        on_delete=models.CASCADE,
-        related_name='kp_case'
+    case = models.ForeignKey(BlotterCase, on_delete=models.CASCADE, related_name='parties')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    resident = models.ForeignKey(
+        'accounts.Resident', on_delete=models.SET_NULL, null=True, blank=True, related_name='blotter_parties',
     )
-    hearing_date = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text="Scheduled date and time of mediation hearing"
-    )
-    mediator_notes = models.TextField(
-        blank=True,
-        help_text="Notes and agreements recorded by Lupon Tagapamayapa / Barangay Kapitan"
-    )
-    settlement_document = models.FileField(
-        upload_to='kp_docs/',
-        blank=True,
-        null=True,
-        help_text="Scanned Amicable Settlement or Kasunduan document"
-    )
-    certificate_to_file_action = models.BooleanField(
-        default=False,
-        help_text="Check if conciliation failed and Certificate to File Action (CFA) was issued for court filing"
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    full_name = models.CharField(max_length=200)
+    address = models.CharField(max_length=255, blank=True, default='')
+    contact_no = models.CharField(max_length=20, blank=True, default='', validators=[validate_ph_mobile])
 
     class Meta:
-        verbose_name = 'Katarungang Pambarangay Case'
-        verbose_name_plural = 'Katarungang Pambarangay Cases'
+        ordering = ['case', 'role', 'id']
+        verbose_name = 'Blotter Party'
+        verbose_name_plural = 'Blotter Parties'
 
     def __str__(self):
-        return f"KP Case for {self.blotter.case_number}"
+        return f'{self.full_name} ({self.get_role_display()})'
+
+
+class BlotterHearing(models.Model):
+    case = models.ForeignKey(BlotterCase, on_delete=models.CASCADE, related_name='hearings')
+    scheduled_at = models.DateTimeField()
+    outcome_notes = models.TextField(blank=True, default='')
+    complainant_attended = models.BooleanField(default=False)
+    respondent_attended = models.BooleanField(default=False)
+    recorded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='blotter_hearings_recorded',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['scheduled_at', 'id']
+        verbose_name = 'Blotter Hearing'
+        verbose_name_plural = 'Blotter Hearings'
+
+    def __str__(self):
+        return f'{self.case.case_no} hearing {self.scheduled_at:%Y-%m-%d %H:%M}'

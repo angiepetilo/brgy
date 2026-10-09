@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load core_tags %}
+
+{% block title %}Mark Post as Done - Barangay Portal{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 2rem auto; width: 100%;">
+    <div class="card" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.5rem; box-shadow: none;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: #F3F4F6; color: #374151; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                {% icon 'circle-check' %}
+            </div>
+            <div>
+                <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0; color: #111827;">Mark Post as Done</h2>
+                <p style="font-size: 0.875rem; color: #6B7280; margin: 0.15rem 0 0;">Conclude and archive this announcement from active resident feeds</p>
+            </div>
+        </div>
+
+        <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 1rem; margin-bottom: 1.25rem;">
+            <div style="font-weight: 700; font-size: 0.95rem; color: #1F2937; margin-bottom: 0.25rem;">{{ announcement.title }}</div>
+            <div style="font-size: 0.875rem; color: #6B7280;">
+                Category: <strong>{{ announcement.get_category_display }}</strong> | Status: <strong>{{ announcement.get_state_display }}</strong>
+            </div>
+        </div>
+
+        <p style="font-size: 0.875rem; color: #4B5563; margin-bottom: 1.5rem;">
+            Are you sure you want to mark this post as <strong>Done</strong>? It will no longer appear on active public feeds.
+        </p>
+
+        <form method="post" action="{% url 'communications:mark_done_announcement' announcement.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.META.HTTP_REFERER|default:'communications:feed' }}">
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+                <a href="{% url 'communications:feed' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-warning" style="background: #374151; color: #FFFFFF; border-color: #374151;">
+                    {% icon 'circle-check' %} Confirm Mark as Done
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

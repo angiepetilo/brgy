@@ -4,27 +4,24 @@
 {% block title %}Appointments & Services - Barangay Portal{% endblock %}
 
 {% block content %}
-<!-- Appointments Module with HIG Layout -->
+<!-- Appointments Module - Phase 5 HIG Complete -->
 <div class="hig-content-area">
     <!-- Toolbar -->
-    <div class="hig-toolbar">
-        <div class="hig-toolbar-title">
-            <h1 class="hig-title-1">Appointments & Services</h1>
-            <p class="hig-body hig-text-secondary">Manage resident certificates, clearances, and health center consultations</p>
+    <div class="hig-toolbar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <div>
+            <h1 class="hig-title-1" style="font-size: 1.25rem; font-weight: 700; color: #111827; margin: 0;">Appointment</h1>
         </div>
-        {% if active_tab == 'appointments' %}
         <div class="hig-toolbar-actions">
-            <button type="button" data-call="openAddAppointmentModal" class="hig-btn hig-btn-primary">
-                {% icon 'plus' %} Book Appointment
+            <button type="button" data-call="openAddAppointmentModal" class="btn btn-primary" style="font-weight: 600; font-size: 0.8125rem; padding: 0.45rem 1.15rem; border-radius: 6px; background: #0071E3;">
+                Book Appointment
             </button>
         </div>
-        {% endif %}
     </div>
 
     <!-- Main Content -->
     <div class="hig-content-main">
         <!-- Tab Navigation -->
-        <div class="hig-segmented-control hig-segmented-3">
+        <div class="hig-segmented-control hig-segmented-3" style="margin-bottom: 1.25rem;">
             <a href="{% url 'appointments:list' %}?tab=appointments" 
                class="hig-segment {% if active_tab == 'appointments' %}hig-segment-active{% endif %}">
                 <span>Appointments</span>
@@ -46,126 +43,125 @@
         <!-- ==================== TAB 1: APPOINTMENTS ==================== -->
         
         <!-- Table with Filters -->
-        <div class="hig-card hig-card-table">
+        <div class="hig-card hig-card-table" style="border: 1px solid #E5E7EB; border-radius: 8px; background: #FFFFFF; overflow: hidden;">
             <!-- Filters Toolbar -->
-            <div class="hig-table-toolbar">
-                <form method="get" action="{% url 'appointments:list' %}" class="hig-filter-bar" id="appointments-filter-form">
+            <div style="padding: 1rem 1.25rem; border-bottom: 1px solid #E5E7EB;">
+                <form method="get" action="{% url 'appointments:list' %}" id="appointments-filter-form" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
                     <input type="hidden" name="tab" value="appointments">
                     
-                    <!-- Search -->
-                    <div class="hig-search-field">
+                    <!-- Search Input -->
+                    <div style="flex: 1; max-width: 480px; position: relative;">
+                        {% icon 'search' cls='icon-muted' style='position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; width: 16px; height: 16px; color: #9CA3AF;' %}
                         <input type="text" 
                                name="q" 
                                value="{{ search_query }}" 
-                               class="hig-search-input" 
-                               placeholder="Search ref #, applicant, purpose...">
-                        {% icon 'search' %}
+                               placeholder="Search by ref no, applicant and service" 
+                               style="padding-left: 2.25rem; height: 38px; border-radius: 8px; border: 1px solid #E5E7EB; width: 100%; font-size: 0.875rem;"
+                               autocomplete="off">
+                        {% if search_query %}
+                        <a href="{% url 'appointments:list' %}?tab=appointments" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #9CA3AF; text-decoration: none;" title="Clear search" aria-label="Clear search">
+                            {% icon 'circle-x' %}
+                        </a>
+                        {% endif %}
                     </div>
 
-                    <!-- Date Filter -->
-                    <select name="date_filter" class="hig-select hig-select-compact" data-auto-submit>
-                        <option value="">All Dates</option>
-                        <option value="today" {% if date_filter == 'today' %}selected{% endif %}>Today</option>
-                        <option value="yesterday" {% if date_filter == 'yesterday' %}selected{% endif %}>Yesterday</option>
-                        <option value="tomorrow" {% if date_filter == 'tomorrow' %}selected{% endif %}>Tomorrow</option>
-                    </select>
+                    <!-- Dropdowns -->
+                    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                        <!-- Service Filter -->
+                        <select name="service" data-auto-submit style="height: 38px; border-radius: 8px; border: 1px solid #E5E7EB; font-size: 0.875rem; font-weight: 500; cursor: pointer; padding: 0 1.75rem 0 0.85rem; appearance: auto; background: #FFFFFF;">
+                            <option value="">All Service</option>
+                            <optgroup label="Document Clearances">
+                                {% for dt in document_types %}
+                                <option value="doc_{{ dt.id }}" {% if service_filter == 'doc_'|add:dt.id|stringformat:'s' %}selected{% endif %}>
+                                    {{ dt.name }}
+                                </option>
+                                {% endfor %}
+                            </optgroup>
+                            <optgroup label="Health Services">
+                                {% for hs in active_health_services %}
+                                <option value="health_{{ hs.id }}" {% if service_filter == 'health_'|add:hs.id|stringformat:'s' %}selected{% endif %}>
+                                    {{ hs.name }}
+                                </option>
+                                {% endfor %}
+                            </optgroup>
+                        </select>
 
-                    <!-- Status Filter -->
-                    <select name="status" class="hig-select hig-select-compact" data-auto-submit>
-                        <option value="">All Statuses</option>
-                        {% for code, label in status_choices %}
-                        <option value="{{ code }}" {% if status_filter == code %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-
-                    <!-- Service Filter -->
-                    <select name="service" class="hig-select hig-select-compact" data-auto-submit>
-                        <option value="">All Services</option>
-                        <optgroup label="Document Clearances">
-                            {% for dt in document_types %}
-                            <option value="doc_{{ dt.id }}" {% if service_filter == 'doc_'|add:dt.id|stringformat:'s' %}selected{% endif %}>
-                                {{ dt.name }}
-                            </option>
+                        <!-- Status Filter -->
+                        <select name="status" data-auto-submit style="height: 38px; border-radius: 8px; border: 1px solid #E5E7EB; font-size: 0.875rem; font-weight: 500; cursor: pointer; padding: 0 1.75rem 0 0.85rem; appearance: auto; background: #FFFFFF;">
+                            <option value="">All Statuses</option>
+                            {% for code, label in status_choices %}
+                            <option value="{{ code }}" {% if status_filter == code %}selected{% endif %}>{{ label }}</option>
                             {% endfor %}
-                        </optgroup>
-                        <optgroup label="Health Services">
-                            {% for hs in active_health_services %}
-                            <option value="health_{{ hs.id }}" {% if service_filter == 'health_'|add:hs.id|stringformat:'s' %}selected{% endif %}>
-                                {{ hs.name }}
-                            </option>
-                            {% endfor %}
-                        </optgroup>
-                    </select>
-
-                    {% if search_query or date_filter or status_filter or service_filter %}
-                    <a href="{% url 'appointments:list' %}?tab=appointments" class="hig-btn hig-btn-secondary hig-btn-sm">
-                        {% icon 'x' %} Clear
-                    </a>
-                    {% endif %}
+                        </select>
+                    </div>
                 </form>
             </div>
 
-            <!-- Table -->
+            <!-- Table Matching Reference Image 3 Bottom -->
             <div class="hig-table-container">
                 {% if appointments %}
-                <table class="hig-table hig-table-compact">
+                <table class="clean-table" style="width: 100%; border-collapse: collapse;">
                     <thead>
-                        <tr>
-                            <th class="hig-table-col-left">Ref #</th>
-                            <th class="hig-table-col-left">Applicant</th>
-                            <th class="hig-table-col-left">Service</th>
-                            <th class="hig-table-col-left">Schedule</th>
-                            <th class="hig-table-col-center">Status</th>
-                            <th class="hig-table-col-right">Actions</th>
+                        <tr style="border-bottom: 1px solid #E5E7EB; background: #FAFAFA;">
+                            <th class="col-idx" style="width: 50px; text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280;">#</th>
+                            <th style="text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280; width: 18%;">Ref No.</th>
+                            <th style="text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280; width: 34%;">Applicant</th>
+                            <th style="text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280; width: 22%;">Schedule</th>
+                            <th style="text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280; width: 16%;">Status</th>
+                            <th style="width: 60px; text-align: center; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for appt in appointments %}
-                        <tr>
-                            <td class="hig-table-col-left">
-                                <span class="hig-body-semibold hig-text-blue">#{{ appt.id }}</span>
+                        <tr style="border-bottom: 1px solid #F3F4F6;">
+                            <td class="col-idx" style="padding: 0.65rem 0.85rem; font-size: 0.875rem; color: #111827;">{{ forloop.counter }}</td>
+                            <td style="padding: 0.65rem 0.85rem; font-size: 0.875rem; font-weight: 600; color: #111827;">
+                                {{ appt.reference_no|default:appt.id }}
                             </td>
-                            <td class="hig-table-col-left">
-                                <div class="hig-table-cell-with-icon">
-                                    {% icon 'user' %}
-                                    <div>
-                                        <div class="hig-body-semibold">{{ appt.get_applicant_name }}</div>
-                                        {% if appt.resident %}
-                                        <div class="hig-caption-1 hig-text-tertiary">Registered</div>
-                                        {% else %}
-                                        <div class="hig-caption-1 hig-text-tertiary">Guest</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
+                            <td style="padding: 0.65rem 0.85rem;">
+                                <div style="font-weight: 600; font-size: 0.875rem; color: #111827;">{{ appt.get_applicant_name }}</div>
+                                <div style="font-size: 0.75rem; color: #6B7280;">{{ appt.get_service_title }}</div>
                             </td>
-                            <td class="hig-table-col-left">
-                                <span class="hig-body">{{ appt.get_service_title }}</span>
+                            <td style="padding: 0.65rem 0.85rem; color: #111827; font-size: 0.875rem;">
+                                {{ appt.appt_date|date:"m/d/y" }}
                             </td>
-                            <td class="hig-table-col-left">
-                                <div>
-                                    <div class="hig-body">{{ appt.appt_date|date:"M j, Y" }}</div>
-                                    <div class="hig-caption-1 hig-text-secondary">{{ appt.get_time_window_display }}</div>
-                                </div>
-                            </td>
-                            <td class="hig-table-col-center">
+                            <td style="padding: 0.65rem 0.85rem;">
                                 {% if appt.status == 'pending' %}
-                                <span class="hig-badge hig-badge-gray">Pending</span>
+                                <span class="badge" style="background: #FEF3C7; color: #92400E; font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px; font-weight: 500; text-transform: lowercase;">pending</span>
                                 {% elif appt.status == 'approved' %}
-                                <span class="hig-badge hig-badge-blue">Approved</span>
+                                <span class="badge" style="background: #D1FAE5; color: #065F46; font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px; font-weight: 500; text-transform: lowercase;">approved</span>
                                 {% elif appt.status == 'completed' %}
-                                <span class="hig-badge hig-badge-green">Completed</span>
+                                <span class="badge" style="background: #E0E7FF; color: #3730A3; font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px; font-weight: 500; text-transform: lowercase;">completed</span>
                                 {% elif appt.status == 'rejected' %}
-                                <span class="hig-badge hig-badge-red">Rejected</span>
-                                {% elif appt.status == 'no_show' %}
-                                <span class="hig-badge hig-badge-gray">No Show</span>
+                                <span class="badge" style="background: #FEE2E2; color: #991B1B; font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px; font-weight: 500; text-transform: lowercase;">rejected</span>
                                 {% else %}
-                                <span class="hig-badge hig-badge-gray">{{ appt.get_status_display }}</span>
+                                <span class="badge" style="background: #F3F4F6; color: #374151; font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px; font-weight: 500; text-transform: lowercase;">{{ appt.get_status_display }}</span>
                                 {% endif %}
                             </td>
-                            <td class="hig-table-col-right">
-                                <a href="{% url 'appointments:detail' appt.id %}" class="hig-btn hig-btn-secondary hig-btn-sm">
-                                    View
-                                </a>
+                            <td style="text-align: center; padding: 0.65rem 0.85rem; white-space: nowrap;">
+                                <button type="button" class="btn-action-circle" data-appt-action="review"
+                                        data-id="{{ appt.id }}"
+                                        data-ref="{{ appt.reference_no|default:appt.id }}"
+                                        data-category="{{ appt.get_category_display }}"
+                                        data-service="{{ appt.get_service_title }}"
+                                        data-title="{{ appt.purpose|default:appt.get_service_title }}"
+                                        data-applicant="{{ appt.get_applicant_name }}"
+                                        data-time="{{ appt.appt_date|date:'m/d/y' }} ({{ appt.get_time_window_display }})"
+                                        data-status="{{ appt.status }}"
+                                        data-status-display="{{ appt.get_status_display }}"
+                                        data-can-approve="{% if can_approve and appt.status == 'pending' %}true{% else %}false{% endif %}"
+                                        title="View Appointment" aria-label="View Appointment"
+                                        style="border: none; background: transparent; cursor: pointer; color: #6B7280; font-size: 1.1rem; padding: 4px; display: inline-flex; align-items: center;">
+                                    {% icon 'eye' %}
+                                </button>
+                                <button type="button" class="btn-action-circle" data-appt-action="delete"
+                                        data-id="{{ appt.id }}"
+                                        data-ref="{{ appt.reference_no|default:appt.id }}"
+                                        data-name="{{ appt.get_applicant_name }}"
+                                        title="Delete Appointment" aria-label="Delete Appointment"
+                                        style="border: none; background: transparent; cursor: pointer; color: #DC2626; font-size: 1.1rem; padding: 4px; display: inline-flex; align-items: center; margin-left: 6px;">
+                                    {% icon 'trash-2' %}
+                                </button>
                             </td>
                         </tr>
                         {% endfor %}
@@ -183,6 +179,83 @@
                         No records match your search criteria. Try clearing filters.
                         {% else %}
                         No appointments have been scheduled yet. Click below to create one.
+                        {% endif %}
+                    </p>
+                    <button type="button" data-call="openAddAppointmentModal" class="hig-btn hig-btn-primary">
+                        {% icon 'plus' %} Book Appointment
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Mobile List (shows on <768px) -->
+            <div class="mobile-list-container">
+                {% if appointments %}
+                <div class="mobile-list">
+                    {% for appt in appointments %}
+                    <a href="{% url 'appointments:detail' appt.id %}" class="mobile-list-item mobile-list-item-link">
+                        <!-- Header -->
+                        <div class="mobile-item-header">
+                            <div style="flex: 1;">
+                                <h3 class="mobile-item-title">{{ appt.get_applicant_name }}</h3>
+                                <p class="mobile-item-subtitle">{{ appt.get_service_title }}</p>
+                            </div>
+                            <span class="mobile-item-ref">#{{ appt.id }}</span>
+                        </div>
+
+                        <!-- Body -->
+                        <div class="mobile-item-body">
+                            <div class="mobile-info-with-icon">
+                                {% icon 'calendar' %}
+                                <span>{{ appt.appt_date|date:"M j, Y" }}</span>
+                            </div>
+                            <div class="mobile-info-with-icon">
+                                {% icon 'clock' %}
+                                <span>{{ appt.get_time_window_display }}</span>
+                            </div>
+                            {% if not appt.resident %}
+                            <div class="mobile-info-with-icon">
+                                {% icon 'user' %}
+                                <span>Guest</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="mobile-item-footer">
+                            {% if appt.status == 'pending' %}
+                            <span class="hig-badge hig-badge-gray">Pending</span>
+                            {% elif appt.status == 'approved' %}
+                            <span class="hig-badge hig-badge-blue">Approved</span>
+                            {% elif appt.status == 'completed' %}
+                            <span class="hig-badge hig-badge-green">Completed</span>
+                            {% elif appt.status == 'rejected' %}
+                            <span class="hig-badge hig-badge-red">Rejected</span>
+                            {% elif appt.status == 'no_show' %}
+                            <span class="hig-badge hig-badge-gray">No Show</span>
+                            {% else %}
+                            <span class="hig-badge hig-badge-gray">{{ appt.get_status_display }}</span>
+                            {% endif %}
+                            
+                            <div class="mobile-item-actions">
+                                {% icon 'chevron-right' %}
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <!-- Mobile Empty State -->
+                <div class="mobile-empty-state">
+                    <div class="mobile-empty-icon">
+                        {% icon 'calendar-x' %}
+                    </div>
+                    <h3 class="mobile-empty-title">No Appointments</h3>
+                    <p class="mobile-empty-text">
+                        {% if search_query or date_filter or status_filter or service_filter %}
+                        No records match your filters. Try clearing them.
+                        {% else %}
+                        Book your first appointment below.
                         {% endif %}
                     </p>
                     <button type="button" data-call="openAddAppointmentModal" class="hig-btn hig-btn-primary">
@@ -340,6 +413,219 @@
             {% endfor %}
         </div>
         {% endif %}
+    </div>
+<!-- APPOINTMENT REVIEW MODAL (Reference Image 3 Bottom Right Mockup 3) -->
+<div id="reviewAppointmentModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: #FFFFFF; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: none; overflow: hidden; animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div style="padding: 1.15rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between; background: #FFFFFF;">
+            <div>
+                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: #111827;">Appointment</h3>
+                <div id="rev-category" style="font-size: 0.8125rem; color: #6B7280; margin-top: 0.2rem;">Category: Health Service / Dental Cleaning</div>
+            </div>
+            <button type="button" data-appt-action="close-review" style="border: none; background: transparent; color: #6B7280; font-size: 0.8125rem; font-weight: 600; cursor: pointer; text-transform: uppercase;">CLOSE</button>
+        </div>
+        <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+                <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">* Title</label>
+                <div id="rev-title" style="padding: 0.6rem 0.85rem; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 0.875rem; color: #111827;">-</div>
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Applicant Name</label>
+                <div id="rev-applicant" style="padding: 0.6rem 0.85rem; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 0.875rem; color: #111827;">-</div>
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">* Time</label>
+                <div id="rev-time" style="padding: 0.6rem 0.85rem; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 0.875rem; color: #111827;">-</div>
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Status</label>
+                <div id="rev-status-pill">-</div>
+            </div>
+        </div>
+        <div style="padding: 1rem 1.5rem; background: #FAFAFA; border-top: 1px solid #E5E7EB; display: flex; justify-content: flex-end; gap: 0.75rem; align-items: center;">
+            <form id="rev-reject-form" method="post" action="" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="btn" style="background: transparent; border: 1px solid #DC2626; color: #DC2626; font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1.25rem; border-radius: 6px; cursor: pointer;">
+                    Reject
+                </button>
+            </form>
+            <form id="rev-approve-form" method="post" action="" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="btn" style="background: #16A34A; border: none; color: #FFFFFF; font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1.25rem; border-radius: 6px; cursor: pointer;">
+                    Approved
+                </button>
+            </form>
+            <a id="rev-detail-link" href="#" class="btn btn-secondary" style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1rem; text-decoration: none; border-radius: 6px;">
+                Full Details
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- BOOK APPOINTMENT MODAL (Modern Minimal) -->
+<div id="moduleAddAppointmentModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: #FFFFFF; border-radius: 16px; width: 100%; max-width: 580px; border: 1px solid #E5E7EB; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); overflow: hidden; animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+        <!-- Form Wrapper -->
+        <div id="modal-form-wrapper">
+            <div style="padding: 1.15rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between; background: #FFFFFF;">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: #111827;">Appointment</h3>
+                    <div style="font-size: 0.8125rem; color: #6B7280; margin-top: 0.2rem;">Book Document Request or Health Center Service</div>
+                </div>
+                <button type="button" data-call="closeAddAppointmentModal" style="border: none; background: transparent; color: #6B7280; font-size: 0.8125rem; font-weight: 600; cursor: pointer; text-transform: uppercase;">CLOSE</button>
+            </div>
+            
+            <form id="module-appointment-form" style="margin: 0;">
+                {% csrf_token %}
+                <div style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 0.85rem; max-height: 72vh; overflow-y: auto;">
+                    <!-- Category Selector Pills -->
+                    <div>
+                        <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Category</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button type="button" id="modal-pill-doc" data-call="switchModalCategory" data-arg="document" class="btn btn-primary active" style="flex: 1; font-size: 0.8125rem; font-weight: 600; border-radius: 6px; padding: 0.45rem;">
+                                Document
+                            </button>
+                            <button type="button" id="modal-pill-health" data-call="switchModalCategory" data-arg="healthcare" class="btn btn-secondary" style="flex: 1; font-size: 0.8125rem; font-weight: 600; border-radius: 6px; padding: 0.45rem;">
+                                Health Service
+                            </button>
+                        </div>
+                        <input type="hidden" name="category" id="modal-category-input" value="document">
+                    </div>
+
+                    <!-- Document selection -->
+                    <div id="modal-doc-type-box">
+                        <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">* Document Type</label>
+                        <select name="document_type" id="modal-document-select" class="form-control" style="font-size: 0.875rem; width: 100%; height: 38px; border-radius: 6px; border: 1px solid #D1D5DB;">
+                            {% for dt in document_types %}
+                            <option value="{{ dt.id }}">{{ dt.name }}{% if dt.fee %} (₱{{ dt.fee }}){% endif %}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Health service selection -->
+                    <div id="modal-health-type-box" style="display: none;">
+                        <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">* Health Service</label>
+                        <select name="healthcare_service" id="modal-healthcare-select" class="form-control" style="font-size: 0.875rem; width: 100%; height: 38px; border-radius: 6px; border: 1px solid #D1D5DB;">
+                            {% for hs in active_health_services %}
+                            <option value="{{ hs.id }}">{{ hs.name }} (Free)</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Applicant Name -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                        <div>
+                            <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">* First Name</label>
+                            <input type="text" name="first_name" id="modal_input_first_name" value="{{ request.user.first_name }}" class="form-control" style="font-size: 0.875rem; width: 100%; height: 38px; border-radius: 6px; border: 1px solid #D1D5DB;" required>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">* Last Name</label>
+                            <input type="text" name="last_name" id="modal_input_last_name" value="{{ request.user.last_name }}" class="form-control" style="font-size: 0.875rem; width: 100%; height: 38px; border-radius: 6px; border: 1px solid #D1D5DB;" required>
+                        </div>
+                    </div>
+
+                    <!-- Age & Residential Address -->
+                    <div style="display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 0.75rem;">
+                        <div>
+                            <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">* Age</label>
+                            <input type="number" name="age" min="1" max="120" placeholder="e.g. 25" class="form-control" style="font-size: 0.875rem; width: 100%; height: 38px; border-radius: 6px; border: 1px solid #D1D5DB;" required>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">* Address</label>
+                            <input type="text" name="address" placeholder="Barangay Address" class="form-control" style="font-size: 0.875rem; width: 100%; height: 38px; border-radius: 6px; border: 1px solid #D1D5DB;" required>
+                        </div>
+                    </div>
+
+                    <!-- Contact Info -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                        <div>
+                            <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">* Mobile Phone (09...)</label>
+                            <input type="tel" name="phone_number" id="modal_input_phone" maxlength="11" placeholder="09171234567" value="{{ request.user.phone_number }}" class="form-control" style="font-size: 0.875rem; width: 100%; height: 38px; border-radius: 6px; border: 1px solid #D1D5DB;" required>
+                            <div id="modal-phone-feedback" style="font-size: 0.75rem; color: #6B7280; margin-top: 2px;"></div>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">* Email Address</label>
+                            <input type="email" name="email" id="modal_input_email" value="{{ request.user.email }}" class="form-control" style="font-size: 0.875rem; width: 100%; height: 38px; border-radius: 6px; border: 1px solid #D1D5DB;" required>
+                            <div id="modal-email-feedback" style="font-size: 0.75rem; margin-top: 2px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Preferred Date & Time Window -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                        <div>
+                            <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">* Preferred Date</label>
+                            <input type="date" name="appt_date" id="modal-pref-date" class="form-control" style="font-size: 0.875rem; width: 100%; height: 38px; border-radius: 6px; border: 1px solid #D1D5DB;" required>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">* Time Window</label>
+                            <select name="time_window" class="form-control" style="font-size: 0.875rem; width: 100%; height: 38px; border-radius: 6px; border: 1px solid #D1D5DB;">
+                                <option value="morning">Morning (8:00 AM - 11:30 AM)</option>
+                                <option value="afternoon">Afternoon (1:00 PM - 4:30 PM)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Purpose -->
+                    <div id="module-purpose-group">
+                        <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">* Purpose of Document Request</label>
+                        <textarea name="purpose" id="module_input_purpose" rows="2" placeholder="State the purpose of your document request..." class="form-control" style="font-size: 0.875rem; width: 100%; border-radius: 6px; border: 1px solid #D1D5DB; resize: vertical;" required></textarea>
+                    </div>
+
+                    <!-- Error banner -->
+                    <div id="modal-error-banner" style="display: none; background: #FEE2E2; border: 1px solid #DC2626; border-radius: 6px; padding: 0.5rem 0.75rem; color: #DC2626; font-size: 0.8125rem;">
+                        <span id="modal-error-text">Please check required fields.</span>
+                    </div>
+                </div>
+
+                <div style="padding: 1rem 1.5rem; background: #FAFAFA; border-top: 1px solid #E5E7EB; display: flex; justify-content: flex-end; gap: 0.75rem;">
+                    <button type="button" data-call="closeAddAppointmentModal" class="btn btn-secondary" style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1rem; border-radius: 6px;">
+                        Cancel
+                    </button>
+                    <button type="submit" id="btn-submit-modal-appointment" class="btn btn-primary" style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1.25rem; border-radius: 6px; background: #0071E3;">
+                        Book Appointment
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Success Wrapper -->
+        <div id="modal-success-wrapper" style="display: none; padding: 2.5rem 1.5rem; text-align: center;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: #D1FAE5; color: #065F46; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin: 0 auto 1rem auto;">
+                {% icon 'check' %}
+            </div>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin: 0 0 0.5rem 0;">Appointment Booked!</h3>
+            <p style="font-size: 0.875rem; color: #6B7280; margin: 0 0 1rem 0;">
+                Your appointment reference is <strong id="modal-success-ref" style="color: #0071E3;">#APT-NEW</strong>.
+            </p>
+            <button type="button" data-call="closeAndReload" class="btn btn-primary" style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1.5rem; border-radius: 6px; background: #0071E3;">
+                Done
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- DELETE APPOINTMENT MODAL -->
+<div id="deleteAppointmentModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: #FFFFFF; border-radius: 12px; width: 100%; max-width: 440px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05); overflow: hidden; animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; gap: 0.75rem;">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: #FEF2F2; color: #DC2626; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+                {% icon 'triangle-alert' %}
+            </div>
+            <div>
+                <h3 style="margin: 0; font-size: 1rem; font-weight: 700; color: #111827;">Delete Appointment</h3>
+                <p style="margin: 0; font-size: 0.8125rem; color: #6B7280;">This appointment record will be deleted.</p>
+            </div>
+        </div>
+        <form id="deleteAppointmentForm" method="post" action="">
+            {% csrf_token %}
+            <div style="padding: 1.25rem 1.5rem; color: #374151; font-size: 0.875rem; line-height: 1.5;">
+                Are you sure you want to delete appointment <strong id="delete-apt-ref" style="color: #111827;"></strong> for <strong id="delete-apt-name" style="color: #111827;"></strong>?
+            </div>
+            <div style="padding: 1rem 1.5rem; background: #F9FAFB; border-top: 1px solid #E5E7EB; display: flex; justify-content: flex-end; gap: 0.75rem;">
+                <button type="button" data-call="closeDeleteAppointmentModal" class="btn btn-secondary" style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1rem; border-radius: 6px;">Cancel</button>
+                <button type="submit" class="btn btn-danger" style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1.25rem; border-radius: 6px; background: #DC2626; border-color: #DC2626;">Yes, Delete</button>
+            </div>
+        </form>
     </div>
 </div>
 

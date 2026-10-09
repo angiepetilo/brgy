@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load static core_tags %}
+{% block title %}{{ case.case_no }} - Blotter - Barangay.ph{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/blotter.css' %}">{% endblock %}
+
+{% block content %}
+<div class="container-fluid blotter-page" id="blotter-case" data-case-id="{{ case.pk }}">
+    <div class="page-header blotter-header">
+        <div>
+            <h1 class="page-title">{{ case.case_no }}
+                <span class="blotter-status blotter-status-{{ case.status }}">{{ case.get_status_display }}</span>
+                {% if case.is_confidential %}<span class="badge badge-danger">Confidential</span>{% endif %}
+            </h1>
+            <p class="page-subtitle">{{ case.get_incident_type_display }} &middot; filed {{ case.filed_at|date:"M d, Y h:i A" }}</p>
+        </div>
+        <div class="blotter-actions">
+            <a class="btn btn-secondary" href="{% url 'blotter:case_list' %}">Back to list</a>
+            <a class="btn btn-secondary" href="{% url 'blotter:case_print' case.pk %}" target="_blank" rel="noopener" id="blotter-print-link">
+                {% icon 'printer' %} Print summary
+            </a>
+            {% if can_edit %}<a class="btn btn-secondary" href="{% url 'blotter:case_edit' case.pk %}" id="blotter-edit-link">Edit</a>{% endif %}
+            {% if can_delete %}
+            <form method="post" action="{% url 'blotter:case_delete' case.pk %}" data-confirm="Delete case {{ case.case_no }} permanently?">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" id="blotter-delete">Delete</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="blotter-columns">
+        <div>
+            <section class="card">
+                <div class="card-header"><h2 class="card-title">Incident</h2></div>
+                <div class="card-body">
+                    <dl class="blotter-dl">
+                        <dt>Date</dt><dd>{{ case.incident_date|date:"M d, Y" }}{% if case.incident_time %} {{ case.incident_time|time:"h:i A" }}{% endif %}</dd>
+                        <dt>Location</dt><dd>{{ case.location }}</dd>
+                        <dt>Purok</dt><dd>{{ case.purok.name|default:"-" }}</dd>
+                        <dt>Handled by</dt><dd>{% if case.handled_by %}{{ case.handled_by.get_full_name|default:case.handled_by.username }}{% else %}-{% endif %}</dd>
+                        <dt>Recorded by</dt><dd>{% if case.recorded_by %}{{ case.recorded_by.get_full_name|default:case.recorded_by.username }}{% else %}-{% endif %}</dd>
+                    </dl>
+                    <h3 class="blotter-subtitle">Narrative</h3>
+                    <p class="blotter-narrative">{{ case.narrative|linebreaksbr }}</p>
+                    {% if case.resolution_notes %}
+                    <h3 class="blotter-subtitle">Resolution notes</h3>
+                    <p class="blotter-narrative">{{ case.resolution_notes|linebreaksbr }}</p>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="card-header"><h2 class="card-title">Parties</h2></div>
+                <div class="card-body table-responsive-wrapper">
+                    <table class="blotter-table">
+                        <caption class="blotter-sr-only">Parties to the case</caption>
+                        <thead><tr><th scope="col">Role</th><th scope="col">Name</th><th scope="col">Address</th><th scope="col">Mobile</th></tr></thead>
+                        <tbody>
+                            {% for party in case.parties.all %}
+                            <tr>
+                                <td>{{ party.get_role_display }}</td>
+                                <td>{{ party.full_name }}{% if party.resident %} <span class="badge badge-info">Resident</span>{% endif %}</td>
+                                <td>{{ party.address|default:"-" }}</td>
+                                <td>{{ party.contact_no|default:"-" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="card-header"><h2 class="card-title">Hearings</h2></div>
+                <div class="card-body">
+                    {% for hearing in case.hearings.all %}
+                    <div class="blotter-hearing">
+                        <strong>{{ hearing.scheduled_at|date:"M d, Y h:i A" }}</strong>
+                        <span>Complainant {% if hearing.complainant_attended %}attended{% else %}absent{% endif %}, respondent {% if hearing.respondent_attended %}attended{% else %}absent{% endif %}</span>
+                        {% if hearing.outcome_notes %}<p>{{ hearing.outcome_notes|linebreaksbr }}</p>{% endif %}
+                    </div>
+                    {% empty %}
+                    <p class="blotter-empty">No hearings recorded.</p>
+                    {% endfor %}
+
+                    {% if can_add_hearing %}
+                    <form method="post" action="{% url 'blotter:hearing_add' case.pk %}" class="blotter-hearing-form" id="blotter-hearing-form">
+                        {% csrf_token %}
+                        <h3 class="blotter-subtitle">Record a hearing</h3>
+                        <div class="form-group">
+                            <label for="{{ hearing_form.scheduled_at.id_for_label }}">Date and time</label>
+                            {{ hearing_form.scheduled_at }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ hearing_form.outcome_notes.id_for_label }}">Outcome notes</label>
+                            {{ hearing_form.outcome_notes }}
+                        </div>
+                        <label class="blotter-check">{{ hearing_form.complainant_attended }} Complainant attended</label>
+                        <label class="blotter-check">{{ hearing_form.respondent_attended }} Respondent attended</label>
+                        <div class="blotter-actions"><button type="submit" class="btn btn-primary btn-sm">Save hearing</button></div>
+                    </form>
+                    {% endif %}
+                </div>
+            </section>
+        </div>
+
+        <div>
+            {% if transitions %}
+            <section class="card" id="blotter-transitions">
+                <div class="card-header"><h2 class="card-title">Update status</h2></div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'blotter:case_transition' case.pk %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="transition-notes">Notes (optional)</label>
+                            <textarea class="form-control" id="transition-notes" name="notes" rows="3" maxlength="4000"></textarea>
+                        </div>
+                        <div class="blotter-transition-buttons">
+                            {% for code, label in transitions %}
+                            <button type="submit" name="to_status" value="{{ code }}" class="btn {% if code == 'settled' %}btn-success{% elif code == 'escalated' or code == 'dismissed' %}btn-danger{% else %}btn-primary{% endif %}"
+                                    data-transition="{{ code }}" data-confirm-button="Mark this case as {{ label|lower }}?">{{ label }}</button>
+                            {% endfor %}
+                        </div>
+                    </form>
+                </div>
+            </section>
+            {% endif %}
+
+            <section class="card">
+                <div class="card-header"><h2 class="card-title">Timeline</h2></div>
+                <div class="card-body">
+                    <ol class="blotter-timeline">
+                        {% for event in timeline %}
+                        <li class="blotter-timeline-{{ event.kind }}">
+                            <time datetime="{{ event.at|date:'c' }}">{{ event.at|date:"M d, Y h:i A" }}</time>
+                            <strong>{{ event.label }}</strong>
+                            {% if event.actor %}<span>by {{ event.actor }}</span>{% endif %}
+                            {% if event.notes %}<p>{{ event.notes|linebreaksbr }}</p>{% endif %}
+                        </li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}<script src="{% static 'js/blotter.js' %}" defer></script>{% endblock %}

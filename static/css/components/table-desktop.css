@@ -1,0 +1,543 @@
+/**
+ * Phase 3: High-Density Data Tables (macOS HIG)
+ * Desktop table component for ≥768px viewports
+ * - 32px header height
+ * - 40-42px row height
+ * - Hover states
+ * - Sortable columns
+ * - Status badges
+ */
+
+/* ============================================
+   DESKTOP TABLE CONTAINER
+   ============================================ */
+
+@media (min-width: 768px) {
+  
+  .hig-table-container {
+    background: var(--color-canvas);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: var(--space-7);
+  }
+  
+  /* Table Wrapper for Horizontal Scroll */
+  .hig-table-wrapper {
+    overflow-x: auto;
+    overflow-y: visible;
+  }
+  
+  /* ============================================
+     TABLE BASE STYLES
+     ============================================ */
+  
+  .hig-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-body);
+    font-family: var(--font-family-base);
+    background: var(--color-canvas);
+  }
+  
+  /* ============================================
+     TABLE HEADER (32px Height)
+     ============================================ */
+  
+  .hig-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  
+  .hig-table thead tr {
+    height: var(--table-header-height);
+    background: var(--color-sidebar);
+    border-bottom: 1px solid var(--color-border);
+  }
+  
+  .hig-table thead th {
+    font-size: var(--text-label);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    padding: 0 12px;
+    white-space: nowrap;
+    vertical-align: middle;
+    user-select: none;
+  }
+  
+  /* Column Alignment Classes */
+  .hig-table-col-left {
+    text-align: left;
+  }
+  
+  .hig-table-col-right {
+    text-align: right;
+  }
+  
+  .hig-table-col-center {
+    text-align: center;
+  }
+  
+  /* Sortable Column Header */
+  .hig-table thead th.sortable {
+    cursor: pointer;
+    transition: color var(--transition-fast);
+    position: relative;
+    padding-right: 24px;
+  }
+  
+  .hig-table thead th.sortable:hover {
+    color: var(--color-text-primary);
+  }
+  
+  /* Sort Indicator */
+  .hig-table thead th.sortable::after {
+    content: '';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 4px solid var(--color-text-tertiary);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+  }
+  
+  .hig-table thead th.sortable:hover::after {
+    opacity: 1;
+  }
+  
+  .hig-table thead th.sorted-asc::after {
+    border-bottom: 4px solid var(--color-accent-blue);
+    border-top: none;
+    opacity: 1;
+  }
+  
+  .hig-table thead th.sorted-desc::after {
+    border-top: 4px solid var(--color-accent-blue);
+    border-bottom: none;
+    opacity: 1;
+  }
+  
+  /* ============================================
+     TABLE BODY (40-42px Rows)
+     ============================================ */
+  
+  .hig-table tbody tr {
+    height: var(--table-row-height);
+    border-bottom: 1px solid var(--color-hover);
+    transition: background var(--transition-fast);
+  }
+  
+  .hig-table tbody tr:last-child {
+    border-bottom: none;
+  }
+  
+  .hig-table tbody tr:hover {
+    background: var(--color-hover);
+  }
+  
+  .hig-table tbody tr.selected {
+    background: var(--color-accent-blue-subtle);
+  }
+  
+  .hig-table tbody tr.selected:hover {
+    background: var(--color-accent-blue-subtle);
+  }
+  
+  .hig-table tbody td {
+    padding: 0 12px;
+    font-size: var(--text-body);
+    color: var(--color-text-primary);
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Wrap Text in Cell */
+  .hig-table tbody td.wrap {
+    white-space: normal;
+    word-break: break-word;
+  }
+  
+  /* Monospace Numbers (for IDs, amounts) */
+  .hig-table tbody td.mono {
+    font-family: var(--font-family-mono);
+    font-size: 12px;
+  }
+  
+  /* ============================================
+     TABLE CELL WITH ICON
+     ============================================ */
+  
+  .hig-table-cell-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .hig-table-cell-with-icon svg {
+    width: 16px;
+    height: 16px;
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+  }
+  
+  /* ============================================
+     STATUS BADGES
+     ============================================ */
+  
+  .hig-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    padding: 0 8px;
+    border-radius: 4px;
+    font-size: var(--text-caption);
+    font-weight: var(--weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  
+  /* Badge Color Variants */
+  .hig-badge-gray {
+    background: var(--color-hover);
+    color: var(--color-text-secondary);
+  }
+  
+  .hig-badge-blue {
+    background: var(--color-accent-blue-subtle);
+    color: var(--color-accent-blue);
+  }
+  
+  .hig-badge-green {
+    background: var(--color-success-green-subtle);
+    color: var(--color-success-green);
+  }
+  
+  .hig-badge-red {
+    background: var(--color-error-red-subtle);
+    color: var(--color-error-red);
+  }
+  
+  .hig-badge-orange {
+    background: var(--color-warning-orange-subtle);
+    color: var(--color-warning-orange);
+  }
+  
+  .hig-badge-purple {
+    background: var(--color-purple-subtle);
+    color: var(--color-purple);
+  }
+  
+  /* Badge with Dot Indicator */
+  .hig-badge-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .hig-badge-dot::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  
+  /* ============================================
+     TABLE ACTIONS (Buttons in Cells)
+     ============================================ */
+  
+  .hig-table-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    justify-content: flex-end;
+  }
+  
+  .hig-btn-sm {
+    height: var(--button-height-compact);
+    padding: 0 12px;
+    font-size: 12px;
+  }
+  
+  .hig-btn-icon {
+    width: var(--button-height-compact);
+    height: var(--button-height-compact);
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .hig-btn-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  /* ============================================
+     TABLE TOOLBAR (Filters & Search)
+     ============================================ */
+  
+  .hig-table-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-canvas);
+  }
+  
+  /* Filter Bar */
+  .hig-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+  }
+  
+  /* Search Field */
+  .hig-search-field {
+    position: relative;
+    flex: 1;
+    max-width: 320px;
+  }
+  
+  .hig-search-input {
+    width: 100%;
+    height: var(--input-height);
+    padding: 0 32px 0 12px;
+    font-size: var(--text-body);
+    font-family: var(--font-family-base);
+    color: var(--color-text-primary);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+  }
+  
+  .hig-search-input:focus {
+    outline: none;
+    border-color: var(--color-accent-blue);
+    background: var(--color-canvas);
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+  }
+  
+  .hig-search-input::placeholder {
+    color: var(--color-text-tertiary);
+  }
+  
+  .hig-search-field svg {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: var(--color-text-tertiary);
+    pointer-events: none;
+  }
+  
+  /* Select Dropdown */
+  .hig-select {
+    height: var(--input-height);
+    padding: 0 32px 0 12px;
+    font-size: var(--text-body);
+    font-family: var(--font-family-base);
+    color: var(--color-text-primary);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2386868B' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+  
+  .hig-select:focus {
+    outline: none;
+    border-color: var(--color-accent-blue);
+    background-color: var(--color-canvas);
+  }
+  
+  .hig-select-compact {
+    min-width: 140px;
+  }
+  
+  /* ============================================
+     TABLE COMPACT VARIANT
+     ============================================ */
+  
+  .hig-table-compact tbody tr {
+    height: var(--table-row-height-compact);
+  }
+  
+  .hig-table-compact tbody td,
+  .hig-table-compact thead th {
+    padding: 0 8px;
+    font-size: 12px;
+  }
+  
+  /* ============================================
+     EMPTY STATE
+     ============================================ */
+  
+  .hig-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-10) var(--space-7);
+    text-align: center;
+  }
+  
+  .hig-empty-state-icon {
+    width: 48px;
+    height: 48px;
+    color: var(--color-text-tertiary);
+    margin-bottom: var(--space-5);
+  }
+  
+  .hig-empty-state-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .hig-title-3 {
+    font-size: var(--text-large);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-3) 0;
+  }
+  
+  .hig-body {
+    font-size: var(--text-body);
+    color: var(--color-text-secondary);
+    margin: 0 0 var(--space-5) 0;
+    line-height: 1.5;
+  }
+  
+  .hig-text-secondary {
+    color: var(--color-text-secondary);
+  }
+  
+  /* ============================================
+     PAGINATION
+     ============================================ */
+  
+  .hig-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-canvas);
+  }
+  
+  .hig-pagination-info {
+    font-size: var(--text-body);
+    color: var(--color-text-secondary);
+  }
+  
+  .hig-pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .hig-pagination-btn {
+    width: var(--button-height);
+    height: var(--button-height);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    transition: all var(--transition-base);
+  }
+  
+  .hig-pagination-btn:hover:not(:disabled) {
+    background: var(--color-hover);
+  }
+  
+  .hig-pagination-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  
+  .hig-pagination-btn.active {
+    background: var(--color-accent-blue);
+    color: var(--color-text-inverse);
+    border-color: var(--color-accent-blue);
+  }
+  
+  .hig-pagination-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  /* ============================================
+     TABLE LOADING STATE
+     ============================================ */
+  
+  .hig-table-loading {
+    position: relative;
+  }
+  
+  .hig-table-loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* ============================================
+     SELECTION CHECKBOX
+     ============================================ */
+  
+  .hig-checkbox {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--color-border);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+  
+  .hig-checkbox:checked {
+    background: var(--color-accent-blue);
+    border-color: var(--color-accent-blue);
+  }
+  
+  /* Checkbox Column */
+  .hig-table thead th.checkbox-col,
+  .hig-table tbody td.checkbox-col {
+    width: 40px;
+    padding: 0;
+    text-align: center;
+  }
+  
+}

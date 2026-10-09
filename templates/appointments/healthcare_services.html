@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load core_tags %}
 
 {% block title %}Health Care Services Management - Barangay e-Portal{% endblock %}
 
@@ -8,31 +9,31 @@
     <!-- Header Section -->
     <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
         <div>
-            <h1 style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin: 0; text-transform: uppercase;">
+            <h1 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin: 0; text-transform: uppercase;">
                 Admin Health Care Request Management
             </h1>
-            <p style="color: #64748B; font-size: 0.8125rem; margin: 0.25rem 0 0 0;">
+            <p style="color: #6B7280; font-size: 0.875rem; margin: 0.25rem 0 0 0;">
                 Configure available health center consultations, dental procedures, and medical services
             </p>
         </div>
         <div style="display: flex; gap: 0.5rem;">
             <a href="{% url 'appointments:list' %}" class="btn btn-secondary btn-sm" style="font-weight: 700; min-height: 40px; display: inline-flex; align-items: center;">
-                <i class="fa-solid fa-arrow-left" style="margin-right: 0.35rem;"></i> Back to Appointments
+                {% icon 'arrow-left' %} Back to Appointments
             </a>
-            <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('add-service-card').scrollIntoView({behavior: 'smooth'})" style="font-weight: 700; min-height: 40px; display: inline-flex; align-items: center;">
-                <i class="fa-solid fa-plus" style="margin-right: 0.35rem;"></i> Add Health Service
+            <button type="button" class="btn btn-primary btn-sm" data-action="scroll-to" data-target="#add-service-card" style="font-weight: 700; min-height: 40px; display: inline-flex; align-items: center;">
+                {% icon 'plus' %} Add Health Service
             </button>
         </div>
     </div>
 
     <!-- Services Table Card -->
     <div class="data-table-card">
-        <div style="background: #FFFFFF; padding: 1rem 1.25rem; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-weight: 700; font-size: 0.8125rem; letter-spacing: 0.05em; text-transform: uppercase; color: #0F172A;">
+        <div style="background: #FFFFFF; padding: 1rem 1.25rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700; font-size: 0.875rem; letter-spacing: 0.05em; text-transform: uppercase; color: #111827;">
                 Active Health Care Services & Medical Clinic Procedures
             </span>
-            <span class="status-text-pill status-available" style="font-size: 0.75rem;">
-                <i class="fa-solid fa-notes-medical"></i> {{ services|length }} Services
+            <span class="status-text-pill status-available" style="font-size: 0.875rem;">
+                {% icon 'clipboard-plus' %} {{ services|length }} Services
             </span>
         </div>
         <div>
@@ -61,22 +62,22 @@
                                 <div class="cell-subtext">Clinical Health Service</div>
                             </td>
                             <td>
-                                <div style="font-size: 0.8125rem; color: #475569; line-height: 1.35;">{{ svc.description|default:"No description provided." }}</div>
+                                <div style="font-size: 0.875rem; color: #4B5563; line-height: 1.35;">{{ svc.description|default:"No description provided." }}</div>
                             </td>
                             <td>
                                 {% if svc.is_active %}
-                                    <span class="status-text-pill status-available"><i class="fa-solid fa-circle-check"></i> Active</span>
+                                    <span class="status-text-pill status-available">{% icon 'circle-check' %} Active</span>
                                 {% else %}
-                                    <span class="status-text-pill status-rejected"><i class="fa-solid fa-circle-pause"></i> Disabled</span>
+                                    <span class="status-text-pill status-rejected">{% icon 'circle-pause' %} Disabled</span>
                                 {% endif %}
                             </td>
                             <td style="text-align: center;">
                                 <div style="display: inline-flex; gap: 0.4rem; align-items: center; justify-content: center;">
-                                    <a href="{% url 'appointments:service_update' svc.id %}" class="btn-action-circle" title="Edit Service">
-                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    <a href="{% url 'appointments:service_update' svc.id %}" class="btn-action-circle" title="Edit Service" aria-label="Edit Service">
+                                        {% icon 'square-pen' %}
                                     </a>
-                                    <a href="{% url 'appointments:service_delete' svc.id %}" class="btn-action-circle" title="Delete Service" style="color: #DC2626;">
-                                        <i class="fa-solid fa-trash-can"></i>
+                                    <a href="{% url 'appointments:service_delete' svc.id %}" class="btn-action-circle" title="Delete Service" style="color: #DC2626;" aria-label="Delete Service">
+                                        {% icon 'trash-2' %}
                                     </a>
                                 </div>
                             </td>
@@ -93,25 +94,25 @@
                 </div>
                 <div class="pagination-controls">
                     <span class="pagination-page-label">Page <strong>1</strong> of <strong>1</strong></span>
-                    <a href="javascript:void(0)" class="btn-page-pill disabled">&lt; Previous</a>
-                    <a href="javascript:void(0)" class="btn-page-pill disabled">Next &gt;</a>
+                    <span class="btn-page-pill disabled" aria-disabled="true">&lt; Previous</span>
+                    <span class="btn-page-pill disabled" aria-disabled="true">Next &gt;</span>
                 </div>
             </div>
             {% else %}
-            <div style="text-align: center; padding: 3rem 1.5rem; color: #64748B;">
-                <i class="fa-solid fa-notes-medical" style="font-size: 2.5rem; color: #94A3B8; margin-bottom: 0.75rem;"></i>
-                <h3 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.25rem;">NO HEALTH SERVICES CONFIGURED</h3>
-                <p style="font-size: 0.8125rem;">Add available health care services below to make them bookable for residents.</p>
+            <div style="text-align: center; padding: 3rem 1.5rem; color: #6B7280;">
+                {% icon 'clipboard-plus' cls='icon-lg icon-muted' %}
+                <h3 style="font-size: 1rem; font-weight: 700; color: #111827; margin-bottom: 0.25rem;">NO HEALTH SERVICES CONFIGURED</h3>
+                <p style="font-size: 0.875rem;">Add available health care services below to make them bookable for residents.</p>
             </div>
             {% endif %}
         </div>
     </div>
 
     <!-- Add Service Card Form -->
-    <div class="card" id="add-service-card" style="border: 1px solid #E2E8F0; border-radius: 8px; box-shadow: none; background: #FFFFFF;">
-        <div class="card-header" style="background: #FFFFFF; color: #0F172A; border-bottom: 1px solid #E2E8F0; padding: 0.75rem 1rem;">
-            <span style="font-weight: 700; font-size: 0.8125rem; letter-spacing: 0.05em; text-transform: uppercase;">
-                <i class="fa-solid fa-plus" style="margin-right: 0.35rem; color: #2563EB;"></i> ADD NEW HEALTH CARE SERVICE
+    <div class="card" id="add-service-card" style="border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: none; background: #FFFFFF;">
+        <div class="card-header" style="background: #FFFFFF; color: #111827; border-bottom: 1px solid #E5E7EB; padding: 0.75rem 1rem;">
+            <span style="font-weight: 700; font-size: 0.875rem; letter-spacing: 0.05em; text-transform: uppercase;">
+                {% icon 'plus' cls='icon-primary' %} ADD NEW HEALTH CARE SERVICE
             </span>
         </div>
         <div class="card-body" style="padding: 1.25rem;">
@@ -120,24 +121,24 @@
                 <input type="hidden" name="create_service" value="1">
                 
                 <div style="margin-bottom: 1rem;">
-                    <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.35rem;">Service Name</label>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.35rem;">Service Name</label>
                     {{ form.name }}
                     {% if form.name.errors %}
-                        <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">{{ form.name.errors }}</div>
+                        <div style="color: #DC2626; font-size: 0.875rem; margin-top: 0.25rem;">{{ form.name.errors }}</div>
                     {% endif %}
                 </div>
 
                 <div style="margin-bottom: 1rem;">
-                    <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.35rem;">Service Description</label>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.35rem;">Service Description</label>
                     {{ form.description }}
                     {% if form.description.errors %}
-                        <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">{{ form.description.errors }}</div>
+                        <div style="color: #DC2626; font-size: 0.875rem; margin-top: 0.25rem;">{{ form.description.errors }}</div>
                     {% endif %}
                 </div>
 
                 <div style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
                     {{ form.is_active }}
-                    <label for="{{ form.is_active.id_for_label }}" style="font-size: 0.8125rem; font-weight: 600; color: #0F172A; margin: 0; cursor: pointer;">
+                    <label for="{{ form.is_active.id_for_label }}" style="font-size: 0.875rem; font-weight: 600; color: #111827; margin: 0; cursor: pointer;">
                         Active and available for resident booking
                     </label>
                 </div>

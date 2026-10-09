@@ -13,10 +13,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
     """
 
     async def connect(self):
-        self.user = self.scope["user"]
+        if not validate_websocket_origin(self.scope):
+            await self.close(code=4003)
+            return
 
-        if not self.user.is_authenticated:
-            await self.close()
+        self.user = self.scope.get("user")
+        if not self.user or not self.user.is_authenticated:
+            await self.close(code=4001)
             return
 
         # other_user_id from url route
@@ -49,6 +52,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         content = data.get("message", "").strip()
         if not content:
+            return
+
+        # Same per-user send limit as the HTTP chat views (RATE_LIMITS['chat_send']).
+        retry_after = await self.check_send_rate()
+        if retry_after:
+            await self.send(text_data=json.dumps({
+                "type": "error",
+                "error": "rate_limited",
+                "retry_after": retry_after,
+                "message": "You are sending messages too quickly. Please wait a moment.",
+            }))
             return
 
         # Save message in database
@@ -85,6 +99,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(event))
 
     @database_sync_to_async
+    def check_send_rate(self):
+        from apps.core.ratelimit import hit, resolve_rate
+        limit, period = resolve_rate('chat_send')
+        return hit('chat_send:user', f'u{self.user.pk}', limit, period)
+
+    @database_sync_to_async
     def save_message(self, sender_id, recipient_id, content):
         sender = User.objects.get(id=sender_id)
         recipient = User.objects.get(id=recipient_id)
@@ -108,45 +128,65 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }
 
 
+from urllib.parse import urlparse
+from django.conf import settings
+
+
+def validate_websocket_origin(scope):
+    """
+    Validates the WebSocket Origin header against ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS.
+    """
+    headers = dict(scope.get("headers", []))
+    origin = headers.get(b"origin")
+    if not origin:
+        return getattr(settings, 'DEBUG', False) or getattr(settings, 'ALLOW_EMPTY_WS_ORIGIN', True)
+    try:
+        origin_str = origin.decode("utf-8")
+        parsed = urlparse(origin_str)
+        host = (parsed.netloc or parsed.path).split(":")[0].lower()
+        if host in ['localhost', '127.0.0.1', 'testserver']:
+            return True
+        allowed_hosts = [h.strip().lower() for h in getattr(settings, 'ALLOWED_HOSTS', []) if h.strip() != '*']
+        if host in allowed_hosts:
+            return True
+        trusted = [urlparse(t).netloc.split(":")[0].lower() for t in getattr(settings, 'CSRF_TRUSTED_ORIGINS', [])]
+        return host in trusted
+    except Exception:
+        return False
+
+
 class NotificationConsumer(AsyncWebsocketConsumer):
     """
-    Global notification & broadcast consumer for Kapitan status changes,
-    appointment status updates, verification alerts, and badge counters.
+    Personal notification consumer.
+    - Requires authenticated user
+    - Validates Origin header
+    - Joins ONLY that user's own group (user_<id>)
     """
 
     async def connect(self):
-        self.user = self.scope["user"]
-
-        if not self.user.is_authenticated:
-            await self.close()
+        # 1. Validate Origin
+        if not validate_websocket_origin(self.scope):
+            await self.close(code=4003)
             return
 
-        self.user_group = f"user_{self.user.id}"
-        self.broadcast_group = "barangay_broadcast"
+        # 2. Require authenticated user
+        self.user = self.scope.get("user")
+        if not self.user or not self.user.is_authenticated:
+            await self.close(code=4001)
+            return
 
-        # Join personal user group
+        # 3. Join ONLY that user's own group
+        self.user_group = f"user_{self.user.id}"
         await self.channel_layer.group_add(
             self.user_group,
             self.channel_name
         )
-
-        # Join public barangay broadcast group
-        await self.channel_layer.group_add(
-            self.broadcast_group,
-            self.channel_name
-        )
-
         await self.accept()
 
     async def disconnect(self, close_code):
         if hasattr(self, "user_group"):
             await self.channel_layer.group_discard(
                 self.user_group,
-                self.channel_name
-            )
-        if hasattr(self, "broadcast_group"):
-            await self.channel_layer.group_discard(
-                self.broadcast_group,
                 self.channel_name
             )
 

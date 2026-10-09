@@ -3,7 +3,12 @@ def global_barangay_context(request):
     Supplies global context for header badge counters, Kapitan status indicator,
     slide-over drawer items, and role helpers across all rendered templates.
     """
+    from django.utils.functional import SimpleLazyObject
+    from apps.accounts.selectors import get_contact_number
+
     context = {
+        # Lazy: only queries BarangayInfo when a template actually prints it.
+        'barangay_contact': SimpleLazyObject(get_contact_number),
         'current_kapitan_status': None,
         'unread_notifications_count': 0,
         'unread_messages_count': 0,
@@ -25,25 +30,6 @@ def global_barangay_context(request):
     if not request.user.is_authenticated:
         return context
 
-    try:
-        from apps.communications.models import KapitanStatus
-        latest_status = KapitanStatus.objects.order_by('-updated_at').first()
-        if latest_status:
-            context['current_kapitan_status'] = latest_status
-        else:
-            context['current_kapitan_status'] = {
-                'status': 'on_duty',
-                'status_display': 'On Duty',
-                'leave_reason': '',
-                'return_date': None,
-            }
-    except Exception:
-        context['current_kapitan_status'] = {
-            'status': 'on_duty',
-            'status_display': 'On Duty',
-            'leave_reason': '',
-            'return_date': None,
-        }
 
     # Unread notifications & unread messages for current user
     try:
@@ -70,7 +56,7 @@ def global_barangay_context(request):
         conversations = {}
         for m in raw_msgs:
             other = m.recipient if m.sender == request.user else m.sender
-            if other.id not in conversations:
+            if other and other.id not in conversations:
                 conversations[other.id] = {
                     'user': other,
                     'last_message': m.content,
@@ -84,29 +70,24 @@ def global_barangay_context(request):
     except Exception:
         pass
 
-    # 4 Unique Real-Time Stat Cards (Unique Resident User.id counts)
+    # 4 Unique Real-Time Stat Cards from Central get_dashboard_metrics
     try:
-        from apps.accounts.models import User
+        from apps.accounts.services import get_dashboard_metrics
         from apps.appointments.models import Appointment
-        from django.db.models import Q
 
-        # 1. Distinct User records with active document request in ['submitted', 'under_review']
-        context['stat_pending_docs_count'] = User.objects.filter(
-            appointments__status__in=[Appointment.STATUS_SUBMITTED, Appointment.STATUS_UNDER_REVIEW]
-        ).distinct().count()
-
-        # 2. Distinct User records where is_approved=False
-        context['stat_pending_residents_count'] = User.objects.filter(is_approved=False).distinct().count()
-
-        # 3. Distinct verified residents (is_approved=True, role='resident')
-        context['stat_total_residents_count'] = User.objects.filter(
-            is_approved=True, role=User.ROLE_RESIDENT
-        ).distinct().count()
-
-        # 4. Distinct User records with document request status='completed'
-        context['stat_handled_requests_count'] = User.objects.filter(
-            appointments__status=Appointment.STATUS_COMPLETED
-        ).distinct().count()
+        metrics = get_dashboard_metrics(request.user)
+        context['dashboard_metrics'] = metrics
+        context['stat_total_residents_count'] = metrics['registered_residents_count']
+        context['stat_portal_accounts_count'] = metrics['portal_accounts_count']
+        context['stat_needs_attention_count'] = metrics['needs_attention_count']
+        context['stat_pending_residents_count'] = metrics['pending_registrations_count']
+        context['pending_approvals_count'] = metrics['pending_registrations_count']
+        context['stat_pending_docs_count'] = Appointment.objects.filter(
+            status=Appointment.STATUS_PENDING
+        ).count()
+        context['stat_handled_requests_count'] = Appointment.objects.filter(
+            status=Appointment.STATUS_COMPLETED
+        ).count()
 
         # Staff Duty Roster for Right Panel
         roster_users = User.objects.filter(
@@ -141,11 +122,11 @@ def global_barangay_context(request):
         try:
             from apps.appointments.models import Appointment
             pending_docs = Appointment.objects.filter(
-                status__in=[Appointment.STATUS_SUBMITTED, Appointment.STATUS_UNDER_REVIEW]
-            ).select_related('resident').order_by('-created_at')
+                status=Appointment.STATUS_PENDING
+            ).select_related('resident', 'document_type', 'healthcare_service').order_by('-created_at')
             for doc in pending_docs[:3]:
                 tasks.append({
-                    'title': f'Approve {doc.get_document_type_display()}',
+                    'title': f'Approve {doc.get_service_title()}',
                     'subtitle': f'Req by {doc.resident.get_full_name() or doc.resident.username}',
                     'url': f'/appointments/{doc.id}/',
                     'badge': 'DOCUMENT',
@@ -156,12 +137,12 @@ def global_barangay_context(request):
         # Resident's own active document tasks
         try:
             from apps.appointments.models import Appointment
-            active_docs = Appointment.objects.filter(
+            active_docs = Appointment.objects.select_related('document_type', 'healthcare_service').filter(
                 resident=request.user
             ).exclude(status__in=[Appointment.STATUS_COMPLETED, Appointment.STATUS_REJECTED]).order_by('-created_at')
             for doc in active_docs[:3]:
                 tasks.append({
-                    'title': f'{doc.get_document_type_display()}',
+                    'title': f'{doc.get_service_title()}',
                     'subtitle': f'Status: {doc.get_status_display()}',
                     'url': f'/appointments/{doc.id}/',
                     'badge': doc.get_status_display().upper(),

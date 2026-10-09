@@ -1,0 +1,17 @@
+Subject: Your account is approved, here's how to log in
+
+Hi {{ first_name }},
+
+Good news, your account has been approved. You can log in here: {{ login_url }}
+
+Email: {{ email }}
+Temporary password: {{ temp_password }}
+
+This password is only temporary. The system will ask you to set your own when you log in for the first time. If you don't log in within 7 days, it expires and you'll need to contact us.
+
+Please keep it private. Barangay staff will never ask you for your password.
+
+Once you're in, you can book appointments, read announcements and message the barangay office.
+
+Salamat po,
+Barangay {{ barangay_name }} Office

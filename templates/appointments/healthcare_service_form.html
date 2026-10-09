@@ -4,8 +4,8 @@
 
 {% block content %}
 <div style="max-width: 650px; margin: 0 auto; padding: 1rem 0;">
-    <div class="card" style="border: 1px solid #E2E8F0; border-radius: 8px; box-shadow: none; background: #FFFFFF;">
-        <div class="card-header" style="background: #FFFFFF; color: #0F172A; border-bottom: 1px solid #E2E8F0; padding: 1rem; display: flex; justify-content: space-between; align-items: center;">
+    <div class="card" style="border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: none; background: #FFFFFF;">
+        <div class="card-header" style="background: #FFFFFF; color: #111827; border-bottom: 1px solid #E5E7EB; padding: 1rem; display: flex; justify-content: space-between; align-items: center;">
             <span style="font-weight: 700; font-size: 0.875rem; letter-spacing: 0.05em; text-transform: uppercase;">
                 {{ title }}
             </span>
@@ -17,24 +17,24 @@
             <form method="post">
                 {% csrf_token %}
                 <div style="margin-bottom: 1rem;">
-                    <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.35rem;">Service Name</label>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.35rem;">Service Name</label>
                     {{ form.name }}
                     {% if form.name.errors %}
-                        <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">{{ form.name.errors }}</div>
+                        <div style="color: #DC2626; font-size: 0.875rem; margin-top: 0.25rem;">{{ form.name.errors }}</div>
                     {% endif %}
                 </div>
 
                 <div style="margin-bottom: 1rem;">
-                    <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.35rem;">Service Description</label>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.35rem;">Service Description</label>
                     {{ form.description }}
                     {% if form.description.errors %}
-                        <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">{{ form.description.errors }}</div>
+                        <div style="color: #DC2626; font-size: 0.875rem; margin-top: 0.25rem;">{{ form.description.errors }}</div>
                     {% endif %}
                 </div>
 
                 <div style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
                     {{ form.is_active }}
-                    <label for="{{ form.is_active.id_for_label }}" style="font-size: 0.8125rem; font-weight: 600; color: #0F172A; margin: 0; cursor: pointer;">
+                    <label for="{{ form.is_active.id_for_label }}" style="font-size: 0.875rem; font-weight: 600; color: #111827; margin: 0; cursor: pointer;">
                         Active and available for resident booking
                     </label>
                 </div>

@@ -1,0 +1,29 @@
+#!/bin/sh
+# Pre-commit secret detection hook
+echo "Running pre-commit secret scan..."
+python -c "
+import sys, re, subprocess
+
+PATTERNS = [
+    (r'(?i)SECRET_KEY\s*=\s*[\'\"](?!django-insecure-local-dev)[^\'\"]{20,}[\'\"]', 'Production SECRET_KEY'),
+    (r'(?i)EMAIL_HOST_PASSWORD\s*=\s*[\'\"][^\'\"]+[\'\"]', 'Hardcoded EMAIL_HOST_PASSWORD'),
+    (r'-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----', 'Private Key Block'),
+    (r'(?i)api[_-]?key\s*=\s*[\'\"][a-zA-Z0-9_\-]{20,}[\'\"]', 'API Key'),
+]
+
+staged = subprocess.run(['git', 'diff', '--cached', '--name-only'], capture_output=True, text=True).stdout.splitlines()
+found = False
+
+for path in staged:
+    if not path or path.startswith('tests/') or path.endswith(('.png', '.jpg', '.jpeg', '.gif', '.ico', '.pdf', '.woff', '.woff2', '.sqlite3', '.db')):
+        continue
+    content = subprocess.run(['git', 'show', f':{path}'], capture_output=True, text=True, errors='ignore').stdout
+    for pattern, name in PATTERNS:
+        if re.search(pattern, content):
+            print(f'ERROR: Potential secret ({name}) detected in staged file: {path}', file=sys.stderr)
+            found = True
+
+if found:
+    print('Commit aborted. Please remove sensitive credentials before committing.', file=sys.stderr)
+    sys.exit(1)
+"

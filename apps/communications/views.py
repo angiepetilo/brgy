@@ -1,13 +1,24 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
+from django.core.exceptions import PermissionDenied
+from django import forms
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
 from apps.accounts.models import User
-from apps.communications.models import KapitanStatus, Announcement, PostReaction, PostComment, PostCategory, Post
-from apps.communications.forms import KapitanStatusUpdateForm, AnnouncementForm
+from apps.accounts.selectors import get_contact_number
+from apps.communications.models import Announcement, PostReaction, PostComment, PostCategory, Post
+from apps.communications.forms import AnnouncementForm
+from apps.communications.selectors import feed_context
+from apps.communications.services import (
+    create_post_service,
+    mark_post_done_service,
+    extend_post_service,
+    get_active_posts_queryset,
+    check_can_post_category,
+)
 
 
 def landing_view(request):
@@ -15,8 +26,15 @@ def landing_view(request):
     Public Landing Page & Community Portal.
     Features services overview, announcements, upcoming community events, and registration.
     """
-    from apps.appointments.models import HealthCareService, Appointment
-    healthcare_services = HealthCareService.objects.filter(is_active=True)
+    from apps.appointments.models import DocumentType, HealthCareService
+    raw_services = HealthCareService.objects.filter(is_active=True, is_free=True).order_by('name')
+    healthcare_services = []
+    seen = set()
+    for s in raw_services:
+        if s.name.strip().lower() not in seen:
+            seen.add(s.name.strip().lower())
+            healthcare_services.append(s)
+
     announcements = Announcement.objects.filter(
         category__in=[
             Announcement.CATEGORY_ANNOUNCEMENT,
@@ -31,12 +49,15 @@ def landing_view(request):
         category=Announcement.CATEGORY_EVENT
     ).order_by('-created_at')[:3]
 
-    admin_user = User.objects.filter(role=User.ROLE_ADMIN).first() or User.objects.filter(is_superuser=True).first()
-    admin_phone = admin_user.phone_number if (admin_user and admin_user.phone_number) else '0917-111-2222'
+    admin_phone = get_contact_number()
+    emergency_posts = list(
+        get_active_posts_queryset(request.user, category=Announcement.CATEGORY_EMERGENCY)[:3]
+    )
 
     return render(request, 'landing.html', {
+        'emergency_posts': emergency_posts,
         'healthcare_services': healthcare_services,
-        'document_choices': Appointment.DOCUMENT_CHOICES,
+        'document_types': DocumentType.objects.filter(is_active=True).order_by('order', 'name'),
         'announcements': announcements,
         'upcoming_events': upcoming_events,
         'admin_phone': admin_phone,
@@ -44,7 +65,9 @@ def landing_view(request):
 
 
 def is_leadership_or_admin(user):
-    return user.is_authenticated and (user.role in [User.ROLE_ADMIN, User.ROLE_KAPITAN] or user.is_staff or user.is_superuser)
+    if not user.is_authenticated or user.role == User.ROLE_RESIDENT:
+        return False
+    return (user.role in [User.ROLE_ADMIN, User.ROLE_KAPITAN] or user.is_staff or user.is_superuser)
 
 
 def is_admin(user):
@@ -52,62 +75,11 @@ def is_admin(user):
 
 
 @login_required
-@user_passes_test(is_leadership_or_admin)
-def kapitan_tracker_view(request):
-    current_status = KapitanStatus.objects.order_by('-updated_at').first()
-    history = KapitanStatus.objects.select_related('updated_by').order_by('-updated_at')[:15]
-
-    if request.method == 'POST':
-        form = KapitanStatusUpdateForm(request.POST)
-        if form.is_valid():
-            new_status = form.save(commit=False)
-            new_status.updated_by = request.user
-            # Clear leave reason/date if on duty
-            if new_status.status == KapitanStatus.STATUS_ON_DUTY:
-                new_status.leave_reason = ''
-                new_status.return_date = None
-            new_status.save()
-
-            # Broadcast real-time status update to all connected users
-            channel_layer = get_channel_layer()
-            async_to_sync(channel_layer.group_send)(
-                "barangay_broadcast",
-                {
-                    "type": "kapitan_status_update",
-                    "status": new_status.status,
-                    "status_display": new_status.get_status_display(),
-                    "leave_reason": new_status.leave_reason,
-                    "return_date": new_status.return_date.strftime("%B %d, %Y") if new_status.return_date else "",
-                    "updated_at": new_status.updated_at.strftime("%I:%M %p"),
-                }
-            )
-
-            messages.success(request, f"Barangay Kapitan status broadcasted as '{new_status.get_status_display()}' to all residents.")
-            return redirect('communications:kapitan_tracker')
-    else:
-        initial = {}
-        if current_status:
-            initial = {
-                'status': current_status.status,
-                'leave_reason': current_status.leave_reason,
-                'return_date': current_status.return_date,
-            }
-        form = KapitanStatusUpdateForm(initial=initial)
-
-    context = {
-        'current_status': current_status,
-        'history': history,
-        'form': form,
-    }
-    return render(request, 'communications/kapitan_tracker.html', context)
-
-
-@login_required
 def feed_view(request):
     user = request.user
     category = request.GET.get('cat', '')
-    
-    # Ensure default dynamic categories exist if table is empty
+
+    # Dynamic categories for quick filtering
     dynamic_categories = PostCategory.objects.filter(is_active=True).order_by('name')
     if not dynamic_categories.exists():
         default_seed = [
@@ -119,101 +91,88 @@ def feed_view(request):
             ('Legislative', 'Barangay ordinances and executive orders'),
             ('General Advisory', 'Public service guidelines and barangay reminders'),
         ]
-        for name, desc in default_seed:
-            PostCategory.objects.get_or_create(name=name, defaults={'description': desc, 'is_active': True})
+        PostCategory.objects.bulk_create([
+            PostCategory(name=name, description=desc, is_active=True)
+            for name, desc in default_seed
+        ], ignore_conflicts=True)
         dynamic_categories = PostCategory.objects.filter(is_active=True).order_by('name')
 
-    # Handle instant post publishing from Facebook-style modal or feed form
-    if request.method == 'POST' and 'create_post' in request.POST:
-        if is_leadership_or_admin(user):
-            form = AnnouncementForm(request.POST, request.FILES)
-            if form.is_valid():
-                announcement = form.save(commit=False)
-                announcement.author = user
+    can_publish = is_leadership_or_admin(user)
 
-                # Resolve dynamic category
-                raw_cat = request.POST.get('category', '').strip()
-                cat_obj = PostCategory.objects.filter(name__iexact=raw_cat).first()
-                if not cat_obj:
-                    cat_obj = PostCategory.objects.filter(name__icontains=raw_cat).first()
+    # Handle post creation from feed
+    if request.method == 'POST' and ('create_post' in request.POST or request.POST.get('title')):
+        if user.role == User.ROLE_RESIDENT:
+            raise PermissionDenied("Residents are not permitted to publish public feed posts.")
 
+        form = AnnouncementForm(request.POST, request.FILES)
+        if form.is_valid():
+            clean_data = form.cleaned_data.copy()
+            if not clean_data.get('title') and clean_data.get('content'):
+                clean_data['title'] = clean_data['content'][:50].strip() or 'Barangay Announcement'
+            if 'is_pinned' in request.POST:
+                clean_data['is_pinned'] = True
+
+            # Resolve dynamic category if selected
+            raw_cat = request.POST.get('category', '').strip()
+            cat_obj = PostCategory.objects.filter(name__iexact=raw_cat).first() or PostCategory.objects.filter(name__icontains=raw_cat).first()
+            if cat_obj:
+                clean_name = cat_obj.name.lower()
+                if 'emergency' in clean_name:
+                    clean_data['category'] = Announcement.CATEGORY_EMERGENCY
+                elif 'event' in clean_name:
+                    clean_data['category'] = Announcement.CATEGORY_EVENT
+                elif 'scholarship' in clean_name:
+                    clean_data['category'] = Announcement.CATEGORY_SCHOLARSHIP
+                elif 'donation' in clean_name:
+                    clean_data['category'] = Announcement.CATEGORY_DONATION
+                elif 'legislative' in clean_name or 'ordinance' in clean_name:
+                    clean_data['category'] = Announcement.CATEGORY_LEGISLATIVE
+                elif 'health' in clean_name:
+                    clean_data['category'] = Announcement.CATEGORY_HEALTH
+                else:
+                    clean_data['category'] = Announcement.CATEGORY_ANNOUNCEMENT
+            elif raw_cat:
+                clean_data['category'] = raw_cat.lower()
+
+            target_cat = clean_data.get('category') or Announcement.CATEGORY_ANNOUNCEMENT
+            if not check_can_post_category(user, target_cat):
+                raise PermissionDenied(f"You do not have permission to publish '{target_cat}' posts.")
+
+            try:
+                announcement = create_post_service(
+                    author=user,
+                    data=clean_data,
+                    image_file=request.FILES.get('image'),
+                    request=request
+                )
                 if cat_obj:
                     announcement.category_ref = cat_obj
-                    clean_name = cat_obj.name.lower()
-                    if 'emergency' in clean_name:
-                        announcement.category = Announcement.CATEGORY_EMERGENCY
-                    elif 'event' in clean_name:
-                        announcement.category = Announcement.CATEGORY_EVENT
-                    elif 'scholarship' in clean_name:
-                        announcement.category = Announcement.CATEGORY_SCHOLARSHIP
-                    elif 'donation' in clean_name:
-                        announcement.category = Announcement.CATEGORY_DONATION
-                    elif 'legislative' in clean_name or 'ordinance' in clean_name:
-                        announcement.category = Announcement.CATEGORY_LEGISLATIVE
-                    elif 'health' in clean_name:
-                        announcement.category = Announcement.CATEGORY_HEALTH
-                    else:
-                        announcement.category = Announcement.CATEGORY_ANNOUNCEMENT
-
-                announcement.save()
-
-                # Also create Post entry
-                try:
-                    Post.objects.create(
-                        author=user,
-                        category=cat_obj,
-                        content=announcement.content,
-                        image=announcement.image
-                    )
-                except Exception:
-                    pass
-
-                # Broadcast live announcement notification
-                try:
-                    channel_layer = get_channel_layer()
-                    async_to_sync(channel_layer.group_send)(
-                        "barangay_broadcast",
-                        {
-                            "type": "announcement_broadcast",
-                            "title": announcement.title,
-                            "category": announcement.get_category_display(),
-                            "created_at": announcement.created_at.strftime("%b %d, %Y"),
-                            "announcement_id": announcement.id,
-                        }
-                    )
-                except Exception:
-                    pass
+                    announcement.save(update_fields=['category_ref'])
 
                 messages.success(request, f"Published new {announcement.get_category_display()}: '{announcement.title}'")
                 return redirect('communications:feed')
+            except (ValueError, forms.ValidationError) as e:
+                messages.error(request, str(e))
         else:
-            messages.error(request, "Only Barangay Officials and Staff can publish official feed posts.")
-            return redirect('communications:feed')
+            messages.error(request, "Please correct the form errors.")
     else:
         form = AnnouncementForm()
 
+    # Active posts with audience filtering
+    queryset = list(get_active_posts_queryset(user, category=category if category else None))
 
-    queryset = Announcement.objects.select_related('author').prefetch_related('comments__author', 'reactions').all()
-    if category:
-        queryset = queryset.filter(category=category)
+    # Reaction lookups consolidated into a single query
+    user_reactions = list(PostReaction.objects.filter(user=user).values_list('post_id', 'reaction_type'))
+    user_liked_post_ids = {p_id for p_id, r_type in user_reactions if r_type == 'like'}
+    user_supported_post_ids = {p_id for p_id, r_type in user_reactions if r_type == 'support'}
+    user_important_post_ids = {p_id for p_id, r_type in user_reactions if r_type == 'important'}
 
-    # Build user reaction sets for simple in-template lookups
-    user_liked_post_ids = set(
-        PostReaction.objects.filter(user=user, reaction_type='like').values_list('post_id', flat=True)
-    )
-    user_supported_post_ids = set(
-        PostReaction.objects.filter(user=user, reaction_type='support').values_list('post_id', flat=True)
-    )
-    user_important_post_ids = set(
-        PostReaction.objects.filter(user=user, reaction_type='important').values_list('post_id', flat=True)
-    )
-
-    # 4 Unique Real-Time Stat Cards (User.id level aggregations)
+    # Real-Time Stat Cards
     from apps.appointments.models import Appointment
     from django.db.models import Q
 
     stat_pending_docs_count = User.objects.filter(
-        appointments__status__in=[Appointment.STATUS_SUBMITTED, Appointment.STATUS_UNDER_REVIEW]
+        appointments__status=Appointment.STATUS_PENDING
     ).distinct().count()
     stat_pending_residents_count = User.objects.filter(is_approved=False).distinct().count()
     stat_total_residents_count = User.objects.filter(
@@ -232,7 +191,7 @@ def feed_view(request):
         'categories': Announcement.CATEGORY_CHOICES,
         'dynamic_categories': dynamic_categories,
         'creation_form': form,
-        'can_publish': is_leadership_or_admin(user),
+        'can_publish': can_publish,
         'user_liked_post_ids': user_liked_post_ids,
         'user_supported_post_ids': user_supported_post_ids,
         'user_important_post_ids': user_important_post_ids,
@@ -242,42 +201,51 @@ def feed_view(request):
         'stat_handled_requests_count': stat_handled_requests_count,
         'duty_officers_roster': duty_officers_roster,
         'staff_members': duty_officers_roster,
+        # Civic stacks; reuse the evaluated list unless a category filter narrowed it.
+        **feed_context(user, visible_posts=None if category else queryset),
     }
-    return render(request, 'communications/feed.html', context)
+    return render(request, 'communications/home.html', context)
 
 
 @login_required
 def announcements_list_view(request):
     """
-    Announcement Module: Displays all each unique announcement only,
-    and counts each unique announcement posted.
-    Admin & Staff can post with or without photo, edit, and delete.
-    Residents only can view.
+    Announcement Module: Displays official announcements with audience filtering.
+    Admin & Staff with permission can post, edit, and delete.
+    Residents get 403 on post creation and view only their audience posts.
     """
     user = request.user
     can_publish = is_leadership_or_admin(user)
 
-    if request.method == 'POST' and 'create_post' in request.POST:
-        if can_publish:
-            form = AnnouncementForm(request.POST, request.FILES)
-            if form.is_valid():
-                announcement = form.save(commit=False)
-                announcement.author = user
-                announcement.category = Announcement.CATEGORY_ANNOUNCEMENT
-                announcement.save()
+    if request.method == 'POST' and ('create_post' in request.POST or request.POST.get('title')):
+        if user.role == User.ROLE_RESIDENT:
+            raise PermissionDenied("Residents cannot publish announcements.")
+        if not check_can_post_category(user, Announcement.CATEGORY_ANNOUNCEMENT):
+            raise PermissionDenied("You do not have permission to publish announcements.")
+
+        form = AnnouncementForm(request.POST, request.FILES)
+        if form.is_valid():
+            clean_data = form.cleaned_data.copy()
+            clean_data['category'] = Announcement.CATEGORY_ANNOUNCEMENT
+            try:
+                announcement = create_post_service(
+                    author=user,
+                    data=clean_data,
+                    image_file=request.FILES.get('image'),
+                    request=request
+                )
                 messages.success(request, f"Published new announcement: '{announcement.title}'")
                 return redirect('communications:announcements_list')
+            except (ValueError, forms.ValidationError) as e:
+                messages.error(request, str(e))
         else:
-            messages.error(request, "Only Barangay Officials and Staff can publish announcements.")
-            return redirect('communications:announcements_list')
+            messages.error(request, "Please correct the form errors.")
     else:
         form = AnnouncementForm(initial={'category': Announcement.CATEGORY_ANNOUNCEMENT})
 
-    # Unique announcements only
-    announcements = Announcement.objects.filter(
-        category=Announcement.CATEGORY_ANNOUNCEMENT
-    ).select_related('author').prefetch_related('comments__author', 'reactions').order_by('-is_pinned', '-created_at')
-
+    tab = request.GET.get('tab', '')
+    target_category = Announcement.CATEGORY_EVENT if tab == 'events' else Announcement.CATEGORY_ANNOUNCEMENT
+    announcements = get_active_posts_queryset(user, category=target_category)
     unique_count = announcements.count()
 
     user_liked_post_ids = set(
@@ -295,6 +263,7 @@ def announcements_list_view(request):
         'unique_count': unique_count,
         'creation_form': form,
         'can_publish': can_publish,
+        'current_tab': tab,
         'user_liked_post_ids': user_liked_post_ids,
         'user_supported_post_ids': user_supported_post_ids,
         'user_important_post_ids': user_important_post_ids,
@@ -305,35 +274,39 @@ def announcements_list_view(request):
 @login_required
 def emergency_list_view(request):
     """
-    Emergency Module: Displays all emergency alerts only,
-    and counts each unique emergency posted.
-    Admin & Staff can post with or without photo, edit, and delete.
-    Residents only can view.
+    Emergency Module: Displays emergency alerts with audience filtering.
+    Emergency posts do not expire by schedule; they stay until marked done.
     """
     user = request.user
     can_publish = is_leadership_or_admin(user)
 
-    if request.method == 'POST' and 'create_post' in request.POST:
-        if can_publish:
-            form = AnnouncementForm(request.POST, request.FILES)
-            if form.is_valid():
-                announcement = form.save(commit=False)
-                announcement.author = user
-                announcement.category = Announcement.CATEGORY_EMERGENCY
-                announcement.save()
+    if request.method == 'POST' and ('create_post' in request.POST or request.POST.get('title')):
+        if user.role == User.ROLE_RESIDENT:
+            raise PermissionDenied("Residents cannot broadcast emergency alerts.")
+        if not check_can_post_category(user, Announcement.CATEGORY_EMERGENCY):
+            raise PermissionDenied("You do not have permission to broadcast emergency alerts.")
+
+        form = AnnouncementForm(request.POST, request.FILES)
+        if form.is_valid():
+            clean_data = form.cleaned_data.copy()
+            clean_data['category'] = Announcement.CATEGORY_EMERGENCY
+            try:
+                announcement = create_post_service(
+                    author=user,
+                    data=clean_data,
+                    image_file=request.FILES.get('image'),
+                    request=request
+                )
                 messages.success(request, f"Emergency alert broadcasted: '{announcement.title}'")
                 return redirect('communications:emergency_list')
+            except (ValueError, forms.ValidationError) as e:
+                messages.error(request, str(e))
         else:
-            messages.error(request, "Only Barangay Officials and Staff can broadcast emergency alerts.")
-            return redirect('communications:emergency_list')
+            messages.error(request, "Please correct the form errors.")
     else:
         form = AnnouncementForm(initial={'category': Announcement.CATEGORY_EMERGENCY})
 
-    # Unique emergencies only
-    emergencies = Announcement.objects.filter(
-        category=Announcement.CATEGORY_EMERGENCY
-    ).select_related('author').prefetch_related('comments__author', 'reactions').order_by('-is_pinned', '-created_at')
-
+    emergencies = get_active_posts_queryset(user, category=Announcement.CATEGORY_EMERGENCY)
     unique_count = emergencies.count()
 
     user_liked_post_ids = set(
@@ -356,6 +329,8 @@ def emergency_list_view(request):
         'user_important_post_ids': user_important_post_ids,
     }
     return render(request, 'communications/emergency_list.html', context)
+
+
 @login_required
 def react_post_view(request, post_id):
     post = get_object_or_404(Announcement, pk=post_id)
@@ -368,7 +343,6 @@ def react_post_view(request, post_id):
         existing.delete()
         user_has_reacted = False
     else:
-        # Clear any other reaction by this user on this post, then set new
         PostReaction.objects.filter(post=post, user=request.user).delete()
         PostReaction.objects.create(post=post, user=request.user, reaction_type=reaction_type)
         user_has_reacted = True
@@ -383,7 +357,7 @@ def react_post_view(request, post_id):
             'user_has_reacted': user_has_reacted,
         })
 
-    return redirect(f"/communications/#post-{post.id}")
+    return redirect(f"/home/#post-{post.id}")
 
 
 @login_required
@@ -406,8 +380,7 @@ def comment_post_view(request, post_id):
                     'created_at': comment.created_at.strftime("%b %d, %I:%M %p"),
                 })
             messages.success(request, "Comment posted.")
-    return redirect(f"/communications/#post-{post.id}")
-
+    return redirect(f"/home/#post-{post.id}")
 
 
 @login_required
@@ -421,35 +394,40 @@ def announcement_detail_view(request, pk):
 
 
 @login_required
-@user_passes_test(is_leadership_or_admin)
 def create_announcement_view(request):
+    """
+    Publish new announcement or advisory.
+    Residents get 403.
+    Staff verified for category permission.
+    """
+    user = request.user
+    if user.role == User.ROLE_RESIDENT:
+        raise PermissionDenied("Residents cannot create announcements.")
+
     next_url = request.POST.get('next') or request.GET.get('next') or 'communications:feed'
     cat = request.GET.get('cat', Announcement.CATEGORY_ANNOUNCEMENT)
+
     if request.method == 'POST':
         form = AnnouncementForm(request.POST, request.FILES)
         if form.is_valid():
-            announcement = form.save(commit=False)
-            announcement.author = request.user
-            announcement.save()
+            clean_data = form.cleaned_data.copy()
+            target_cat = clean_data.get('category') or cat
+            if not check_can_post_category(user, target_cat):
+                raise PermissionDenied(f"You do not have permission to publish '{target_cat}' posts.")
 
-            # Broadcast new announcement alert via WebSockets
             try:
-                channel_layer = get_channel_layer()
-                async_to_sync(channel_layer.group_send)(
-                    "barangay_broadcast",
-                    {
-                        "type": "announcement_broadcast",
-                        "title": announcement.title,
-                        "category": announcement.get_category_display(),
-                        "created_at": announcement.created_at.strftime("%b %d, %Y"),
-                        "announcement_id": announcement.id,
-                    }
+                announcement = create_post_service(
+                    author=user,
+                    data=clean_data,
+                    image_file=request.FILES.get('image'),
+                    request=request
                 )
-            except Exception:
-                pass
-
-            messages.success(request, f"Published new {announcement.get_category_display()}: '{announcement.title}'")
-            return redirect(next_url)
+                messages.success(request, f"Published new {announcement.get_category_display()}: '{announcement.title}'")
+                return redirect(next_url)
+            except (ValueError, forms.ValidationError) as e:
+                messages.error(request, str(e))
+        else:
+            messages.error(request, "Please correct the form errors.")
     else:
         form = AnnouncementForm(initial={'category': cat})
 
@@ -464,49 +442,66 @@ def create_announcement_view(request):
 
 
 @login_required
-@user_passes_test(is_leadership_or_admin)
 def edit_announcement_view(request, pk):
+    """
+    Edit existing announcement.
+    Residents get 403.
+    Checks permission on EXISTING category and any NEW category.
+    """
+    user = request.user
+    if user.role == User.ROLE_RESIDENT:
+        raise PermissionDenied("Residents cannot edit announcements.")
+
     announcement = get_object_or_404(Announcement, pk=pk)
+    if not (user.role == User.ROLE_ADMIN or user.is_superuser or check_can_post_category(user, announcement.category)):
+        raise PermissionDenied(f"You do not have permission to edit '{announcement.category}' posts.")
+
     next_url = request.POST.get('next') or request.GET.get('next') or 'communications:feed'
     dynamic_categories = PostCategory.objects.filter(is_active=True).order_by('name')
 
     if request.method == 'POST':
         form = AnnouncementForm(request.POST, request.FILES, instance=announcement)
         if form.is_valid():
-            post_obj = form.save(commit=False)
-            if request.POST.get('clear_image') == '1' and not request.FILES.get('image'):
-                if post_obj.image:
-                    try:
-                        post_obj.image.delete(save=False)
-                    except Exception:
-                        pass
-                post_obj.image = None
-
+            clean_data = form.cleaned_data.copy()
             raw_cat = request.POST.get('category', '').strip()
-            cat_obj = PostCategory.objects.filter(name__iexact=raw_cat).first()
-            if not cat_obj:
-                cat_obj = PostCategory.objects.filter(name__icontains=raw_cat).first()
+            cat_obj = PostCategory.objects.filter(name__iexact=raw_cat).first() or PostCategory.objects.filter(name__icontains=raw_cat).first()
             if cat_obj:
-                post_obj.category_ref = cat_obj
                 clean_name = cat_obj.name.lower()
                 if 'emergency' in clean_name:
-                    post_obj.category = Announcement.CATEGORY_EMERGENCY
+                    clean_data['category'] = Announcement.CATEGORY_EMERGENCY
                 elif 'event' in clean_name:
-                    post_obj.category = Announcement.CATEGORY_EVENT
+                    clean_data['category'] = Announcement.CATEGORY_EVENT
                 elif 'scholarship' in clean_name:
-                    post_obj.category = Announcement.CATEGORY_SCHOLARSHIP
+                    clean_data['category'] = Announcement.CATEGORY_SCHOLARSHIP
                 elif 'donation' in clean_name:
-                    post_obj.category = Announcement.CATEGORY_DONATION
+                    clean_data['category'] = Announcement.CATEGORY_DONATION
                 elif 'legislative' in clean_name or 'ordinance' in clean_name:
-                    post_obj.category = Announcement.CATEGORY_LEGISLATIVE
+                    clean_data['category'] = Announcement.CATEGORY_LEGISLATIVE
                 elif 'health' in clean_name:
-                    post_obj.category = Announcement.CATEGORY_HEALTH
+                    clean_data['category'] = Announcement.CATEGORY_HEALTH
                 else:
-                    post_obj.category = Announcement.CATEGORY_ANNOUNCEMENT
+                    clean_data['category'] = Announcement.CATEGORY_ANNOUNCEMENT
+            elif raw_cat:
+                clean_data['category'] = raw_cat.lower()
 
-            post_obj.save()
-            messages.success(request, f"Post '{announcement.title}' updated successfully.")
-            return redirect(next_url)
+            try:
+                from apps.communications.services import edit_post_service
+                edit_post_service(
+                    post=announcement,
+                    actor=user,
+                    data=clean_data,
+                    image_file=request.FILES.get('image'),
+                    request=request
+                )
+                if cat_obj:
+                    announcement.category_ref = cat_obj
+                    announcement.save(update_fields=['category_ref'])
+                messages.success(request, f"Post '{announcement.title}' updated successfully.")
+                return redirect(next_url)
+            except (ValueError, PermissionDenied) as e:
+                if isinstance(e, PermissionDenied):
+                    raise
+                messages.error(request, str(e))
     else:
         form = AnnouncementForm(instance=announcement)
 
@@ -521,74 +516,171 @@ def edit_announcement_view(request, pk):
 
 
 @login_required
-@user_passes_test(is_leadership_or_admin)
 def delete_announcement_view(request, pk):
+    """
+    Soft-archives announcement instead of hard deleting.
+    Residents get 403.
+    """
+    user = request.user
+    if user.role == User.ROLE_RESIDENT:
+        raise PermissionDenied("Residents cannot delete announcements.")
+
     announcement = get_object_or_404(Announcement, pk=pk)
+    if not (user.role == User.ROLE_ADMIN or user.is_superuser or check_can_post_category(user, announcement.category)):
+        raise PermissionDenied(f"You do not have permission to delete '{announcement.category}' posts.")
+
     if request.method == 'POST':
+        from apps.communications.services import archive_post_service
         title = announcement.title
-        announcement.delete()
-        messages.success(request, f"Post '{title}' deleted successfully.")
+        archive_post_service(announcement, user, request=request)
+        messages.success(request, f"Post '{title}' archived successfully.")
         next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or 'communications:feed'
         return redirect(next_url)
     return redirect('communications:announcement_detail', pk=pk)
 
 
 @login_required
-def transparency_portal_view(request):
+def toggle_pin_announcement_view(request, pk):
     """
-    Public Transparency Portal displaying published Barangay Ordinances,
-    Resolutions, and Executive Orders with downloadable official PDF documents.
+    Toggle pinned status of an announcement.
+    Only authorized leadership/admin users can pin/unpin.
     """
-    from django.db.models import Q
-    from apps.communications.models import LegislativeRecord
+    user = request.user
+    if user.role == User.ROLE_RESIDENT:
+        raise PermissionDenied("Residents cannot pin announcements.")
 
-    category = request.GET.get('cat', '')
-    search_query = request.GET.get('q', '').strip()
+    announcement = get_object_or_404(Announcement, pk=pk)
+    if not (user.role == User.ROLE_ADMIN or user.is_superuser or check_can_post_category(user, announcement.category)):
+        raise PermissionDenied(f"You do not have permission to pin '{announcement.category}' posts.")
 
-    if request.user.is_admin_user or request.user.is_kapitan_user:
-        records = LegislativeRecord.objects.all()
-    else:
-        records = LegislativeRecord.objects.filter(is_public=True)
+    if request.method == 'POST':
+        announcement.is_pinned = not announcement.is_pinned
+        announcement.save(update_fields=['is_pinned'])
+        action_name = "pinned to top" if announcement.is_pinned else "unpinned from top"
+        messages.success(request, f"Post '{announcement.title}' {action_name}.")
+        next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or 'communications:feed'
+        return redirect(next_url)
 
-    if category:
-        records = records.filter(category=category)
-    if search_query:
-        records = records.filter(
-            Q(title__icontains=search_query) |
-            Q(document_number__icontains=search_query) |
-            Q(summary__icontains=search_query)
-        )
-
-    # Counts
-    ordinance_count = records.filter(category=LegislativeRecord.CATEGORY_ORDINANCE).count()
-    resolution_count = records.filter(category=LegislativeRecord.CATEGORY_RESOLUTION).count()
-    eo_count = records.filter(category=LegislativeRecord.CATEGORY_EXECUTIVE_ORDER).count()
-
-    context = {
-        'records': records,
-        'selected_category': category,
-        'search_query': search_query,
-        'categories': LegislativeRecord.CATEGORY_CHOICES,
-        'ordinance_count': ordinance_count,
-        'resolution_count': resolution_count,
-        'eo_count': eo_count,
-    }
-    return render(request, 'communications/transparency.html', context)
+    return redirect('communications:feed')
 
 
 @login_required
-@user_passes_test(is_admin)
-def legislative_create_view(request):
-    from apps.communications.forms import LegislativeRecordForm
+def extend_announcement_view(request, pk):
+    """
+    Extends expiration date of an announcement.
+    Residents get 403.
+    Extend on a done post is refused.
+    """
+    user = request.user
+    if user.role == User.ROLE_RESIDENT:
+        raise PermissionDenied("Residents cannot extend announcements.")
+
+    announcement = get_object_or_404(Announcement, pk=pk)
+    if not (user.role == User.ROLE_ADMIN or user.is_superuser or check_can_post_category(user, announcement.category)):
+        raise PermissionDenied(f"You do not have permission to extend '{announcement.category}' posts.")
 
     if request.method == 'POST':
-        form = LegislativeRecordForm(request.POST, request.FILES)
-        if form.is_valid():
-            record = form.save()
-            messages.success(request, f"Legislative measure '{record.document_number}' successfully recorded.")
-            return redirect('communications:transparency')
-    else:
-        form = LegislativeRecordForm()
+        new_valid_until = request.POST.get('new_valid_until') or request.POST.get('valid_until')
+        if not new_valid_until:
+            messages.error(request, "New expiration date is required.")
+        else:
+            try:
+                extend_post_service(announcement, user, new_valid_until, request=request)
+                messages.success(request, f"Post '{announcement.title}' extended successfully.")
+            except (ValueError, PermissionDenied) as e:
+                if isinstance(e, PermissionDenied):
+                    raise
+                messages.error(request, str(e))
+        next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or 'communications:feed'
+        return redirect(next_url)
 
-    return render(request, 'communications/legislative_form.html', {'form': form, 'title': 'Publish Legislative Measure'})
+    return render(request, 'communications/post_extend.html', {
+        'announcement': announcement,
+    })
 
+
+@login_required
+def mark_done_announcement_view(request, pk):
+    """
+    Marks an announcement as done.
+    Residents get 403.
+    """
+    user = request.user
+    if user.role == User.ROLE_RESIDENT:
+        raise PermissionDenied("Residents cannot mark announcements as done.")
+
+    announcement = get_object_or_404(Announcement, pk=pk)
+    if not (user.role == User.ROLE_ADMIN or user.is_superuser or check_can_post_category(user, announcement.category)):
+        raise PermissionDenied(f"You do not have permission to mark '{announcement.category}' posts as done.")
+
+    if request.method == 'POST':
+        try:
+            mark_post_done_service(announcement, user, request=request)
+            messages.success(request, f"Post '{announcement.title}' marked as done.")
+        except (ValueError, PermissionDenied) as e:
+            if isinstance(e, PermissionDenied):
+                raise
+            messages.error(request, str(e))
+        next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or 'communications:feed'
+        return redirect(next_url)
+
+    return render(request, 'communications/post_mark_done.html', {
+        'announcement': announcement,
+    })
+
+
+@login_required
+def reopen_announcement_view(request, pk):
+    """
+    Reopens a done, expired, or archived announcement.
+    Residents get 403.
+    """
+    user = request.user
+    if user.role == User.ROLE_RESIDENT:
+        raise PermissionDenied("Residents cannot reopen announcements.")
+
+    announcement = get_object_or_404(Announcement, pk=pk)
+    if not (user.role == User.ROLE_ADMIN or user.is_superuser or check_can_post_category(user, announcement.category)):
+        raise PermissionDenied(f"You do not have permission to reopen '{announcement.category}' posts.")
+
+    if request.method == 'POST':
+        new_valid_until = request.POST.get('new_valid_until') or request.POST.get('valid_until')
+        try:
+            from apps.communications.services import reopen_post_service
+            reopen_post_service(announcement, user, new_valid_until=new_valid_until, request=request)
+            messages.success(request, f"Post '{announcement.title}' reopened to active feed.")
+        except (ValueError, PermissionDenied) as e:
+            if isinstance(e, PermissionDenied):
+                raise
+            messages.error(request, str(e))
+        next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or 'communications:feed'
+        return redirect(next_url)
+
+    return render(request, 'communications/post_extend.html', {
+        'announcement': announcement,
+        'is_reopen': True,
+    })
+
+
+@login_required
+def manage_history_posts_view(request):
+    """
+    Lists expired, done, and archived posts for Staff/Admin review.
+    Residents get 403.
+    """
+    user = request.user
+    if user.role == User.ROLE_RESIDENT:
+        raise PermissionDenied("Residents cannot access post archives and history.")
+
+    from apps.communications.services import get_history_posts_queryset
+    current_state = request.GET.get('state', '')
+    posts = get_history_posts_queryset(user, state=current_state if current_state else None)
+    total_count = Announcement.objects.filter(
+        state__in=[Announcement.STATE_DONE, Announcement.STATE_EXPIRED, Announcement.STATE_ARCHIVED]
+    ).count()
+
+    return render(request, 'communications/manage_history.html', {
+        'posts': posts,
+        'current_state': current_state,
+        'total_count': total_count,
+    })

@@ -19,60 +19,6 @@ class Migration(migrations.Migration):
         ('accounts', '0005_purok_remove_household_address_and_more'),
     ]
 
-    operations = [
-        # ── Household ─────────────────────────────────────────────────────
-        migrations.AddField(
-            model_name='household',
-            name='street_address',
-            field=models.CharField(
-                blank=True,
-                default='',
-                help_text='House/Unit number and street name only (e.g. 12-B Rizal St.)',
-                max_length=255,
-            ),
-        ),
-        migrations.AlterField(
-            model_name='household',
-            name='purok',
-            field=models.ForeignKey(
-                blank=True,
-                help_text='Purok zone this household belongs to',
-                null=True,
-                on_delete=django.db.models.deletion.PROTECT,
-                related_name='households',
-                to='accounts.purok',
-            ),
-        ),
-
-        # ── User ──────────────────────────────────────────────────────────
-        migrations.AddField(
-            model_name='user',
-            name='street_address',
-            field=models.CharField(
-                blank=True,
-                default='',
-                help_text='House/Unit number and street name (e.g. 22 Mabini St.)',
-                max_length=255,
-            ),
-        ),
-        migrations.AlterField(
-            model_name='user',
-            name='address',
-            field=models.TextField(
-                blank=True,
-                help_text='[LEGACY] Full residential address \u2014 use street_address + purok instead.',
-            ),
-        ),
-        migrations.AlterField(
-            model_name='user',
-            name='purok',
-            field=models.ForeignKey(
-                blank=True,
-                help_text='Purok jurisdiction inside the Barangay',
-                null=True,
-                on_delete=django.db.models.deletion.SET_NULL,
-                related_name='residents',
-                to='accounts.purok',
-            ),
-        ),
-    ]
+    # 0005 already defines and executes these operations for any un-faked migration run.
+    # Leaving operations empty prevents duplicate column errors on fresh databases (MySQL/tests).
+    operations = []

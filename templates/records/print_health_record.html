@@ -1,0 +1,153 @@
+{% load core_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HLTH-{{ appointment.id|stringformat:"04d" }} - Health Consultation Record</title>
+    <style>
+        body {
+            font-family: var(--font-sans, system-ui, sans-serif);
+            margin: 0;
+            padding: 2.5cm 2cm;
+            color: #111827;
+            background: #FFFFFF;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #16A34A;
+            padding-bottom: 12px;
+            margin-bottom: 25px;
+        }
+        .republic {
+            font-size: 10pt;
+            color: #374151;
+        }
+        .center-title {
+            font-size: 15pt;
+            font-weight: bold;
+            color: #16A34A;
+            margin-top: 4px;
+        }
+        .doc-title {
+            text-align: center;
+            font-size: 16pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin: 20px 0;
+        }
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .field-label {
+            font-size: 9pt;
+            text-transform: uppercase;
+            color: #6B7280;
+            font-weight: bold;
+        }
+        .field-value {
+            font-size: 11pt;
+            font-weight: bold;
+            color: #111827;
+            margin-top: 2px;
+        }
+        .section-box {
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .signatures {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signature-block {
+            text-align: center;
+            width: 240px;
+        }
+        .line {
+            border-top: 1px solid #111827;
+            margin-top: 45px;
+            padding-top: 5px;
+            font-weight: bold;
+        }
+        @media print {
+            .no-print { display: none; }
+            body { padding: 1cm; }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print" style="margin-bottom: 20px; background: #FFFFFF; border: 1px solid #16A34A; padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+        <span><strong>Barangay Health Center Record</strong> (Ready for print/export)</span>
+        <button type="button" data-action="print" style="background: #16A34A; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer;">
+            Print / Save as PDF
+        </button>
+    </div>
+
+    <div class="header">
+        <div class="republic">Republic of the Philippines · City Health Services Office</div>
+        <div class="center-title">BARANGAY HEALTH CARE & CLINICAL SERVICES CENTER</div>
+        <div class="republic">Patient Clinical Consultation & Immunization Record</div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 10pt;">
+        <div><strong>Record Ref:</strong> HLTH-{{ appointment.id|stringformat:"04d" }}</div>
+        <div><strong>Date of Encounter:</strong> {{ appointment.appt_date|date:"F d, Y" }} ({{ appointment.get_time_window_display }})</div>
+    </div>
+
+    <div class="doc-title">
+        {{ appointment.get_service_title }}
+    </div>
+
+    <div class="details-grid">
+        <div>
+            <div class="field-label">Patient Full Name</div>
+            <div class="field-value">{{ appointment.get_applicant_name }}</div>
+        </div>
+        <div>
+            <div class="field-label">Age / Contact</div>
+            <div class="field-value">{{ appointment.get_applicant_age|default:"N/A" }} yrs old · {{ appointment.get_applicant_phone|default:"No phone" }}</div>
+        </div>
+        <div style="grid-column: span 2;">
+            <div class="field-label">Residential Address</div>
+            <div class="field-value">{{ appointment.get_applicant_address|default:"Barangay Resident" }}</div>
+        </div>
+    </div>
+
+    <div class="section-box">
+        <div class="field-label">Patient Reported Symptoms / Chief Complaint / Request Purpose</div>
+        <div style="font-size: 11pt; line-height: 1.6; margin-top: 5px;">
+            {{ appointment.purpose }}
+        </div>
+    </div>
+
+    <div class="section-box">
+        <div class="field-label">Clinical Observations / Service Rendered / Medical Advice</div>
+        <div style="font-size: 11pt; line-height: 1.6; margin-top: 5px;">
+            {{ appointment.admin_notes|default:"Service completed in accordance with primary health care protocols and standards." }}
+        </div>
+    </div>
+
+    <div class="signatures">
+        <div class="signature-block">
+            <div style="font-size: 9pt; color: #4B5563;">Attending Health Worker / Nurse:</div>
+            <div class="line">{{ appointment.processed_by|display_name:"Barangay Health Nurse" }}</div>
+            <div style="font-size: 9pt;">Barangay Health Officer</div>
+        </div>
+
+        <div class="signature-block">
+            <div style="font-size: 9pt; color: #4B5563;">Verified & Confirmed:</div>
+            <div class="line">BARANGAY MEDICAL OFFICER</div>
+            <div style="font-size: 9pt;">Chief Health Services</div>
+        </div>
+    </div>
+</body>
+</html>

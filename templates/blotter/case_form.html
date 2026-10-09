@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static core_tags %}
+{% block title %}{% if is_edit %}Edit {{ case.case_no }}{% else %}File a blotter case{% endif %} - Barangay.ph{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/blotter.css' %}">{% endblock %}
+
+{% block content %}
+<div class="container-fluid blotter-page">
+    <div class="page-header blotter-header">
+        <div>
+            <h1 class="page-title">{% if is_edit %}Edit case {{ case.case_no }}{% else %}File a blotter case{% endif %}</h1>
+            <p class="page-subtitle">{% if is_edit %}Update the incident details. Parties and status are managed on the case page.{% else %}A case number is assigned when you save.{% endif %}</p>
+        </div>
+        <a class="btn btn-secondary" href="{% if is_edit %}{% url 'blotter:case_detail' case.pk %}{% else %}{% url 'blotter:case_list' %}{% endif %}">Cancel</a>
+    </div>
+
+    <form method="post" class="blotter-form" id="blotter-case-form" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="blotter-error" role="alert">{% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}</div>
+        {% endif %}
+
+        <section class="card">
+            <div class="card-header"><h2 class="card-title">Incident</h2></div>
+            <div class="card-body blotter-grid">
+                {% for field in form %}
+                <div class="form-group{% if field.name == 'narrative' or field.name == 'location' %} blotter-span-2{% endif %}">
+                    {% if field.field.widget.input_type == 'checkbox' %}
+                    <label class="blotter-check">{{ field }} {{ field.label }}</label>
+                    {% else %}
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% endif %}
+                    {% for error in field.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        {% if not is_edit %}
+        <section class="card">
+            <div class="card-header blotter-header">
+                <h2 class="card-title">Parties</h2>
+                <button type="button" class="btn btn-secondary btn-sm" data-add-party>
+                    {% icon 'user-plus' %} Add party
+                </button>
+            </div>
+            <div class="card-body">
+                <p class="form-help">At least one complainant and one respondent are required. Blank rows are ignored.</p>
+                {% if party_errors %}
+                <div class="blotter-error" role="alert" id="blotter-party-errors">{% for error in party_errors %}<div>{{ error }}</div>{% endfor %}</div>
+                {% endif %}
+                {{ formset.management_form }}
+                <div data-party-rows data-prefix="{{ formset.prefix }}">
+                    {% for party in formset %}{% include 'blotter/_party_row.html' %}{% endfor %}
+                </div>
+                <template id="party-row-template">{% with party=formset.empty_form %}{% include 'blotter/_party_row.html' %}{% endwith %}</template>
+            </div>
+        </section>
+        {% endif %}
+
+        <div class="blotter-actions">
+            <button type="submit" class="btn btn-primary">{% if is_edit %}Save changes{% else %}File case{% endif %}</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}<script src="{% static 'js/blotter.js' %}" defer></script>{% endblock %}

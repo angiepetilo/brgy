@@ -1,0 +1,11 @@
+{
+  "verdict": "APPROVED",
+  "findings": [
+    "Admin bypasses case numbering and lifecycle (non-blocking): BlotterCaseAdmin allows adding a case (saves case_no='', the second one hits a unique-constraint 500) and editing status without settled_at/closed_at or an audit row. Set has_add_permission to False and make status read-only, or route admin saves through services.",
+    "Terminal check before lock (non-blocking): update_case and add_hearing test case.is_terminal on the unlocked instance. Check again on the select_for_update row (update_case), or lock the case in add_hearing.",
+    "Confidential mediation notes discarded (non-blocking): in transition_case, notes on a non-terminal move of a confidential case are neither stored nor logged, and the user is not told. Store them somewhere access-controlled or hide the notes field for that move.",
+    "Live DB migration still pending (non-blocking, needs user confirmation): plan C1 asks for a ...C.bak backup and migrate; blotter 0005/0006 (and the A/B migrations) are unapplied on the live db.sqlite3. Migrations were checked forward and reverse on a backup copy.",
+    "Two settlement-rate definitions (non-blocking): the overall rate (cases filed in the period) and the monthly rate (closures in the month) can disagree on the same screen. Label each one in the KPI/chart note."
+  ],
+  "reviewDoc": "c:\\brgy\\.agents\\tasks\\review-stageC.md"
+}

@@ -1,6 +1,6 @@
 from django import forms
 from django.utils import timezone
-from apps.appointments.models import Appointment, HealthCareService
+from apps.appointments.models import Appointment, DocumentType, HealthCareService
 
 
 class HealthCareServiceForm(forms.ModelForm):
@@ -28,7 +28,7 @@ class AppointmentCreateForm(forms.ModelForm):
         fields = [
             'category',
             'document_type', 'healthcare_service', 'purpose',
-            'preferred_date', 'preferred_time_slot', 'supporting_id'
+            'appt_date', 'time_window', 'supporting_id'
         ]
         widgets = {
             'category': forms.Select(attrs={'class': 'form-control', 'id': 'appointment-category-select'}),
@@ -39,12 +39,12 @@ class AppointmentCreateForm(forms.ModelForm):
                 'rows': 3,
                 'placeholder': 'State purpose of request or symptoms/consultation notes...'
             }),
-            'preferred_date': forms.DateInput(attrs={
+            'appt_date': forms.DateInput(attrs={
                 'class': 'form-control',
                 'type': 'date',
                 'id': 'appointment-date-input',
             }),
-            'preferred_time_slot': forms.Select(attrs={'class': 'form-control'}),
+            'time_window': forms.Select(attrs={'class': 'form-control'}),
             'supporting_id': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*,application/pdf'}),
         }
 
@@ -53,12 +53,14 @@ class AppointmentCreateForm(forms.ModelForm):
         self.fields['category'].required = False
         self.fields['category'].initial = Appointment.CATEGORY_DOCUMENT
         self.fields['healthcare_service'].queryset = HealthCareService.objects.filter(is_active=True)
+        self.fields['document_type'].queryset = DocumentType.objects.filter(is_active=True)
         self.fields['document_type'].required = False
         self.fields['healthcare_service'].required = False
+        self.fields['purpose'].required = False
 
-    def clean_preferred_date(self):
-        date = self.cleaned_data.get('preferred_date')
-        if date and date < timezone.now().date():
+    def clean_appt_date(self):
+        date = self.cleaned_data.get('appt_date')
+        if date and date < timezone.localdate():
             raise forms.ValidationError("Appointment date cannot be in the past.")
         return date
 
@@ -75,9 +77,14 @@ class AppointmentCreateForm(forms.ModelForm):
         if cat == Appointment.CATEGORY_HEALTHCARE:
             if not cleaned_data.get('healthcare_service'):
                 self.add_error('healthcare_service', 'Please select a health care service.')
+            if not cleaned_data.get('purpose'):
+                svc = cleaned_data.get('healthcare_service')
+                cleaned_data['purpose'] = svc.name if svc else "Health Service Consultation"
         else:
             if not cleaned_data.get('document_type'):
                 self.add_error('document_type', 'Please select a document type.')
+            if not cleaned_data.get('purpose'):
+                self.add_error('purpose', 'Please state the purpose of your document request.')
         return cleaned_data
 
 

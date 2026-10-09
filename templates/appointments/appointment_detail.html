@@ -1,23 +1,24 @@
 {% extends 'base.html' %}
+{% load static core_tags %}
 
-{% block title %}Appointment #{{ appointment.id }} - {{ appointment.get_document_type_display }}{% endblock %}
+{% block title %}Appointment #{{ appointment.id }} - {{ appointment.get_service_title }}{% endblock %}
 
 {% block content %}
 <div style="margin-bottom: 1.5rem;">
-    <a href="{% url 'appointments:list' %}" style="font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; margin-bottom: 0.5rem; text-transform: uppercase;">
+    <a href="{% url 'appointments:list' %}" style="font-size: 0.875rem; font-weight: 700; display: inline-flex; align-items: center; margin-bottom: 0.5rem; text-transform: uppercase;">
         BACK TO REQUESTS
     </a>
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
         <div>
-            <h1 style="font-size: 1.25rem; font-weight: 600; color: #0f172a; line-height: 1.2;">
-                {{ appointment.get_document_type_display }}
+            <h1 style="font-size: 1.25rem; font-weight: 600; color: #111827; line-height: 1.2;">
+                {{ appointment.get_service_title }}
             </h1>
-            <p style="color: #64748b; font-size: 0.8125rem; margin-top: 0.2rem;">
+            <p style="color: #6B7280; font-size: 0.875rem; margin-top: 0.2rem;">
                 Reference #{{ appointment.id }} - Submitted on {{ appointment.created_at|date:"F d, Y at h:i A" }}
             </p>
         </div>
         <div>
-            <span class="badge {{ appointment.badge_class }}" style="font-size: 0.75rem; padding: 0.3rem 0.65rem;">
+            <span class="badge {{ appointment.badge_class }}" style="font-size: 0.875rem; padding: 0.3rem 0.65rem;">
                 {{ appointment.get_status_display }}
             </span>
         </div>
@@ -27,27 +28,24 @@
 <!-- Status Stepper Lifecycle -->
 <div class="card" style="margin-bottom: 2rem;">
     <div class="card-body">
-        <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 1.5rem;">Processing Lifecycle</h4>
+        <h4 style="font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; color: #6B7280; margin-bottom: 1.5rem;">Processing Lifecycle</h4>
         
         {% if appointment.status == 'rejected' %}
         <div class="alert alert-danger" style="margin: 0;">
             <div style="font-weight: 700; margin-bottom: 0.25rem;">REQUEST REJECTED</div>
-            <div>This document request was rejected by administration. See administrative remarks below.</div>
+            <div>This document request was rejected by administration.</div>
+            {% if appointment.rejection_reason %}
+            <div style="margin-top: 0.5rem;"><strong>Reason:</strong> {{ appointment.rejection_reason }}</div>
+            {% endif %}
         </div>
         {% else %}
         <div class="status-stepper">
-            {% for code, label in status_order %}
-            <div class="step-item 
-                {% if appointment.status == code %}active
-                {% elif forloop.counter <= 1 and appointment.status != 'submitted' %}completed
-                {% elif forloop.counter <= 2 and appointment.status in 'approved_scheduled,ready_for_pickup,completed' %}completed
-                {% elif forloop.counter <= 3 and appointment.status in 'ready_for_pickup,completed' %}completed
-                {% elif forloop.counter <= 4 and appointment.status == 'completed' %}completed
-                {% endif %}">
+            {% for step in status_steps %}
+            <div class="step-item {{ step.css }}" data-step="{{ step.code }}" data-step-state="{{ step.state }}">
                 <div class="step-circle">
                     {{ forloop.counter }}
                 </div>
-                <div class="step-label">{{ label }}</div>
+                <div class="step-label">{{ step.label }}</div>
             </div>
             {% endfor %}
         </div>
@@ -66,61 +64,61 @@
             <div class="card-body">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
                     <div>
-                        <span style="font-size: 0.775rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Applicant Name</span>
-                        <div style="font-weight: 700; font-size: 0.95rem; margin-top: 0.2rem; color: #0f172a;">
+                        <span style="font-size: 0.875rem; text-transform: uppercase; color: #6B7280; font-weight: 700;">Applicant Name</span>
+                        <div style="font-weight: 700; font-size: 0.95rem; margin-top: 0.2rem; color: #111827;">
                             {{ appointment.get_applicant_name }}
                         </div>
                         {% if appointment.resident %}
-                        <div style="font-size: 0.75rem; color: #64748b;">@{{ appointment.resident.username }} (Registered Resident)</div>
+                        <div style="font-size: 0.875rem; color: #6B7280;">@{{ appointment.resident.username }} (Registered Resident)</div>
                         {% else %}
-                        <div style="font-size: 0.75rem; color: #0284c7; font-weight: 600;">Public / Guest Applicant</div>
+                        <div style="font-size: 0.875rem; color: #1E3A8A; font-weight: 600;">Public / Guest Applicant</div>
                         {% endif %}
                     </div>
                     <div>
-                        <span style="font-size: 0.775rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Contact Details</span>
-                        <div style="font-weight: 600; font-size: 0.95rem; margin-top: 0.2rem; color: #0f172a;">
+                        <span style="font-size: 0.875rem; text-transform: uppercase; color: #6B7280; font-weight: 700;">Contact Details</span>
+                        <div style="font-weight: 600; font-size: 0.95rem; margin-top: 0.2rem; color: #111827;">
                             {{ appointment.get_applicant_phone|default:"Not specified" }}
                         </div>
                         {% if appointment.get_applicant_email %}
-                        <div style="font-size: 0.75rem; color: #64748b;">{{ appointment.get_applicant_email }}</div>
+                        <div style="font-size: 0.875rem; color: #6B7280;">{{ appointment.get_applicant_email }}</div>
                         {% endif %}
                     </div>
                 </div>
 
                 <div style="margin-bottom: 1.25rem;">
-                    <span style="font-size: 0.775rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Address / Location</span>
-                    <div style="font-size: 0.9rem; margin-top: 0.2rem; color: #334155;">
+                    <span style="font-size: 0.875rem; text-transform: uppercase; color: #6B7280; font-weight: 700;">Address / Location</span>
+                    <div style="font-size: 0.9rem; margin-top: 0.2rem; color: #374151;">
                         {{ appointment.get_applicant_address|default:"Not specified" }}
                     </div>
                 </div>
 
                 <div style="margin-bottom: 1.25rem;">
-                    <span style="font-size: 0.775rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Purpose of Request</span>
-                    <div style="background: #f8fafc; padding: 0.85rem; border-radius: 2px; border: 1px solid #e2e8f0; margin-top: 0.35rem; font-size: 0.9rem; line-height: 1.5;">
+                    <span style="font-size: 0.875rem; text-transform: uppercase; color: #6B7280; font-weight: 700;">Purpose of Request</span>
+                    <div style="background: #F9FAFB; padding: 0.85rem; border-radius: 2px; border: 1px solid #E5E7EB; margin-top: 0.35rem; font-size: 0.9rem; line-height: 1.5;">
                         {{ appointment.purpose }}
                     </div>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
                     <div>
-                        <span style="font-size: 0.775rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Preferred Date</span>
-                        <div style="font-weight: 700; color: #0f172a; margin-top: 0.2rem;">
-                            {{ appointment.preferred_date|date:"F d, Y" }}
+                        <span style="font-size: 0.875rem; text-transform: uppercase; color: #6B7280; font-weight: 700;">Preferred Date</span>
+                        <div style="font-weight: 700; color: #111827; margin-top: 0.2rem;">
+                            {{ appointment.appt_date|date:"F d, Y" }}
                         </div>
                     </div>
                     <div>
-                        <span style="font-size: 0.775rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Preferred Time Slot</span>
-                        <div style="font-weight: 700; color: #0f172a; margin-top: 0.2rem;">
-                            {{ appointment.get_preferred_time_slot_display }}
+                        <span style="font-size: 0.875rem; text-transform: uppercase; color: #6B7280; font-weight: 700;">Preferred Time Slot</span>
+                        <div style="font-weight: 700; color: #111827; margin-top: 0.2rem;">
+                            {{ appointment.get_time_window_display }}
                         </div>
                     </div>
                 </div>
 
                 {% if appointment.supporting_id %}
                 <div>
-                    <span style="font-size: 0.775rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Supporting Attachment</span>
+                    <span style="font-size: 0.875rem; text-transform: uppercase; color: #6B7280; font-weight: 700;">Supporting Attachment</span>
                     <div style="margin-top: 0.35rem;">
-                        <a href="{{ appointment.supporting_id.url }}" target="_blank" class="btn btn-secondary btn-sm">
+                        <a href="{% url 'appointments:supporting_id' appointment.pk %}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">
                             VIEW UPLOADED ATTACHMENT
                         </a>
                     </div>
@@ -131,36 +129,106 @@
 
         <!-- Official Clearance Issuance & Verification QR Code -->
         {% if appointment.issued_log %}
-        <div class="card" style="border: 1px solid #16a34a; background: #f0fdf4;">
-            <div class="card-header" style="background: #ecfdf5; border-bottom: 1px solid #a7f3d0;">
-                <h3 class="card-title" style="color: #065f46; font-size: 0.95rem; text-transform: uppercase;">
+        <div class="card" style="border: 1px solid #16a34a; background: #FFFFFF;">
+            <div class="card-header" style="background: #FFFFFF; border-bottom: 1px solid #16A34A;">
+                <h3 class="card-title" style="color: #111827; font-size: 0.95rem; text-transform: uppercase;">
                     OFFICIAL ISSUED DOCUMENT & VERIFICATION SEAL
                 </h3>
             </div>
             <div class="card-body" style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;">
                 {% if appointment.issued_log.qr_code %}
-                <div style="background: #ffffff; padding: 0.5rem; border-radius: 2px; border: 1px solid #d1fae5; text-align: center;">
+                <div style="background: #ffffff; padding: 0.5rem; border-radius: 2px; border: 1px solid #FFFFFF; text-align: center;">
                     <img src="{{ appointment.issued_log.qr_code.url }}" alt="Verification QR" style="width: 120px; height: 120px; display: block;">
-                    <span style="font-size: 0.65rem; color: #065f46; font-weight: 700; display: block; margin-top: 0.25rem;">SCAN TO VERIFY</span>
+                    <span style="font-size: 0.875rem; color: #111827; font-weight: 700; display: block; margin-top: 0.25rem;">SCAN TO VERIFY</span>
                 </div>
                 {% endif %}
                 <div style="flex: 1;">
-                    <div style="font-size: 0.8rem; color: #047857; font-weight: 700; text-transform: uppercase;">Official Control Number</div>
-                    <div style="font-size: 1.35rem; font-weight: 800; color: #064e3b; letter-spacing: 0.03em; margin: 0.2rem 0;">
+                    <div style="font-size: 0.875rem; color: #111827; font-weight: 700; text-transform: uppercase;">Official Control Number</div>
+                    <div style="font-size: 1.35rem; font-weight: 800; color: #111827; letter-spacing: 0.03em; margin: 0.2rem 0;">
                         {{ appointment.issued_log.control_number }}
                     </div>
-                    <div style="font-size: 0.825rem; color: #065f46; margin-top: 0.25rem;">
+                    <div style="font-size: 0.875rem; color: #111827; margin-top: 0.25rem;">
                         Issued on <strong>{{ appointment.issued_log.issued_at|date:"F d, Y at h:i A" }}</strong>
                         {% if appointment.issued_log.issued_by %}
-                        by <strong>{{ appointment.issued_log.issued_by.get_full_name|default:appointment.issued_log.issued_by.username }}</strong>
+                        by <strong>{{ appointment.issued_log.issued_by|display_name }}</strong>
                         {% endif %}
                     </div>
                     <div style="margin-top: 0.75rem;">
-                        <a href="{% url 'appointments:verify' appointment.issued_log.control_number %}" target="_blank" class="btn btn-success btn-sm">
-                            VIEW PUBLIC VERIFICATION CERTIFICATE
+                        <a href="{% url 'records:print_document' appointment.issued_log.id %}" target="_blank" class="btn btn-success btn-sm">
+                            {% icon 'printer' %} PRINT OFFICIAL CERTIFICATE
                         </a>
                     </div>
                 </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Admin / Staff Quick Action Controls -->
+        {% if request.user.is_staff_user or request.user.is_admin_user or request.user.is_kapitan_user %}
+        <div class="card" style="border: 1.5px solid #D1D5DB;">
+            <div class="card-header" style="background: #F9FAFB;">
+                <h3 class="card-title" style="font-size: 0.95rem; text-transform: uppercase;">Staff Action Controls</h3>
+            </div>
+            <div class="card-body">
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                    {% if 'approve' in allowed_actions %}
+                    <form method="post" action="{% url 'appointments:approve' appointment.id %}" style="display: inline;" data-confirm="Approve this appointment and dispatch confirmation email?">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary" data-action-button="approve">
+                            {% icon 'check' %} APPROVE & DISPATCH EMAIL
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    {% if 'reject' in allowed_actions %}
+                    <button type="button" class="btn btn-danger" data-action="toggle-reject" data-action-button="reject">
+                        {% icon 'x' %} REJECT...
+                    </button>
+                    {% endif %}
+
+                    {% if 'complete' in allowed_actions %}
+                    <form method="post" action="{% url 'appointments:complete' appointment.id %}" style="display: inline;" data-confirm="Mark as completed and issue certificate?">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success" data-action-button="complete">
+                            {% icon 'check-check' %} MARK COMPLETED
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    {% if 'no_show' in allowed_actions %}
+                    <form method="post" action="{% url 'appointments:noshow' appointment.id %}" style="display: inline;" data-confirm="Mark as no-show?">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-secondary" style="background: #4B5563; color: #fff;" data-action-button="no_show">
+                            {% icon 'user-x' %} NO-SHOW
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    {% if not allowed_actions %}
+                    <span style="font-size: 0.875rem; color: #6B7280;">No actions available for a {{ appointment.get_status_display|lower }} request.</span>
+                    {% endif %}
+                </div>
+
+                {% if 'reject' in allowed_actions %}
+                <!-- Conditional Rejection Reason Form (Only shown when Reject button is clicked) -->
+                <div id="rejectReasonBox" style="display: none; background: #FFFFFF; padding: 1.25rem; border-radius: 8px; border: 1.5px solid #DC2626; margin-top: 1rem;">
+                    <form method="post" action="{% url 'appointments:reject' appointment.id %}">
+                        {% csrf_token %}
+                        <label style="font-weight: 700; color: #DC2626; font-size: 0.875rem; display: block; margin-bottom: 0.35rem;">
+                            STATE OF REJECTION (Required):
+                        </label>
+                        <textarea name="rejection_reason" required rows="3" class="form-control" style="width: 100%; border: 1.5px solid #DC2626; border-radius: 6px; padding: 0.6rem; font-size: 0.875rem;" placeholder="Explain clearly the reason for declining this request..."></textarea>
+                        <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem;">
+                            <button type="submit" class="btn btn-danger btn-sm" style="font-weight: 700;">
+                                CONFIRM REJECTION & SEND EMAIL
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-sm" data-action="cancel-reject">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
             </div>
         </div>
         {% endif %}
@@ -169,15 +237,15 @@
         {% if appointment.admin_notes %}
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title" style="font-size: 0.95rem; text-transform: uppercase;">Administrative Remarks</h3>
+                <h3 class="card-title" style="font-size: 0.95rem; text-transform: uppercase;">Administrative Remarks / State of Request</h3>
             </div>
             <div class="card-body">
-                <p style="font-size: 0.9rem; line-height: 1.5; color: #334155; margin: 0;">
+                <p style="font-size: 0.9rem; line-height: 1.5; color: #374151; margin: 0;">
                     {{ appointment.admin_notes }}
                 </p>
                 {% if appointment.processed_by %}
-                <div style="margin-top: 0.75rem; font-size: 0.75rem; color: #64748b;">
-                    Processed by: {{ appointment.processed_by.get_full_name|default:appointment.processed_by.username }}
+                <div style="margin-top: 0.75rem; font-size: 0.875rem; color: #6B7280;">
+                    Processed by: {{ appointment.processed_by|display_name }}
                 </div>
                 {% endif %}
             </div>
@@ -187,10 +255,10 @@
 
     <!-- Right: Administrative Controls or Help -->
     <div>
-        {% if request.user.is_admin_user %}
+        {% if request.user.is_admin_user or request.user.is_staff_user %}
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title" style="font-size: 0.95rem; text-transform: uppercase;">Admin Status Management</h3>
+                <h3 class="card-title" style="font-size: 0.95rem; text-transform: uppercase;">Status Management</h3>
             </div>
             <div class="card-body">
                 <form method="post" action="{% url 'appointments:detail' appointment.id %}">
@@ -216,7 +284,7 @@
                 <h3 class="card-title" style="font-size: 0.95rem; text-transform: uppercase;">Need Assistance?</h3>
             </div>
             <div class="card-body">
-                <p style="font-size: 0.85rem; color: #475569; line-height: 1.4; margin-bottom: 1rem;">
+                <p style="font-size: 0.875rem; color: #4B5563; line-height: 1.4; margin-bottom: 1rem;">
                     Have questions regarding your document processing schedule or required attachments?
                 </p>
                 <a href="{% url 'chat:inbox' %}" class="btn btn-primary" style="width: 100%;">
@@ -227,4 +295,8 @@
         {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/appointment_detail.js' %}"></script>
 {% endblock %}

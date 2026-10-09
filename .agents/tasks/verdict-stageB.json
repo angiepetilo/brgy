@@ -1,0 +1,13 @@
+{
+  "verdict": "APPROVED",
+  "findings": [
+    "Lockout keyed on the typed identifier (confirmed, non-blocking): username and email aliases count under separate lf:u / lf:u_ip keys, doubling per-account budgets; resolve the identifier to the account username before counting in on_login_failed and the middleware pre-check.",
+    "Shared-IP limits on residents (likely, non-blocking): signup 5/h per IP and the login IP limit (20) can block legitimate residents on barangay-hall Wi-Fi or carrier CGNAT; confirm defaults with the user (RATE_LIMIT_SIGNUP is env-overridable).",
+    "Account lockout DoS (confirmed, by design, non-blocking): 10 bad passwords from any IP lock a known username (including admins) for 15 minutes; document the admin recovery path in docs/deployment.md.",
+    "Unverified handler rewrite (likely risk, non-blocking): ~130 on*= handlers and seven inline script blocks moved to delegated listeners without a browser click-through; smoke-test landing booking, residents, appointments, inbox and feed, or roll out with CSP_REPORT_ONLY=True first.",
+    "Public supporting-document originals remain (confirmed, by design, non-blocking): migration 0020 never deletes media/appointments/; after migrating the live DB, delete the public copies once the private view serves them.",
+    "Staff scope via is_kapitan_user (confirmed, pre-existing, non-blocking): role=staff passes the kapitan branch on the detail page, but the new strict supporting-id view returns 403 to out-of-scope staff; decide on fixing the property in Stage C.",
+    "Proxy count left at 0 behind nginx (likely, deployment, non-blocking): all clients would share the nginx IP for login IP locks and rate limits; verify TRUSTED_PROXY_COUNT=1 at go-live."
+  ],
+  "reviewDoc": "c:\\brgy\\.agents\\tasks\\review-stageB.md"
+}

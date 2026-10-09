@@ -1,0 +1,527 @@
+/**
+ * Phase 4: Dropdown Menus
+ * Context menus, action dropdowns, and popovers
+ * - Desktop dropdown menus
+ * - Mobile action sheets
+ * - Submenus
+ * - Menu items with icons
+ */
+
+/* ============================================
+   DROPDOWN CONTAINER
+   ============================================ */
+
+.hig-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+/* ============================================
+   DROPDOWN TOGGLE BUTTON
+   ============================================ */
+
+.hig-dropdown-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.hig-dropdown-toggle svg.chevron {
+  width: 12px;
+  height: 12px;
+  transition: transform var(--transition-fast);
+}
+
+.hig-dropdown.open .hig-dropdown-toggle svg.chevron {
+  transform: rotate(180deg);
+}
+
+/* ============================================
+   DROPDOWN MENU (Desktop)
+   ============================================ */
+
+@media (min-width: 768px) {
+  .hig-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    min-width: 200px;
+    max-width: 320px;
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: 4px;
+    z-index: var(--z-dropdown);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all var(--transition-base);
+  }
+  
+  .hig-dropdown.open .hig-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  
+  /* Dropdown Menu Alignment */
+  .hig-dropdown-menu.align-left {
+    left: 0;
+    right: auto;
+  }
+  
+  .hig-dropdown-menu.align-center {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%) translateY(-8px);
+  }
+  
+  .hig-dropdown.open .hig-dropdown-menu.align-center {
+    transform: translateX(-50%) translateY(0);
+  }
+  
+  /* Dropdown Menu Above */
+  .hig-dropdown-menu.position-top {
+    top: auto;
+    bottom: calc(100% + 4px);
+    transform: translateY(8px);
+  }
+  
+  .hig-dropdown.open .hig-dropdown-menu.position-top {
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   DROPDOWN ITEM
+   ============================================ */
+
+.hig-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: 8px 12px;
+  font-size: var(--text-body);
+  font-family: var(--font-family-base);
+  color: var(--color-text-primary);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.hig-dropdown-item:hover {
+  background: var(--color-hover);
+}
+
+.hig-dropdown-item:active {
+  background: var(--color-hover-secondary);
+}
+
+.hig-dropdown-item:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Dropdown Item with Icon */
+.hig-dropdown-item svg {
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+.hig-dropdown-item:hover svg {
+  color: var(--color-text-primary);
+}
+
+/* Dropdown Item Active State */
+.hig-dropdown-item.active {
+  background: var(--color-accent-blue-subtle);
+  color: var(--color-accent-blue);
+}
+
+.hig-dropdown-item.active svg {
+  color: var(--color-accent-blue);
+}
+
+/* Dropdown Item Destructive */
+.hig-dropdown-item-danger {
+  color: var(--color-error-red);
+}
+
+.hig-dropdown-item-danger:hover {
+  background: rgba(255, 59, 48, 0.1);
+  color: var(--color-error-red);
+}
+
+.hig-dropdown-item-danger svg {
+  color: var(--color-error-red);
+}
+
+/* ============================================
+   DROPDOWN DIVIDER
+   ============================================ */
+
+.hig-dropdown-divider {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--color-border);
+}
+
+/* ============================================
+   DROPDOWN HEADER
+   ============================================ */
+
+.hig-dropdown-header {
+  padding: 8px 12px 4px;
+  font-size: var(--text-label);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+
+/* ============================================
+   DROPDOWN WITH SUBMENU
+   ============================================ */
+
+.hig-dropdown-item.has-submenu {
+  position: relative;
+  padding-right: 32px;
+}
+
+.hig-dropdown-item.has-submenu::after {
+  content: '';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 0;
+  height: 0;
+  border-left: 4px solid var(--color-text-secondary);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transform: translateY(-50%);
+}
+
+.hig-submenu {
+  position: absolute;
+  left: calc(100% + 4px);
+  top: 0;
+  min-width: 180px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 4px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-8px);
+  transition: all var(--transition-base);
+}
+
+.hig-dropdown-item.has-submenu:hover .hig-submenu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+
+/* ============================================
+   DROPDOWN WITH SEARCH
+   ============================================ */
+
+.hig-dropdown-search {
+  padding: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.hig-dropdown-search .hig-input {
+  height: 32px;
+  font-size: var(--text-body);
+}
+
+/* ============================================
+   DROPDOWN SCROLLABLE
+   ============================================ */
+
+.hig-dropdown-scrollable {
+  max-height: 320px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Custom Scrollbar */
+.hig-dropdown-scrollable::-webkit-scrollbar {
+  width: 8px;
+}
+
+.hig-dropdown-scrollable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.hig-dropdown-scrollable::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+.hig-dropdown-scrollable::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-strong);
+}
+
+/* ============================================
+   CONTEXT MENU (Right-Click)
+   ============================================ */
+
+.hig-context-menu {
+  position: fixed;
+  min-width: 200px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  padding: 4px;
+  z-index: var(--z-popover);
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.95);
+  transition: all var(--transition-fast);
+}
+
+.hig-context-menu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+}
+
+/* ============================================
+   MOBILE ACTION SHEET (<768px)
+   ============================================ */
+
+@media (max-width: 767px) {
+  /* Hide desktop dropdown, show action sheet */
+  .hig-dropdown-menu {
+    display: none;
+  }
+  
+  .hig-action-sheet-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: var(--z-modal-backdrop);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-base);
+  }
+  
+  .hig-dropdown.open .hig-action-sheet-backdrop {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .hig-action-sheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--color-canvas);
+    border-radius: var(--radius-mobile-lg) var(--radius-mobile-lg) 0 0;
+    padding: var(--space-5) var(--mobile-margin) calc(var(--mobile-margin) + env(safe-area-inset-bottom));
+    z-index: var(--z-modal);
+    transform: translateY(100%);
+    transition: transform var(--transition-base);
+  }
+  
+  .hig-dropdown.open .hig-action-sheet {
+    transform: translateY(0);
+  }
+  
+  /* Action Sheet Handle */
+  .hig-action-sheet-handle {
+    width: 36px;
+    height: 5px;
+    background: var(--color-border);
+    border-radius: 999px;
+    margin: 0 auto var(--space-5);
+  }
+  
+  /* Action Sheet Title */
+  .hig-action-sheet-title {
+    font-size: var(--text-mobile-headline);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-5) 0;
+    text-align: center;
+  }
+  
+  /* Action Sheet Items */
+  .hig-action-sheet .hig-dropdown-item {
+    min-height: var(--mobile-touch-target);
+    padding: 12px var(--mobile-margin);
+    font-size: var(--text-mobile-body);
+    border-radius: var(--radius-mobile-md);
+    margin-bottom: var(--space-2);
+  }
+  
+  .hig-action-sheet .hig-dropdown-item:active {
+    background: var(--color-hover);
+    transform: scale(0.98);
+  }
+  
+  .hig-action-sheet .hig-dropdown-item svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  /* Action Sheet Cancel Button */
+  .hig-action-sheet-cancel {
+    width: 100%;
+    min-height: var(--mobile-touch-target);
+    margin-top: var(--space-3);
+    background: var(--color-canvas);
+    border: 1px solid var(--color-border);
+    font-size: var(--text-mobile-body);
+    font-weight: var(--weight-semibold);
+    color: var(--color-accent-blue);
+  }
+}
+
+/* ============================================
+   DROPDOWN BADGE (Count Indicator)
+   ============================================ */
+
+.hig-dropdown-item-badge {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: var(--color-hover);
+  color: var(--color-text-secondary);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold);
+  border-radius: 10px;
+}
+
+.hig-dropdown-item.active .hig-dropdown-item-badge {
+  background: var(--color-accent-blue);
+  color: white;
+}
+
+/* ============================================
+   DROPDOWN WITH CHECKBOX
+   ============================================ */
+
+.hig-dropdown-item-checkbox {
+  padding-left: 36px;
+  position: relative;
+}
+
+.hig-dropdown-item-checkbox::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-border);
+  border-radius: 3px;
+  transform: translateY(-50%);
+}
+
+.hig-dropdown-item-checkbox.checked::before {
+  background: var(--color-accent-blue);
+  border-color: var(--color-accent-blue);
+}
+
+.hig-dropdown-item-checkbox.checked::after {
+  content: '';
+  position: absolute;
+  left: 17px;
+  top: calc(50% - 2px);
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+/* ============================================
+   DROPDOWN SHORTCUTS
+   ============================================ */
+
+.hig-dropdown-shortcut {
+  margin-left: auto;
+  font-size: var(--text-label);
+  color: var(--color-text-tertiary);
+  font-family: var(--font-family-mono);
+}
+
+/* ============================================
+   DROPDOWN ANIMATION VARIANTS
+   ============================================ */
+
+/* Fade */
+.hig-dropdown-menu.anim-fade {
+  transition: opacity var(--transition-base), visibility var(--transition-base);
+  transform: none;
+}
+
+/* Scale */
+.hig-dropdown-menu.anim-scale {
+  transform: scale(0.95);
+}
+
+.hig-dropdown.open .hig-dropdown-menu.anim-scale {
+  transform: scale(1);
+}
+
+/* Slide Up */
+.hig-dropdown-menu.anim-slide-up {
+  transform: translateY(8px);
+}
+
+.hig-dropdown.open .hig-dropdown-menu.anim-slide-up {
+  transform: translateY(0);
+}
+
+/* ============================================
+   MEGA MENU (Large Dropdowns)
+   ============================================ */
+
+.hig-mega-menu {
+  min-width: 400px;
+  padding: var(--space-5);
+}
+
+.hig-mega-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-5);
+}
+
+.hig-mega-menu-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.hig-mega-menu-section-title {
+  font-size: var(--text-label);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  margin-bottom: var(--space-2);
+}

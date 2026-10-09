@@ -1,101 +1,89 @@
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 import markdown
+import os
+import uuid
 
 
-class KapitanStatus(models.Model):
-    STATUS_ON_DUTY = 'on_duty'
-    STATUS_ON_LEAVE = 'on_leave'
-
-    STATUS_CHOICES = [
-        (STATUS_ON_DUTY, 'On Duty'),
-        (STATUS_ON_LEAVE, 'On Leave'),
-    ]
-
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default=STATUS_ON_DUTY
-    )
-    leave_reason = models.TextField(
-        blank=True,
-        help_text='Reason for leave (required when setting to On Leave)'
-    )
-    return_date = models.DateField(
-        null=True,
-        blank=True,
-        help_text='Expected date of return to barangay service'
-    )
-    updated_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='kapitan_status_logs'
-    )
-    updated_at = models.DateTimeField(auto_now=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['-updated_at']
-        verbose_name = 'Kapitan Status'
-        verbose_name_plural = 'Kapitan Status Records'
-
-    def __str__(self):
-        return f"Kapitan is {self.get_status_display()} ({self.updated_at.strftime('%Y-%m-%d %H:%M')})"
+def post_image_upload_path(instance, filename):
+    ext = os.path.splitext(filename)[1].lower()
+    return f"announcements/{uuid.uuid4().hex}{ext}"
 
 
 class PostCategory(models.Model):
     name = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField(max_length=60, unique=True, blank=True)
     description = models.TextField(blank=True, null=True)
+    expires = models.BooleanField(default=True, help_text="Whether posts in this category can expire")
+    default_end = models.CharField(
+        max_length=20,
+        choices=[('end_of_month', 'End of Month'), ('none', 'None')],
+        default='none'
+    )
+    notify_on_post = models.BooleanField(default=False, help_text="Send notification broadcast on publish")
+    is_system = models.BooleanField(default=False, help_text="System categories cannot be deleted")
+    order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = 'Post Category'
         verbose_name_plural = 'Post Categories'
-        ordering = ['name']
+        ordering = ['order', 'name']
+
+    def save(self, *args, **kwargs):
+        if not self.slug and self.name:
+            from django.utils.text import slugify
+            self.slug = slugify(self.name).replace('-', '_')
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
 
 
-class Post(models.Model):
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='feed_posts')
-    category = models.ForeignKey(PostCategory, on_delete=models.SET_NULL, null=True, blank=True, related_name='feed_posts')
-    content = models.TextField()
-    image = models.ImageField(upload_to='posts/', blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = 'Post'
-        verbose_name_plural = 'Posts'
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f"{self.author.username}: {self.content[:30]}"
-
-
 class Announcement(models.Model):
     CATEGORY_ANNOUNCEMENT = 'announcement'
-    CATEGORY_EVENT = 'event'
+    CATEGORY_HEALTH = 'health'
     CATEGORY_EMERGENCY = 'emergency'
+    CATEGORY_EDUCATION = 'education'
+    CATEGORY_EVENT = 'event'
+    CATEGORY_CONCERN = 'concern'
     CATEGORY_SCHOLARSHIP = 'scholarship'
     CATEGORY_DONATION = 'donation'
     CATEGORY_LEGISLATIVE = 'legislative'
     CATEGORY_GENERAL = 'general'
-    CATEGORY_HEALTH = 'health'
     CATEGORY_ORDINANCE = 'ordinance'
 
     CATEGORY_CHOICES = [
-        (CATEGORY_ANNOUNCEMENT, 'ANNOUNCEMENT'),
-        (CATEGORY_EMERGENCY, 'EMERGENCY ALERT'),
-        (CATEGORY_EVENT, 'UPCOMING EVENT'),
-        (CATEGORY_SCHOLARSHIP, 'SCHOLARSHIP'),
-        (CATEGORY_DONATION, 'DONATION'),
-        (CATEGORY_LEGISLATIVE, 'LEGISLATIVE (ORDINANCE/EO)'),
-        (CATEGORY_GENERAL, 'GENERAL ADVISORY'),
-        (CATEGORY_HEALTH, 'HEALTH & SANITATION'),
-        (CATEGORY_ORDINANCE, 'BARANGAY ORDINANCE'),
+        (CATEGORY_ANNOUNCEMENT, 'Announcement'),
+        (CATEGORY_HEALTH, 'Health'),
+        (CATEGORY_EMERGENCY, 'Emergency Alert'),
+        (CATEGORY_EDUCATION, 'Education'),
+        (CATEGORY_EVENT, 'Upcoming Event'),
+        (CATEGORY_CONCERN, 'Concern for Street'),
+        (CATEGORY_GENERAL, 'General Advisory'),
+        (CATEGORY_SCHOLARSHIP, 'Scholarship'),
+        (CATEGORY_DONATION, 'Donation'),
+        (CATEGORY_LEGISLATIVE, 'Legislative (Ordinance/EO)'),
+        (CATEGORY_ORDINANCE, 'Barangay Ordinance'),
+    ]
+
+    AUDIENCE_EVERYONE = 'everyone'
+    AUDIENCE_PUROK = 'purok'
+    AUDIENCE_CHOICES = [
+        (AUDIENCE_EVERYONE, 'Everyone'),
+        (AUDIENCE_PUROK, 'Specific Purok'),
+    ]
+
+    STATE_ACTIVE = 'active'
+    STATE_DONE = 'done'
+    STATE_EXPIRED = 'expired'
+    STATE_ARCHIVED = 'archived'
+    STATE_CHOICES = [
+        (STATE_ACTIVE, 'Active'),
+        (STATE_DONE, 'Done'),
+        (STATE_EXPIRED, 'Expired'),
+        (STATE_ARCHIVED, 'Archived'),
     ]
 
     title = models.CharField(max_length=255)
@@ -103,7 +91,29 @@ class Announcement(models.Model):
     category = models.CharField(
         max_length=30,
         choices=CATEGORY_CHOICES,
-        default=CATEGORY_ANNOUNCEMENT
+        default=CATEGORY_ANNOUNCEMENT,
+        db_index=True
+    )
+    audience_type = models.CharField(
+        max_length=20,
+        choices=AUDIENCE_CHOICES,
+        default=AUDIENCE_EVERYONE,
+        db_index=True
+    )
+    purok = models.ForeignKey(
+        'accounts.Purok',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='announcements'
+    )
+    valid_from = models.DateTimeField(default=timezone.now)
+    valid_until = models.DateTimeField(null=True, blank=True, db_index=True)
+    state = models.CharField(
+        max_length=20,
+        choices=STATE_CHOICES,
+        default=STATE_ACTIVE,
+        db_index=True
     )
     category_ref = models.ForeignKey(
         PostCategory,
@@ -113,7 +123,7 @@ class Announcement(models.Model):
         related_name='announcements'
     )
     image = models.ImageField(
-        upload_to='announcements/',
+        upload_to=post_image_upload_path,
         blank=True,
         null=True,
         help_text='Optional header image or poster'
@@ -155,6 +165,25 @@ class Announcement(models.Model):
     @property
     def importants_count(self):
         return self.reactions.filter(reaction_type=PostReaction.REACTION_IMPORTANT).count()
+
+    @property
+    def author_position(self):
+        if not self.author:
+            return 'Barangay Official'
+        try:
+            roles = list(self.author.officer_roles.all())
+            if roles:
+                return roles[0].get_position_display()
+        except Exception:
+            pass
+        if self.author.role == 'admin':
+            return 'Barangay Administrator'
+        if self.author.role == 'kapitan':
+            return 'Punong Barangay'
+        return self.author.get_role_display()
+
+
+Post = Announcement
 
 
 class PostReaction(models.Model):
@@ -211,33 +240,3 @@ class PostComment(models.Model):
 
     def __str__(self):
         return f"{self.author.username} on #{self.post_id}: {self.content[:30]}"
-
-
-class LegislativeRecord(models.Model):
-    CATEGORY_ORDINANCE = 'Ordinance'
-    CATEGORY_RESOLUTION = 'Resolution'
-    CATEGORY_EXECUTIVE_ORDER = 'Executive Order'
-
-    CATEGORY_CHOICES = [
-        (CATEGORY_ORDINANCE, 'Ordinance'),
-        (CATEGORY_RESOLUTION, 'Resolution'),
-        (CATEGORY_EXECUTIVE_ORDER, 'Executive Order'),
-    ]
-
-    title = models.CharField(max_length=255)
-    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default=CATEGORY_ORDINANCE)
-    document_number = models.CharField(max_length=100, help_text="e.g. Ord. No. 2026-04 or Res. No. 12-S2026")
-    date_approved = models.DateField(help_text="Date when enacted or signed")
-    pdf_file = models.FileField(upload_to='legislative/', blank=True, null=True, help_text="Upload official signed copy")
-    summary = models.TextField(help_text="Concise summary or purpose of the measure")
-    is_public = models.BooleanField(default=True, help_text="Display publicly on the Transparency Portal")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ['-date_approved', '-created_at']
-        verbose_name = 'Legislative Record'
-        verbose_name_plural = 'Legislative Records & Transparency'
-
-    def __str__(self):
-        return f"{self.document_number}: {self.title} ({self.category})"

@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static core_tags %}
 
 {% block title %}{{ announcement.title }} - Barangay Announcements{% endblock %}
 
 
 {% block content %}
 <div style="margin-bottom: 1.5rem;">
-    <a href="{% url 'communications:feed' %}" style="font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; margin-bottom: 0.5rem; text-transform: uppercase;">
+    <a href="{% url 'communications:feed' %}" style="font-size: 0.875rem; font-weight: 700; display: inline-flex; align-items: center; margin-bottom: 0.5rem; text-transform: uppercase;">
         BACK TO COMMUNITY FEED
     </a>
 </div>
@@ -15,7 +15,7 @@
     <!-- Main Article Body -->
     <article class="card">
         {% if announcement.image %}
-        <div style="max-height: 420px; overflow: hidden; background: #e2e8f0;">
+        <div style="max-height: 420px; overflow: hidden; background: #E5E7EB;">
             <img src="{{ announcement.image.url }}" alt="{{ announcement.title }}" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
         {% endif %}
@@ -25,24 +25,24 @@
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
                     <span class="badge badge-primary">{{ announcement.get_category_display }}</span>
                     {% if announcement.is_pinned %}
-                    <span class="badge badge-warning" style="font-size: 0.65rem;"><i class="fa-solid fa-thumbtack"></i> PINNED</span>
+                    <span class="badge badge-warning" style="font-size: 0.875rem;">{% icon 'pin' %} PINNED</span>
                     {% endif %}
                 </div>
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <span style="font-size: 0.75rem; color: #64748b;">Published {{ announcement.created_at|date:"F d, Y at h:i A" }}</span>
+                    <span style="font-size: 0.875rem; color: #6B7280;">Published {{ announcement.created_at|date:"F d, Y at h:i A" }}</span>
                     {% if request.user.is_admin_user or request.user.is_kapitan_user or request.user.is_staff %}
                     <div class="post-card-menu-container">
-                        <button type="button" class="post-menu-trigger" onclick="togglePostMenu(event, 'post-detail-menu')" aria-label="Post actions" title="More options">
-                            <i class="fa-solid fa-ellipsis"></i>
+                        <button type="button" class="post-menu-trigger" data-post-action="toggle-menu" data-menu-id="post-detail-menu" aria-label="Post actions" title="More options">
+                            {% icon 'ellipsis' %}
                         </button>
                         <div id="post-detail-menu" class="post-dropdown-menu">
                             <a href="{% url 'communications:edit_announcement' announcement.id %}" class="dropdown-item">
-                                <i class="fa-solid fa-pen-to-square"></i> Edit Post
+                                {% icon 'square-pen' %} Edit Post
                             </a>
-                            <form action="{% url 'communications:delete_announcement' announcement.id %}" method="post" style="margin: 0;" onsubmit="return confirm('Are you sure you want to permanently delete this announcement?');">
+                            <form action="{% url 'communications:delete_announcement' announcement.id %}" method="post" style="margin: 0;" data-confirm="Are you sure you want to permanently delete this announcement?">
                                 {% csrf_token %}
                                 <button type="submit" class="dropdown-item danger">
-                                    <i class="fa-solid fa-trash"></i> Delete Post
+                                    {% icon 'trash-2' %} Delete Post
                                 </button>
                             </form>
                         </div>
@@ -51,27 +51,27 @@
                 </div>
             </div>
 
-            <h1 style="font-size: 1.25rem; font-weight: 600; color: #0f172a; margin-bottom: 1rem; line-height: 1.2;">
+            <h1 style="font-size: 1.25rem; font-weight: 600; color: #111827; margin-bottom: 1rem; line-height: 1.2;">
                 {{ announcement.title }}
             </h1>
 
-            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #e2e8f0;">
-                By <strong>{{ announcement.author.get_full_name|default:announcement.author.username|default:"Barangay Hall Admin" }}</strong>
+            <div style="font-size: 0.875rem; color: #6B7280; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #E5E7EB;">
+                By <strong>{{ announcement.author|display_name:"Barangay Hall Admin" }}</strong>
             </div>
 
             <!-- Rendered Markdown Content -->
-            <div class="announcement-content" style="line-height: 1.8; color: #334155; font-size: 1rem;">
-                {{ announcement.rendered_html|safe }}
+            <div class="announcement-content" style="line-height: 1.8; color: #374151; font-size: 1rem;">
+                {{ announcement.content|linebreaksbr }}
             </div>
 
             {% if request.user.is_admin_user or request.user.is_kapitan_user or request.user.is_staff %}
-            <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0;">
+            <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid #E5E7EB;">
                 <a href="{% url 'communications:edit_announcement' announcement.id %}" class="btn btn-secondary btn-sm">
                     EDIT POST
                 </a>
                 <form action="{% url 'communications:delete_announcement' announcement.id %}" method="post">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to permanently delete this announcement?');">
+                    <button type="submit" class="btn btn-danger btn-sm" data-confirm="Are you sure you want to permanently delete this announcement?">
                         DELETE
                     </button>
                 </form>
@@ -90,10 +90,10 @@
                 {% if recent_others %}
                 <div style="display: flex; flex-direction: column; gap: 1rem;">
                     {% for item in recent_others %}
-                    <div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
-                        <span style="font-size: 0.75rem; color: #94a3b8;">{{ item.created_at|date:"M d, Y" }}</span>
+                    <div style="border-bottom: 1px solid #F3F4F6; padding-bottom: 0.75rem;">
+                        <span style="font-size: 0.875rem; color: #6B7280;">{{ item.created_at|date:"M d, Y" }}</span>
                         <h4 style="font-size: 0.9rem; font-weight: 700; margin: 0.2rem 0;">
-                            <a href="{% url 'communications:announcement_detail' item.id %}" style="color: #0f172a;">
+                            <a href="{% url 'communications:announcement_detail' item.id %}" style="color: #111827;">
                                 {{ item.title }}
                             </a>
                         </h4>
@@ -101,7 +101,7 @@
                     {% endfor %}
                 </div>
                 {% else %}
-                <p style="font-size: 0.85rem; color: #94a3b8;">No other bulletins available.</p>
+                <p style="font-size: 0.875rem; color: #6B7280;">No other bulletins available.</p>
                 {% endif %}
             </div>
         </div>

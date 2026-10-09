@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static core_tags %}
 
 {% block title %}Chats - Messenger{% endblock %}
 
@@ -19,7 +19,7 @@
     width: 100%;
     height: calc(100vh - 120px);
     background: #FFFFFF;
-    border: 1px solid #E2E8F0;
+    border: 1px solid #E5E7EB;
     border-radius: 8px;
     overflow: hidden;
     box-sizing: border-box;
@@ -33,7 +33,7 @@
     max-width: 320px !important;
     flex-shrink: 0 !important;
     background: #FFFFFF;
-    border-right: 1px solid #E2E8F0 !important;
+    border-right: 1px solid #E5E7EB !important;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
@@ -63,7 +63,7 @@
 .sidebar-header-title {
     font-size: 1.5rem;
     font-weight: 800;
-    color: #050505;
+    color: #111827;
     margin: 0;
     letter-spacing: -0.02em;
 }
@@ -78,9 +78,9 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: #F0F2F5;
+    background: #F3F4F6;
     border: none;
-    color: #050505;
+    color: #111827;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -91,9 +91,9 @@
 }
 
 .messenger-round-btn:hover {
-    background: #E4E6EB;
-    color: #050505;
-    transform: scale(1.04);
+    background: #E5E7EB;
+    color: #111827;
+    transform: none;
 }
 
 /* SEARCH MESSENGER */
@@ -102,7 +102,7 @@
 }
 
 .search-messenger-box {
-    background: #F0F2F5;
+    background: #F3F4F6;
     border-radius: 50px;
     padding: 0.55rem 1rem;
     display: flex;
@@ -113,11 +113,11 @@
 
 .search-messenger-box:focus-within {
     background: #FFFFFF;
-    box-shadow: 0 0 0 2px #0084FF;
+    box-shadow: none;
 }
 
-.search-messenger-box i {
-    color: #65676B;
+.search-messenger-box .icon {
+    color: #6B7280;
     font-size: 0.9rem;
 }
 
@@ -127,12 +127,12 @@
     outline: none;
     width: 100%;
     font-size: 0.9375rem;
-    color: #050505;
+    color: #111827;
     font-family: inherit;
 }
 
 .search-messenger-box input::placeholder {
-    color: #65676B;
+    color: #6B7280;
 }
 
 /* CHATS LIST */
@@ -155,11 +155,11 @@
 }
 
 .messenger-contact-item:hover {
-    background: #F2F2F2;
+    background: #F3F4F6;
 }
 
 .messenger-contact-item.active {
-    background: #E7F3FF;
+    background: #F3F4F6;
 }
 
 .contact-avatar-wrap {
@@ -178,8 +178,8 @@
 }
 
 .contact-avatar-initials {
-    background: #E4E6EB;
-    color: #050505;
+    background: #E5E7EB;
+    color: #111827;
     font-weight: 700;
     font-size: 1rem;
     display: flex;
@@ -193,7 +193,7 @@
     right: 1px;
     width: 13px;
     height: 13px;
-    background: #31A24C;
+    background: #16A34A;
     border: 2px solid #FFFFFF;
     border-radius: 50%;
 }
@@ -206,7 +206,7 @@
 .contact-name {
     font-size: 0.9375rem;
     font-weight: 600;
-    color: #050505;
+    color: #111827;
     line-height: 1.25;
     white-space: nowrap;
     overflow: hidden;
@@ -214,8 +214,8 @@
 }
 
 .contact-snippet {
-    font-size: 0.8125rem;
-    color: #65676B;
+    font-size: 0.875rem;
+    color: #6B7280;
     margin-top: 0.15rem;
     white-space: nowrap;
     overflow: hidden;
@@ -225,14 +225,14 @@
 
 .contact-snippet.unread-bold {
     font-weight: 700;
-    color: #050505;
+    color: #111827;
 }
 
 .contact-unread-dot {
     width: 11px;
     height: 11px;
     border-radius: 50%;
-    background: #0084FF;
+    background: #1E3A8A;
     flex-shrink: 0;
     margin-left: 0.5rem;
 }
@@ -269,14 +269,14 @@
 .empty-state-title {
     font-size: 1.35rem;
     font-weight: 700;
-    color: #050505;
+    color: #111827;
     margin: 0.5rem 0 0.25rem 0;
 }
 
 /* ACTIVE CHAT WINDOW */
 .chat-window-header {
     padding: 0.75rem 1.25rem;
-    border-bottom: 1px solid #E4E6EB;
+    border-bottom: 1px solid #E5E7EB;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -292,13 +292,13 @@
 .chat-header-name {
     font-size: 1rem;
     font-weight: 700;
-    color: #050505;
+    color: #111827;
     line-height: 1.2;
 }
 
 .chat-header-status {
-    font-size: 0.75rem;
-    color: #65676B;
+    font-size: 0.875rem;
+    color: #6B7280;
     margin-top: 0.15rem;
     display: flex;
     align-items: center;
@@ -339,21 +339,21 @@
 }
 
 .chat-message-row.sent .chat-bubble-pill {
-    background: #0084FF;
+    background: #1E3A8A;
     color: #FFFFFF;
     border-radius: 18px 18px 4px 18px;
 }
 
 .chat-message-row.received .chat-bubble-pill {
-    background: #F0F2F5;
-    color: #050505;
+    background: #F3F4F6;
+    color: #111827;
     border-radius: 18px 18px 18px 4px;
 }
 
 /* SENT, DELIVERED, SEEN WITH DATE AND TIME */
 .chat-receipt-meta {
-    font-size: 0.7rem;
-    color: #65676B;
+    font-size: 0.875rem;
+    color: #6B7280;
     margin-top: 0.25rem;
     display: flex;
     align-items: center;
@@ -361,22 +361,22 @@
 }
 
 .chat-receipt-meta.seen {
-    color: #0084FF;
+    color: #1E3A8A;
     font-weight: 600;
 }
 
 .chat-receipt-meta.delivered {
-    color: #65676B;
+    color: #6B7280;
 }
 
 .chat-receipt-meta.sent {
-    color: #94A3B8;
+    color: #6B7280;
 }
 
 /* COMPOSER */
 .chat-composer-bar {
     padding: 0.75rem 1.25rem;
-    border-top: 1px solid #E4E6EB;
+    border-top: 1px solid #E5E7EB;
     background: #FFFFFF;
     display: flex;
     align-items: center;
@@ -385,26 +385,26 @@
 
 .composer-pill-input {
     flex: 1;
-    background: #F0F2F5;
+    background: #F3F4F6;
     border-radius: 50px;
     padding: 0.65rem 1.15rem;
     border: none;
     outline: none;
     font-size: 0.9375rem;
     font-family: inherit;
-    color: #050505;
+    color: #111827;
 }
 
 .composer-pill-input:focus {
     background: #FFFFFF;
-    box-shadow: 0 0 0 2px #0084FF;
+    box-shadow: none;
 }
 
 .btn-send-messenger {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: #0084FF;
+    background: #1E3A8A;
     color: #FFFFFF;
     border: none;
     display: flex;
@@ -417,15 +417,15 @@
 }
 
 .btn-send-messenger:hover {
-    background: #0073E6;
-    transform: scale(1.05);
+    background: #1E3A8A;
+    transform: none;
 }
 
 /* Live Staff Roster Modal */
 .modal-overlay-roster {
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.6);
+    background: rgba(17, 24, 39, 0.6);
     z-index: 2500;
     display: none;
     align-items: center;
@@ -440,7 +440,7 @@
     width: 100%;
     max-height: 85vh;
     overflow-y: auto;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+    box-shadow: none;
 }
 
 .officer-roster-item {
@@ -448,9 +448,9 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.85rem 1rem;
-    border: 1.5px solid #CBD5E1;
+    border: 1.5px solid #D1D5DB;
     border-radius: 10px;
-    background: #F8FAFC;
+    background: #F9FAFB;
 }
 
 .officer-roster-item.status-on-duty {
@@ -458,27 +458,44 @@
 }
 
 .officer-roster-item.status-on-leave {
-    border-color: #EA580C;
+    border-color: #374151;
+}
+
+/* Phones: stack the chat list above the conversation instead of squeezing both
+   side by side. With no conversation open, the decorative empty pane is hidden. */
+@media (max-width: 767px) {
+    .messages-card, .messenger-shell { flex-direction: column; height: auto; min-height: calc(100vh - 160px); }
+    .chat-sidebar, .messenger-sidebar {
+        width: 100% !important; min-width: 0 !important; max-width: 100% !important;
+        border-right: 0 !important; border-bottom: 1px solid #E5E7EB !important;
+    }
+    .messenger-shell.has-conversation .messenger-sidebar { max-height: 35vh; }
+    .messenger-shell.has-conversation .messenger-main-pane { min-height: 60vh; }
+    .messenger-shell:not(.has-conversation) .messenger-main-pane { display: none; }
 }
 </style>
 
 
 <div class="messenger-container">
 
-    <div class="messages-card messenger-shell">
+    <div class="messages-card messenger-shell{% if other_user %} has-conversation{% endif %}">
         
         <!-- LEFT COLUMN: CHATS SIDEBAR (SCREENSHOT 1) -->
         <div class="chat-sidebar messenger-sidebar">
-            <!-- Header: Chats Title -->
+            <!-- Header: Chats Title & New Chat button -->
             <div class="sidebar-header-bar">
                 <h1 class="sidebar-header-title">Chats</h1>
+                <button type="button" class="hig-btn" data-inbox-action="open-roster" title="New Chat" aria-label="New Chat" style="font-size: 0.8125rem; font-weight: 600; padding: 0.35rem 0.75rem; border-radius: 6px; background: #0071E3; color: #FFFFFF; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                    {% icon 'square-pen' style='width: 15px; height: 15px;' %}
+                    <span>New Chat</span>
+                </button>
             </div>
 
             <!-- Search Messenger Input -->
             <div class="search-messenger-wrap">
                 <div class="search-messenger-box">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="messenger-search-box" placeholder="Search Messenger" onkeyup="filterMessengerContacts(this.value)">
+                    <label for="messenger-search-box" class="icon-labelled">{% icon 'search' %}<span class="sr-only">Search Messenger</span></label>
+                    <input type="text" id="messenger-search-box" placeholder="Search Messenger">
                 </div>
             </div>
 
@@ -515,7 +532,7 @@
                     </a>
                     {% endfor %}
                 {% else %}
-                    <div style="text-align: center; padding: 2rem 1rem; color: #65676B; font-size: 0.875rem;">
+                    <div style="text-align: center; padding: 2rem 1rem; color: #6B7280; font-size: 0.875rem;">
                         No conversations yet.<br>Click the write icon to start messaging an officer.
                     </div>
                 {% endif %}
@@ -533,20 +550,20 @@
                             <defs>
                                 <!-- Arrow pointer gradient: pink to purple magenta -->
                                 <linearGradient id="cursorGradient" x1="15%" y1="10%" x2="85%" y2="90%">
-                                    <stop offset="0%" stop-color="#FF3B88"/>
-                                    <stop offset="50%" stop-color="#843BFF"/>
-                                    <stop offset="100%" stop-color="#4F46E5"/>
+                                    <stop offset="0%" stop-color="#1E3A8A"/>
+                                    <stop offset="50%" stop-color="#1E3A8A"/>
+                                    <stop offset="100%" stop-color="#1E3A8A"/>
                                 </linearGradient>
                                 <!-- Bubble border subtle glow -->
                                 <filter id="bubbleDropShadow" x="-10%" y="-10%" width="130%" height="130%" filterUnits="userSpaceOnUse">
-                                    <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#7B8CA4" flood-opacity="0.18"/>
+                                    <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#6B7280" flood-opacity="0.18"/>
                                 </filter>
                             </defs>
                             
                             <!-- Outer soft speech bubble -->
                             <path d="M60 22 C37 22 20 37 20 56 C20 67 27 77 38 83 C38 88 35 96 30 100 C39 99 48 94 53 90 C55 90 58 90 60 90 C83 90 100 75 100 56 C100 37 83 22 60 22 Z" 
                                   fill="#FFFFFF" 
-                                  stroke="#E4E9F2" 
+                                  stroke="#E5E7EB" 
                                   stroke-width="7" 
                                   filter="url(#bubbleDropShadow)"/>
 
@@ -576,17 +593,17 @@
 <!-- ACTIVE BARANGAY OFFICERS & STAFF DUTY ROSTER MODAL -->
 <div id="staffRosterModal" class="modal-overlay-roster">
     <div class="modal-content-roster">
-        <div style="padding: 1.15rem 1.5rem; border-bottom: 1px solid #E4E6EB; display: flex; justify-content: space-between; align-items: center;">
+        <div style="padding: 1.15rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center;">
             <div>
-                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #0F172A; text-transform: uppercase;">
+                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #111827; text-transform: uppercase;">
                     ACTIVE BARANGAY OFFICERS & STAFF DUTY ROSTER
                 </h3>
-                <p style="margin: 0.15rem 0 0 0; font-size: 0.75rem; color: #64748B;">
+                <p style="margin: 0.15rem 0 0 0; font-size: 0.875rem; color: #6B7280;">
                     Select an official to start an instant 1-on-1 direct conversation
                 </p>
             </div>
-            <button type="button" onclick="closeStaffRosterModal()" style="border: none; background: transparent; font-size: 1.25rem; color: #64748B; cursor: pointer;">
-                <i class="fa-solid fa-xmark"></i>
+            <button type="button" data-inbox-action="close-roster" aria-label="Close" style="border: none; background: transparent; font-size: 1.25rem; color: #6B7280; cursor: pointer;">
+                {% icon 'x' %}
             </button>
         </div>
 
@@ -607,18 +624,11 @@
                             {% endif %}
                         </div>
                         <div>
-                            <div style="font-weight: 700; font-size: 0.9375rem; color: #0F172A;">
-                                {{ officer.get_full_name|default:officer.username }}
+                            <div style="font-weight: 700; font-size: 0.9375rem; color: #111827;">
+                                {{ officer.name|default:officer.get_full_name|default:officer.username }}
                             </div>
                             <div style="display: flex; gap: 0.4rem; align-items: center; margin-top: 0.2rem;">
-                                <span class="badge badge-secondary" style="font-size: 0.65rem;">{{ officer.get_role_display|upper }}</span>
-                                {% if officer.duty_status == 'on_duty' %}
-                                    <span class="badge badge-success" style="background: #16A34A; color: #FFF; font-weight: 700;">[ON-DUTY]</span>
-                                {% elif officer.duty_status == 'on_leave' %}
-                                    <span class="badge badge-warning" style="background: #EA580C; color: #FFF; font-weight: 700;">[ON-LEAVE]</span>
-                                {% else %}
-                                    <span class="badge badge-secondary" style="background: #64748B; color: #FFF; font-weight: 700;">[ABSENT]</span>
-                                {% endif %}
+                                <span class="badge badge-secondary" style="font-size: 0.875rem;">{{ officer.position|default:officer.get_role_display|upper }}</span>
                             </div>
                         </div>
                     </div>
@@ -632,186 +642,12 @@
                 {% endfor %}
             </div>
             {% else %}
-            <div style="text-align: center; color: #64748B; padding: 2rem;">No officers available in roster.</div>
+            <div style="text-align: center; color: #6B7280; padding: 2rem;">No officers available in roster.</div>
             {% endif %}
         </div>
     </div>
 </div>
 
 <script src="{% static 'js/chat.js' %}"></script>
-<script>
-function openStaffRosterModal() {
-    var modal = document.getElementById('staffRosterModal');
-    if (modal) modal.style.display = 'flex';
-}
-
-function closeStaffRosterModal() {
-    var modal = document.getElementById('staffRosterModal');
-    if (modal) modal.style.display = 'none';
-}
-
-function filterMessengerContacts(val) {
-    var query = val.toLowerCase().trim();
-    var items = document.querySelectorAll('.messenger-contact-item');
-    items.forEach(function(item) {
-        var name = item.getAttribute('data-name') || '';
-        if (name.indexOf(query) !== -1) {
-            item.style.display = 'flex';
-        } else {
-            item.style.display = 'none';
-        }
-    });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Close roster modal on click outside
-    var rosterModal = document.getElementById('staffRosterModal');
-    if (rosterModal) {
-        rosterModal.addEventListener('click', (e) => {
-            if (e.target === rosterModal) closeStaffRosterModal();
-        });
-    }
-
-    const currentUserId = "{{ request.user.id }}";
-    let currentChatSocket = null;
-
-    function bindChatSession() {
-        if (currentChatSocket) {
-            try { currentChatSocket.close(); } catch(err) {}
-            currentChatSocket = null;
-        }
-
-        const mainPane = document.getElementById('messenger-main-pane');
-        if (!mainPane) return;
-
-        const otherUserId = mainPane.getAttribute('data-other-user-id');
-        if (!otherUserId) return;
-
-        const messagesContainer = document.getElementById('chatMessagesBody') || document.getElementById('chat-messages-container');
-        const form = document.getElementById('chat-form');
-        const input = document.getElementById('chat-message-input');
-        const placeholder = document.getElementById('no-messages-placeholder');
-
-        function scrollToBottom() {
-            if (messagesContainer) {
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }
-        }
-        scrollToBottom();
-
-        // WebSocket connection for real-time 1-on-1 direct chat
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const chatWsUrl = `${protocol}//${window.location.host}/ws/chat/${otherUserId}/`;
-        currentChatSocket = new WebSocket(chatWsUrl);
-
-        currentChatSocket.onmessage = (e) => {
-            try {
-                const data = JSON.parse(e.data);
-                if (data.type === 'chat_message') {
-                    if (placeholder) placeholder.remove();
-
-                    const isSentByMe = String(data.sender_id) === String(currentUserId);
-                    const row = document.createElement('div');
-                    row.className = `message-row ${isSentByMe ? 'outgoing' : 'incoming'}`;
-                    
-                    if (isSentByMe) {
-                        row.innerHTML = `
-                            <div class="message-bubble">
-                                <p class="message-text">${data.content}</p>
-                                <span class="message-time">
-                                    <i class="fa-solid fa-check" style="font-size: 0.65rem;"></i>
-                                    ${data.created_at}
-                                </span>
-                            </div>
-                        `;
-                    } else {
-                        const initials = data.sender_initials || (data.sender_name ? data.sender_name.slice(0, 2).toUpperCase() : 'U');
-                        row.innerHTML = `
-                            <div class="message-avatar">${initials}</div>
-                            <div class="message-bubble">
-                                <p class="message-text">${data.content}</p>
-                                <span class="message-time">${data.created_at}</span>
-                            </div>
-                        `;
-                    }
-
-                    messagesContainer.appendChild(row);
-                    scrollToBottom();
-                }
-            } catch (err) {
-                console.error("Error processing incoming chat message:", err);
-            }
-        };
-
-        if (form && input) {
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const content = input.value.trim();
-                if (!content) return;
-
-                if (currentChatSocket && currentChatSocket.readyState === WebSocket.OPEN) {
-                    currentChatSocket.send(JSON.stringify({
-                        'message': content
-                    }));
-                    input.value = '';
-                    input.focus();
-                } else {
-                    alert("Chat socket reconnecting. Please wait a moment.");
-                }
-            });
-        }
-    }
-
-    // Attach dynamic click to contacts to keep display intact without moving
-    function attachContactItemHandlers() {
-        document.querySelectorAll('.messenger-contact-item').forEach(item => {
-            item.onclick = function(e) {
-                e.preventDefault();
-                const url = this.getAttribute('href');
-                if (!url) return;
-
-                document.querySelectorAll('.messenger-contact-item').forEach(el => el.classList.remove('active'));
-                this.classList.add('active');
-
-                // Remove unread dot if present
-                const dot = this.querySelector('.contact-unread-dot');
-                if (dot) dot.remove();
-
-                const mainPane = document.getElementById('messenger-main-pane');
-                if (!mainPane) return;
-
-                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                    .then(res => {
-                        if (!res.ok) throw new Error("HTTP " + res.status);
-                        return res.text();
-                    })
-                    .then(html => {
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(html, 'text/html');
-                        const newPane = doc.getElementById('messenger-main-pane');
-                        if (newPane) {
-                            mainPane.innerHTML = newPane.innerHTML;
-                            mainPane.setAttribute('data-other-user-id', newPane.getAttribute('data-other-user-id') || '');
-                            window.history.pushState({ url: url }, '', url);
-                            bindChatSession();
-                        } else {
-                            window.location.href = url;
-                        }
-                    })
-                    .catch(err => {
-                        console.error("Error loading chat conversation:", err);
-                        window.location.href = url;
-                    });
-            };
-        });
-    }
-
-    attachContactItemHandlers();
-    bindChatSession();
-
-    window.addEventListener('popstate', () => {
-        window.location.reload();
-    });
-});
-</script>
+<script src="{% static 'js/inbox.js' %}"></script>
 {% endblock %}

@@ -1,0 +1,10 @@
+{
+  "verdict": "APPROVED",
+  "findings": [
+    "Date filter scope not shown on the page (confirmed, minor): population, sector and purok cards ignore date_from/date_to but the range line implies everything is bounded. Add a note that dates apply to appointments and revenue only.",
+    "Expired session during fetch (likely, minor): fetch follows the 302 to login, response.json() throws, and the user sees a parse error. Treat response.redirected or non-JSON content as 'session expired, sign in again'.",
+    "Summary endpoint recomputes every block (confirmed, minor): page load computes each block twice (summary plus the dedicated endpoint). Acceptable at barangay scale; revisit if data grows.",
+    "Production static storage unchanged (confirmed, pre-existing): STATICFILES_STORAGE is ignored by Django 5.2, so production serves unhashed files. Fix with STORAGES in a separate change; already on the final-report list."
+  ],
+  "reviewDoc": "c:\\brgy/.agents/tasks/review-stage5.md"
+}

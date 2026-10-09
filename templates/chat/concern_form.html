@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load core_tags %}
+
+{% block title %}Submit a Concern - Barangay Portal{% endblock %}
+
+{% block content %}
+<div style="max-width: 680px; margin: 2rem auto; width: 100%;">
+    <div class="card" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.5rem; box-shadow: none;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
+            <div style="width: 42px; height: 42px; border-radius: 10px; background: #F3F4F6; color: #1E3A8A; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                {% icon 'hand-helping' %}
+            </div>
+            <div>
+                <h2 style="font-size: 1.25rem; font-weight: 800; margin: 0; color: #111827;">Submit a Resident Concern</h2>
+                <p style="font-size: 0.875rem; color: #6B7280; margin: 0.15rem 0 0;">
+                    Your concern will be routed to the assigned barangay officer for review and resolution
+                </p>
+            </div>
+        </div>
+
+        <form method="post" action="{% url 'chat:submit_concern' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #4B5563; display: block; margin-bottom: 0.35rem;">
+                    Category *
+                </label>
+                <select name="category" class="form-control" required style="width: 100%;">
+                    {% for cat_key, cat_label in categories %}
+                        <option value="{{ cat_key }}">{{ cat_label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #4B5563; display: block; margin-bottom: 0.35rem;">
+                    Concern Title / Subject (Optional)
+                </label>
+                <input type="text" name="title" class="form-control" placeholder="Brief summary of your concern..." style="width: 100%;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #4B5563; display: block; margin-bottom: 0.35rem;">
+                    Detailed Description *
+                </label>
+                <textarea name="content" class="form-control" rows="5" placeholder="Describe the issue, location, or request in detail (max 2000 characters)..." required style="width: 100%; font-size: 0.875rem;"></textarea>
+                <small style="color: #6B7280; font-size: 0.875rem;">Limit: Up to 3 concerns per hour per resident.</small>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #4B5563; display: block; margin-bottom: 0.35rem;">
+                    Attachment (Optional)
+                </label>
+                <input type="file" name="attachment" class="form-control" style="width: 100%;">
+                <small style="color: #6B7280; font-size: 0.875rem;">Max 10MB. Allowed: Photos, PDF, Word documents, text files.</small>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+                <a href="{% url 'chat:inbox' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary" style="font-weight: 700;">
+                    {% icon 'send' %} Submit Concern
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

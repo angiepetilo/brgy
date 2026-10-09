@@ -1,0 +1,10 @@
+{
+  "verdict": "APPROVED",
+  "findings": [
+    "Email edit gated by preview permission (confirmed, non-blocking): email_template_edit_view POST uses system.preview_emails, so preview-only staff can rewrite templates carrying temp passwords and reset links. Require system.edit (or a new edit_emails rule) for POST.",
+    "Staff disable has no target check (confirmed, non-blocking): disable_staff_account_service disables any user id including admins, superusers and residents. Restrict to role=staff and refuse admins/superusers.",
+    "Requirements cannot be cleared (confirmed, non-blocking): create_or_update_document_type_service only resyncs Requirement rows when the textarea is non-empty, so an emptied field leaves stale rows. Delete rows when the field is submitted empty.",
+    "Incidental ValueError text shown (possible, non-blocking): str(e) of ValueErrors from ORM coercion, such as a non-numeric officer_id in staff creation, reaches the browser. Validate officer_id explicitly."
+  ],
+  "reviewDoc": "c:\\brgy/.agents/tasks/review-stage3.md"
+}

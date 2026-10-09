@@ -1,0 +1,14 @@
+Subject: About your sign-up, {{ first_name }}
+
+Hi {{ first_name }},
+
+Thanks for signing up on the Barangay {{ barangay_name }} portal. We checked your details, and we couldn't approve your account this time.
+
+Reason: {{ reason }}
+
+This doesn't mean you can't try again. If the problem is something you can fix, such as a blurry ID photo or a missing detail, you can sign up again here: {{ register_url }}
+
+If you're not sure what to change, call us at {{ barangay_contact|default:contact_no|default:"(02) 8123-4567" }} (8 AM to 5 PM, Monday to Friday) or visit the barangay hall and we'll help you.
+
+Salamat po,
+Barangay {{ barangay_name }} Office

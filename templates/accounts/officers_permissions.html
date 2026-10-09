@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load core_tags %}
+
+{% block title %}Officers & Permissions Management - Barangay e-Portal{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 2rem auto; padding: 0 1rem;">
+    <!-- Page Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="font-size: 1.35rem; font-weight: 800; color: #111827; text-transform: uppercase; margin: 0;">
+                Officer Roles & Access Permissions
+            </h1>
+            <p style="font-size: 0.875rem; color: #6B7280; margin: 0.25rem 0 0 0;">
+                Module action permissions and staff assignment scopes. Dynamically generated from code registry.
+            </p>
+        </div>
+        <a href="{% url 'accounts:residents_tabbed' %}" class="btn btn-secondary btn-sm" style="font-weight: 700;">
+            {% icon 'arrow-left' %} Back to Residents
+        </a>
+    </div>
+
+    <!-- 1. Staff Scope Assignments Card -->
+    <div class="card" style="border: 1px solid #E5E7EB; border-radius: 12px; margin-bottom: 2rem; background: #FFFFFF; box-shadow: none; overflow: hidden;">
+        <div class="card-header" style="background: #F9FAFB; border-bottom: 1px solid #E5E7EB; padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: #F3F4F6; color: #1E3A8A; display: flex; align-items: center; justify-content: center; font-size: 0.95rem;">
+                    {% icon 'shield-user' %}
+                </div>
+                <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #111827;">Staff Scope Assignments</h3>
+            </div>
+            <span style="font-size: 0.875rem; color: #6B7280; font-weight: 600;">Staff act only inside their assignment</span>
+        </div>
+        <div class="card-body" style="padding: 1.5rem;">
+            <!-- Assignment Form -->
+            <form method="post" action="{% url 'accounts:officers_permissions' %}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); gap: 0.75rem; align-items: flex-end; margin-bottom: 1.5rem; background: #F9FAFB; padding: 1rem; border-radius: 8px; border: 1px solid #E5E7EB;">
+                {% csrf_token %}
+                <input type="hidden" name="action_type" value="assign_staff">
+                <div>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.35rem;">Staff User</label>
+                    <select name="user_id" class="form-control" style="font-size: 0.875rem; width: 100%; min-width: 0;" required>
+                        <option value="">-- Select User --</option>
+                        {% for u in staff_users %}
+                        <option value="{{ u.id }}">{{ u.get_full_name|default:u.username }} ({{ u.email }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.35rem;">Officer Role</label>
+                    <select name="officer_id" class="form-control" style="font-size: 0.875rem; width: 100%; min-width: 0;" required>
+                        <option value="">-- Select Role --</option>
+                        {% for o in officers %}
+                        <option value="{{ o.id }}">{{ o.position }}{% if o.committee %} ({{ o.committee }}){% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.35rem;">Scope Type</label>
+                    <select name="scope_type" class="form-control" style="font-size: 0.875rem; width: 100%; min-width: 0;" required>
+                        <option value="service_area">Service Area</option>
+                        <option value="purok">Purok Jurisdiction</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.35rem;">Scope Value</label>
+                    <input type="text" name="scope_value" class="form-control" style="font-size: 0.875rem; width: 100%; min-width: 0;" placeholder="e.g. Health, Documents, Purok 1" required>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary" style="font-weight: 700; padding: 0.5rem 1.25rem; font-size: 0.875rem; background: #1E3A8A; height: 38px;">
+                        {% icon 'plus' %} Assign Scope
+                    </button>
+                </div>
+            </form>
+
+            <!-- Current Assignments Table -->
+            <div class="table-responsive">
+                <table class="clean-table" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th style="width: 25%;">STAFF MEMBER</th>
+                            <th style="width: 25%;">OFFICER ROLE</th>
+                            <th style="width: 20%;">SCOPE TYPE</th>
+                            <th style="width: 30%;">SCOPE VALUE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in staff_assignments %}
+                        <tr>
+                            <td>
+                                <strong style="color: #111827;">{{ a.user.get_full_name|default:a.user.username }}</strong>
+                                <div style="font-size: 0.875rem; color: #6B7280;">{{ a.user.email }}</div>
+                            </td>
+                            <td>
+                                <span class="badge badge-info" style="font-weight: 700;">{{ a.officer.position }}</span>
+                            </td>
+                            <td>
+                                <span style="font-size: 0.875rem; color: #4B5563;">{{ a.get_scope_type_display }}</span>
+                            </td>
+                            <td>
+                                <span style="font-weight: 700; color: #1E3A8A; font-size: 0.875rem;">{{ a.scope_value }}</span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #6B7280; padding: 1.5rem;">No staff scope assignments configured yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Permission Rules Matrix (Generated from Code Registry) -->
+    <div class="card" style="border: 1px solid #E5E7EB; border-radius: 12px; background: #FFFFFF; box-shadow: none; overflow: hidden;">
+        <div class="card-header" style="background: #F9FAFB; border-bottom: 1px solid #E5E7EB; padding: 1.25rem 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: #F3F4F6; color: #1E3A8A; display: flex; align-items: center; justify-content: center; font-size: 0.95rem;">
+                    {% icon 'list-checks' %}
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #111827;">Permission Rules by Officer Role</h3>
+                    <p style="margin: 0.15rem 0 0 0; font-size: 0.875rem; color: #6B7280;">Admin and Kapitan (Punong Barangay) have full access through permission rules.</p>
+                </div>
+            </div>
+        </div>
+        <div class="card-body" style="padding: 1.5rem;">
+            {% for o in officers %}
+            <div style="margin-bottom: 2rem; border: 1px solid #E5E7EB; border-radius: 10px; overflow: hidden;">
+                <div style="background: #F3F4F6; padding: 0.75rem 1.25rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E5E7EB;">
+                    <div>
+                        <strong style="color: #111827; font-size: 0.95rem;">{{ o.position }}</strong>
+                        {% if o.committee %}<span style="color: #6B7280; font-size: 0.875rem;"> &bull; Committee: {{ o.committee }}</span>{% endif %}
+                    </div>
+                    <span style="font-size: 0.875rem; color: #6B7280;">Officer ID: #{{ o.id }}</span>
+                </div>
+                <form method="post" action="{% url 'accounts:officers_permissions' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action_type" value="update_rules">
+                    <input type="hidden" name="officer_id" value="{{ o.id }}">
+                    <div style="padding: 1rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 1rem;">
+                        {% for mod, acts in modules.items %}
+                        <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 0.85rem;">
+                            <div style="font-size: 0.875rem; font-weight: 800; color: #1E3A8A; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.04em;">
+                                {% icon 'folder' %} {{ mod }}
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                                {% for act in acts %}
+                                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: #374151; cursor: pointer; user-select: none;">
+                                    <input type="checkbox" name="perm_{{ o.id }}_{{ mod }}_{{ act }}" value="1"
+                                        {% if o.position == 'Punong Barangay' %}checked{% elif rules_dict and rules_dict|default:None %}{% for key, val in rules_dict.items %}{% if key.0 == o.id and key.1 == mod and key.2 == act and val %}checked{% endif %}{% endfor %}{% endif %}>
+                                    <span>{{ act }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div style="background: #F9FAFB; border-top: 1px solid #E5E7EB; padding: 0.75rem 1rem; text-align: right;">
+                        <button type="submit" class="btn btn-primary btn-sm" style="font-weight: 700; background: #1E3A8A;">
+                            {% icon 'save' %} Save {{ o.position }} Permissions
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

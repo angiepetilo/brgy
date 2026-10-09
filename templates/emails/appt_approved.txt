@@ -1,0 +1,18 @@
+Subject: Your appointment is confirmed for {{ date }}
+
+Hi {{ first_name }},
+
+Your appointment has been approved. Here are the details:
+
+Service: {{ service }}
+Date: {{ date }}
+Time: {{ time_window }}
+Where: {{ venue }}
+Reference no.: {{ reference_no }}
+
+Please come about 10 minutes early and bring a valid ID{{ requirements_line }}.
+
+If you can't make it, let us know through the portal or call {{ barangay_contact|default:contact_no|default:"(02) 8123-4567" }} so we can give the slot to someone else.
+
+Salamat po,
+Barangay {{ barangay_name }} Office

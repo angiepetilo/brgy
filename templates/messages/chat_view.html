@@ -1,167 +1,140 @@
-{% if other_user %}
-  {% with active_user=other_user chat_msgs=messages_history %}
-<div class="chat-conversation-wrapper">
-  <!-- Header -->
-  <div class="chat-header">
-    <div class="chat-user-info">
-      <div class="avatar-sm">
-        {% if active_user.avatar %}
-          <img src="{{ active_user.avatar.url }}" alt="{{ active_user.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-        {% else %}
-          {{ active_user.first_name|slice:":1" }}{{ active_user.last_name|slice:":1" }}
-        {% endif %}
-      </div>
-      <div>
-        <h2 class="user-name">{{ active_user.get_full_name|default:active_user.username }}</h2>
-        <span class="status-indicator">
-          {% if active_user.duty_status == 'on_duty' %}
-            Active now
-          {% elif active_user.duty_status == 'on_leave' %}
-            On Leave
-          {% else %}
-            Active now
-          {% endif %}
-        </span>
-      </div>
+{% load static core_tags %}
+
+<style>
+    .message-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 0.5rem;
+        width: 100%;
+    }
+    .message-row.outgoing {
+        justify-content: flex-end;
+    }
+    .message-row.incoming {
+        justify-content: flex-start;
+    }
+    .message-bubble {
+        max-width: 68%;
+        padding: 0.65rem 1rem;
+        border-radius: 16px;
+        font-size: 0.9375rem;
+        line-height: 1.4;
+        word-break: break-word;
+    }
+    .message-row.outgoing .message-bubble {
+        background: #1E3A8A;
+        color: #FFFFFF;
+        border-bottom-right-radius: 4px;
+    }
+    .message-row.incoming .message-bubble {
+        background: #FFFFFF;
+        color: #111827;
+        border: 1px solid #E5E7EB;
+        border-bottom-left-radius: 4px;
+    }
+    .message-time {
+        display: block;
+        font-size: 0.875rem;
+        margin-top: 4px;
+    }
+    .message-row.outgoing .message-time {
+        color: rgba(255, 255, 255, 0.8);
+        text-align: right;
+    }
+    .message-row.incoming .message-time {
+        color: #6B7280;
+    }
+</style>
+
+<div class="chat-conversation-wrapper" style="display: flex; flex-direction: column; height: 100%; width: 100%; background: #FFFFFF;">
+    <!-- Chat Header -->
+    <div class="chat-header" style="padding: 0.875rem 1.25rem; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between; background: #FFFFFF;">
+        <div class="chat-user-info" style="display: flex; align-items: center; gap: 0.75rem;">
+            <div class="avatar-sm" style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: #E5E7EB; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #111827; font-size: 0.95rem;">
+                {% if other_user.avatar %}
+                    <img src="{{ other_user.avatar.url }}" alt="{{ other_user.username }}" style="width: 100%; height: 100%; object-fit: cover;">
+                {% else %}
+                    {{ other_user.initials|default:other_user.username|make_list|first|upper }}
+                {% endif %}
+            </div>
+            <div>
+                <h2 class="user-name" style="margin: 0; font-size: 1rem; font-weight: 700; color: #111827; display: flex; align-items: center; gap: 0.5rem;">
+                    {{ other_user.get_full_name|default:other_user.username }}
+                    <span class="badge badge-secondary" style="font-size: 0.875rem; text-transform: uppercase;">
+                        {{ other_user.get_role_display }}
+                    </span>
+                </h2>
+                <div class="status-indicator" style="font-size: 0.875rem; color: #111827; display: flex; align-items: center; gap: 0.35rem; margin-top: 0.15rem;">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #16A34A; display: inline-block;"></span>
+                    {% if other_user.duty_status == 'on_duty' %}
+                        On Duty / Active
+                    {% elif other_user.duty_status == 'on_leave' %}
+                        On Leave
+                    {% else %}
+                        Active
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <button type="button" class="btn btn-secondary btn-sm" data-action="reload" title="Refresh Conversation" aria-label="Refresh Conversation">
+                {% icon 'refresh-cw' %}
+            </button>
+        </div>
     </div>
-  </div>
 
-  <!-- Scrollable Message List Body -->
-  <div class="chat-messages-body" id="chatMessagesBody">
-    {% for msg in chat_msgs %}
-      {% if msg.sender == request.user %}
-        <div class="message-row outgoing">
-          <div class="message-bubble">
-            <p class="message-text">{{ msg.content }}</p>
-            <span class="message-time">
-              {% if msg.is_read %}
-                <i class="fa-solid fa-check-double" style="font-size: 0.65rem;"></i>
-              {% else %}
-                <i class="fa-solid fa-check" style="font-size: 0.65rem;"></i>
-              {% endif %}
-              {{ msg.created_at|date:"g:i A" }}
-            </span>
-          </div>
-        </div>
-      {% else %}
-        <div class="message-row incoming">
-          <div class="message-avatar">
-            {% if msg.sender.avatar %}
-              <img src="{{ msg.sender.avatar.url }}" alt="{{ msg.sender.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-            {% else %}
-              {{ msg.sender.first_name|slice:":1" }}{{ msg.sender.last_name|slice:":1" }}
-            {% endif %}
-          </div>
-          <div class="message-bubble">
-            <p class="message-text">{{ msg.content }}</p>
-            <span class="message-time">{{ msg.created_at|date:"g:i A" }}</span>
-          </div>
-        </div>
-      {% endif %}
-    {% empty %}
-      <div id="no-messages-placeholder" style="text-align: center; margin: auto; color: #64748B; font-size: 0.875rem; padding: 2rem;">
-        <div style="font-size: 2rem; margin-bottom: 0.5rem;">👋</div>
-        <div style="font-weight: 600; color: #0F172A; margin-bottom: 0.25rem;">Say hello to {{ active_user.get_full_name|default:active_user.username }}!</div>
-        <div>Send a message to start this consultation conversation.</div>
-      </div>
-    {% endfor %}
-  </div>
-
-  <!-- Bottom Input Bar Line -->
-  <div class="chat-input-footer">
-    <form class="chat-input-form" id="chat-form">
-      {% csrf_token %}
-      <div class="input-wrapper">
-        <input type="text" id="chat-message-input" placeholder="Type a message..." autocomplete="off" required>
-        <button type="submit" class="btn-send" id="chat-send-btn" title="Send message">
-          <i class="fa-solid fa-paper-plane"></i>
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
-  {% endwith %}
-{% elif active_chat %}
-  {% with active_user=active_chat.user chat_msgs=messages %}
-<div class="chat-conversation-wrapper">
-  <!-- Header -->
-  <div class="chat-header">
-    <div class="chat-user-info">
-      <div class="avatar-sm">
-        {% if active_user.avatar %}
-          <img src="{{ active_user.avatar.url }}" alt="{{ active_user.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+    <!-- Scrollable Message List Body -->
+    <div class="chat-messages-body" id="chatMessagesBody" style="flex: 1; padding: 1.25rem 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; background: #F9FAFB;">
+        {% if messages_history %}
+            {% for msg in messages_history %}
+                <div class="message-row {% if msg.sender == request.user %}outgoing{% else %}incoming{% endif %}">
+                    {% if msg.sender != request.user %}
+                        <div class="message-avatar" style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: #D1D5DB; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 700; color: #374151; flex-shrink: 0;">
+                            {% if msg.sender.avatar %}
+                                <img src="{{ msg.sender.avatar.url }}" alt="{{ msg.sender.username }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            {% else %}
+                                {{ msg.sender.initials|default:msg.sender.username|make_list|first|upper }}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="message-bubble">
+                        <p class="message-text" style="margin: 0; white-space: pre-wrap;">{{ msg.content }}</p>
+                        <span class="message-time">
+                            {{ msg.created_at|date:"g:i A" }}
+                            {% if msg.sender == request.user %}
+                                {% if msg.is_read %}
+                                    <span class="icon-labelled" title="Read">{% icon 'check-check' %}<span class="sr-only">Read</span></span>
+                                {% else %}
+                                    <span class="icon-labelled" title="Delivered">{% icon 'check' %}<span class="sr-only">Delivered</span></span>
+                                {% endif %}
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            {% endfor %}
         {% else %}
-          {{ active_user.first_name|slice:":1" }}{{ active_user.last_name|slice:":1" }}
+            <div id="no-messages-placeholder" style="text-align: center; margin: auto; color: #6B7280; font-size: 0.875rem; padding: 2rem;">
+                <div style="margin-bottom: 0.5rem;">{% icon 'message-square' cls='icon-lg icon-primary' %}</div>
+                <div style="font-weight: 700; color: #111827; margin-bottom: 0.25rem; font-size: 1rem;">
+                    Say hello to {{ other_user.get_full_name|default:other_user.username }}!
+                </div>
+                <div>Send a message to start this direct conversation.</div>
+            </div>
         {% endif %}
-      </div>
-      <div>
-        <h2 class="user-name">{{ active_user.get_full_name|default:active_user.username }}</h2>
-        <span class="status-indicator">
-          {% if active_user.duty_status == 'on_duty' %}
-            Active now
-          {% elif active_user.duty_status == 'on_leave' %}
-            On Leave
-          {% else %}
-            Active now
-          {% endif %}
-        </span>
-      </div>
     </div>
-  </div>
 
-  <!-- Scrollable Message List Body -->
-  <div class="chat-messages-body" id="chatMessagesBody">
-    {% for msg in chat_msgs %}
-      {% if msg.sender == request.user %}
-        <div class="message-row outgoing">
-          <div class="message-bubble">
-            <p class="message-text">{{ msg.content|default:msg.text }}</p>
-            <span class="message-time">
-              {% if msg.is_read %}
-                <i class="fa-solid fa-check-double" style="font-size: 0.65rem;"></i>
-              {% else %}
-                <i class="fa-solid fa-check" style="font-size: 0.65rem;"></i>
-              {% endif %}
-              {{ msg.created_at|default:msg.timestamp|date:"g:i A" }}
-            </span>
-          </div>
-        </div>
-      {% else %}
-        <div class="message-row incoming">
-          <div class="message-avatar">
-            {% if msg.sender.avatar %}
-              <img src="{{ msg.sender.avatar.url }}" alt="{{ msg.sender.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-            {% else %}
-              {{ msg.sender.first_name|slice:":1" }}{{ msg.sender.last_name|slice:":1" }}
-            {% endif %}
-          </div>
-          <div class="message-bubble">
-            <p class="message-text">{{ msg.content|default:msg.text }}</p>
-            <span class="message-time">{{ msg.created_at|default:msg.timestamp|date:"g:i A" }}</span>
-          </div>
-        </div>
-      {% endif %}
-    {% empty %}
-      <div id="no-messages-placeholder" style="text-align: center; margin: auto; color: #64748B; font-size: 0.875rem; padding: 2rem;">
-        <div style="font-size: 2rem; margin-bottom: 0.5rem;">👋</div>
-        <div style="font-weight: 600; color: #0F172A; margin-bottom: 0.25rem;">Say hello to {{ active_user.get_full_name|default:active_user.username }}!</div>
-        <div>Send a message to start this consultation conversation.</div>
-      </div>
-    {% endfor %}
-  </div>
-
-  <!-- Bottom Input Bar Line -->
-  <div class="chat-input-footer">
-    <form class="chat-input-form" id="chat-form">
-      {% csrf_token %}
-      <div class="input-wrapper">
-        <input type="text" id="chat-message-input" placeholder="Type a message..." autocomplete="off" required>
-        <button type="submit" class="btn-send" id="chat-send-btn" title="Send message">
-          <i class="fa-solid fa-paper-plane"></i>
-        </button>
-      </div>
-    </form>
-  </div>
+    <!-- Message Composer -->
+    <div class="chat-input-footer" style="padding: 0.875rem 1.25rem; border-top: 1px solid #E5E7EB; background: #FFFFFF;">
+        <form class="chat-input-form" id="chat-form" method="post" action="{% url 'chat:room' other_user.id %}" style="display: flex; align-items: center; gap: 0.65rem; margin: 0;">
+            {% csrf_token %}
+            <div class="input-wrapper" style="flex: 1; position: relative;">
+                <input type="text" id="chat-message-input" name="message" class="composer-pill-input" placeholder="Type a message... (Press Enter to send)" autocomplete="off" required style="width: 100%; box-sizing: border-box; background: #F3F4F6; border: 1.5px solid transparent; border-radius: 50px; padding: 0.7rem 1.25rem; font-size: 0.9375rem; color: #111827; outline: none; transition: all 0.2s ease;">
+            </div>
+            <button type="submit" class="btn-send-messenger" id="chat-send-btn" title="Send message" style="width: 42px; height: 42px; border-radius: 50%; background: #1E3A8A; color: #FFFFFF; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; flex-shrink: 0; transition: background 0.15s ease, transform 0.1s ease;" aria-label="Send message">
+                {% icon 'send' %}
+            </button>
+        </form>
+    </div>
 </div>
-  {% endwith %}
-{% endif %}

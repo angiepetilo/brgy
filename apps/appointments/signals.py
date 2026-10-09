@@ -14,7 +14,7 @@ def generate_issued_document_log(sender, instance, created, **kwargs):
     Automatically creates an IssuedDocumentLog with a unique control number
     and programmatic verification QR code when an appointment transitions to 'completed'.
     """
-    if instance.status == Appointment.STATUS_COMPLETED:
+    if instance.status == Appointment.STATUS_COMPLETED and instance.category == Appointment.CATEGORY_DOCUMENT:
         if not hasattr(instance, 'issued_log'):
             year = timezone.now().year
             count = IssuedDocumentLog.objects.filter(issued_at__year=year).count() + 1
@@ -32,8 +32,8 @@ def generate_issued_document_log(sender, instance, created, **kwargs):
                 issued_by=instance.processed_by,
             )
 
-            # Programmatically render QR code image containing verification URL
-            verify_payload = f"/appointments/verify/{control_number}/"
+            # Programmatically render QR code image containing control number
+            verify_payload = f"BARANGAY-CERT-{control_number}"
             qr = qrcode.QRCode(
                 version=1,
                 box_size=8,

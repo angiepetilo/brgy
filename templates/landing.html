@@ -4,35 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barangay.ph - Public Service & Online Appointment</title>
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome 6 Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    {% load static %}
+    {% load static core_tags %}
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
-    <!-- FullCalendar CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+    <!-- FullCalendar 6.1.11, vendored (the 6.x global bundle injects its own CSS) -->
+    <script src="{% static 'vendor/fullcalendar/index.global.min.js' %}"></script>
 
     <style>
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #F8FAFC;
-            color: #0F172A;
+            font-family: var(--font-sans, system-ui, sans-serif);
+            background-color: #F9FAFB;
+            color: #111827;
             margin: 0;
             padding: 0;
         }
 
+        .landing-civic { max-width: 1200px; margin: 1rem auto; padding: 0 1.5rem; }
+
         /* Public Header */
         .landing-header {
             background: #FFFFFF;
-            border-bottom: 1px solid #E2E8F0;
+            border-bottom: 1px solid #E5E7EB;
             position: sticky;
             top: 0;
             z-index: 1000;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+            box-shadow: none;
         }
         .landing-header-inner {
             max-width: 1200px;
@@ -47,13 +43,13 @@
             align-items: center;
             gap: 0.75rem;
             text-decoration: none;
-            color: #0F172A;
+            color: #111827;
         }
         .brand-icon-box {
             width: 38px;
             height: 38px;
             border-radius: 8px;
-            background: #2563EB;
+            background: #1E3A8A;
             color: #FFFFFF;
             display: flex;
             align-items: center;
@@ -64,13 +60,13 @@
             font-weight: 800;
             font-size: 1.15rem;
             letter-spacing: -0.01em;
-            color: #0F172A;
+            color: #111827;
             text-transform: uppercase;
         }
 
         /* Hero Section */
         .landing-hero {
-            background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+            background: #1E3A8A;
             color: #FFFFFF;
             padding: 4.5rem 1.5rem;
             position: relative;
@@ -96,11 +92,11 @@
             line-height: 1.6;
             opacity: 0.92;
             margin-bottom: 1.75rem;
-            color: #EFF6FF;
+            color: #F3F4F6;
         }
         .hero-cta-btn {
             background: #FFFFFF;
-            color: #1D4ED8;
+            color: #1E3A8A;
             font-weight: 700;
             font-size: 1rem;
             padding: 0.85rem 1.75rem;
@@ -110,20 +106,20 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            box-shadow: none;
             transition: all 0.2s ease;
         }
         .hero-cta-btn:hover {
-            background: #F8FAFC;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15);
+            background: #F9FAFB;
+            transform: none;
+            box-shadow: none;
         }
         .hero-card {
             background: #FFFFFF;
-            color: #0F172A;
+            color: #111827;
             border-radius: 12px;
             padding: 1.5rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            box-shadow: none;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
@@ -139,16 +135,16 @@
             background: #FFFFFF;
             border-radius: 12px;
             padding: 1.75rem 2rem;
-            border: 1px solid #E2E8F0;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            border: 1px solid #E5E7EB;
+            box-shadow: none;
         }
         .workflow-title {
             text-align: center;
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: #64748B;
+            color: #6B7280;
             margin-bottom: 1.5rem;
         }
         .workflow-steps-grid {
@@ -166,25 +162,25 @@
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: #EFF6FF;
-            color: #2563EB;
+            background: #F3F4F6;
+            color: #1E3A8A;
             font-weight: 800;
             font-size: 0.95rem;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 0.75rem auto;
-            border: 2px solid #BFDBFE;
+            border: 2px solid #D1D5DB;
         }
         .step-heading {
             font-size: 0.95rem;
             font-weight: 700;
-            color: #0F172A;
+            color: #111827;
             margin-bottom: 0.35rem;
         }
         .step-desc {
-            font-size: 0.75rem;
-            color: #64748B;
+            font-size: 0.875rem;
+            color: #6B7280;
             line-height: 1.4;
         }
 
@@ -201,12 +197,12 @@
         .section-header h2 {
             font-size: 1.5rem;
             font-weight: 800;
-            color: #0F172A;
+            color: #111827;
             margin: 0 0 0.5rem 0;
             text-transform: uppercase;
         }
         .section-header p {
-            color: #64748B;
+            color: #6B7280;
             font-size: 0.875rem;
             margin: 0;
         }
@@ -217,21 +213,21 @@
         }
         .service-box {
             background: #FFFFFF;
-            border: 1px solid #E2E8F0;
+            border: 1px solid #E5E7EB;
             border-radius: 8px;
             padding: 1.25rem;
             transition: transform 0.2s ease, border-color 0.2s ease;
         }
         .service-box:hover {
-            transform: translateY(-2px);
-            border-color: #93C5FD;
+            transform: none;
+            border-color: #D1D5DB;
         }
 
         /* Modals - Modern Non-Flat Glassmorphic Design */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(15, 23, 42, 0.72);
+            background: rgba(17, 24, 39, 0.72);
             display: none;
             align-items: center;
             justify-content: center;
@@ -246,12 +242,12 @@
         }
         .modal-container {
             background: #FFFFFF;
-            border-radius: 18px;
+            border-radius: 16px;
             width: 100%;
             max-height: 94vh;
             overflow-y: auto;
-            box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2);
-            border: 1px solid #E2E8F0;
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.15), 0 10px 15px -5px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.08);
             animation: slideUpModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
         @keyframes slideUpModal {
@@ -259,15 +255,15 @@
             to { transform: translateY(0) scale(1); opacity: 1; }
         }
         .modal-container-side-by-side {
-            max-width: 1020px;
+            max-width: 1120px;
         }
         .modal-container-auth {
             max-width: 460px;
         }
         .modal-header-bar {
             padding: 1.25rem 1.75rem;
-            border-bottom: 1px solid #F1F5F9;
-            background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+            border-bottom: 1px solid #F3F4F6;
+            background: #FFFFFF;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -275,13 +271,13 @@
             border-top-right-radius: 18px;
         }
         .modal-close-btn {
-            background: #F1F5F9;
-            border: 1px solid #E2E8F0;
+            background: #F3F4F6;
+            border: 1px solid #E5E7EB;
             width: 34px;
             height: 34px;
             border-radius: 50%;
             font-size: 1rem;
-            color: #64748B;
+            color: #6B7280;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -289,9 +285,9 @@
             transition: all 0.15s ease;
         }
         .modal-close-btn:hover {
-            background: #E2E8F0;
-            color: #0F172A;
-            transform: scale(1.05);
+            background: #E5E7EB;
+            color: #111827;
+            transform: none;
         }
 
         /* Category toggle pills - Modern non-flat cards */
@@ -304,14 +300,14 @@
         .cat-pill {
             padding: 0.85rem 1rem;
             text-align: center;
-            border: 2px solid #E2E8F0;
+            border: 2px solid #E5E7EB;
             border-radius: 12px;
             font-weight: 700;
             font-size: 0.875rem;
             cursor: pointer;
             background: #FFFFFF;
-            color: #475569;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+            color: #4B5563;
+            box-shadow: none;
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
             align-items: center;
@@ -319,14 +315,14 @@
             gap: 0.5rem;
         }
         .cat-pill:hover {
-            border-color: #93C5FD;
-            transform: translateY(-1px);
+            border-color: #D1D5DB;
+            transform: none;
         }
         .cat-pill.active {
-            border-color: #2563EB;
-            background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
-            color: #1D4ED8;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+            border-color: #1E3A8A;
+            background: #F3F4F6;
+            color: #1E3A8A;
+            box-shadow: none;
         }
 
         /* Modern input styling */
@@ -334,45 +330,36 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: #334155;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #374151;
             text-transform: uppercase;
             letter-spacing: 0.03em;
-            margin-bottom: 0.3rem;
+            margin-bottom: 0.35rem;
         }
         .input-group-modern {
             position: relative;
         }
-        .input-group-modern i.icon-prefix {
-            position: absolute;
-            left: 0.9rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94A3B8;
-            font-size: 0.9rem;
-            pointer-events: none;
-        }
         .form-control-modern {
             width: 100%;
-            padding: 0.65rem 0.9rem 0.65rem 2.4rem;
-            border: 1.5px solid #CBD5E1;
-            border-radius: 9px;
+            padding: 0.65rem 0.85rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 8px;
             font-size: 0.875rem;
-            color: #0F172A;
+            color: #111827;
             background: #FFFFFF;
             transition: all 0.2s ease;
             box-sizing: border-box;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) inset;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
         }
         .form-control-modern:focus {
             outline: none;
-            border-color: #2563EB;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+            border-color: #1E3A8A;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.15);
         }
         .form-control-modern.input-error {
             border-color: #DC2626;
-            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+            box-shadow: none;
         }
 
         @media (max-width: 860px) {
@@ -387,14 +374,323 @@
                 grid-template-columns: 1fr !important;
             }
         }
-        @media (max-width: 520px) {
-            .workflow-steps-grid {
-                grid-template-columns: 1fr;
+        /* ==================== SCREENSHOT 2: CALENDAR & HEALTH SERVICES ==================== */
+        .calendar-section-grid {
+            margin-bottom: 1.25rem;
+        }
+        .cal-box-card {
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            border-radius: 14px;
+            padding: 1.15rem;
+            margin-bottom: 1.25rem;
+        }
+        .cal-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .cal-header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .cal-select {
+            padding: 0.4rem 0.65rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-weight: 700;
+            color: #111827;
+            background: #FFFFFF;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.15s ease;
+        }
+        .cal-select:focus {
+            border-color: #1E3A8A;
+        }
+        .cal-header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .cal-today-btn {
+            background: #FFFFFF;
+            border: 1px solid #D1D5DB;
+            border-radius: 8px;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #374151;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            transition: all 0.15s ease;
+        }
+        .cal-today-btn:hover {
+            background: #F3F4F6;
+            color: #111827;
+        }
+        .cal-nav-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1px solid #D1D5DB;
+            background: #FFFFFF;
+            color: #4B5563;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .cal-nav-btn:hover {
+            background: #F3F4F6;
+            color: #111827;
+        }
+        .cal-nav-btn.primary {
+            background: #1E3A8A;
+            border-color: #1E3A8A;
+            color: #FFFFFF;
+        }
+        .cal-nav-btn.primary:hover {
+            background: #0F4C81;
+        }
+        .cal-weekdays-row {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+        .cal-weekday-label {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #6B7280;
+            padding: 4px 0;
+        }
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        .cal-day-cell {
+            min-height: 44px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: 1.5px solid transparent;
+            background: #FFFFFF;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.15s ease;
+            user-select: none;
+            padding: 4px;
+            color: #111827;
+        }
+        .cal-day-cell:hover {
+            background: #F3F4F6;
+            border-color: #D1D5DB;
+        }
+        .cal-day-cell.other-month {
+            color: #9CA3AF;
+        }
+        .cal-day-cell.other-month .cal-day-num {
+            color: #9CA3AF;
+            font-weight: 500;
+        }
+        .cal-day-cell.current-month {
+            color: #111827;
+        }
+        .cal-day-cell.current-month .cal-day-num {
+            color: #111827;
+            font-weight: 700;
+        }
+        .cal-day-cell.past {
+            color: #9CA3AF;
+        }
+        .cal-day-cell.past .cal-day-num {
+            color: #9CA3AF;
+        }
+        .cal-day-cell.has-services {
+            background: #F9FAFB;
+            border-color: #E5E7EB;
+        }
+        .cal-day-cell.selected {
+            background: #1E3A8A;
+            border-color: #1E3A8A;
+            font-weight: 800;
+            color: #FFFFFF;
+        }
+        .cal-day-cell.selected .cal-day-num {
+            color: #FFFFFF;
+            font-weight: 800;
+        }
+        .cal-day-cell.selected .cal-day-dot {
+            background: #FFFFFF !important;
+        }
+        .cal-day-num {
+            font-size: 0.9375rem;
+            line-height: 1;
+            font-weight: 700;
+            color: inherit;
+        }
+        .cal-day-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            margin-top: 4px;
+        }
+        .cal-day-dot.dot-blue { background: #1E3A8A; }
+        .cal-day-dot.dot-navy { background: #0F4C81; }
+        .cal-day-dot.dot-red { background: #DC2626; }
+        .cal-day-dot.dot-green { background: #16A34A; }
+        .cal-day-dot.dot-gray { background: #374151; }
+
+        /* Available Health Services Container (Positioned below Calendar) */
+        .cal-services-container {
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            border-radius: 14px;
+            padding: 1.15rem;
+            margin-bottom: 1.25rem;
+        }
+        .cal-services-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 0.65rem;
+            max-height: 240px;
+            overflow-y: auto;
+            margin-top: 0.75rem;
+            padding-right: 4px;
+        }
+        .cal-service-card {
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: left;
+        }
+        .cal-service-card:hover {
+            border-color: #1E3A8A;
+            background: #F9FAFB;
+        }
+        .cal-service-card.selected {
+            border-color: #1E3A8A;
+            background: #F3F4F6;
+        }
+        .service-card-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .service-card-datetime {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 2px;
+        }
+        .service-card-name {
+            font-size: 0.8125rem;
+            color: #6B7280;
+            line-height: 1.3;
+        }
+
+        /* ==================== SCREENSHOT 3: TIME PICKER ==================== */
+        .time-picker-card {
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+        }
+        .time-picker-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.85rem;
+        }
+        .time-picker-badge {
+            background: #F3F4F6;
+            color: #0F4C81;
+            font-weight: 800;
+            font-size: 1.15rem;
+            padding: 4px 14px;
+            border-radius: 6px;
+            border: 1px solid #E5E7EB;
+            letter-spacing: 0.02em;
+        }
+        .time-drum-wrapper {
+            position: relative;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            align-items: center;
+            height: 110px;
+            background: #FFFFFF;
+            user-select: none;
+        }
+        .time-drum-highlight-bar {
+            position: absolute;
+            top: 36px;
+            left: 6px;
+            right: 6px;
+            height: 38px;
+            background: #F3F4F6;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .time-drum-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            height: 100%;
+            z-index: 2;
+        }
+        .time-drum-val-prev,
+        .time-drum-val-next {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #9CA3AF;
+            cursor: pointer;
+            padding: 4px 10px;
+            transition: color 0.15s ease;
+        }
+        .time-drum-val-prev:hover,
+        .time-drum-val-next:hover {
+            color: #111827;
+        }
+        .time-drum-val-curr {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #111827;
+            padding: 2px 10px;
+            line-height: 1;
+        }
+
+        @media (max-width: 860px) {
+            .calendar-section-grid {
+                grid-template-columns: 1fr !important;
             }
         }
     </style>
 </head>
-<body>
+<body data-icon-sprite="{% static 'vendor/lucide/sprite.svg' %}">
+    <a class="skip-link" href="#landing-main">Skip to main content</a>
 
     <!-- Public Header Navigation -->
     <header class="landing-header">
@@ -402,7 +698,7 @@
             <!-- Left Section: App Logo & System Title -->
             <a href="/" class="brand-logo-area" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
                 <img src="{% static 'images/barangay_logo.png' %}" alt="Barangay.ph Logo" style="height: 46px; width: auto; object-fit: contain;">
-                <span class="brand-text" style="font-weight: 800; font-size: 1.15rem; color: #0F172A;">BARANGAY.PH</span>
+                <span class="brand-text" style="font-weight: 800; font-size: 1.15rem; color: #111827;">BARANGAY.PH</span>
             </a>
 
             <!-- Right Section: Clean Login Button / Dashboard Link -->
@@ -410,26 +706,33 @@
                 {% if request.user.is_authenticated %}
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
                     <a href="{% url 'appointments:list' %}" class="btn btn-secondary btn-sm" style="font-weight: 700; min-height: 40px; display: inline-flex; align-items: center;">
-                        <i class="fa-solid fa-calendar-check" style="margin-right: 0.35rem;"></i> Appointments
+                        {% icon 'calendar-check' %} Appointments
                     </a>
                     <a href="{% url 'accounts:profile' %}" class="btn btn-primary btn-sm" style="font-weight: 700; min-height: 40px; display: inline-flex; align-items: center;">
-                        <i class="fa-solid fa-circle-user" style="margin-right: 0.35rem;"></i> {{ request.user.get_full_name|default:request.user.username }}
+                        {% icon 'circle-user' %} {{ request.user.get_full_name|default:request.user.username }}
                     </a>
                 </div>
                 {% else %}
-                <a href="{% url 'accounts:login' %}" class="btn btn-primary" style="font-weight: 700; min-height: 40px; padding: 0.5rem 1.25rem; display: inline-flex; align-items: center;">
-                    <i class="fa-solid fa-right-to-bracket" style="margin-right: 0.35rem;"></i> Login
-                </a>
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                    <a href="{% url 'accounts:signup' %}" class="btn btn-secondary btn-sm" style="font-weight: 600; min-height: 38px; padding: 0.45rem 1.15rem; border-radius: 8px; text-decoration: none;">
+                        Sign Up
+                    </a>
+                    <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-sm" style="font-weight: 600; min-height: 38px; padding: 0.45rem 1.25rem; border-radius: 8px; text-decoration: none;">
+                        Login
+                    </a>
+                </div>
                 {% endif %}
             </div>
         </div>
     </header>
 
+    <main id="landing-main">
+
     <!-- Hero Section -->
     <section class="landing-hero">
         <div class="hero-inner">
             <div>
-                <span style="display: inline-block; background: rgba(255, 255, 255, 0.2); padding: 0.35rem 0.85rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 1rem;">
+                <span style="display: inline-block; background: rgba(255, 255, 255, 0.2); padding: 0.35rem 0.85rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 1rem;">
                     Official Community Services & Health Center
                 </span>
                 <h1 class="hero-title">
@@ -439,25 +742,25 @@
                     Request official clearances, schedule health consultations, dental procedures, and track processing in real-time from anywhere.
                 </p>
                 <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-                    <button type="button" id="btn-hero-book-appointment" class="hero-cta-btn" onclick="openBookAppointmentModal()">
-                        <i class="fa-solid fa-calendar-check"></i> Book Appointment
+                    <button type="button" id="btn-hero-book-appointment" class="hero-cta-btn" data-call="openBookAppointmentModal">
+                        {% icon 'calendar-check' %} Book Appointment
                     </button>
                 </div>
             </div>
 
             <!-- Crisp Hero Card -->
             <div class="hero-card">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid #E2E8F0; padding-bottom: 0.75rem;">
-                    <span style="font-weight: 700; font-size: 0.8125rem; text-transform: uppercase; color: #0F172A;">
-                        <i class="fa-solid fa-circle-check" style="color: #16A34A; margin-right: 0.35rem;"></i> Daily Service Window
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid #E5E7EB; padding-bottom: 0.75rem;">
+                    <span style="font-weight: 700; font-size: 0.875rem; text-transform: uppercase; color: #111827;">
+                        {% icon 'circle-check' cls='icon-success' %} Daily Service Window
                     </span>
                     <span class="badge badge-primary">Open 8 AM - 5 PM</span>
                 </div>
-                <div style="font-size: 0.8125rem; color: #475569; margin-bottom: 0.75rem;">
-                    <i class="fa-solid fa-file-shield" style="color: #2563EB; width: 20px;"></i> <strong>Document Clearances:</strong> Same-day or next-day pickup.
+                <div style="font-size: 0.875rem; color: #4B5563; margin-bottom: 0.75rem;">
+                    {% icon 'file-text' cls='icon-primary' %} <strong>Document Clearances:</strong> Same-day or next-day pickup.
                 </div>
-                <div style="font-size: 0.8125rem; color: #475569;">
-                    <i class="fa-solid fa-tooth" style="color: #2563EB; width: 20px;"></i> <strong>Health Center:</strong> Dental, consultations & check-ups.
+                <div style="font-size: 0.875rem; color: #4B5563;">
+                    {% icon 'smile' cls='icon-primary' %} <strong>Health Center:</strong> Dental, consultations & check-ups.
                 </div>
             </div>
         </div>
@@ -505,65 +808,65 @@
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;" class="modal-side-grid">
             <!-- Left: Document Requests -->
-            <div class="card" style="border: 1px solid #E2E8F0; border-radius: 8px; background: #FFFFFF; padding: 1.5rem;">
+            <div class="card" style="border: 1px solid #E5E7EB; border-radius: 8px; background: #FFFFFF; padding: 1.5rem;">
                 <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.25rem;">
-                    <i class="fa-solid fa-file-circle-check" style="font-size: 1.25rem; color: #2563EB;"></i>
-                    <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0; color: #0F172A;">Document Clearances</h3>
+                    {% icon 'file-check' cls='icon-primary' %}
+                    <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0; color: #111827;">Document Clearances</h3>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                     <div class="service-box">
-                        <div style="font-weight: 700; color: #0F172A; font-size: 0.875rem;">Barangay Clearance</div>
-                        <div style="font-size: 0.75rem; color: #64748B;">Official certificate for employment, business, and postal identification.</div>
+                        <div style="font-weight: 700; color: #111827; font-size: 0.875rem;">Barangay Clearance</div>
+                        <div style="font-size: 0.875rem; color: #6B7280;">Official certificate for employment, business, and postal identification.</div>
                     </div>
                     <div class="service-box">
-                        <div style="font-weight: 700; color: #0F172A; font-size: 0.875rem;">Certificate of Residency</div>
-                        <div style="font-size: 0.75rem; color: #64748B;">Proof of domicile required by banks, universities, and government agencies.</div>
+                        <div style="font-weight: 700; color: #111827; font-size: 0.875rem;">Certificate of Residency</div>
+                        <div style="font-size: 0.875rem; color: #6B7280;">Proof of domicile required by banks, universities, and government agencies.</div>
                     </div>
                     <div class="service-box">
-                        <div style="font-weight: 700; color: #0F172A; font-size: 0.875rem;">Certificate of Indigency</div>
-                        <div style="font-size: 0.75rem; color: #64748B;">Financial, hospital, and legal aid qualification clearance.</div>
+                        <div style="font-weight: 700; color: #111827; font-size: 0.875rem;">Certificate of Indigency</div>
+                        <div style="font-size: 0.875rem; color: #6B7280;">Financial, hospital, and legal aid qualification clearance.</div>
                     </div>
                     <div class="service-box">
-                        <div style="font-weight: 700; color: #0F172A; font-size: 0.875rem;">Notice of Award (NOA)</div>
-                        <div style="font-size: 0.75rem; color: #64748B;">Official verification and community grant approval notices.</div>
+                        <div style="font-weight: 700; color: #111827; font-size: 0.875rem;">Notice of Award (NOA)</div>
+                        <div style="font-size: 0.875rem; color: #6B7280;">Official verification and community grant approval notices.</div>
                     </div>
                 </div>
             </div>
 
             <!-- Right: Health Care Services -->
-            <div class="card" style="border: 1px solid #E2E8F0; border-radius: 8px; background: #FFFFFF; padding: 1.5rem;">
+            <div class="card" style="border: 1px solid #E5E7EB; border-radius: 8px; background: #FFFFFF; padding: 1.5rem;">
                 <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.25rem;">
-                    <i class="fa-solid fa-hospital-user" style="font-size: 1.25rem; color: #16A34A;"></i>
-                    <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0; color: #0F172A;">Health Center Services</h3>
+                    {% icon 'hospital' cls='icon-success' %}
+                    <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0; color: #111827;">Health Center Services</h3>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                     {% for svc in healthcare_services %}
                     <div class="service-box" style="display: flex; flex-direction: column; gap: 0.35rem;">
                         <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                            <div style="font-weight: 700; color: #0F172A; font-size: 0.9rem;">{{ svc.name }}</div>
-                            <span class="badge" style="font-size: 0.68rem; background: #DCFCE7; color: #16A34A; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 4px;">ACTIVE</span>
+                            <div style="font-weight: 700; color: #111827; font-size: 0.9rem;">{{ svc.name }}</div>
+                            <span class="badge" style="font-size: 0.875rem; background: #FFFFFF; color: #111827; border: 1px solid #16A34A; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 4px;">ACTIVE</span>
                         </div>
                         <!-- Available Date & Time -->
-                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; font-size: 0.75rem; color: #475569; margin: 0.15rem 0;">
-                            <span style="display: inline-flex; align-items: center; gap: 0.3rem; background: #F1F5F9; padding: 0.2rem 0.5rem; border-radius: 6px;">
-                                <i class="fa-regular fa-calendar" style="color: #2563EB;"></i>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; font-size: 0.875rem; color: #4B5563; margin: 0.15rem 0;">
+                            <span style="display: inline-flex; align-items: center; gap: 0.3rem; background: #F3F4F6; padding: 0.2rem 0.5rem; border-radius: 6px;">
+                                {% icon 'calendar' cls='icon-primary' %}
                                 <strong>{{ svc.available_date|default:"Monday - Friday" }}</strong>
                             </span>
-                            <span style="display: inline-flex; align-items: center; gap: 0.3rem; background: #F1F5F9; padding: 0.2rem 0.5rem; border-radius: 6px;">
-                                <i class="fa-regular fa-clock" style="color: #16A34A;"></i>
+                            <span style="display: inline-flex; align-items: center; gap: 0.3rem; background: #F3F4F6; padding: 0.2rem 0.5rem; border-radius: 6px;">
+                                {% icon 'clock' cls='icon-success' %}
                                 <span>{{ svc.available_time|default:"8:00 AM - 5:00 PM" }}</span>
                             </span>
                         </div>
-                        <div style="font-size: 0.76rem; color: #64748B; line-height: 1.45;">{{ svc.description|default:"Available at Barangay Health Center." }}</div>
+                        <div style="font-size: 0.875rem; color: #6B7280; line-height: 1.45;">{{ svc.description|default:"Available at Barangay Health Center." }}</div>
                     </div>
                     {% empty %}
                     <div class="service-box">
-                        <div style="font-weight: 700; color: #0F172A; font-size: 0.875rem;">Dental Cleaning & Oral Care</div>
-                        <div style="font-size: 0.75rem; color: #64748B;">Free dental prophylaxis and oral health checkup.</div>
+                        <div style="font-weight: 700; color: #111827; font-size: 0.875rem;">Dental Cleaning & Oral Care</div>
+                        <div style="font-size: 0.875rem; color: #6B7280;">Free dental prophylaxis and oral health checkup.</div>
                     </div>
                     <div class="service-box">
-                        <div style="font-weight: 700; color: #0F172A; font-size: 0.875rem;">General Medical Consultation</div>
-                        <div style="font-size: 0.75rem; color: #64748B;">Physician consultation and basic health assessment.</div>
+                        <div style="font-weight: 700; color: #111827; font-size: 0.875rem;">General Medical Consultation</div>
+                        <div style="font-size: 0.875rem; color: #6B7280;">Physician consultation and basic health assessment.</div>
                     </div>
                     {% endfor %}
                 </div>
@@ -571,444 +874,419 @@
         </div>
     </section>
 
-    <!-- ==================== ANNOUNCEMENTS & UPCOMING EVENTS SECTION ==================== -->
-    <section class="announcements-events-section" style="padding: 3.5rem 0; background: #F8FAFC; border-top: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0;">
-        <div style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;">
-            <div class="section-header" style="text-align: center; margin-bottom: 2.25rem;">
-                <h2 style="font-size: 1.85rem; font-weight: 800; color: #0F172A; margin: 0 0 0.5rem 0; letter-spacing: -0.02em;">Barangay Updates & Community Calendar</h2>
-                <p style="font-size: 0.95rem; color: #64748B; margin: 0;">Stay informed with the latest public advisories, official notices, and upcoming barangay events.</p>
+    <!-- Official Emergency Hotline Section (Displayed below Available Services & Consultations) -->
+    <section class="landing-civic" data-section="emergency" aria-label="Emergency Hotline" style="margin: 2.5rem 0;">
+        <div class="civic-section civic-emergency" style="padding: 1.25rem 1.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.25rem; border-radius: 12px; background: #FEF2F2; border: 1.5px solid #FCA5A5; box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.08);">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: #DC2626; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+                    {% icon 'triangle-alert' %}
+                </div>
+                <div>
+                    <div style="font-weight: 800; color: #991B1B; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.03em;">
+                        Official Barangay Emergency Hotline
+                    </div>
+                    <div style="font-size: 0.875rem; color: #7F1D1D; margin-top: 3px;">
+                        Immediate 24/7 emergency response, rescue, and ambulance dispatch across all networks (Smart, TNT, Globe, TM, DITO).
+                    </div>
+                </div>
             </div>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 2rem;">
-                <!-- Column 1: Announcements -->
-                <div class="card" style="border: 1px solid #E2E8F0; border-radius: 12px; background: #FFFFFF; padding: 1.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; border-bottom: 1px solid #F1F5F9; padding-bottom: 0.85rem;">
-                        <div style="display: flex; align-items: center; gap: 0.65rem;">
-                            <span style="width: 38px; height: 38px; border-radius: 8px; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; font-size: 1.05rem;">
-                                <i class="fa-solid fa-bullhorn"></i>
-                            </span>
-                            <div>
-                                <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: #0F172A;">Latest Announcements</h3>
-                                <div style="font-size: 0.75rem; color: #64748B;">Official public notices & advisories</div>
-                            </div>
-                        </div>
-                        <span class="badge badge-primary" style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Public Notices</span>
-                    </div>
-
-                    <div style="display: flex; flex-direction: column; gap: 1rem; flex: 1;">
-                        {% for a in announcements %}
-                        <div style="padding: 1.1rem; border-radius: 8px; background: #F8FAFC; border: 1px solid #E2E8F0; transition: transform 0.2s ease, box-shadow 0.2s ease;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
-                                <span class="badge" style="background: #DBEAFE; color: #1D4ED8; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; padding: 0.2rem 0.5rem; border-radius: 4px;">
-                                    {{ a.get_category_display|default:a.category }}
-                                </span>
-                                <span style="font-size: 0.75rem; color: #94A3B8; display: inline-flex; align-items: center;">
-                                    <i class="fa-regular fa-clock" style="margin-right: 0.3rem;"></i>{{ a.created_at|date:"M d, Y" }}
-                                </span>
-                            </div>
-                            <h4 style="font-size: 0.95rem; font-weight: 700; color: #0F172A; margin: 0.25rem 0 0.45rem 0; line-height: 1.4;">{{ a.title }}</h4>
-                            <p style="font-size: 0.8125rem; color: #475569; margin: 0; line-height: 1.55;">
-                                {{ a.content|truncatechars:150 }}
-                            </p>
-                        </div>
-                        {% empty %}
-                        <div style="text-align: center; padding: 2.5rem 1rem; color: #94A3B8;">
-                            <i class="fa-regular fa-clipboard" style="font-size: 2rem; margin-bottom: 0.75rem; display: block; opacity: 0.5;"></i>
-                            <p style="font-size: 0.875rem; margin: 0;">No active announcements at this time.</p>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <!-- Column 2: Upcoming Events -->
-                <div class="card" style="border: 1px solid #E2E8F0; border-radius: 12px; background: #FFFFFF; padding: 1.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; border-bottom: 1px solid #F1F5F9; padding-bottom: 0.85rem;">
-                        <div style="display: flex; align-items: center; gap: 0.65rem;">
-                            <span style="width: 38px; height: 38px; border-radius: 8px; background: #ECFDF5; color: #16A34A; display: flex; align-items: center; justify-content: center; font-size: 1.05rem;">
-                                <i class="fa-solid fa-calendar-day"></i>
-                            </span>
-                            <div>
-                                <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: #0F172A;">Upcoming Events</h3>
-                                <div style="font-size: 0.75rem; color: #64748B;">Community activities & gatherings</div>
-                            </div>
-                        </div>
-                        <span class="badge badge-success" style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Community</span>
-                    </div>
-
-                    <div style="display: flex; flex-direction: column; gap: 1rem; flex: 1;">
-                        {% for ev in upcoming_events %}
-                        <div style="padding: 1.1rem; border-radius: 8px; background: #F8FAFC; border: 1px solid #E2E8F0; display: flex; gap: 1.1rem; align-items: flex-start;">
-                            <div style="background: #16A34A; color: #FFFFFF; border-radius: 8px; padding: 0.5rem 0.75rem; text-align: center; min-width: 62px; box-shadow: 0 2px 4px rgba(22, 163, 74, 0.25);">
-                                <div style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">{{ ev.created_at|date:"M" }}</div>
-                                <div style="font-size: 1.35rem; font-weight: 800; line-height: 1.1;">{{ ev.created_at|date:"d" }}</div>
-                            </div>
-                            <div style="flex: 1;">
-                                <h4 style="font-size: 0.95rem; font-weight: 700; color: #0F172A; margin: 0 0 0.35rem 0; line-height: 1.4;">{{ ev.title }}</h4>
-                                <p style="font-size: 0.8125rem; color: #475569; margin: 0; line-height: 1.55;">
-                                    {{ ev.content|truncatechars:140 }}
-                                </p>
-                            </div>
-                        </div>
-                        {% empty %}
-                        <div style="text-align: center; padding: 2.5rem 1rem; color: #94A3B8;">
-                            <i class="fa-regular fa-calendar-xmark" style="font-size: 2rem; margin-bottom: 0.75rem; display: block; opacity: 0.5;"></i>
-                            <p style="font-size: 0.875rem; margin: 0;">No upcoming events scheduled at this moment.</p>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
+            <div class="civic-hotline" style="margin: 0; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                {% if admin_phone %}
+                <a class="civic-hotline-number" href="tel:{{ admin_phone|cut:' '|cut:'-' }}" style="font-weight: 800; font-size: 1.1rem; color: #FFFFFF; background: #DC2626; padding: 0.65rem 1.35rem; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 2px 4px rgba(220, 38, 38, 0.25);">
+                    {% icon 'phone-call' %} {{ admin_phone }}
+                </a>
+                {% else %}
+                <a class="civic-hotline-number" href="tel:0281234567" style="font-weight: 800; font-size: 1.1rem; color: #FFFFFF; background: #DC2626; padding: 0.65rem 1.35rem; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 2px 4px rgba(220, 38, 38, 0.25);">
+                    {% icon 'phone-call' %} (02) 8123-4567
+                </a>
+                {% endif %}
+                <a href="#portal-footer" style="font-size: 0.875rem; font-weight: 700; color: #B91C1C; text-decoration: none; padding: 0.65rem 1rem; border: 1.5px solid #F87171; border-radius: 8px; background: #FFFFFF; display: inline-flex; align-items: center; gap: 0.4rem;">
+                    {% icon 'phone' cls='icon-xs' %} All Telco Networks
+                </a>
             </div>
         </div>
     </section>
 
-    <!-- ==================== MODAL 1: REGISTER ACCOUNT MODAL (If Not Logged In) ==================== -->
-    <div id="registerModal" class="modal-overlay">
-        <div class="modal-container modal-container-auth">
-            <div class="modal-header-bar">
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="fa-solid fa-user-plus" style="color: #2563EB;"></i>
-                    <h3 style="margin: 0; font-size: 1rem; font-weight: 700;">Create Resident Account</h3>
-                </div>
-                <button type="button" class="modal-close-btn" onclick="closeRegisterModal()"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div style="padding: 1.25rem;">
-                <p style="font-size: 0.8125rem; color: #64748B; margin-top: 0; margin-bottom: 1.25rem;">
-                    Please register or sign in to schedule appointments and track certificates.
-                </p>
-
-                <form method="post" action="{% url 'accounts:signup' %}" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.75rem;">
-                        <div>
-                            <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase;">First Name</label>
-                            <input type="text" name="first_name" required class="form-control" style="font-size: 0.8125rem;">
-                        </div>
-                        <div>
-                            <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase;">Last Name</label>
-                            <input type="text" name="last_name" required class="form-control" style="font-size: 0.8125rem;">
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom: 0.75rem;">
-                        <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase;">Username</label>
-                        <input type="text" name="username" required class="form-control" style="font-size: 0.8125rem;">
-                    </div>
-
-                    <div style="margin-bottom: 0.75rem;">
-                        <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase;">Phone Number</label>
-                        <input type="text" name="phone_number" required class="form-control" placeholder="0919-000-0000" style="font-size: 0.8125rem;">
-                    </div>
-
-                    <div style="margin-bottom: 0.75rem;">
-                        <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase;">Purok Jurisdiction</label>
-                        <select name="purok" class="form-control" style="font-size: 0.8125rem;">
-                            <option value="Purok 1">Purok 1</option>
-                            <option value="Purok 2">Purok 2</option>
-                            <option value="Purok 3">Purok 3</option>
-                            <option value="Purok 4">Purok 4</option>
-                            <option value="Purok 5">Purok 5</option>
-                            <option value="Purok 6">Purok 6</option>
-                            <option value="Purok 7">Purok 7</option>
-                        </select>
-                    </div>
-
-                    <div style="margin-bottom: 0.75rem;">
-                        <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase;">Password</label>
-                        <input type="password" name="password" required class="form-control" style="font-size: 0.8125rem;">
-                    </div>
-
-                    <div style="margin-bottom: 1.25rem;">
-                        <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase;">Confirm Password</label>
-                        <input type="password" name="password2" required class="form-control" style="font-size: 0.8125rem;">
-                    </div>
-
-                    <button type="submit" class="btn btn-primary" style="width: 100%; font-weight: 700; min-height: 42px;">
-                        Register & Continue
-                    </button>
-                </form>
-
-                <div style="margin-top: 1rem; text-align: center; font-size: 0.8125rem; color: #64748B;">
-                    Already registered? <a href="javascript:void(0)" onclick="switchToLogin()" style="color: #2563EB; font-weight: 700;">Sign in here</a>
-                </div>
-            </div>
-        </div>
+    <!-- Comprehensive Portal Footer -->
+    <div id="portal-footer">
+        {% include 'includes/footer.html' %}
     </div>
 
-    <!-- ==================== MODAL 2: LOGIN MODAL ==================== -->
-    <div id="loginModal" class="modal-overlay">
-        <div class="modal-container modal-container-auth">
-            <div class="modal-header-bar">
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="fa-solid fa-right-to-bracket" style="color: #2563EB;"></i>
-                    <h3 style="margin: 0; font-size: 1rem; font-weight: 700;">Resident Sign In</h3>
-                </div>
-                <button type="button" class="modal-close-btn" onclick="closeLoginModal()"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div style="padding: 1.25rem;">
-                <form method="post" action="{% url 'accounts:login' %}">
-                    {% csrf_token %}
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.25rem;">Username or Email</label>
-                        <input type="text" name="username" required class="form-control">
-                    </div>
-                    <div style="margin-bottom: 1.25rem;">
-                        <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.25rem;">Password</label>
-                        <input type="password" name="password" required class="form-control">
-                    </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%; font-weight: 700; min-height: 42px;">
-                        Sign In
-                    </button>
-                </form>
-                <div style="margin-top: 1rem; text-align: center; font-size: 0.8125rem; color: #64748B;">
-                    Don't have an account? <a href="javascript:void(0)" onclick="switchToRegister()" style="color: #2563EB; font-weight: 700;">Register Account</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== MODAL 3: MODERN BOOK APPOINTMENT MODAL ==================== -->
+    <!-- ==================== BOOK APPOINTMENT MODAL ==================== -->
     <div id="bookAppointmentModal" class="modal-overlay">
         <div class="modal-container modal-container-side-by-side">
             <!-- Modal Header -->
             <div class="modal-header-bar">
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);">
-                        <i class="fa-solid fa-calendar-check"></i>
+                    <div style="width: 40px; height: 40px; border-radius: 10px; background: #1E3A8A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; box-shadow: none;">
+                        {% icon 'calendar-check' %}
                     </div>
                     <div>
-                        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0F172A; letter-spacing: -0.01em;">Book an Appointment</h3>
-                        <p style="margin: 0; font-size: 0.75rem; color: #64748B;">Schedule your document request or barangay health center consultation</p>
+                        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #111827; letter-spacing: -0.01em;">Book an Appointment</h3>
+                        <p style="margin: 0; font-size: 0.875rem; color: #6B7280;">Schedule your document request or barangay health center consultation</p>
                     </div>
                 </div>
-                <button type="button" class="modal-close-btn" onclick="closeBookAppointmentModal()"><i class="fa-solid fa-xmark"></i></button>
+                <button type="button" class="modal-close-btn" data-call="closeBookAppointmentModal" aria-label="Close">{% icon 'x' %}</button>
             </div>
             
-            <div style="padding: 1.5rem; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 1.75rem;" class="modal-side-grid" id="modal-body-container">
-                <!-- Left Panel: Interactive Modern Form -->
-                <div id="appointment-form-panel">
-                    <form id="public-booking-form" onsubmit="handlePublicBookingSubmit(event)">
-                        {% csrf_token %}
-
-                        <!-- Category Selector: Document Request vs Health Center -->
-                        <div style="margin-bottom: 1.15rem;">
-                            <label class="form-label-modern">
-                                <span><i class="fa-solid fa-layer-group" style="color: #2563EB; margin-right: 0.3rem;"></i> 1. Select Service Category <span style="color: #DC2626;">*</span></span>
-                            </label>
-                            <div class="category-pill-group">
-                                <div class="cat-pill active" id="pill-doc" onclick="switchCategory('document')">
-                                    <i class="fa-solid fa-file-shield" style="font-size: 1.05rem;"></i>
-                                    <div>
-                                        <div style="font-weight: 800;">Document Request</div>
-                                        <div style="font-size: 0.7rem; font-weight: 500; opacity: 0.85;">Clearances & Certifications</div>
-                                    </div>
-                                </div>
-                                <div class="cat-pill" id="pill-health" onclick="switchCategory('healthcare')">
-                                    <i class="fa-solid fa-heart-pulse" style="font-size: 1.05rem; color: #16A34A;"></i>
-                                    <div>
-                                        <div style="font-weight: 800;">Health Center</div>
-                                        <div style="font-size: 0.7rem; font-weight: 500; opacity: 0.85;">Medical & Dental Care</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <input type="hidden" name="category" id="form-category-input" value="document">
-                        </div>
-
-                        <!-- Specific Service Dropdown -->
-                        <div id="subservice-doc-container" style="margin-bottom: 1rem;">
-                            <label class="form-label-modern">
-                                <span><i class="fa-solid fa-certificate" style="color: #2563EB; margin-right: 0.3rem;"></i> Select Document Type <span style="color: #DC2626;">*</span></span>
-                            </label>
-                            <div class="input-group-modern">
-                                <i class="fa-solid fa-file-contract icon-prefix"></i>
-                                <select name="document_type" id="modal-doc-select" class="form-control-modern" style="padding-left: 2.4rem;">
-                                    <option value="clearance">Barangay Clearance</option>
-                                    <option value="residency">Certificate of Residency</option>
-                                    <option value="indigency">Certificate of Indigency</option>
-                                    <option value="noa">Notice of Award (NOA)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div id="subservice-health-container" style="display: none; margin-bottom: 1rem;">
-                            <label class="form-label-modern">
-                                <span><i class="fa-solid fa-stethoscope" style="color: #16A34A; margin-right: 0.3rem;"></i> Select Health Center Service <span style="color: #DC2626;">*</span></span>
-                            </label>
-                            <div class="input-group-modern">
-                                <i class="fa-solid fa-hospital-user icon-prefix"></i>
-                                <select name="healthcare_service" id="modal-health-select" class="form-control-modern" style="padding-left: 2.4rem;">
-                                    {% for svc in healthcare_services %}
-                                    <option value="{{ svc.id }}">{{ svc.name }}</option>
-                                    {% empty %}
-                                    <option value="">Dental Cleaning & Oral Care</option>
-                                    <option value="">General Medical Consultation</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Schedule: Date & Time Window -->
-                        <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+            <div style="padding: 1.5rem;" id="modal-body-container">
+                <!-- 1. Category Switcher -->
+                <div style="margin-bottom: 1.25rem;">
+                    <div class="category-pill-group">
+                        <div class="cat-pill active" id="pill-doc" data-call="switchCategory" data-arg="document">
+                            {% icon 'file-text' %}
                             <div>
-                                <label class="form-label-modern">
-                                    <span><i class="fa-regular fa-calendar" style="color: #2563EB; margin-right: 0.25rem;"></i> Preferred Date <span style="color: #DC2626;">*</span></span>
-                                </label>
-                                <div class="input-group-modern">
-                                    <i class="fa-regular fa-calendar-day icon-prefix"></i>
-                                    <input type="date" name="preferred_date" id="modal-date-input" required class="form-control-modern" style="padding-left: 2.4rem;">
-                                </div>
+                                <div style="font-weight: 700;">Document Request</div>
+                                <div style="font-size: 0.8125rem; font-weight: 500; opacity: 0.85;">Clearances & Certifications</div>
                             </div>
+                        </div>
+                        <div class="cat-pill" id="pill-health" data-call="switchCategory" data-arg="healthcare">
+                            {% icon 'heart-pulse' cls='icon-success' %}
                             <div>
-                                <label class="form-label-modern">
-                                    <span><i class="fa-regular fa-clock" style="color: #2563EB; margin-right: 0.25rem;"></i> Time Window <span style="color: #DC2626;">*</span></span>
-                                </label>
-                                <div class="input-group-modern">
-                                    <i class="fa-solid fa-clock-rotate-left icon-prefix"></i>
-                                    <select name="preferred_time_slot" class="form-control-modern" style="padding-left: 2.4rem;">
-                                        <option value="morning">Morning (8:00 AM - 11:30 AM)</option>
-                                        <option value="afternoon">Afternoon (1:00 PM - 4:30 PM)</option>
-                                    </select>
-                                </div>
+                                <div style="font-weight: 700;">Health Center</div>
+                                <div style="font-size: 0.8125rem; font-weight: 500; opacity: 0.85;">Medical & Dental Care</div>
                             </div>
                         </div>
-
-                        <!-- Applicant Identity Info: First Name, Middle Name, Last Name (All Required) -->
-                        <div style="margin-bottom: 1rem;">
-                            <label class="form-label-modern">
-                                <span><i class="fa-regular fa-id-card" style="color: #2563EB; margin-right: 0.3rem;"></i> 2. Applicant Identification <span style="color: #DC2626;">*</span></span>
-                            </label>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;">
-                                <div class="input-group-modern">
-                                    <i class="fa-solid fa-user icon-prefix"></i>
-                                    <input type="text" name="first_name" id="input_first_name" placeholder="First Name *" value="{{ request.user.first_name }}" class="form-control-modern" required style="padding-left: 2.3rem;">
-                                </div>
-                                <div class="input-group-modern">
-                                    <i class="fa-regular fa-user icon-prefix"></i>
-                                    <input type="text" name="middle_name" id="input_middle_name" placeholder="Middle Name *" class="form-control-modern" required style="padding-left: 2.3rem;">
-                                </div>
-                                <div class="input-group-modern">
-                                    <i class="fa-solid fa-user-tag icon-prefix"></i>
-                                    <input type="text" name="last_name" id="input_last_name" placeholder="Last Name *" value="{{ request.user.last_name }}" class="form-control-modern" required style="padding-left: 2.3rem;">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Age & Residential Address (All Required) -->
-                        <div style="display: grid; grid-template-columns: 0.7fr 1.3fr; gap: 0.75rem; margin-bottom: 1rem;">
-                            <div>
-                                <label class="form-label-modern">
-                                    <span><i class="fa-solid fa-hashtag" style="color: #2563EB; margin-right: 0.25rem;"></i> Age <span style="color: #DC2626;">*</span></span>
-                                </label>
-                                <div class="input-group-modern">
-                                    <i class="fa-solid fa-person icon-prefix"></i>
-                                    <input type="number" name="age" id="input_age" min="1" max="120" placeholder="e.g. 28" required class="form-control-modern" style="padding-left: 2.4rem;">
-                                </div>
-                            </div>
-                            <div>
-                                <label class="form-label-modern">
-                                    <span><i class="fa-solid fa-location-dot" style="color: #2563EB; margin-right: 0.25rem;"></i> Residential Address <span style="color: #DC2626;">*</span></span>
-                                </label>
-                                <div class="input-group-modern">
-                                    <i class="fa-solid fa-house-chimney icon-prefix"></i>
-                                    <input type="text" name="address" id="input_address" placeholder="House #, Street, Purok..." required class="form-control-modern" style="padding-left: 2.4rem;">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Email Address (Abstract API Validation) & Phone Number (11 Digits Only) -->
-                        <div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 0.75rem; margin-bottom: 1rem;">
-                            <div>
-                                <label class="form-label-modern">
-                                    <span><i class="fa-regular fa-envelope" style="color: #2563EB; margin-right: 0.25rem;"></i> Email Address <span style="color: #DC2626;">*</span></span>
-                                </label>
-                                <div class="input-group-modern">
-                                    <i class="fa-solid fa-at icon-prefix"></i>
-                                    <input type="email" name="email" id="input_email" placeholder="active.email@example.com" value="{{ request.user.email }}" required class="form-control-modern" style="padding-left: 2.4rem;" onblur="validateEmailLive(this.value)">
-                                </div>
-                                <div id="email-verification-feedback" style="font-size: 0.72rem; margin-top: 0.3rem; min-height: 18px; display: flex; align-items: center; gap: 0.35rem;"></div>
-                            </div>
-                            <div>
-                                <label class="form-label-modern">
-                                    <span><i class="fa-solid fa-mobile-screen" style="color: #2563EB; margin-right: 0.25rem;"></i> Phone Number <span style="color: #DC2626;">*</span></span>
-                                    <span style="font-size: 0.65rem; color: #64748B; font-weight: 500;">11 digits</span>
-                                </label>
-                                <div class="input-group-modern">
-                                    <i class="fa-solid fa-phone icon-prefix"></i>
-                                    <input type="tel" name="phone_number" id="input_phone_number" maxlength="11" placeholder="09XXXXXXXXX" value="{{ request.user.phone_number }}" required class="form-control-modern" style="padding-left: 2.4rem;" oninput="enforcePhone11Digits(this)">
-                                </div>
-                                <div id="phone-feedback" style="font-size: 0.72rem; color: #64748B; margin-top: 0.3rem; min-height: 18px;">
-                                    Must be 11 digits starting with 09
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Purpose / Symptoms / Notes -->
-                        <div style="margin-bottom: 1rem;">
-                            <label class="form-label-modern">
-                                <span><i class="fa-regular fa-comment-dots" style="color: #2563EB; margin-right: 0.25rem;"></i> Purpose or Symptoms / Consultation Notes <span style="color: #DC2626;">*</span></span>
-                            </label>
-                            <textarea name="purpose" id="input_purpose" rows="2" class="form-control-modern" style="padding-left: 0.9rem; font-family: inherit; resize: vertical;" placeholder="Describe the purpose of your clearance or health consultation notes..." required></textarea>
-                        </div>
-
-                        <!-- Optional Supporting ID / Document -->
-                        <div style="margin-bottom: 1.25rem;">
-                            <label class="form-label-modern">
-                                <span><i class="fa-solid fa-paperclip" style="color: #64748B; margin-right: 0.25rem;"></i> Supporting ID / Document (Optional)</span>
-                            </label>
-                            <input type="file" name="supporting_id" class="form-control-modern" style="padding: 0.45rem 0.9rem; font-size: 0.8rem;" accept="image/*,application/pdf">
-                        </div>
-
-                        <!-- Error Banner (Hidden by default) -->
-                        <div id="booking-error-banner" style="display: none; background: #FEF2F2; border: 1.5px solid #FCA5A5; border-radius: 9px; padding: 0.75rem 1rem; margin-bottom: 1rem; color: #991B1B; font-size: 0.8125rem;">
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <i class="fa-solid fa-triangle-exclamation" style="color: #DC2626; font-size: 1rem;"></i>
-                                <span id="booking-error-text" style="font-weight: 600;">Please check your input fields.</span>
-                            </div>
-                        </div>
-
-                        <!-- Submit Button -->
-                        <button type="submit" id="btn-submit-public-booking" class="btn btn-primary" style="width: 100%; font-weight: 800; min-height: 46px; font-size: 0.95rem; border-radius: 9px; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);">
-                            <i class="fa-solid fa-paper-plane"></i> Submit Appointment Request
-                        </button>
-                    </form>
+                    </div>
                 </div>
 
-                <!-- Right Panel: Modern Interactive Calendar & Contact Info -->
-                <div style="background: linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%); border: 1px solid #E2E8F0; border-radius: 14px; padding: 1.15rem; display: flex; flex-direction: column; justify-content: space-between;">
-                    <div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                            <span style="font-weight: 800; font-size: 0.8125rem; color: #0F172A; text-transform: uppercase; letter-spacing: 0.04em;">
-                                <i class="fa-solid fa-calendar-days" style="color: #2563EB; margin-right: 0.35rem;"></i> Select Appointment Date
-                            </span>
-                        </div>
-                        <div id="booking-modal-calendar" style="min-height: 340px; background: #FFFFFF; border-radius: 10px; padding: 0.5rem; border: 1px solid #E2E8F0;"></div>
-                        <div style="font-size: 0.72rem; color: #64748B; margin-top: 0.75rem; text-align: center; line-height: 1.4;">
-                            <i class="fa-solid fa-circle-info" style="color: #2563EB; margin-right: 0.25rem;"></i> Tap any available date on the calendar to update your booking.
-                        </div>
+    <!-- MAIN SIDE-BY-SIDE CONTAINER: CALENDAR ON LEFT, FIELDS & TIME ON RIGHT -->
+    <div style="display: grid; grid-template-columns: 440px 1fr; gap: 1.5rem; align-items: start;" class="modal-side-grid">
+        
+        <!-- LEFT COLUMN: CALENDAR & HEALTH SERVICES (below calendar) -->
+        <div>
+            <!-- CALENDAR -->
+            <div class="cal-box-card" style="margin-bottom: 1rem;">
+                <div class="cal-header-bar">
+                    <div class="cal-header-left">
+                        <select id="cal-month-select" class="cal-select" aria-label="Month">
+                            <option value="0">January</option>
+                            <option value="1">February</option>
+                            <option value="2">March</option>
+                            <option value="3">April</option>
+                            <option value="4">May</option>
+                            <option value="5">June</option>
+                            <option value="6">July</option>
+                            <option value="7">August</option>
+                            <option value="8">September</option>
+                            <option value="9">October</option>
+                            <option value="10">November</option>
+                            <option value="11">December</option>
+                        </select>
+                        <select id="cal-year-select" class="cal-select" aria-label="Year">
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                            <option value="2026">2026</option>
+                            <option value="2027">2027</option>
+                            <option value="2028">2028</option>
+                            <option value="2029">2029</option>
+                            <option value="2030">2030</option>
+                        </select>
                     </div>
+                    <div class="cal-header-right">
+                        <button type="button" id="cal-today-btn" class="cal-today-btn">
+                            {% icon 'calendar' %} Today
+                        </button>
+                        <button type="button" id="cal-prev-btn" class="cal-nav-btn" aria-label="Previous month">
+                            {% icon 'chevron-left' %}
+                        </button>
+                        <button type="button" id="cal-next-btn" class="cal-nav-btn primary" aria-label="Next month">
+                            {% icon 'chevron-right' %}
+                        </button>
+                    </div>
+                </div>
 
-                    <!-- Admin Assistance Hotline Card -->
-                    <div style="margin-top: 1.25rem; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 0.85rem; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
-                        <div style="display: flex; align-items: center; gap: 0.65rem;">
-                            <div style="width: 34px; height: 34px; border-radius: 8px; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
-                                <i class="fa-solid fa-headset"></i>
-                            </div>
-                            <div style="flex: 1;">
-                                <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #64748B;">Barangay Admin Contact</div>
-                                <div style="font-size: 0.875rem; font-weight: 800; color: #0F172A;">
-                                    <i class="fa-solid fa-phone" style="font-size: 0.75rem; color: #16A34A; margin-right: 0.25rem;"></i> {{ admin_phone|default:"0917-111-2222" }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Weekdays row -->
+                <div class="cal-weekdays-row">
+                    <div class="cal-weekday-label">Sun</div>
+                    <div class="cal-weekday-label">Mon</div>
+                    <div class="cal-weekday-label">Tue</div>
+                    <div class="cal-weekday-label">Wed</div>
+                    <div class="cal-weekday-label">Thu</div>
+                    <div class="cal-weekday-label">Fri</div>
+                    <div class="cal-weekday-label">Sat</div>
+                </div>
+
+                <!-- Calendar days grid -->
+                <div id="custom-cal-grid" class="cal-grid">
+                    <div class="cal-day-cell other-month"><span class="cal-day-num">28</span></div>
+                    <div class="cal-day-cell other-month"><span class="cal-day-num">29</span></div>
+                    <div class="cal-day-cell other-month"><span class="cal-day-num">30</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">01</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">02</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">03</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">04</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">05</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">06</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">07</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">08</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">09</span></div>
+                    <div class="cal-day-cell current-month selected"><span class="cal-day-num">10</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">11</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">12</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">13</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">14</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">15</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">16</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">17</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">18</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">19</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">20</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">21</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">22</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">23</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">24</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">25</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">26</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">27</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">28</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">29</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">30</span></div>
+                    <div class="cal-day-cell current-month"><span class="cal-day-num">31</span></div>
+                    <div class="cal-day-cell other-month"><span class="cal-day-num">01</span></div>
+                </div>
+
+                <div style="font-size: 11px; color: #8E8E93; margin-top: 8px; text-align: center;">
+                    Click any date on the calendar to select appointment date.
                 </div>
             </div>
+
+            <!-- HEALTH SERVICES SECTION (Positioned BELOW the calendar when Health Center is selected) -->
+            <div id="health-services-section" class="cal-services-container" style="display: none; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                    <span style="font-size: 11px; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.04em;">
+                        Health Center Services
+                    </span>
+                    <span id="cal-services-counter" style="font-size: 11px; font-weight: 600; color: #1E3A8A; background: #F3F4F6; padding: 1px 6px; border-radius: 4px;">
+                        Available
+                    </span>
+                </div>
+                <p style="font-size: 11px; color: #8E8E93; margin: 0 0 6px 0;">
+                    Click a service below to book.
+                </p>
+                <div id="cal-services-list" class="cal-services-list">
+                    {% for svc in healthcare_services %}
+                    <div class="cal-service-card" data-service-id="{{ svc.id }}" data-service-name="{{ svc.name }}" data-service-date="{{ svc.available_date }}" data-service-time="{{ svc.available_time }}">
+                        <div class="service-card-dot" style="background: #1E3A8A;"></div>
+                        <div style="flex: 1;">
+                            <div class="service-card-datetime">{{ svc.available_date|default:'Monday - Friday' }} • {{ svc.available_time|default:'8:00 AM - 4:00 PM' }}</div>
+                            <div class="service-card-name">{{ svc.name }} <span style="font-weight: 600; color: #111827;">(Free)</span></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: APPLICANT DETAILS FORM & TIME PICKER -->
+        <div>
+            <form id="public-booking-form">
+                {% csrf_token %}
+                <input type="hidden" name="category" id="form-category-input" value="document">
+                <input type="date" name="appt_date" id="modal-date-input" required style="display: none;">
+                <input type="hidden" name="time_window" id="modal-time-slot" value="morning">
+                <input type="hidden" name="time_exact" id="modal-time-exact-value" value="8:00 AM">
+
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <!-- Specific Service Selector -->
+                    <div id="subservice-doc-container">
+                        <label class="form-label-modern" for="modal-doc-select" style="font-size: 11px; font-weight: 700; color: #86868B;">
+                            <span>SELECT DOCUMENT TYPE *</span>
+                        </label>
+                        <div class="input-group-modern">
+                            <select name="document_type" id="modal-doc-select" class="form-control-modern">
+                                {% for dt in document_types %}
+                                <option value="{{ dt.id }}">{{ dt.name }}{% if dt.fee %} (₱{{ dt.fee }}){% endif %}</option>
+                                {% empty %}
+                                <option value="">No document types available</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="subservice-health-container" style="display: none;">
+                        <label class="form-label-modern" for="modal-health-select" style="font-size: 11px; font-weight: 700; color: #86868B;">
+                            <span>SELECTED HEALTH CENTER SERVICE *</span>
+                        </label>
+                        <div class="input-group-modern">
+                            <select name="healthcare_service" id="modal-health-select" class="form-control-modern">
+                                {% for svc in healthcare_services %}
+                                <option value="{{ svc.id }}">{{ svc.name }} (Free)</option>
+                                {% empty %}
+                                <option value="">General Consultation (Free)</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div id="health-service-free-badge" style="font-size: 11px; color: #111827; font-weight: 600; margin-top: 0.35rem; display: flex; align-items: center; gap: 0.35rem;">
+                            {% icon 'circle-check' cls='icon-success' %} Free health center consultation &amp; services (₱0.00)
+                        </div>
+                    </div>
+
+                    <!-- Applicant Identification -->
+                    <div>
+                        <label class="form-label-modern" style="font-size: 11px; font-weight: 700; color: #86868B;">
+                            <span>APPLICANT IDENTIFICATION *</span>
+                        </label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;">
+                            <div class="input-group-modern">
+                                <input type="text" name="first_name" id="input_first_name" placeholder="First Name *" value="{{ request.user.first_name }}" class="form-control-modern" required>
+                            </div>
+                            <div class="input-group-modern">
+                                <input type="text" name="middle_name" id="input_middle_name" placeholder="Middle Name" class="form-control-modern">
+                            </div>
+                            <div class="input-group-modern">
+                                <input type="text" name="last_name" id="input_last_name" placeholder="Last Name *" value="{{ request.user.last_name }}" class="form-control-modern" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Age & Address -->
+                    <div style="display: grid; grid-template-columns: 0.7fr 1.3fr; gap: 0.75rem;">
+                        <div>
+                            <label class="form-label-modern" for="input_age" style="font-size: 11px; font-weight: 700; color: #86868B;">
+                                <span>AGE *</span>
+                            </label>
+                            <div class="input-group-modern">
+                                <input type="number" name="age" id="input_age" min="1" max="120" placeholder="e.g. 28" required class="form-control-modern">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="form-label-modern" for="input_address" style="font-size: 11px; font-weight: 700; color: #86868B;">
+                                <span>RESIDENTIAL ADDRESS *</span>
+                            </label>
+                            <div class="input-group-modern">
+                                <input type="text" name="address" id="input_address" placeholder="House #, Street..." required class="form-control-modern">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Email & Phone -->
+                    <div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 0.75rem;">
+                        <div>
+                            <label class="form-label-modern" for="input_email" style="font-size: 11px; font-weight: 700; color: #86868B;">
+                                <span>EMAIL ADDRESS *</span>
+                            </label>
+                            <div class="input-group-modern">
+                                <input type="email" name="email" id="input_email" placeholder="active.email@example.com" value="{{ request.user.email }}" required class="form-control-modern">
+                            </div>
+                            <div id="email-verification-feedback" style="font-size: 11px; margin-top: 0.2rem; min-height: 16px; display: flex; align-items: center; gap: 0.35rem;"></div>
+                        </div>
+                        <div>
+                            <label class="form-label-modern" for="input_phone_number" style="font-size: 11px; font-weight: 700; color: #86868B;">
+                                <span>PHONE NUMBER *</span>
+                                <span style="font-size: 11px; color: #86868B; font-weight: 500; text-transform: none;">11 digits</span>
+                            </label>
+                            <div class="input-group-modern">
+                                <input type="tel" name="phone_number" id="input_phone_number" maxlength="11" inputmode="numeric" pattern="09[0-9]{9}" autocomplete="tel" title="11 digits starting with 09, e.g. 09171234567" placeholder="09XXXXXXXXX" value="{{ request.user.phone_number }}" required class="form-control-modern" data-phone>
+                            </div>
+                            <div id="phone-feedback" style="font-size: 11px; color: #86868B; margin-top: 0.2rem;">
+                                Must be 11 digits starting with 09
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Purpose -->
+                    <div id="landing-purpose-container">
+                        <label class="form-label-modern" for="input_purpose" style="font-size: 11px; font-weight: 700; color: #86868B;">
+                            <span>PURPOSE OF REQUEST *</span>
+                        </label>
+                        <textarea name="purpose" id="input_purpose" rows="2" class="form-control-modern" placeholder="Describe the purpose of your document clearance or appointment..." required></textarea>
+                    </div>
+
+                    <!-- Time Picker & Schedule & Assistance Row -->
+                    <div style="display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 0.75rem; align-items: start;">
+                        <!-- Time Picker Card -->
+                        <div class="time-picker-card">
+                            <div class="time-picker-header">
+                                <span style="font-size: 0.95rem; font-weight: 700; color: #111827;">Time</span>
+                                <span id="time-picker-badge" class="time-picker-badge">8:00 AM</span>
+                            </div>
+
+                            <div class="time-drum-wrapper" id="time-drum-container">
+                                <div class="time-drum-highlight-bar"></div>
+
+                                <!-- Hour Column -->
+                                <div class="time-drum-col" id="drum-col-hour">
+                                    <div class="time-drum-val-prev" id="time-hour-prev">7</div>
+                                    <div class="time-drum-val-curr" id="time-hour-curr">8</div>
+                                    <div class="time-drum-val-next" id="time-hour-next">9</div>
+                                </div>
+
+                                <!-- Minute Column -->
+                                <div class="time-drum-col" id="drum-col-min">
+                                    <div class="time-drum-val-prev" id="time-min-prev">55</div>
+                                    <div class="time-drum-val-curr" id="time-min-curr">00</div>
+                                    <div class="time-drum-val-next" id="time-min-next">05</div>
+                                </div>
+
+                                <!-- AM/PM Column -->
+                                <div class="time-drum-col" id="drum-col-ampm">
+                                    <div class="time-drum-val-prev" id="time-ampm-prev">PM</div>
+                                    <div class="time-drum-val-curr" id="time-ampm-curr">AM</div>
+                                    <div class="time-drum-val-next" id="time-ampm-next">&nbsp;</div>
+                                </div>
+                            </div>
+
+                            <div style="font-size: 11px; color: #8E8E93; text-align: center; margin-top: 0.5rem;">
+                                Click or scroll numbers to change appointment time.
+                            </div>
+                        </div>
+
+                        <!-- Schedule Preview & Admin Contact -->
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            <!-- Selected Appointment Summary Pill -->
+                            <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; padding: 0.75rem 0.85rem;">
+                                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #86868B; letter-spacing: 0.04em; margin-bottom: 0.2rem;">
+                                    SELECTED SCHEDULE
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.8125rem; font-weight: 700; color: #111827;">
+                                    {% icon 'calendar-check' cls='icon-primary' %}
+                                    <span id="selected-schedule-preview">Select date on calendar</span>
+                                </div>
+                            </div>
+
+                            <!-- Admin Contact Card -->
+                            <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 10px; padding: 0.75rem 0.85rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <div style="width: 30px; height: 30px; border-radius: 6px; background: #F3F4F6; color: #1E3A8A; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
+                                        {% icon 'headset' %}
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #86868B;">BARANGAY ADMIN ASSISTANCE</div>
+                                        <div style="font-size: 0.8125rem; font-weight: 800; color: #111827;">
+                                            {{ admin_phone }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error Banner -->
+                    <div id="booking-error-banner" style="display: none; background: #FFFFFF; border: 1.5px solid #DC2626; border-radius: 8px; padding: 0.65rem 0.85rem; color: #DC2626; font-size: 0.8125rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            {% icon 'triangle-alert' cls='icon-danger' %}
+                            <span id="booking-error-text" style="font-weight: 600;">Please check your input fields.</span>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="btn-submit-public-booking" class="btn btn-primary" style="width: 100%; font-weight: 700; min-height: 42px; font-size: 0.9rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: #0071E3; border: none; color: #FFFFFF; box-shadow: none;">
+                        {% icon 'send' %} Submit Appointment Request
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
 
             <!-- SUCCESS CONFIRMATION MODAL STATE -->
             <div id="modal-success-container" style="display: none; padding: 2.5rem 1.75rem; text-align: center;">
-                <div style="width: 72px; height: 72px; border-radius: 50%; background: #ECFDF5; color: #16A34A; display: flex; align-items: center; justify-content: center; font-size: 2.25rem; margin: 0 auto 1.25rem auto; box-shadow: 0 0 0 10px #D1FAE5; animation: pingSuccess 1s ease;">
-                    <i class="fa-solid fa-check"></i>
+                <div style="width: 72px; height: 72px; border-radius: 50%; background: #FFFFFF; color: #16A34A; display: flex; align-items: center; justify-content: center; font-size: 2.25rem; margin: 0 auto 1.25rem auto; box-shadow: none; animation: pingSuccess 1s ease;">
+                    {% icon 'check' %}
                 </div>
-                <h2 style="font-size: 1.5rem; font-weight: 800; color: #0F172A; margin: 0 0 0.5rem 0;">
+                <h2 style="font-size: 1.5rem; font-weight: 800; color: #111827; margin: 0 0 0.5rem 0;">
                     Appointment Booked Successfully!
                 </h2>
                 <div>
@@ -1018,48 +1296,48 @@
                 </div>
 
                 <!-- REQUIRED NOTIFICATION NOTICE -->
-                <div style="max-width: 680px; margin: 1.5rem auto; background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); border: 1.5px solid #93C5FD; border-radius: 14px; padding: 1.25rem 1.5rem; text-align: left; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);">
+                <div style="max-width: 680px; margin: 1.5rem auto; background: #F3F4F6; border: 1.5px solid #D1D5DB; border-radius: 14px; padding: 1.25rem 1.5rem; text-align: left; box-shadow: none;">
                     <div style="display: flex; gap: 0.85rem; align-items: flex-start;">
-                        <span style="font-size: 1.5rem; color: #2563EB; line-height: 1;">
-                            <i class="fa-solid fa-envelope-circle-check"></i>
+                        <span style="font-size: 1.5rem; color: #1E3A8A; line-height: 1;">
+                            {% icon 'mail-check' %}
                         </span>
                         <div>
                             <div style="font-size: 0.95rem; font-weight: 700; color: #1E3A8A; margin-bottom: 0.35rem;">
                                 Confirmation & Verification in Progress
                             </div>
-                            <p style="font-size: 0.875rem; line-height: 1.6; color: #1E40AF; margin: 0;" id="success-required-message">
-                                Wait for the email sent for approved your appointment date. We will notify via email please keep track on you email. Thank you if you have any question please contact <strong>{{ admin_phone|default:"0917-111-2222" }}</strong>.
+                            <p style="font-size: 0.875rem; line-height: 1.6; color: #1E3A8A; margin: 0;" id="success-required-message">
+                                Wait for the email sent for approved your appointment date. We will notify via email please keep track on you email. Thank you if you have any question please contact <strong>{{ admin_phone }}</strong>.
                             </p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Booking Summary Card -->
-                <div style="max-width: 680px; margin: 0 auto 1.75rem auto; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.15rem; text-align: left; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;" class="modal-side-grid">
+                <div style="max-width: 680px; margin: 0 auto 1.75rem auto; background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.15rem; text-align: left; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;" class="modal-side-grid">
                     <div>
-                        <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #64748B;">Applicant Name</div>
-                        <div style="font-size: 0.95rem; font-weight: 700; color: #0F172A;" id="summary-applicant-name">-</div>
+                        <div style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #6B7280;">Applicant Name</div>
+                        <div style="font-size: 0.95rem; font-weight: 700; color: #111827;" id="summary-applicant-name">-</div>
                     </div>
                     <div>
-                        <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #64748B;">Requested Service</div>
-                        <div style="font-size: 0.95rem; font-weight: 700; color: #2563EB;" id="summary-service-title">-</div>
+                        <div style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #6B7280;">Requested Service</div>
+                        <div style="font-size: 0.95rem; font-weight: 700; color: #1E3A8A;" id="summary-service-title">-</div>
                     </div>
                     <div>
-                        <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #64748B;">Scheduled Date & Time</div>
-                        <div style="font-size: 0.875rem; font-weight: 700; color: #0F172A;" id="summary-schedule">-</div>
+                        <div style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #6B7280;">Scheduled Date & Time</div>
+                        <div style="font-size: 0.875rem; font-weight: 700; color: #111827;" id="summary-schedule">-</div>
                     </div>
                     <div>
-                        <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #64748B;">Notification Email & Phone</div>
-                        <div style="font-size: 0.875rem; font-weight: 700; color: #0F172A;" id="summary-contact">-</div>
+                        <div style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #6B7280;">Notification Email & Phone</div>
+                        <div style="font-size: 0.875rem; font-weight: 700; color: #111827;" id="summary-contact">-</div>
                     </div>
                 </div>
 
                 <div style="display: flex; justify-content: center; gap: 0.75rem;">
-                    <button type="button" class="btn btn-secondary" onclick="resetAndBookAnother()" style="font-weight: 700; min-height: 42px; padding: 0 1.25rem;">
-                        <i class="fa-solid fa-plus" style="margin-right: 0.35rem;"></i> Book Another
+                    <button type="button" class="btn btn-secondary" data-call="resetAndBookAnother" style="font-weight: 700; min-height: 42px; padding: 0 1.25rem;">
+                        {% icon 'plus' %} Book Another
                     </button>
-                    <button type="button" class="btn btn-primary" onclick="closeBookAppointmentModal()" style="font-weight: 700; min-height: 42px; padding: 0 1.5rem; background: #2563EB;">
-                        <i class="fa-solid fa-check" style="margin-right: 0.35rem;"></i> Done & Return Home
+                    <button type="button" class="btn btn-primary" data-call="closeBookAppointmentModal" style="font-weight: 700; min-height: 42px; padding: 0 1.5rem; background: #1E3A8A;">
+                        {% icon 'check' %} Done & Return Home
                     </button>
                 </div>
             </div>
@@ -1067,251 +1345,8 @@
     </div>
 
     <!-- Scripts -->
-    <script>
-        var bookingCalendar = null;
-        var emailValidationTimeout = null;
-        var isEmailChecking = false;
-
-        function openRegisterModal() {
-            closeLoginModal();
-            document.getElementById('registerModal').style.display = 'flex';
-        }
-        function closeRegisterModal() {
-            document.getElementById('registerModal').style.display = 'none';
-        }
-
-        function openLoginModal() {
-            closeRegisterModal();
-            document.getElementById('loginModal').style.display = 'flex';
-        }
-        function closeLoginModal() {
-            document.getElementById('loginModal').style.display = 'none';
-        }
-
-        function switchToLogin() {
-            closeRegisterModal();
-            openLoginModal();
-        }
-        function switchToRegister() {
-            closeLoginModal();
-            openRegisterModal();
-        }
-
-        function openBookAppointmentModal() {
-            var modal = document.getElementById('bookAppointmentModal');
-            document.getElementById('modal-body-container').style.display = 'grid';
-            document.getElementById('modal-success-container').style.display = 'none';
-            modal.style.display = 'flex';
-
-            // Set default date to tomorrow
-            var tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            var dateStr = tomorrow.toISOString().split('T')[0];
-            var dateInput = document.getElementById('modal-date-input');
-            if (dateInput && !dateInput.value) {
-                dateInput.value = dateStr;
-                dateInput.min = new Date().toISOString().split('T')[0];
-            }
-
-            // Initialize or render calendar
-            setTimeout(function() {
-                var calEl = document.getElementById('booking-modal-calendar');
-                if (calEl && !bookingCalendar) {
-                    bookingCalendar = new FullCalendar.Calendar(calEl, {
-                        initialView: 'dayGridMonth',
-                        headerToolbar: {
-                            left: 'prev,next',
-                            center: 'title',
-                            right: 'today'
-                        },
-                        selectable: true,
-                        dateClick: function(info) {
-                            var todayStr = new Date().toISOString().split('T')[0];
-                            if (info.dateStr < todayStr) {
-                                alert("Please select today or a future date for appointments.");
-                                return;
-                            }
-                            document.getElementById('modal-date-input').value = info.dateStr;
-                        }
-                    });
-                    bookingCalendar.render();
-                } else if (bookingCalendar) {
-                    bookingCalendar.updateSize();
-                }
-            }, 100);
-        }
-
-        function closeBookAppointmentModal() {
-            document.getElementById('bookAppointmentModal').style.display = 'none';
-        }
-
-        function switchCategory(cat) {
-            var pillDoc = document.getElementById('pill-doc');
-            var pillHealth = document.getElementById('pill-health');
-            var catInput = document.getElementById('form-category-input');
-            var docContainer = document.getElementById('subservice-doc-container');
-            var healthContainer = document.getElementById('subservice-health-container');
-
-            if (cat === 'document') {
-                pillDoc.classList.add('active');
-                pillHealth.classList.remove('active');
-                catInput.value = 'document';
-                docContainer.style.display = 'block';
-                healthContainer.style.display = 'none';
-            } else {
-                pillHealth.classList.add('active');
-                pillDoc.classList.remove('active');
-                catInput.value = 'healthcare';
-                docContainer.style.display = 'none';
-                healthContainer.style.display = 'block';
-            }
-        }
-
-        // Phone number restriction: strictly 11 digits
-        function enforcePhone11Digits(input) {
-            var val = input.value.replace(/[^0-9]/g, '');
-            if (val.length > 11) {
-                val = val.substring(0, 11);
-            }
-            input.value = val;
-
-            var feedback = document.getElementById('phone-feedback');
-            if (val.length === 11) {
-                if (val.startsWith('09')) {
-                    feedback.innerHTML = '<span style="color: #16A34A;"><i class="fa-solid fa-check"></i> Valid 11-digit mobile number</span>';
-                    input.classList.remove('input-error');
-                } else {
-                    feedback.innerHTML = '<span style="color: #DC2626;"><i class="fa-solid fa-xmark"></i> Must start with 09 (e.g. 09171234567)</span>';
-                    input.classList.add('input-error');
-                }
-            } else if (val.length > 0) {
-                feedback.innerHTML = '<span style="color: #D97706;">' + val.length + '/11 digits entered</span>';
-            } else {
-                feedback.innerHTML = 'Must be 11 digits starting with 09';
-                input.classList.remove('input-error');
-            }
-        }
-
-        // Live Abstract API Email validation
-        function validateEmailLive(email) {
-            var feedback = document.getElementById('email-verification-feedback');
-            var emailInput = document.getElementById('input_email');
-            email = (email || '').trim();
-
-            if (!email) {
-                feedback.innerHTML = '';
-                emailInput.classList.remove('input-error');
-                return;
-            }
-
-            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                feedback.innerHTML = '<span style="color: #DC2626;"><i class="fa-solid fa-circle-exclamation"></i> Invalid email format</span>';
-                emailInput.classList.add('input-error');
-                return;
-            }
-
-            fetch('/appointments/api/validate-email/?email=' + encodeURIComponent(email))
-                .then(function(res) { return res.json(); })
-                .then(function(data) {
-                    if (data.valid) {
-                        feedback.innerHTML = '';
-                        emailInput.classList.remove('input-error');
-                    } else {
-                        feedback.innerHTML = '<span style="color: #DC2626; font-weight: 600;"><i class="fa-solid fa-circle-exclamation"></i> ' + (data.message || 'Suspicious or invalid email') + '</span>';
-                        emailInput.classList.add('input-error');
-                    }
-                })
-                .catch(function() {
-                    feedback.innerHTML = '';
-                    emailInput.classList.remove('input-error');
-                });
-        }
-
-        // Handle AJAX submission
-        function handlePublicBookingSubmit(e) {
-            e.preventDefault();
-            var form = document.getElementById('public-booking-form');
-            var btn = document.getElementById('btn-submit-public-booking');
-            var errBanner = document.getElementById('booking-error-banner');
-            var errText = document.getElementById('booking-error-text');
-
-            // Quick phone check
-            var phoneVal = document.getElementById('input_phone_number').value.replace(/[^0-9]/g, '');
-            if (phoneVal.length !== 11) {
-                errBanner.style.display = 'block';
-                errText.innerText = "Phone number must be exactly 11 digits (e.g. 09171234567).";
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting & Verifying with Abstract API...';
-            errBanner.style.display = 'none';
-
-            var formData = new FormData(form);
-
-            fetch('/appointments/api/public-book/', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(function(response) {
-                return response.json().then(function(data) {
-                    return { ok: response.ok, data: data };
-                });
-            })
-            .then(function(res) {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Appointment Request';
-
-                if (res.ok && res.data.status === 'ok') {
-                    // Populate success view
-                    document.getElementById('success-ref-badge').innerText = res.data.ref_number || 'REF #APT-NEW';
-                    document.getElementById('summary-applicant-name').innerText = res.data.applicant_name;
-                    document.getElementById('summary-service-title').innerText = res.data.service_title;
-                    document.getElementById('summary-schedule').innerText = res.data.scheduled_date + ' (' + res.data.time_slot + ')';
-                    document.getElementById('summary-contact').innerText = res.data.applicant_email + ' | ' + res.data.applicant_phone;
-                    document.getElementById('success-required-message').innerHTML = 'Wait for the email sent for approved your appointment date. We will notify via email please keep track on you email. Thank you if you have any question please contact <strong>' + (res.data.admin_phone || '0917-111-2222') + '</strong>.';
-
-                    // Swap view
-                    document.getElementById('modal-body-container').style.display = 'none';
-                    document.getElementById('modal-success-container').style.display = 'block';
-                    form.reset();
-                } else {
-                    errBanner.style.display = 'block';
-                    if (res.data.errors) {
-                        var firstErrKey = Object.keys(res.data.errors)[0];
-                        errText.innerText = res.data.errors[firstErrKey];
-                    } else {
-                        errText.innerText = res.data.message || 'Error booking appointment. Please review the form.';
-                    }
-                }
-            })
-            .catch(function(err) {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Appointment Request';
-                errBanner.style.display = 'block';
-                errText.innerText = 'Network error or connection timed out. Please try again.';
-            });
-        }
-
-        function resetAndBookAnother() {
-            document.getElementById('modal-body-container').style.display = 'grid';
-            document.getElementById('modal-success-container').style.display = 'none';
-        }
-
-        // Close on backdrop click
-        document.addEventListener('click', function(e) {
-            var regModal = document.getElementById('registerModal');
-            var logModal = document.getElementById('loginModal');
-            var bookModal = document.getElementById('bookAppointmentModal');
-
-            if (e.target === regModal) closeRegisterModal();
-            if (e.target === logModal) closeLoginModal();
-            if (e.target === bookModal) closeBookAppointmentModal();
-        });
-    </script>
+    <script src="{% static 'js/icons.js' %}"></script>
+    <script src="{% static 'js/phone_input.js' %}"></script>
+    <script src="{% static 'js/landing.js' %}"></script>
 </body>
 </html>

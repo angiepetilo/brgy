@@ -1,0 +1,10 @@
+{
+  "verdict": "APPROVED",
+  "findings": [
+    "Stale legacy status literals in UI (confirmed, non-blocking, pre-existing): appointment_detail.html, appointments/table.html, the appointment_list.html edit-modal select and status_order in appointments/views.py still use submitted/under_review/approved_scheduled/ready_for_pickup. Approve shows for already approved rows and Complete/No-Show never appear. Replace with pending/approved/completed/rejected/no_show in a cleanup pass before Stage 2 touches these templates, and add a test for an approved row.",
+    "Lossy rejection_reason fold in migration 0014 (confirmed, low likelihood): a non-rejected row with both admin_notes and a different rejection_reason loses the rejection text. Append it to admin_notes instead of discarding and add a test row. The live DB is not migrated yet, so the fix is cheap.",
+    "Historical fee_at_booking is NULL (confirmed): the 4 local rows have no snapshot. Stage 5 revenue must treat NULL explicitly, or backfill with a documented decision.",
+    "Missing test coverage (likely): no test for the two-different-notes case in 0014, none for Complete/No-Show on an approved appointment, none for MySQL (not reachable)."
+  ],
+  "reviewDoc": "c:\\brgy/.agents/tasks/review-stage01.md"
+}

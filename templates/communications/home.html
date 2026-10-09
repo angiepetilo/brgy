@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load static core_tags %}
+
+{% block title %}Barangay Home{% endblock %}
+
+{% block content %}
+<div class="feed-container" style="max-width: 760px; margin: 0 auto;">
+
+
+    <!-- Post creation (Admin and staff only) -->
+    {% if can_publish %}
+        {% include 'includes/post_trigger_bar.html' %}
+        {% include 'includes/create_post_modal.html' %}
+        {% include 'includes/edit_post_modal.html' %}
+    {% endif %}
+
+
+
+    <!-- Feed Cards Stream -->
+    {% if announcements %}
+    <h2 class="civic-section-title" id="feed-latest-title">{% icon 'newspaper' %} Latest posts</h2>
+    <div class="feed-cards-stream" data-section="feed" aria-labelledby="feed-latest-title" style="display: flex; flex-direction: column; gap: 1.25rem;">
+        {% for post in announcements %}
+        <article class="card feed-card" id="post-{{ post.id }}" style="padding: 0;">
+            
+            <!-- Feed Card Header -->
+            <div class="feed-card-header" style="padding: 1rem 1.25rem 0.75rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; border-bottom: 1px solid #F3F4F6;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <!-- Author Avatar or Initials -->
+                    <div style="width: 42px; height: 42px; background: #1F2937; color: #FFFFFF; font-weight: 700; font-size: 0.875rem; display: flex; align-items: center; justify-content: center; border: 1px solid #374151; flex-shrink: 0;">
+                        {% if post.author.avatar %}
+                            <img src="{{ post.author.avatar.url }}" alt="{{ post.author.username }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            {{ post.author.initials|default:"BG" }}
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 0.875rem; color: #111827; line-height: 1.2; display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
+                            <span>{{ post.author|display_name:"Barangay Official" }}</span>
+                            <span class="badge badge-secondary" style="font-size: 0.875rem; padding: 1px 4px; font-weight: 700;">[{{ post.author_position|upper }}]</span>
+                        </div>
+                        <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.15rem;">
+                            {% icon 'clock' cls='icon-sm' %} {{ post.created_at|date:"M d, Y" }} at {{ post.created_at|date:"h:i A" }}
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.35rem;">
+                    <div style="display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+                        {% if post.category == 'emergency' %}
+                            <span class="badge badge-danger">{% icon 'triangle-alert' %} EMERGENCY ALERT</span>
+                        {% elif post.category == 'event' %}
+                            <span class="badge badge-success">{% icon 'calendar-check' %} UPCOMING EVENT</span>
+                        {% elif post.category == 'scholarship' %}
+                            <span class="badge badge-info" style="background: #1E3A8A; color: #FFFFFF;">{% icon 'graduation-cap' %} SCHOLARSHIP</span>
+                        {% elif post.category == 'donation' %}
+                            <span class="badge badge-warning" style="background: #374151; color: #FFFFFF;">{% icon 'hand-coins' %} DONATION</span>
+                        {% elif post.category == 'legislative' %}
+                            <span class="badge badge-info">{% icon 'landmark' %} LEGISLATIVE (ORDINANCE/EO)</span>
+                        {% else %}
+                            <span class="badge badge-primary">{% icon 'megaphone' %} {{ post.get_category_display|upper }}</span>
+                        {% endif %}
+
+                        {% if post.is_pinned %}
+                            <span class="badge badge-warning" style="font-size: 0.875rem;">{% icon 'pin' %} PINNED</span>
+                        {% endif %}
+                    </div>
+
+                    {% if can_publish %}
+                    <div class="post-card-menu-container">
+                        <button type="button" class="post-menu-trigger" data-post-action="toggle-menu" data-menu-id="post-menu-{{ post.id }}" aria-label="Post actions" title="More options">
+                            {% icon 'ellipsis' %}
+                        </button>
+                        <div id="post-menu-{{ post.id }}" class="post-dropdown-menu">
+                            <a href="{% url 'communications:edit_announcement' post.id %}?next={{ request.path }}"
+                               class="dropdown-item"
+                               data-id="{{ post.id }}"
+                               data-title="{{ post.title }}"
+                               data-content="{{ post.content }}"
+                               data-category="{{ post.category_ref.name|default:post.get_category_display }}"
+                               data-image-url="{% if post.image %}{{ post.image.url }}{% endif %}"
+                               data-is-pinned="{% if post.is_pinned %}true{% else %}false{% endif %}"
+                               data-action-url="{% url 'communications:edit_announcement' post.id %}?next={{ request.path|urlencode }}"
+                               data-post-action="open-edit">
+                                {% icon 'square-pen' %} Edit Post
+                            </a>
+                            <form action="{% url 'communications:toggle_pin_announcement' post.id %}" method="post" style="margin: 0;">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.path }}">
+                                <button type="submit" class="dropdown-item">
+                                    {% if post.is_pinned %}
+                                        {% icon 'pin' %} Unpin Post
+                                    {% else %}
+                                        {% icon 'pin' %} Pin Post
+                                    {% endif %}
+                                </button>
+                            </form>
+                            <form action="{% url 'communications:delete_announcement' post.id %}" method="post" style="margin: 0;" data-confirm="Are you sure you want to permanently delete this post?">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.path }}">
+                                <button type="submit" class="dropdown-item danger">
+                                    {% icon 'trash-2' %} Delete Post
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Feed Card Body -->
+            <div class="feed-card-body" style="padding: 1.25rem;">
+                <h2 style="font-size: 1.125rem; font-weight: 700; color: #111827; margin: 0 0 0.75rem 0; line-height: 1.35;">
+                    <a href="{% url 'communications:announcement_detail' post.id %}" style="color: inherit; text-decoration: none;">
+                        {{ post.title }}
+                    </a>
+                </h2>
+
+                <div class="feed-markdown-content" style="font-size: 1rem; line-height: 1.6; color: #374151; margin-bottom: 1rem;">
+                    {{ post.content|linebreaksbr }}
+                </div>
+
+                {% if post.image %}
+                <div style="margin-top: 0.75rem; margin-bottom: 0.75rem; max-height: 420px; overflow: hidden; background: #F9FAFB; border: 1px solid #E5E7EB;">
+                    <img src="{{ post.image.url }}" alt="{{ post.title }}" style="width: 100%; height: auto; max-height: 420px; object-fit: contain; display: block;">
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Clean Interactions Bar (Comments Only) -->
+            <div class="feed-interactions-bar" style="padding: 0.625rem 1.25rem; background: #F9FAFB; border-top: 1px solid #E5E7EB; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: flex-end; align-items: center;">
+                <!-- Comment Toggle Button -->
+                <button type="button" class="btn btn-sm btn-secondary comment-toggle-btn" data-toggle-comments="comments-section-{{ post.id }}" style="min-height: 36px; font-weight: 700;">
+                    {% icon 'messages-square' %} Comments (<span class="comments-counter-{{ post.id }}">{{ post.comments.all|length }}</span>)
+                </button>
+            </div>
+
+
+            <!-- Collapsible Comments Section -->
+            <div id="comments-section-{{ post.id }}" class="feed-comments-section" style="padding: 1rem 1.25rem; background: #FFFFFF;">
+                
+                <!-- Existing Comments Thread -->
+                <div class="comments-list" id="comments-list-{{ post.id }}" style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem;">
+                    {% if post.comments.all %}
+                        {% for comment in post.comments.all %}
+                        <div class="comment-item" style="padding: 0.65rem 0.75rem; background: #F9FAFB; border: 1px solid #E5E7EB;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="font-weight: 700; font-size: 0.875rem; color: #1F2937; background: #E5E7EB; padding: 2px 5px;">
+                                        {{ comment.author.initials|default:"RD" }}
+                                    </span>
+                                    <span style="font-weight: 700; font-size: 0.875rem; color: #111827;">
+                                        {{ comment.author.get_full_name|default:comment.author.username }}
+                                    </span>
+                                </div>
+                                <span style="font-size: 0.875rem; color: #6B7280;">
+                                    {{ comment.created_at|date:"M d, H:i" }}
+                                </span>
+                            </div>
+                            <div style="font-size: 0.875rem; color: #374151; line-height: 1.4;">
+                                {{ comment.content }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-comments-hint" style="font-size: 0.875rem; color: #6B7280; font-style: italic;">
+                            {% icon 'message-square-text' %} No comments yet. Be the first to share your thoughts.
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Instant Comment Input Form -->
+                <form action="{% url 'communications:comment_post' post.id %}" method="post" class="feed-comment-form" data-post-id="{{ post.id }}" style="display: flex; gap: 0.5rem;">
+                    {% csrf_token %}
+                    <input type="text" name="content" class="form-control comment-input" placeholder="Write a comment or question..." required style="flex: 1; font-size: 0.875rem; min-height: 44px;">
+                    <button type="submit" class="btn btn-primary" style="font-weight: 700; min-height: 44px; padding: 0 1.25rem; white-space: nowrap;">
+                        {% icon 'send' %} Comment
+                    </button>
+                </form>
+            </div>
+
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card" data-section="feed" style="text-align: center; padding: 3rem 1.5rem;">
+        <h3 style="font-size: 1.125rem; font-weight: 700; color: #111827; margin-bottom: 0.5rem;">NO POSTS FOUND IN THIS CATEGORY</h3>
+        <p style="font-size: 0.875rem; color: #6B7280; margin-bottom: 1.25rem;">Select "ALL POSTS" or publish a new official update above.</p>
+        <a href="{% url 'communications:feed' %}" class="btn btn-primary" style="font-weight: 700;">VIEW ALL POSTS</a>
+    </div>
+    {% endif %}
+
+</div>
+
+<script src="{% static 'js/post_modal.js' %}"></script>
+<script src="{% static 'js/home.js' %}"></script>
+{% endblock %}
+
+{% block right_sidebar %}
+{% include 'includes/right_sidebar.html' %}
+{% endblock %}

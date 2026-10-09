@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static core_tags %}
 
 {% block title %}{{ title }} - Barangay e-Portal{% endblock %}
 
 {% block content %}
 <div class="post-standalone-card-container">
     
-    <a href="{{ next_url|default:'/communications/' }}" class="post-standalone-back">
-        <i class="fa-solid fa-arrow-left"></i> BACK TO FEED
+    <a href="{{ next_url|default:'/home/' }}" class="post-standalone-back">
+        {% icon 'arrow-left' %} BACK TO FEED
     </a>
 
-    <div class="post-modal-content" style="max-width: 100%; border: 1px solid #E2E8F0; box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;">
+    <div class="post-modal-content" style="max-width: 100%; border: 1px solid #E5E7EB; box-shadow: none !important;">
         
         <div class="post-modal-header">
             <h3 class="modal-title">{% if is_edit %}Edit Announcement / Post{% else %}Create Announcement / Post{% endif %}</h3>
@@ -41,7 +41,7 @@
                     
                     <!-- Dynamic Category Pill Select -->
                     <div class="category-select-pill">
-                        <i class="fa-solid fa-tag"></i>
+                        {% icon 'tag' %}
                         <select name="category" id="standaloneCategorySelect" aria-label="Select post category">
                             {% if dynamic_categories %}
                                 {% for cat in dynamic_categories %}
@@ -67,24 +67,24 @@
                 <!-- Live Image Preview Container -->
                 <div id="standaloneImagePreviewWrapper" class="image-preview-container" style="{% if not announcement or not announcement.image %}display: none;{% endif %}">
                     <img id="standaloneImagePreviewElement" src="{% if announcement and announcement.image %}{{ announcement.image.url }}{% endif %}" alt="Attached media preview">
-                    <button type="button" class="btn-remove-preview" onclick="clearStandaloneImage()" title="Remove photo" aria-label="Remove image">
-                        <i class="fa-solid fa-xmark"></i>
+                    <button type="button" class="btn-remove-preview" data-form-action="clear-image" title="Remove photo" aria-label="Remove image">
+                        {% icon 'x' %}
                     </button>
                 </div>
             </div>
 
             <!-- Hidden file input for Photo / Media -->
-            <input type="file" name="image" id="standaloneImageFileInput" accept="image/*" style="display: none;" onchange="handleStandaloneImage(this)">
+            <input type="file" name="image" id="standaloneImageFileInput" accept="image/*" style="display: none;">
 
             <div class="add-to-post-card">
                 <span class="add-label">Update post media</span>
                 <div class="attachment-icons">
-                    <button type="button" class="icon-btn media" title="Attach / Replace Photo" onclick="document.getElementById('standaloneImageFileInput').click();" aria-label="Attach Photo">
-                        <i class="fa-solid fa-images"></i>
+                    <button type="button" class="icon-btn media" title="Attach / Replace Photo" data-action="click-target" data-target="#standaloneImageFileInput" aria-label="Attach Photo">
+                        {% icon 'images' %}
                     </button>
                     <label class="icon-btn pin" title="Pin to top of feed" style="cursor: pointer; margin: 0; opacity: {% if form.is_pinned.value %}1{% else %}0.5{% endif %};" aria-label="Pin to top">
-                        <input type="checkbox" name="is_pinned" id="standaloneIsPinned" value="1" {% if form.is_pinned.value %}checked{% endif %} style="display: none;" onchange="this.parentElement.style.opacity = this.checked ? '1' : '0.5'">
-                        <i class="fa-solid fa-thumbtack"></i>
+                        <input type="checkbox" name="is_pinned" id="standaloneIsPinned" value="1" {% if form.is_pinned.value %}checked{% endif %} style="display: none;" data-pin-toggle>
+                        {% icon 'pin' %}
                     </label>
                 </div>
             </div>
@@ -101,31 +101,5 @@
     </div>
 </div>
 
-<script>
-function handleStandaloneImage(fileInput) {
-    const previewWrapper = document.getElementById('standaloneImagePreviewWrapper');
-    const previewImg = document.getElementById('standaloneImagePreviewElement');
-    if (fileInput && fileInput.files && fileInput.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            if (previewImg && previewWrapper) {
-                previewImg.src = e.target.result;
-                previewWrapper.style.display = 'block';
-            }
-        };
-        reader.readAsDataURL(fileInput.files[0]);
-    }
-}
-
-function clearStandaloneImage() {
-    const fileInput = document.getElementById('standaloneImageFileInput');
-    const previewWrapper = document.getElementById('standaloneImagePreviewWrapper');
-    const previewImg = document.getElementById('standaloneImagePreviewElement');
-    const clearFlag = document.getElementById('standaloneClearImageFlag');
-    if (fileInput) fileInput.value = '';
-    if (previewImg) previewImg.src = '';
-    if (previewWrapper) previewWrapper.style.display = 'none';
-    if (clearFlag) clearFlag.value = '1';
-}
-</script>
+<script src="{% static 'js/announcement_form.js' %}"></script>
 {% endblock %}

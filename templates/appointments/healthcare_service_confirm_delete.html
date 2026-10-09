@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
+{% load core_tags %}
 
 {% block title %}Delete Health Care Service - Barangay e-Portal{% endblock %}
 
 {% block content %}
 <div style="max-width: 550px; margin: 2rem auto; padding: 0 1rem;">
-    <div class="card" style="border: 1px solid #E2E8F0; border-radius: 8px; box-shadow: none; background: #FFFFFF; text-align: center; padding: 2rem 1.5rem;">
-        <i class="fa-solid fa-triangle-exclamation" style="font-size: 3rem; color: #DC2626; margin-bottom: 1rem;"></i>
-        <h2 style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin-bottom: 0.5rem;">Delete Health Service?</h2>
-        <p style="color: #64748B; font-size: 0.875rem; margin-bottom: 1.5rem;">
+    <div class="card" style="border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: none; background: #FFFFFF; text-align: center; padding: 2rem 1.5rem;">
+        {% icon 'triangle-alert' cls='icon-lg icon-danger' %}
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.5rem;">Delete Health Service?</h2>
+        <p style="color: #6B7280; font-size: 0.875rem; margin-bottom: 1.5rem;">
             Are you sure you want to permanently remove <strong>{{ service.name }}</strong>? Residents will no longer be able to schedule appointments for this service.
         </p>
 

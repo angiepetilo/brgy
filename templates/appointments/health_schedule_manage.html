@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static core_tags %}
+
+{% block title %}Manage Health Schedules | BARANGAY.PH{% endblock %}
+
+{% block content %}
+<div class="content-wrapper" style="max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="margin: 0; font-size: 1.6rem; font-weight: 800; color: #111827;">Manage Health Center Schedules</h1>
+            <p style="margin: 0; font-size: 0.875rem; color: #6B7280;">Staff schedule configuration for Barangay Health Center slots</p>
+        </div>
+        <a href="{% url 'appointments:list' %}" class="btn-outline-modern" style="padding: 0.6rem 1.1rem; border-radius: 10px; font-weight: 600; font-size: 0.875rem; text-decoration: none;">
+            {% icon 'arrow-left' %} Appointments
+        </a>
+    </div>
+
+    <!-- Create Schedule Form Card -->
+    <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: none;">
+        <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 700; color: #111827;">Post New Schedule Slot</h3>
+        <form method="POST" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) auto; gap: 1rem; align-items: end;">
+            {% csrf_token %}
+            <input type="hidden" name="create_schedule" value="1">
+            <div>
+                <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; margin-bottom: 0.35rem;">Health Service</label>
+                <select name="health_service_id" required style="width: 100%; padding: 0.6rem; border: 1px solid #D1D5DB; border-radius: 8px;">
+                    {% for svc in health_services %}
+                    <option value="{{ svc.id }}">{{ svc.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; margin-bottom: 0.35rem;">Date</label>
+                <input type="date" name="service_date" required style="width: 100%; padding: 0.6rem; border: 1px solid #D1D5DB; border-radius: 8px;">
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; margin-bottom: 0.35rem;">Time Window</label>
+                <select name="time_window" style="width: 100%; padding: 0.6rem; border: 1px solid #D1D5DB; border-radius: 8px;">
+                    <option value="morning">Morning (8:00 AM - 11:30 AM)</option>
+                    <option value="afternoon">Afternoon (1:00 PM - 4:30 PM)</option>
+                </select>
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; margin-bottom: 0.35rem;">Capacity</label>
+                <input type="number" name="capacity" value="20" min="1" max="500" required style="width: 100%; padding: 0.6rem; border: 1px solid #D1D5DB; border-radius: 8px;">
+            </div>
+            <div>
+                <button type="submit" style="padding: 0.65rem 1.25rem; background: #16A34A; color: #FFFFFF; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">
+                    {% icon 'plus' %} Add Slot
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Active Schedules Table -->
+    <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 16px; overflow: hidden; box-shadow: none;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem;">
+            <thead>
+                <tr style="background: #F9FAFB; border-bottom: 1px solid #E5E7EB; color: #4B5563; font-size: 0.875rem; text-transform: uppercase;">
+                    <th style="padding: 1rem 1.5rem;">Service</th>
+                    <th style="padding: 1rem;">Date</th>
+                    <th style="padding: 1rem;">Time Window</th>
+                    <th style="padding: 1rem; text-align: center;">Capacity</th>
+                    <th style="padding: 1rem 1.5rem; text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in schedules %}
+                <tr style="border-bottom: 1px solid #F3F4F6;">
+                    <td style="padding: 1rem 1.5rem; font-weight: 700; color: #111827;">{{ s.health_service.name }}</td>
+                    <td style="padding: 1rem; color: #374151;">{{ s.service_date|date:"M d, Y" }}</td>
+                    <td style="padding: 1rem; color: #4B5563;">{{ s.get_time_window_display }}</td>
+                    <td style="padding: 1rem; text-align: center; font-weight: 600;">{{ s.capacity }}</td>
+                    <td style="padding: 1rem 1.5rem; text-align: right;">
+                        <a href="{% url 'appointments:schedule_edit' s.id %}" style="color: #1E3A8A; font-weight: 600; margin-right: 0.75rem; text-decoration: none;">Edit</a>
+                        <a href="{% url 'appointments:schedule_delete' s.id %}" style="color: #DC2626; font-weight: 600; text-decoration: none;">Delete</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="padding: 2.5rem; text-align: center; color: #6B7280;">No schedules posted.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

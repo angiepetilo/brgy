@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load core_tags %}
+
+{% block title %}403 - Access Denied | Barangay e-Portal{% endblock %}
+
+{% block content %}
+<div style="max-width: 560px; margin: 4rem auto; text-align: center; padding: 2rem;">
+    <div style="width: 80px; height: 80px; border-radius: 50%; background: #FFFFFF; color: #DC2626; display: inline-flex; align-items: center; justify-content: center; font-size: 2.25rem; margin-bottom: 1.5rem; box-shadow: none;">
+        {% icon 'shield-half' %}
+    </div>
+    <div style="font-size: 0.875rem; font-weight: 700; color: #DC2626; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem;">
+        Error 403 &bull; Forbidden
+    </div>
+    <h1 style="font-size: 1.85rem; font-weight: 800; color: #111827; margin: 0 0 0.75rem 0; letter-spacing: -0.02em;">
+        Access Denied
+    </h1>
+    <p style="color: #6B7280; font-size: 0.95rem; line-height: 1.6; margin: 0 auto 2rem auto;">
+        You do not have the required permissions or assignments to access this resource. If you believe this is an error, please contact the Barangay Administrator.
+    </p>
+    <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+        <a href="{% url 'home' %}" class="btn btn-primary" style="font-weight: 700; padding: 0.65rem 1.5rem; border-radius: 8px;">
+            {% icon 'house' %} Return Home
+        </a>
+        <a href="/" data-action="back" class="btn btn-secondary" style="font-weight: 700; padding: 0.65rem 1.5rem; border-radius: 8px;">
+            {% icon 'arrow-left' %} Go Back
+        </a>
+    </div>
+</div>
+{% endblock %}

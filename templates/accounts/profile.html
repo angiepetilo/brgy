@@ -7,18 +7,18 @@
 
     <!-- Page Header -->
     <div class="page-header" style="margin-bottom: 1.25rem;">
-        <h1 style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin: 0; text-transform: uppercase;">
+        <h1 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin: 0; text-transform: uppercase;">
             Profile & Avatar Management
         </h1>
-        <p style="color: #64748B; font-size: 0.8125rem; margin: 0.25rem 0 0 0;">
+        <p style="color: #6B7280; font-size: 0.875rem; margin: 0.25rem 0 0 0;">
             Update your public profile, avatar image, and live duty status message
         </p>
     </div>
 
     <!-- Avatar Management Card -->
-    <div class="card" style="margin-bottom: 1.5rem; border: 1px solid #E2E8F0; border-radius: 8px; box-shadow: none; background: #FFFFFF;">
-        <div class="card-header" style="background: #FFFFFF; color: #0F172A; border-bottom: 1px solid #E2E8F0; padding: 0.75rem 1rem;">
-            <span style="font-weight: 700; font-size: 0.8125rem; letter-spacing: 0.05em; text-transform: uppercase;">
+    <div class="card" style="margin-bottom: 1.5rem; border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: none; background: #FFFFFF;">
+        <div class="card-header" style="background: #FFFFFF; color: #111827; border-bottom: 1px solid #E5E7EB; padding: 0.75rem 1rem;">
+            <span style="font-weight: 700; font-size: 0.875rem; letter-spacing: 0.05em; text-transform: uppercase;">
                 OFFICIAL AVATAR BADGE
             </span>
         </div>
@@ -26,7 +26,7 @@
             <div style="display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap;">
                 
                 <!-- Avatar Visual Display -->
-                <div style="width: 80px; height: 80px; background: #1B2430; color: #FFFFFF; font-weight: 800; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; border: 2px solid #334155; flex-shrink: 0;">
+                <div style="width: 80px; height: 80px; background: #1F2937; color: #FFFFFF; font-weight: 800; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; border: 2px solid #374151; flex-shrink: 0;">
                     {% if user_obj.avatar %}
                         <img src="{{ user_obj.avatar.url }}" alt="{{ user_obj.username }}" style="width: 100%; height: 100%; object-fit: cover;">
                     {% else %}
@@ -35,10 +35,10 @@
                 </div>
 
                 <div style="flex: 1; min-width: 200px;">
-                    <div style="font-weight: 700; font-size: 1rem; color: #0F172A;">
+                    <div style="font-weight: 700; font-size: 1rem; color: #111827;">
                         {{ user_obj.get_full_name|default:user_obj.username }}
                     </div>
-                    <div style="font-size: 0.75rem; color: #64748B; margin-top: 0.2rem;">
+                    <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.2rem;">
                         Role: <strong>{{ user_obj.get_role_display|upper }}</strong> • @{{ user_obj.username }}
                     </div>
                     
@@ -51,7 +51,7 @@
                             </button>
                         </form>
                         {% else %}
-                        <span class="badge badge-secondary" style="font-size: 0.75rem; padding: 0.35rem 0.65rem;">
+                        <span class="badge badge-secondary" style="font-size: 0.875rem; padding: 0.35rem 0.65rem;">
                             ACTIVE: FLAT INITIAL TEXT BADGE [{{ user_obj.initials }}]
                         </span>
                         {% endif %}
@@ -63,9 +63,9 @@
     </div>
 
     <!-- Profile Details & Status Message Form -->
-    <div class="card" style="border: 1px solid #E2E8F0; border-radius: 8px; box-shadow: none; background: #FFFFFF;">
-        <div class="card-header" style="background: #FFFFFF; color: #0F172A; border-bottom: 1px solid #E2E8F0; padding: 0.75rem 1rem;">
-            <span style="font-weight: 700; font-size: 0.8125rem; letter-spacing: 0.05em; text-transform: uppercase;">
+    <div class="card" style="border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: none; background: #FFFFFF;">
+        <div class="card-header" style="background: #FFFFFF; color: #111827; border-bottom: 1px solid #E5E7EB; padding: 0.75rem 1rem;">
+            <span style="font-weight: 700; font-size: 0.875rem; letter-spacing: 0.05em; text-transform: uppercase;">
                 UPDATE PROFILE DETAILS & STATUS
             </span>
         </div>
@@ -75,30 +75,30 @@
 
                 <!-- Avatar Upload / Replace Input -->
                 <div class="form-group" style="margin-bottom: 1.25rem;">
-                    <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569;">
+                    <label style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #4B5563;">
                         Upload New Avatar Image (Replaces current avatar)
                     </label>
                     {{ form.avatar }}
-                    <small style="color: #64748B; font-size: 0.75rem;">Square JPG or PNG recommended.</small>
+                    <small style="color: #6B7280; font-size: 0.875rem;">Square JPG or PNG recommended.</small>
                 </div>
 
                 <!-- Status Message Input -->
                 <div class="form-group" style="margin-bottom: 1.25rem;">
-                    <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569;">
+                    <label style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #4B5563;">
                         Personal Status Message (Visible in quick drawer & roster)
                     </label>
                     {{ form.status_message }}
-                    <small style="color: #64748B; font-size: 0.75rem;">e.g., "Available at Barangay Hall until 4 PM" or "On Field Inspection in Purok 3"</small>
+                    <small style="color: #6B7280; font-size: 0.875rem;">e.g., "Available at Barangay Hall until 4 PM" or "On Field Inspection in Purok 3"</small>
                 </div>
 
                 <!-- Names Row -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
                     <div class="form-group" style="margin-bottom: 0;">
-                        <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569;">First Name</label>
+                        <label style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #4B5563;">First Name</label>
                         {{ form.first_name }}
                     </div>
                     <div class="form-group" style="margin-bottom: 0;">
-                        <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569;">Last Name</label>
+                        <label style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #4B5563;">Last Name</label>
                         {{ form.last_name }}
                     </div>
                 </div>
@@ -106,28 +106,28 @@
                 <!-- Contact Row -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
                     <div class="form-group" style="margin-bottom: 0;">
-                        <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569;">Email Address</label>
+                        <label style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #4B5563;">Email Address</label>
                         {{ form.email }}
                     </div>
                     <div class="form-group" style="margin-bottom: 0;">
-                        <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569;">Mobile Number</label>
+                        <label style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #4B5563;">Mobile Number</label>
                         {{ form.phone_number }}
                     </div>
                 </div>
 
                 <!-- Staff / Admin Duty Controls -->
                 {% if user_obj.is_admin_user or user_obj.is_kapitan_user or user_obj.is_staff %}
-                <div style="border-top: 2px solid #E2E8F0; padding-top: 1rem; margin-top: 1rem; margin-bottom: 1.25rem;">
-                    <div style="font-size: 0.75rem; font-weight: 700; color: #2563EB; text-transform: uppercase; margin-bottom: 0.75rem;">
+                <div style="border-top: 2px solid #E5E7EB; padding-top: 1rem; margin-top: 1rem; margin-bottom: 1.25rem;">
+                    <div style="font-size: 0.875rem; font-weight: 700; color: #1E3A8A; text-transform: uppercase; margin-bottom: 0.75rem;">
                         OFFICER DUTY ROSTER SETTINGS
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         <div class="form-group" style="margin-bottom: 0;">
-                            <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569;">Duty Status</label>
+                            <label style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #4B5563;">Duty Status</label>
                             {{ form.duty_status }}
                         </div>
                         <div class="form-group" style="margin-bottom: 0;">
-                            <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569;">Expected Return Date (If on leave)</label>
+                            <label style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #4B5563;">Expected Return Date (If on leave)</label>
                             {{ form.duty_return_date }}
                         </div>
                     </div>

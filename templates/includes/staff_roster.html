@@ -1,15 +1,16 @@
+{% load core_tags %}
 <div class="staff-roster-card">
     <div class="roster-header">
         <h3 class="roster-title">
-            <i class="fa-solid fa-user-tie"></i> Staff Directory
+            {% icon 'user-round' %} Staff Directory
             <span style="display:none;">STAFF DUTY ROSTER</span>
         </h3>
         <div class="roster-actions">
             <button type="button" class="btn-icon-subtle" title="Search Staff" data-tooltip="Search" aria-label="Search Staff">
-                <i class="fa-solid fa-magnifying-glass"></i>
+                {% icon 'search' %}
             </button>
             <button type="button" class="btn-icon-subtle" title="Roster Options" data-tooltip="Options" aria-label="Options">
-                <i class="fa-solid fa-ellipsis"></i>
+                {% icon 'ellipsis' %}
             </button>
         </div>
     </div>
@@ -33,7 +34,7 @@
                 {% if officer.duty_status == 'on_duty' %}
                     <span class="status-dot online" title="ON-DUTY" data-tooltip="ON-DUTY"><span style="display:none;">ON-DUTY</span></span>
                 {% elif officer.duty_status == 'on_leave' %}
-                    <span class="status-badge" style="background: #FEF3C7; color: #92400E;" title="ON-LEAVE{% if officer.duty_leave_reason %}: {{ officer.duty_leave_reason }}{% endif %}" data-tooltip="ON-LEAVE">Leave<span style="display:none;">ON-LEAVE {% if officer.duty_leave_reason %}{{ officer.duty_leave_reason }}{% endif %}</span></span>
+                    <span class="status-badge" style="background: #F3F4F6; color: #374151;" title="ON-LEAVE{% if officer.duty_leave_reason %}: {{ officer.duty_leave_reason }}{% endif %}" data-tooltip="ON-LEAVE">Leave<span style="display:none;">ON-LEAVE {% if officer.duty_leave_reason %}{{ officer.duty_leave_reason }}{% endif %}</span></span>
                 {% else %}
                     <span class="status-badge" title="Offline"><span style="display:none;">ABSENT</span>{{ officer.last_seen_formatted|default:"Off" }}</span>
                 {% endif %}
@@ -46,7 +47,7 @@
             <span style="display:none;">MESSAGE</span>
         </a>
         {% empty %}
-        <div style="font-size: 0.75rem; color: #94A3B8; text-align: center; padding: 1rem; font-style: italic;">
+        <div style="font-size: 0.875rem; color: #6B7280; text-align: center; padding: 1rem; font-style: italic;">
             No officers listed in roster.
         </div>
         {% endfor %}
@@ -54,6 +55,6 @@
 
     <!-- Floating Action Button -->
     <a href="{% url 'chat:inbox' %}" class="roster-fab" title="New Message" data-tooltip="New Message" aria-label="New Message">
-        <i class="fa-solid fa-pen-to-square"></i>
+        {% icon 'square-pen' %}
     </a>
 </div>

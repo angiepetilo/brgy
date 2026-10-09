@@ -1,0 +1,676 @@
+/**
+ * Phase 4: Form Controls
+ * Native-feeling inputs, selects, checkboxes, radios, switches
+ * - Text inputs
+ * - Textareas
+ * - Select dropdowns
+ * - Checkboxes
+ * - Radio buttons
+ * - Toggle switches (iOS style)
+ * - Form validation states
+ */
+
+/* ============================================
+   FORM GROUP & LABELS
+   ============================================ */
+
+.hig-form-group {
+  margin-bottom: var(--space-5);
+}
+
+.hig-form-label {
+  display: block;
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.hig-form-label-required::after {
+  content: ' *';
+  color: var(--color-error-red);
+}
+
+.hig-form-help {
+  display: block;
+  font-size: var(--text-label);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-1);
+  line-height: 1.4;
+}
+
+.hig-form-error {
+  display: block;
+  font-size: var(--text-label);
+  color: var(--color-error-red);
+  margin-top: var(--space-1);
+  line-height: 1.4;
+}
+
+/* ============================================
+   TEXT INPUTS (Desktop)
+   ============================================ */
+
+@media (min-width: 768px) {
+  .hig-input {
+    width: 100%;
+    height: var(--input-height);
+    padding: 0 12px;
+    font-size: var(--text-body);
+    font-family: var(--font-family-base);
+    color: var(--color-text-primary);
+    background: var(--color-canvas);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+  
+  .hig-input:hover {
+    border-color: var(--color-border-strong);
+  }
+  
+  .hig-input:focus {
+    outline: none;
+    border-color: var(--color-accent-blue);
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+    background: var(--color-canvas);
+  }
+  
+  .hig-input::placeholder {
+    color: var(--color-text-tertiary);
+  }
+  
+  .hig-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: var(--color-sidebar);
+  }
+  
+  /* Large Input */
+  .hig-input-large {
+    height: var(--input-height-large);
+    font-size: var(--text-large);
+  }
+  
+  /* Compact Input */
+  .hig-input-compact {
+    height: 28px;
+    padding: 0 8px;
+    font-size: 12px;
+  }
+}
+
+/* ============================================
+   TEXT INPUTS (Mobile)
+   ============================================ */
+
+@media (max-width: 767px) {
+  .hig-input {
+    width: 100%;
+    min-height: var(--mobile-touch-target);
+    padding: 0 var(--mobile-margin);
+    font-size: var(--text-mobile-body);
+    font-family: var(--font-family-base);
+    color: var(--color-text-primary);
+    background: var(--color-canvas);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-mobile-md);
+    transition: all var(--transition-base);
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  
+  .hig-input:focus {
+    outline: none;
+    border-color: var(--color-accent-blue);
+  }
+  
+  .hig-input::placeholder {
+    color: var(--color-text-tertiary);
+  }
+  
+  .hig-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: var(--color-sidebar);
+  }
+}
+
+/* ============================================
+   TEXTAREA
+   ============================================ */
+
+.hig-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px;
+  font-size: var(--text-body);
+  font-family: var(--font-family-base);
+  color: var(--color-text-primary);
+  background: var(--color-canvas);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+  resize: vertical;
+  line-height: 1.5;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.hig-textarea:hover {
+  border-color: var(--color-border-strong);
+}
+
+.hig-textarea:focus {
+  outline: none;
+  border-color: var(--color-accent-blue);
+  box-shadow: var(--shadow-focus);
+}
+
+.hig-textarea::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.hig-textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--color-sidebar);
+}
+
+/* ============================================
+   SELECT DROPDOWN
+   ============================================ */
+
+.hig-select {
+  width: 100%;
+  height: var(--input-height);
+  padding: 0 32px 0 12px;
+  font-size: var(--text-body);
+  font-family: var(--font-family-base);
+  color: var(--color-text-primary);
+  background: var(--color-canvas);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2386868B' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+.hig-select:hover {
+  border-color: var(--color-border-strong);
+}
+
+.hig-select:focus {
+  outline: none;
+  border-color: var(--color-accent-blue);
+  box-shadow: var(--shadow-focus);
+}
+
+.hig-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--color-sidebar);
+}
+
+/* Mobile Select */
+@media (max-width: 767px) {
+  .hig-select {
+    min-height: var(--mobile-touch-target);
+    font-size: var(--text-mobile-body);
+    border-radius: var(--radius-mobile-md);
+  }
+}
+
+/* ============================================
+   CHECKBOX
+   ============================================ */
+
+.hig-checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+  user-select: none;
+}
+
+.hig-checkbox {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: var(--color-canvas);
+  border: 2px solid var(--color-border);
+  border-radius: 4px;
+  transition: all var(--transition-fast);
+}
+
+.hig-checkbox:hover {
+  border-color: var(--color-border-strong);
+}
+
+.hig-checkbox:checked {
+  background: var(--color-accent-blue);
+  border-color: var(--color-accent-blue);
+}
+
+.hig-checkbox:checked::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.hig-checkbox:focus {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.hig-checkbox:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.hig-checkbox-label {
+  font-size: var(--text-body);
+  color: var(--color-text-primary);
+  line-height: 1.4;
+}
+
+/* ============================================
+   RADIO BUTTON
+   ============================================ */
+
+.hig-radio-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+  user-select: none;
+}
+
+.hig-radio {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: var(--color-canvas);
+  border: 2px solid var(--color-border);
+  border-radius: 50%;
+  transition: all var(--transition-fast);
+}
+
+.hig-radio:hover {
+  border-color: var(--color-border-strong);
+}
+
+.hig-radio:checked {
+  border-color: var(--color-accent-blue);
+}
+
+.hig-radio:checked::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background: var(--color-accent-blue);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.hig-radio:focus {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.hig-radio:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.hig-radio-label {
+  font-size: var(--text-body);
+  color: var(--color-text-primary);
+  line-height: 1.4;
+}
+
+/* Radio Group */
+.hig-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ============================================
+   TOGGLE SWITCH (iOS Style)
+   ============================================ */
+
+.hig-switch-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+  user-select: none;
+}
+
+.hig-switch {
+  position: relative;
+  width: 44px;
+  height: 26px;
+  flex-shrink: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: var(--color-border);
+  border-radius: 13px;
+  transition: all var(--transition-base);
+}
+
+.hig-switch::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+}
+
+.hig-switch:checked {
+  background: var(--color-success-green);
+}
+
+.hig-switch:checked::before {
+  transform: translateX(18px);
+}
+
+.hig-switch:focus {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.hig-switch:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.hig-switch-label {
+  font-size: var(--text-body);
+  color: var(--color-text-primary);
+  line-height: 1.4;
+}
+
+/* ============================================
+   INPUT WITH ICON
+   ============================================ */
+
+.hig-input-wrapper {
+  position: relative;
+}
+
+.hig-input-icon-left {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-tertiary);
+  pointer-events: none;
+}
+
+.hig-input-icon-right {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-tertiary);
+  pointer-events: none;
+}
+
+.hig-input.has-icon-left {
+  padding-left: 38px;
+}
+
+.hig-input.has-icon-right {
+  padding-right: 38px;
+}
+
+/* ============================================
+   VALIDATION STATES
+   ============================================ */
+
+/* Success State */
+.hig-input.is-valid,
+.hig-textarea.is-valid,
+.hig-select.is-valid {
+  border-color: var(--color-success-green);
+}
+
+.hig-input.is-valid:focus,
+.hig-textarea.is-valid:focus,
+.hig-select.is-valid:focus {
+  box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.25);
+}
+
+/* Error State */
+.hig-input.is-invalid,
+.hig-textarea.is-invalid,
+.hig-select.is-invalid {
+  border-color: var(--color-error-red);
+}
+
+.hig-input.is-invalid:focus,
+.hig-textarea.is-invalid:focus,
+.hig-select.is-invalid:focus {
+  box-shadow: var(--shadow-focus-error);
+}
+
+/* Warning State */
+.hig-input.is-warning,
+.hig-textarea.is-warning,
+.hig-select.is-warning {
+  border-color: var(--color-warning-orange);
+}
+
+/* ============================================
+   INPUT GROUP (Addons)
+   ============================================ */
+
+.hig-input-group {
+  display: flex;
+  width: 100%;
+}
+
+.hig-input-group .hig-input {
+  border-radius: 0;
+}
+
+.hig-input-group .hig-input:first-child {
+  border-top-left-radius: var(--radius-md);
+  border-bottom-left-radius: var(--radius-md);
+}
+
+.hig-input-group .hig-input:last-child {
+  border-top-right-radius: var(--radius-md);
+  border-bottom-right-radius: var(--radius-md);
+}
+
+.hig-input-addon {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-size: var(--text-body);
+  color: var(--color-text-secondary);
+  background: var(--color-sidebar);
+  border: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.hig-input-addon:first-child {
+  border-top-left-radius: var(--radius-md);
+  border-bottom-left-radius: var(--radius-md);
+  border-right: none;
+}
+
+.hig-input-addon:last-child {
+  border-top-right-radius: var(--radius-md);
+  border-bottom-right-radius: var(--radius-md);
+  border-left: none;
+}
+
+/* ============================================
+   FILE INPUT
+   ============================================ */
+
+.hig-file-input {
+  position: relative;
+  display: inline-block;
+}
+
+.hig-file-input input[type="file"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.hig-file-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--button-height);
+  padding: 0 16px;
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+  background: var(--color-canvas);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.hig-file-label:hover {
+  background: var(--color-hover);
+  border-color: var(--color-border-strong);
+}
+
+.hig-file-label svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ============================================
+   RANGE SLIDER
+   ============================================ */
+
+.hig-range {
+  width: 100%;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 2px;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.hig-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: var(--color-accent-blue);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.hig-range::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.hig-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: var(--color-accent-blue);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.hig-range::-moz-range-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* ============================================
+   SEARCH INPUT (with clear button)
+   ============================================ */
+
+.hig-search-wrapper {
+  position: relative;
+}
+
+.hig-search-clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-hover);
+  color: var(--color-text-secondary);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.hig-search-wrapper:hover .hig-search-clear,
+.hig-input:focus ~ .hig-search-clear {
+  opacity: 1;
+}
+
+.hig-search-clear:hover {
+  background: var(--color-hover-secondary);
+  color: var(--color-text-primary);
+}
+
+.hig-search-clear svg {
+  width: 14px;
+  height: 14px;
+}

@@ -1,55 +1,44 @@
 /**
- * Mobile Layout System (iOS HIG)
- * Breakpoint: <768px
- * 
- * Architecture:
- * - 44px navigation bar (top)
- * - Full-screen scrollable content
- * - 49px tab bar (bottom, 3-5 items)
- * - Respects safe areas
+ * Phase 2: Mobile Layout Architecture (iOS HIG)
+ * Implements stack layout for <768px viewports
+ * - 44px top navigation bar
+ * - Scrollable content
+ * - 49px bottom tab bar
+ * - Touch-friendly ≥44px targets
  */
 
 /* ============================================
-   MOBILE CONTAINER
+   MOBILE LAYOUT (<768px)
    ============================================ */
 
 @media (max-width: 767px) {
-  .hig-container {
+  
+  /* Hide Desktop Elements on Mobile */
+  .desktop-only {
+    display: none !important;
+  }
+  
+  /* Main App Container - Vertical Stack */
+  .app-container.mobile,
+  .fb-main-container {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    height: 100dvh; /* Dynamic viewport height (iOS Safari) */
     overflow: hidden;
-    background: var(--color-canvas);
-    font-family: var(--font-family-base);
-    color: var(--color-text-primary);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
   
-  /* Hide desktop sidebar on mobile */
-  .hig-sidebar {
+  /* Hide Desktop Sidebar on Mobile */
+  .sidebar,
+  .fb-left-sidebar {
     display: none;
   }
   
-  /* Content Area for Mobile */
-  .hig-content-area {
-    flex: 1;
-    padding: var(--mobile-margin);
-    background: var(--color-canvas-secondary);
-    color: var(--color-text-primary);
-  }
-  
-  .hig-content-main {
-    color: var(--color-text-primary);
-  }
-  
-  
   /* ============================================
-     NAVIGATION BAR (44px Height - iOS HIG)
+     TOP NAVIGATION BAR (44px iOS Standard)
      ============================================ */
   
-  .hig-mobile-nav {
+  .mobile-nav-bar,
+  .fb-topbar {
     height: var(--mobile-nav-bar);
     min-height: var(--mobile-nav-bar);
     display: flex;
@@ -60,42 +49,36 @@
     background: var(--color-canvas);
     flex-shrink: 0;
     position: relative;
+    z-index: 100;
   }
   
-  /* Safe Area Inset (Top) */
-  .hig-mobile-nav {
-    padding-top: env(safe-area-inset-top);
-    height: calc(var(--mobile-nav-bar) + env(safe-area-inset-top));
-  }
-  
-  /* Back Button (Left) */
-  .hig-nav-back {
-    display: inline-flex;
+  /* Navigation Back Button */
+  .nav-back {
+    width: var(--mobile-touch-target);
+    height: var(--mobile-touch-target);
+    display: flex;
     align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-3);
-    margin-left: calc(var(--space-3) * -1);
-    color: var(--color-accent-blue);
-    font-size: var(--text-mobile-body);
-    text-decoration: none;
-    border-radius: var(--radius-mobile-sm);
-    transition: background var(--transition-fast);
-    min-height: var(--mobile-touch-target);
-    min-width: var(--mobile-touch-target);
     justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--color-accent-blue);
+    cursor: pointer;
+    border-radius: var(--radius-mobile-md);
+    transition: background var(--transition-fast);
   }
   
-  .hig-nav-back:active {
+  .nav-back:active {
     background: var(--color-hover);
   }
   
-  .hig-nav-back-icon {
-    width: 20px;
-    height: 20px;
+  .nav-back svg {
+    width: 24px;
+    height: 24px;
   }
   
-  /* Title (Center) */
-  .hig-nav-title {
+  /* Navigation Title */
+  .nav-title,
+  .mobile-nav-bar h1 {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
@@ -103,408 +86,452 @@
     font-weight: var(--weight-semibold);
     color: var(--color-text-primary);
     margin: 0;
-    white-space: nowrap;
+    line-height: 1;
+    max-width: 50%;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 50%;
+    white-space: nowrap;
   }
   
-  /* Action Button (Right) */
-  .hig-nav-action {
-    display: inline-flex;
+  /* Navigation Action Button */
+  .nav-action {
+    min-width: var(--mobile-touch-target);
+    height: var(--mobile-touch-target);
+    display: flex;
     align-items: center;
-    padding: var(--space-2) var(--space-3);
-    margin-right: calc(var(--space-3) * -1);
+    justify-content: center;
+    padding: 0 12px;
+    background: transparent;
+    border: none;
     color: var(--color-accent-blue);
     font-size: var(--text-mobile-body);
-    font-weight: var(--weight-regular);
-    text-decoration: none;
-    border-radius: var(--radius-mobile-sm);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+    border-radius: var(--radius-mobile-md);
     transition: background var(--transition-fast);
-    min-height: var(--mobile-touch-target);
-    min-width: var(--mobile-touch-target);
-    justify-content: center;
   }
   
-  .hig-nav-action:active {
+  .nav-action:active {
     background: var(--color-hover);
   }
   
-  .hig-nav-action.primary {
-    color: var(--color-accent-blue);
-    font-weight: var(--weight-semibold);
-  }
-  
-  .hig-nav-action.destructive {
-    color: var(--color-error-red);
-  }
-  
-  
   /* ============================================
-     LARGE TITLE NAVIGATION (iOS Style)
+     MOBILE CONTENT (Scrollable)
      ============================================ */
   
-  .hig-mobile-nav-large {
-    height: auto;
-    min-height: var(--mobile-nav-bar-large);
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 0 var(--mobile-margin);
-    padding-top: calc(var(--space-3) + env(safe-area-inset-top));
-    padding-bottom: var(--space-3);
-  }
-  
-  .hig-mobile-nav-large .hig-nav-title {
-    position: static;
-    transform: none;
-    font-size: var(--text-mobile-large-title);
-    font-weight: var(--weight-bold);
-    max-width: 100%;
-    margin-top: var(--space-3);
-  }
-  
-  .hig-mobile-nav-large .hig-nav-actions {
-    position: absolute;
-    top: calc(var(--space-3) + env(safe-area-inset-top));
-    right: var(--mobile-margin);
-  }
-  
-  
-  /* ============================================
-     MAIN CONTENT (Scrollable)
-     ============================================ */
-  
-  .hig-mobile-content {
+  .mobile-content,
+  .fb-center-content,
+  .main-content-area {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    -webkit-overflow-scrolling: touch; /* Smooth iOS scroll */
+    -webkit-overflow-scrolling: touch;
     padding: var(--mobile-margin);
-    background: var(--color-canvas-secondary);
+    background: var(--color-bg-secondary);
   }
   
-  /* Inset Lists (iOS Style) */
-  .hig-mobile-content.inset {
-    padding: var(--mobile-margin) var(--mobile-margin);
-    background: var(--color-canvas-secondary);
-  }
-  
-  /* Full Width Lists (Edge-to-Edge) */
-  .hig-mobile-content.full-width {
+  .mobile-content-no-padding {
     padding: 0;
   }
   
+  /* Pull to Refresh (iOS Native Behavior) */
+  .mobile-content {
+    overscroll-behavior-y: contain;
+  }
   
   /* ============================================
-     TAB BAR (49px Height - iOS HIG)
+     BOTTOM TAB BAR (49px iOS Standard)
      ============================================ */
   
-  .hig-mobile-tabs {
+  .mobile-tab-bar,
+  .bottom-nav-bar {
     height: var(--mobile-tab-bar);
     min-height: var(--mobile-tab-bar);
     display: flex;
-    align-items: stretch;
-    background: var(--color-sidebar);
+    background: var(--color-canvas);
     border-top: 1px solid var(--color-border);
     flex-shrink: 0;
+    position: relative;
+    z-index: 100;
+    /* Safe area for iPhone notch */
     padding-bottom: env(safe-area-inset-bottom);
   }
   
-  /* Tab Item */
-  .hig-tab-item {
+  /* Tab Items */
+  .tab-item,
+  .bottom-nav-item {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: var(--space-1);
-    padding: var(--space-2) var(--space-1);
-    text-decoration: none;
-    color: var(--color-text-secondary);
-    transition: color var(--transition-fast);
+    gap: 2px;
     min-height: var(--mobile-touch-target);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+    padding: 4px 0;
     position: relative;
   }
   
-  .hig-tab-item:active {
-    opacity: 0.6;
+  .tab-item:active,
+  .bottom-nav-item:active {
+    opacity: 0.7;
   }
   
-  .hig-tab-item.active {
+  .tab-item.active,
+  .bottom-nav-item.active {
     color: var(--color-accent-blue);
   }
   
-  /* Tab Icon (25x25pt - iOS Standard) */
-  .hig-tab-icon {
+  /* Tab Icons */
+  .tab-icon,
+  .bottom-nav-item svg {
     width: 25px;
     height: 25px;
     flex-shrink: 0;
   }
   
-  /* Tab Label */
-  .hig-tab-label {
-    font-size: var(--text-mobile-caption1);
+  /* Tab Labels */
+  .tab-label,
+  .bnav-label {
+    font-size: var(--text-mobile-caption2);
     font-weight: var(--weight-medium);
-    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
   
-  /* Tab Badge */
-  .hig-tab-badge {
+  /* Tab Badge (Notification Count) */
+  .tab-badge {
     position: absolute;
-    top: 4px;
+    top: 2px;
     right: calc(50% - 18px);
     min-width: 18px;
     height: 18px;
-    padding: 0 var(--space-2);
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0 5px;
     background: var(--color-error-red);
     color: white;
-    font-size: var(--text-caption);
-    font-weight: var(--weight-semibold);
-    border-radius: var(--radius-pill);
+    font-size: 10px;
+    font-weight: var(--weight-bold);
+    border-radius: 9px;
   }
   
-  
   /* ============================================
-     MOBILE LIST (iOS Style)
+     MOBILE CARDS & LISTS
      ============================================ */
   
-  .hig-mobile-list {
+  /* Mobile List Container */
+  .mobile-list {
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
-    margin: 0;
-    padding: 0;
-    list-style: none;
   }
   
-  /* List Item (Card Style) */
-  .hig-list-item {
+  /* Mobile List Item */
+  .mobile-list-item {
     background: var(--color-canvas);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-mobile-md);
     padding: var(--mobile-margin);
-    min-height: var(--mobile-list-row);
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    text-decoration: none;
-    color: var(--color-text-primary);
+    min-height: var(--mobile-touch-target);
     transition: background var(--transition-fast);
   }
   
-  .hig-list-item:active {
+  .mobile-list-item:active {
     background: var(--color-hover);
   }
   
-  /* Grouped List (iOS Inset Style) */
-  .hig-list-grouped {
+  /* Mobile Card */
+  .mobile-card {
     background: var(--color-canvas);
-    border: 1px solid var(--color-border);
     border-radius: var(--radius-mobile-md);
     overflow: hidden;
+    margin-bottom: var(--space-3);
   }
   
-  .hig-list-grouped .hig-list-item {
-    border: none;
-    border-radius: 0;
+  .mobile-card-header {
+    padding: var(--mobile-margin);
     border-bottom: 1px solid var(--color-border);
   }
   
-  .hig-list-grouped .hig-list-item:last-child {
-    border-bottom: none;
-  }
-  
-  /* List Item Content */
-  .hig-list-item-icon {
-    width: 28px;
-    height: 28px;
-    flex-shrink: 0;
-  }
-  
-  .hig-list-item-content {
-    flex: 1;
-    min-width: 0;
-  }
-  
-  .hig-list-item-title {
-    font-size: var(--text-mobile-body);
-    font-weight: var(--weight-regular);
-    color: var(--color-text-primary);
-    margin: 0 0 var(--space-1) 0;
-  }
-  
-  .hig-list-item-subtitle {
-    font-size: var(--text-mobile-footnote);
-    color: var(--color-text-secondary);
-    margin: 0;
-  }
-  
-  .hig-list-item-accessory {
-    flex-shrink: 0;
-    color: var(--color-text-tertiary);
-  }
-  
-  
-  /* ============================================
-     MOBILE SECTIONS
-     ============================================ */
-  
-  .hig-mobile-section {
-    margin-bottom: var(--space-7);
-  }
-  
-  .hig-mobile-section-header {
-    font-size: var(--text-mobile-subhead);
-    font-weight: var(--weight-semibold);
-    color: var(--color-text-secondary);
-    text-transform: uppercase;
-    letter-spacing: var(--tracking-wider);
-    margin: 0 0 var(--space-3) var(--space-5);
-  }
-  
-  
-  /* ============================================
-     MOBILE CARDS
-     ============================================ */
-  
-  .hig-mobile-card {
-    background: var(--color-canvas);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-mobile-md);
-    padding: var(--mobile-margin);
-    margin-bottom: var(--space-5);
-  }
-  
-  .hig-mobile-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--space-4);
-  }
-  
-  .hig-mobile-card-title {
+  .mobile-card-title {
     font-size: var(--text-mobile-headline);
     font-weight: var(--weight-semibold);
     color: var(--color-text-primary);
     margin: 0;
   }
   
-  .hig-mobile-card-body {
+  .mobile-card-body {
+    padding: var(--mobile-margin);
+  }
+  
+  .mobile-card-footer {
+    padding: var(--mobile-margin);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    gap: var(--space-3);
+  }
+  
+  /* ============================================
+     MOBILE BUTTONS (44px Touch Targets)
+     ============================================ */
+  
+  .btn,
+  .hig-btn {
+    min-height: var(--mobile-touch-target);
+    padding: 0 20px;
     font-size: var(--text-mobile-body);
-    color: var(--color-text-primary);
-    line-height: var(--leading-normal);
-  }
-  
-  
-  /* ============================================
-     PULL TO REFRESH (Native iOS)
-     ============================================ */
-  
-  .hig-mobile-content {
-    /* Browser will handle native pull-to-refresh */
-    overscroll-behavior-y: contain;
-  }
-  
-  
-  /* ============================================
-     SWIPE GESTURES
-     ============================================ */
-  
-  /* Swipe Actions (Left/Right) */
-  .hig-swipe-container {
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .hig-swipe-actions {
-    position: absolute;
-    top: 0;
-    right: 0;
-    height: 100%;
-    display: flex;
-    align-items: stretch;
-  }
-  
-  .hig-swipe-action {
-    display: flex;
+    border-radius: var(--radius-mobile-md);
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0 var(--space-7);
-    color: white;
-    font-size: var(--text-mobile-footnote);
-    font-weight: var(--weight-semibold);
-    min-width: 80px;
+    gap: 8px;
+    font-weight: var(--weight-medium);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    border: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
   }
   
-  .hig-swipe-action.delete {
+  .btn-primary,
+  .hig-btn-primary {
+    background: var(--color-accent-blue);
+    color: var(--color-text-inverse);
+  }
+  
+  .btn-primary:active,
+  .hig-btn-primary:active {
+    background: var(--color-accent-blue-hover);
+  }
+  
+  .btn-secondary,
+  .hig-btn-secondary {
+    background: transparent;
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+  }
+  
+  .btn-secondary:active,
+  .hig-btn-secondary:active {
+    background: var(--color-hover);
+  }
+  
+  .btn-destructive,
+  .hig-btn-destructive {
     background: var(--color-error-red);
+    color: var(--color-text-inverse);
   }
   
-  .hig-swipe-action.archive {
-    background: var(--color-warning-orange);
+  .btn-destructive:active,
+  .hig-btn-destructive:active {
+    background: var(--color-error-red-hover);
   }
   
+  /* Full Width Button */
+  .btn-block {
+    width: 100%;
+    display: flex;
+  }
   
   /* ============================================
-     SAFE AREAS (iPhone Notch/Dynamic Island)
+     MOBILE FORMS
      ============================================ */
   
-  .hig-safe-top {
+  /* Form Group */
+  .form-group {
+    margin-bottom: var(--space-5);
+  }
+  
+  /* Form Label */
+  .form-label {
+    display: block;
+    font-size: var(--text-mobile-subhead);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-2);
+  }
+  
+  /* Form Input */
+  .form-input,
+  .form-select,
+  .form-textarea {
+    width: 100%;
+    min-height: var(--mobile-touch-target);
+    padding: 0 var(--mobile-margin);
+    font-size: var(--text-mobile-body);
+    font-family: var(--font-family-base);
+    color: var(--color-text-primary);
+    background: var(--color-canvas);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-mobile-md);
+    transition: all var(--transition-base);
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  
+  .form-input:focus,
+  .form-select:focus,
+  .form-textarea:focus {
+    outline: none;
+    border-color: var(--color-accent-blue);
+    background: var(--color-canvas);
+  }
+  
+  .form-textarea {
+    min-height: 120px;
+    padding: 12px var(--mobile-margin);
+    resize: vertical;
+  }
+  
+  /* ============================================
+     MOBILE MODALS & SHEETS
+     ============================================ */
+  
+  /* Modal Overlay */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    display: flex;
+    align-items: flex-end;
+  }
+  
+  /* Modal Content (iOS Sheet from Bottom) */
+  .modal-content {
+    width: 100%;
+    max-height: 90vh;
+    background: var(--color-canvas);
+    border-radius: var(--radius-mobile-lg) var(--radius-mobile-lg) 0 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Modal Grabber */
+  .modal-grabber {
+    width: 36px;
+    height: 5px;
+    background: var(--color-border);
+    border-radius: 999px;
+    margin: 8px auto;
+    flex-shrink: 0;
+  }
+  
+  /* Modal Header */
+  .modal-header {
+    padding: var(--mobile-margin);
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+  }
+  
+  .modal-title {
+    font-size: var(--text-mobile-title3);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+  
+  /* Modal Body */
+  .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--mobile-margin);
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Modal Footer */
+  .modal-footer {
+    padding: var(--mobile-margin);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    gap: var(--space-3);
+    flex-shrink: 0;
+    /* Safe area for iPhone notch */
+    padding-bottom: calc(var(--mobile-margin) + env(safe-area-inset-bottom));
+  }
+  
+  /* ============================================
+     MOBILE UTILITIES
+     ============================================ */
+  
+  /* Hide on Mobile */
+  .hide-mobile {
+    display: none !important;
+  }
+  
+  /* Text Alignment */
+  .text-center-mobile {
+    text-align: center;
+  }
+  
+  /* Spacing Utilities */
+  .mt-mobile-1 { margin-top: var(--space-3) !important; }
+  .mt-mobile-2 { margin-top: var(--space-5) !important; }
+  .mt-mobile-3 { margin-top: var(--space-7) !important; }
+  
+  .mb-mobile-1 { margin-bottom: var(--space-3) !important; }
+  .mb-mobile-2 { margin-bottom: var(--space-5) !important; }
+  .mb-mobile-3 { margin-bottom: var(--space-7) !important; }
+  
+  /* Full Width on Mobile */
+  .full-width-mobile {
+    width: 100% !important;
+  }
+  
+  /* Stack on Mobile */
+  .stack-mobile {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: var(--space-3) !important;
+  }
+  
+  /* ============================================
+     SAFE AREAS (iPhone X+ Notch Support)
+     ============================================ */
+  
+  /* Top Safe Area */
+  .safe-top {
     padding-top: env(safe-area-inset-top);
   }
   
-  .hig-safe-bottom {
+  /* Bottom Safe Area */
+  .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom);
   }
   
-  .hig-safe-left {
+  /* Left Safe Area */
+  .safe-left {
     padding-left: env(safe-area-inset-left);
   }
   
-  .hig-safe-right {
+  /* Right Safe Area */
+  .safe-right {
     padding-right: env(safe-area-inset-right);
   }
+  
 }
 
-
 /* ============================================
-   SMALL MOBILE (<375px - iPhone SE)
+   SHOW DESKTOP ONLY ON LARGER SCREENS
    ============================================ */
 
-@media (max-width: 374px) {
-  .hig-mobile-nav-title {
-    font-size: var(--text-mobile-callout);
+@media (min-width: 768px) {
+  .mobile-only {
+    display: none !important;
   }
   
-  .hig-tab-label {
-    font-size: var(--text-caption);
-  }
-  
-  .hig-mobile-content {
-    padding: var(--space-4);
-  }
-  
-  .hig-mobile-card,
-  .hig-list-item {
-    padding: var(--space-4);
-  }
-}
-
-
-/* ============================================
-   LARGE MOBILE (≥414px - iPhone Pro Max)
-   ============================================ */
-
-@media (min-width: 414px) and (max-width: 767px) {
-  .hig-mobile-content {
-    padding: var(--space-6);
-  }
-  
-  .hig-mobile-card,
-  .hig-list-item {
-    padding: var(--space-6);
+  .mobile-nav-bar,
+  .mobile-tab-bar,
+  .bottom-nav-bar {
+    display: none !important;
   }
 }

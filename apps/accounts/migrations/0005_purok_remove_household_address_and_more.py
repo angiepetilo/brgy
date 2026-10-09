@@ -27,6 +27,9 @@ def clear_purok_values(apps, schema_editor):
     SQLite does not support ALTER COLUMN, so we use the standard
     table-rebuild pattern (CREATE temp → INSERT → DROP → RENAME).
     """
+    if connection.vendor != 'sqlite':
+        return
+
     with connection.cursor() as cursor:
         cursor.execute("PRAGMA foreign_keys = OFF")
 

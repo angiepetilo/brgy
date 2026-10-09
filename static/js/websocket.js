@@ -116,7 +116,7 @@ class BarangayNotificationSocket {
         if (emptyState) emptyState.remove();
 
         const item = document.createElement('a');
-        item.href = data.link_url || '#';
+        item.href = this.safeLocalUrl(data.link_url) || '#';
         item.className = 'notification-item unread';
         item.innerHTML = `
             <div class="item-title">${this.escapeHtml(data.title)}</div>
@@ -139,13 +139,29 @@ class BarangayNotificationSocket {
         const typeClass = type === 'success' ? 'toast-success' : (type === 'warning' ? 'toast-warning' : (type === 'danger' ? 'toast-danger' : ''));
         toast.className = `toast ${typeClass}`;
 
-        toast.innerHTML = `
-            <div class="toast-content" ${linkUrl ? `onclick="window.location.href='${linkUrl}'" style="cursor:pointer;"` : ''}>
-                <div class="toast-title">${this.escapeHtml(title)}</div>
-                <div class="toast-body">${this.escapeHtml(message)}</div>
-            </div>
-            <button class="toast-close" onclick="this.parentElement.remove()">CLOSE</button>
-        `;
+        // Built with DOM APIs: no inline handlers (CSP) and no HTML injection.
+        const content = document.createElement('div');
+        content.className = 'toast-content';
+        const titleEl = document.createElement('div');
+        titleEl.className = 'toast-title';
+        titleEl.textContent = title || '';
+        const bodyEl = document.createElement('div');
+        bodyEl.className = 'toast-body';
+        bodyEl.textContent = message || '';
+        content.appendChild(titleEl);
+        content.appendChild(bodyEl);
+        const safeUrl = this.safeLocalUrl(linkUrl);
+        if (safeUrl) {
+            content.style.cursor = 'pointer';
+            content.addEventListener('click', () => window.location.assign(safeUrl));
+        }
+        const closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.className = 'toast-close';
+        closeBtn.textContent = 'CLOSE';
+        closeBtn.addEventListener('click', () => toast.remove());
+        toast.appendChild(content);
+        toast.appendChild(closeBtn);
 
         toastContainer.appendChild(toast);
 
@@ -158,6 +174,12 @@ class BarangayNotificationSocket {
                 setTimeout(() => toast.remove(), 300);
             }
         }, 5500);
+    }
+
+    // Only same-site paths ('/x') may be followed: no '//host' or script URLs.
+    safeLocalUrl(url) {
+        if (typeof url !== 'string') return '';
+        return (url.startsWith('/') && !url.startsWith('//')) ? url : '';
     }
 
     escapeHtml(text) {

@@ -1,0 +1,12 @@
+Subject: We received your sign-up, {{ first_name }}
+
+Hi {{ first_name }},
+
+Thanks for signing up on the Barangay {{ barangay_name }} portal. We have your details and your ID photo.
+
+Before you can log in, someone from the barangay office needs to check them. We'll email you as soon as that's done, usually within two working days.
+
+You don't need to do anything else for now. Please don't create a second account, since it can slow things down. If you think you made a mistake in your details, call us at {{ barangay_contact|default:contact_no|default:"(02) 8123-4567" }} (8 AM to 5 PM).
+
+Salamat po,
+Barangay {{ barangay_name }} Office

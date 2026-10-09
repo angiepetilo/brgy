@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static core_tags %}
+
+{% block title %}Barangay Health Center Schedule | BARANGAY.PH{% endblock %}
+
+{% block extra_css %}
+<style>.schedule-row-hover:hover { background: #F9FAFB; }</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper" style="max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem;">
+    <!-- Page Header -->
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: #16A34A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; box-shadow: none;">
+                    {% icon 'heart-pulse' %}
+                </div>
+                <div>
+                    <h1 style="margin: 0; font-size: 1.6rem; font-weight: 800; color: #111827; letter-spacing: -0.02em;">Health Center Schedule</h1>
+                    <p style="margin: 0; font-size: 0.875rem; color: #6B7280;">Official schedule and live slot availability for free barangay healthcare services</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <a href="{% url 'appointments:list' %}" class="btn-outline-modern" style="padding: 0.6rem 1.1rem; border-radius: 10px; font-weight: 600; font-size: 0.875rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+                {% icon 'arrow-left' %} My Appointments
+            </a>
+            <a href="/#bookAppointmentModal" class="btn-primary-modern" style="padding: 0.6rem 1.25rem; border-radius: 10px; font-weight: 600; font-size: 0.875rem; background: #1E3A8A; color: #FFFFFF; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: none;">
+                {% icon 'plus' %} Book Consultation
+            </a>
+        </div>
+    </div>
+
+    <!-- Free Care Banner Notice -->
+    <div style="background: #FFFFFF; border: 1px solid #16A34A; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem;">
+        {% icon 'circle-check' cls='icon-success' %}
+        <div style="font-size: 0.875rem; color: #111827;">
+            <strong>All Health Center Services are 100% Free:</strong> Consultations, immunizations, and preventive services listed below have no fee (₱0.00). Slots are capped per window to ensure proper care.
+        </div>
+    </div>
+
+    <!-- Schedules Grid / Table -->
+    <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 16px; overflow: hidden; box-shadow: none;">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between;">
+            <div style="font-weight: 700; color: #111827; font-size: 1rem;">
+                {% icon 'calendar-days' cls='icon-primary' %} Upcoming Healthcare Schedule
+            </div>
+            <span style="font-size: 0.875rem; color: #6B7280; font-weight: 500;">Weekdays only (Monday to Friday)</span>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem;">
+                <thead>
+                    <tr style="background: #F9FAFB; border-bottom: 1px solid #E5E7EB; color: #4B5563; font-weight: 700; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                        <th style="padding: 1rem 1.5rem;">Healthcare Service</th>
+                        <th style="padding: 1rem 1rem;">Date</th>
+                        <th style="padding: 1rem 1rem;">Time Window</th>
+                        <th style="padding: 1rem 1rem; text-align: center;">Capacity</th>
+                        <th style="padding: 1rem 1rem; text-align: center;">Remaining Slots</th>
+                        <th style="padding: 1rem 1.5rem; text-align: right;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in schedules %}
+                    <tr style="border-bottom: 1px solid #F3F4F6; transition: background 0.15s ease;" class="schedule-row-hover">
+                        <td style="padding: 1rem 1.5rem;">
+                            <div style="font-weight: 700; color: #111827;">{{ item.service_name }}</div>
+                            {% if item.description %}
+                            <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.15rem;">{{ item.description|truncatechars:70 }}</div>
+                            {% endif %}
+                            <span style="display: inline-block; font-size: 0.875rem; font-weight: 700; color: #111827; border: 1px solid #16A34A; background: #FFFFFF; padding: 0.15rem 0.45rem; border-radius: 4px; margin-top: 0.25rem;">Free (₱0.00)</span>
+                        </td>
+                        <td style="padding: 1rem 1rem; color: #374151; font-weight: 600;">
+                            {{ item.date|date:"l, M d, Y" }}
+                        </td>
+                        <td style="padding: 1rem 1rem; color: #4B5563;">
+                            {% icon 'clock' cls='icon-muted' %} {{ item.time_window_display }}
+                        </td>
+                        <td style="padding: 1rem 1rem; text-align: center; color: #6B7280; font-weight: 600;">
+                            {{ item.capacity }}
+                        </td>
+                        <td style="padding: 1rem 1rem; text-align: center;">
+                            {% if item.remaining_slots > 5 %}
+                            <span style="font-weight: 700; color: #111827; border: 1px solid #16A34A; background: #FFFFFF; padding: 0.25rem 0.65rem; border-radius: 9999px; font-size: 0.875rem;">
+                                {{ item.remaining_slots }} slots
+                            </span>
+                            {% elif item.remaining_slots > 0 %}
+                            <span style="font-weight: 700; color: #374151; background: #F3F4F6; padding: 0.25rem 0.65rem; border-radius: 9999px; font-size: 0.875rem;">
+                                {{ item.remaining_slots }} left
+                            </span>
+                            {% else %}
+                            <span style="font-weight: 700; color: #DC2626; background: #FFFFFF; padding: 0.25rem 0.65rem; border-radius: 9999px; font-size: 0.875rem;">
+                                Full (0 slots)
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 1rem 1.5rem; text-align: right;">
+                            {% if item.is_available %}
+                            <a href="/#bookAppointmentModal" style="color: #1E3A8A; font-weight: 700; text-decoration: none; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.25rem;">
+                                Book Slot {% icon 'arrow-right' cls='icon-sm' %}
+                            </a>
+                            {% else %}
+                            <span style="color: #6B7280; font-weight: 600; font-size: 0.875rem;">Unavailable</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" style="padding: 3rem 1.5rem; text-align: center; color: #6B7280;">
+                            {% icon 'calendar-x' cls='icon-lg icon-muted icon-block' %}
+                            <div style="font-weight: 700; color: #111827; font-size: 1rem;">No upcoming schedules posted yet</div>
+                            <div style="font-size: 0.875rem; margin-top: 0.25rem;">Health center schedules are posted by the Barangay Health Officer regularly.</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{
+  "verdict": "APPROVED",
+  "findings": [
+    "Informational (confirmed): no browser verification was done (focus trap, Escape, focus return, confirm dialogs, FileReader logo preview are covered only by rendered-HTML tests). Do one manual pass before release.",
+    "Non-blocking (possible): email_template_edit_view still writes a raw POSTed 'content' as is, so a 'Subject:' line can be written into password_reset_email via a hand-crafted request. The UI never sends 'content' and only system.edit holders reach it; strip server-side if the API is exposed more widely.",
+    "Non-blocking (confirmed): a future strict CSP needs style-src 'unsafe-inline' (modals toggle inline style.display) and img-src data: (logo preview); the edit-URL placeholder replacement assumes the first /0/ in the path is the id.",
+    "Bookkeeping: plan.md says 49 UI tests but tests/settings/test_settings_ui.py collects 48 (all pass)."
+  ],
+  "reviewDoc": "c:\\brgy/.agents/tasks/review-stage4.md"
+}

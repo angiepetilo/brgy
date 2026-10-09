@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% load static core_tags %}
+
+{% block title %}Concern #{{ concern.id }}: {{ concern.title|default:concern.get_category_display }} - Barangay Portal{% endblock %}
+
+{% block content %}
+<div style="max-width: 860px; margin: 2rem auto; width: 100%;">
+    <!-- Header Card -->
+    <div class="card" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: none;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem;">
+                    <a href="{% url 'chat:inbox' %}" class="btn btn-sm btn-outline-secondary" style="border-radius: 6px; font-size: 0.875rem; padding: 0.25rem 0.6rem;">
+                        {% icon 'arrow-left' %} Back to Messages
+                    </a>
+                    <span style="font-size: 0.875rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">
+                        Concern #{{ concern.id }} &bull; {{ concern.get_category_display }}
+                    </span>
+                </div>
+                <h1 style="font-size: 1.35rem; font-weight: 800; color: #111827; margin: 0;">
+                    {{ concern.title|default:"Resident Concern" }}
+                </h1>
+            </div>
+
+            <!-- Status Badge -->
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                {% if concern.status == 'submitted' %}
+                    <span style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.85rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 700; background: #F3F4F6; color: #374151; border: 1px solid #D1D5DB;">
+                        {% icon 'clock' %} Submitted
+                    </span>
+                {% elif concern.status == 'seen' %}
+                    <span style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.85rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 700; background: #F3F4F6; color: #1E3A8A; border: 1px solid #D1D5DB;">
+                        {% icon 'eye' %} Seen
+                    </span>
+                {% elif concern.status == 'in_progress' %}
+                    <span style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.85rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 700; background: #F3F4F6; color: #1E3A8A; border: 1px solid #D1D5DB;">
+                        {% icon 'loader-circle' cls='icon-spin' %} In Progress
+                    </span>
+                {% elif concern.status == 'resolved' %}
+                    <span style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.85rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 700; background: #FFFFFF; color: #111827; border: 1px solid #16A34A;">
+                        {% icon 'circle-check' %} Resolved
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Meta info grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; padding-top: 1rem; border-top: 1px solid #F3F4F6; font-size: 0.875rem;">
+            <div>
+                <span style="color: #6B7280; display: block; font-size: 0.875rem; text-transform: uppercase; font-weight: 600;">Initiator</span>
+                <strong style="color: #1F2937;">{{ concern.initiator.get_full_name|default:concern.initiator.username }}</strong>
+                {% if concern.initiator.purok %}
+                    <span style="color: #6B7280; font-size: 0.875rem;">({{ concern.initiator.purok.name }})</span>
+                {% endif %}
+            </div>
+            <div>
+                <span style="color: #6B7280; display: block; font-size: 0.875rem; text-transform: uppercase; font-weight: 600;">Assigned Handler</span>
+                {% if concern.assigned_handler %}
+                    <strong style="color: #1F2937;">{{ concern.assigned_handler|display_name }}</strong>
+                    <span style="color: #6B7280; font-size: 0.875rem;">({{ concern.assigned_handler.get_role_display }})</span>
+                {% else %}
+                    <strong style="color: #1E3A8A;">Barangay Administration</strong>
+                {% endif %}
+            </div>
+            <div>
+                <span style="color: #6B7280; display: block; font-size: 0.875rem; text-transform: uppercase; font-weight: 600;">Created</span>
+                <span style="color: #1F2937;">{{ concern.created_at|date:"M d, Y h:i A" }}</span>
+            </div>
+            <div>
+                <span style="color: #6B7280; display: block; font-size: 0.875rem; text-transform: uppercase; font-weight: 600;">Last Activity</span>
+                <span style="color: #1F2937;">{{ concern.updated_at|date:"M d, Y h:i A" }}</span>
+            </div>
+        </div>
+
+        <!-- Status Management Actions (Officer / Admin Only) -->
+        {% if can_update_status %}
+        <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px dashed #D1D5DB; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+            <div style="font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase;">
+                {% icon 'sliders-horizontal' %} Officer Status Control:
+            </div>
+            <form method="post" action="{% url 'chat:update_concern_status' concern.id %}" style="display: flex; gap: 0.5rem; align-items: center; margin: 0;">
+                {% csrf_token %}
+                {% if concern.status == 'submitted' %}
+                    <input type="hidden" name="status" value="in_progress">
+                    <button type="submit" class="btn btn-sm btn-primary" style="font-weight: 600;">
+                        {% icon 'play' %} Start Investigation (In Progress)
+                    </button>
+                {% elif concern.status == 'seen' %}
+                    <button type="submit" name="status" value="in_progress" class="btn btn-sm btn-primary" style="font-weight: 600;">
+                        {% icon 'play' %} Start Progress
+                    </button>
+                    <button type="submit" name="status" value="resolved" class="btn btn-sm btn-success" style="font-weight: 600;">
+                        {% icon 'check' %} Mark Resolved
+                    </button>
+                {% elif concern.status == 'in_progress' %}
+                    <button type="submit" name="status" value="resolved" class="btn btn-sm btn-success" style="font-weight: 600;">
+                        {% icon 'circle-check' %} Mark Resolved
+                    </button>
+                {% elif concern.status == 'resolved' %}
+                    <button type="submit" name="status" value="in_progress" class="btn btn-sm btn-outline-warning" style="font-weight: 600;">
+                        {% icon 'rotate-ccw' %} Reopen Concern
+                    </button>
+                {% endif %}
+            </form>
+        </div>
+        {% endif %}
+
+        <!-- Reassignment Actions -->
+        <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed #E5E7EB; display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+            {% if request.user == concern.initiator and concern.status != 'resolved' %}
+                <form method="post" action="{% url 'chat:reassign_concern' concern.id %}" style="margin: 0;" data-confirm="Request reassignment/escalation of this concern to Barangay Administration?">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="resident_escalate">
+                    <button type="submit" class="btn btn-sm btn-outline-primary" style="font-size: 0.875rem; font-weight: 600;">
+                        {% icon 'headset' %} Request Reassignment to Admin
+                    </button>
+                </form>
+            {% endif %}
+
+            {% if can_update_status and active_handlers %}
+                <form method="post" action="{% url 'chat:reassign_concern' concern.id %}" style="display: inline-flex; align-items: center; gap: 0.35rem; margin: 0;">
+                    {% csrf_token %}
+                    <span style="font-size: 0.875rem; color: #6B7280; font-weight: 600;">Reassign:</span>
+                    <select name="handler_id" class="form-control form-control-sm" style="font-size: 0.875rem; width: auto;" required>
+                        <option value="">Select Handler...</option>
+                        {% for h in active_handlers %}
+                            <option value="{{ h.id }}" {% if h.id == concern.assigned_handler_id %}disabled{% endif %}>
+                                {{ h.get_full_name|default:h.username }} ({{ h.get_role_display }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-outline-secondary" style="font-size: 0.875rem; font-weight: 600;">
+                        Transfer
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Messages / Timeline Area -->
+    <div class="card" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: none;">
+        <h3 style="font-size: 1rem; font-weight: 700; color: #1F2937; margin-bottom: 1.25rem;">
+            {% icon 'messages-square' %} Conversation History
+        </h3>
+
+        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            {% for msg in messages %}
+                <div style="display: flex; gap: 0.85rem; align-items: flex-start;">
+                    <!-- Avatar Initials -->
+                    <div style="width: 38px; height: 38px; border-radius: 50%; background: {% if msg.sender == concern.initiator %}#1E3A8A{% else %}#16A34A{% endif %}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.875rem; flex-shrink: 0;">
+                        {{ msg.sender.initials|default:msg.sender.first_name|slice:":1"|upper }}
+                    </div>
+
+                    <!-- Message Body -->
+                    <div style="flex: 1; background: {% if msg.sender == request.user %}#F9FAFB{% else %}#FFFFFF{% endif %}; border: 1px solid #E5E7EB; border-radius: 10px; padding: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem;">
+                            <div style="font-size: 0.875rem; font-weight: 700; color: #111827;">
+                                {{ msg.sender.get_full_name|default:msg.sender.username }}
+                                {% if msg.sender == concern.initiator %}
+                                    <span style="font-size: 0.875rem; font-weight: 600; color: #1E3A8A; background: #F3F4F6; padding: 0.15rem 0.4rem; border-radius: 4px; margin-left: 0.35rem;">Resident</span>
+                                {% else %}
+                                    <span style="font-size: 0.875rem; font-weight: 600; color: #111827; border: 1px solid #16A34A; background: #FFFFFF; padding: 0.15rem 0.4rem; border-radius: 4px; margin-left: 0.35rem;">Staff / Handler</span>
+                                {% endif %}
+                            </div>
+                            <span style="font-size: 0.875rem; color: #6B7280;">
+                                {{ msg.created_at|date:"M d, Y h:i A" }}
+                            </span>
+                        </div>
+
+                        <!-- Message Content (raw text, auto-escaped by template) -->
+                        <div style="font-size: 0.9rem; color: #374151; line-height: 1.5; white-space: pre-wrap;">{{ msg.content }}</div>
+
+                        <!-- Attachment link if present -->
+                        {% if msg.attachment %}
+                            <div style="margin-top: 0.75rem; padding: 0.5rem 0.75rem; background: #F3F4F6; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                                {% icon 'paperclip' cls='icon-muted' %}
+                                <a href="{% url 'chat:serve_attachment' msg.id %}" target="_blank" style="color: #1E3A8A; font-weight: 600; text-decoration: underline;">
+                                    {{ msg.attachment_filename|default:"Download Attachment" }}
+                                </a>
+                                {% if msg.attachment_size %}
+                                    <span style="color: #6B7280; font-size: 0.875rem;">({{ msg.attachment_size|filesizeformat }})</span>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% empty %}
+                <div style="text-align: center; color: #6B7280; padding: 2rem 0;">
+                    No messages recorded yet.
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Reply Box -->
+    <div class="card" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.5rem; box-shadow: none;">
+        <h4 style="font-size: 0.95rem; font-weight: 700; color: #1F2937; margin-bottom: 0.75rem;">
+            {% icon 'reply' %} Add a Reply
+        </h4>
+
+        <form method="post" action="{% url 'chat:concern_detail' concern.id %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group" style="margin-bottom: 0.85rem;">
+                <textarea name="message" class="form-control" rows="4" placeholder="Type your reply here (max 2000 characters)..." required style="width: 100%; font-size: 0.875rem;"></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <label for="id_attachment" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.875rem; color: #4B5563; margin: 0; padding: 0.4rem 0.75rem; border: 1px solid #D1D5DB; border-radius: 6px; background: #F9FAFB;">
+                        {% icon 'paperclip' %} Attach File
+                    </label>
+                    <input type="file" id="id_attachment" name="attachment" style="display: inline-block; font-size: 0.875rem; max-width: 250px;">
+                    <small style="color: #6B7280; font-size: 0.875rem;">Max 10MB.</small>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="font-weight: 700; padding: 0.5rem 1.25rem;">
+                    {% icon 'send' %} Send Reply
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

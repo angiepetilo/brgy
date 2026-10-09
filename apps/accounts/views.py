@@ -1,99 +1,58 @@
+import mimetypes
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
-from django.contrib.auth.forms import PasswordChangeForm
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth import login, logout, update_session_auth_hash
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+from django.http import FileResponse, HttpResponse, Http404, HttpResponseForbidden
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Q
 from django.core.paginator import Paginator
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
-
-import secrets
-import string
-import logging
-from django.conf import settings
 from django.urls import reverse
-from django.core.mail import send_mail
+from django.utils.http import url_has_allowed_host_and_scheme
 
-from apps.accounts.models import User, Household, Purok
-from apps.accounts.forms import ResidentRegistrationForm, UserLoginForm, ProfileUpdateForm, SettingsForm, PersonalInfoForm, DutyStatusForm
-from apps.appointments.models import Appointment
-from apps.communications.models import Announcement, KapitanStatus
-from apps.chat.models import Notification
-
-logger = logging.getLogger(__name__)
-
-
-def generate_random_password(length=8):
-    """Generates a secure, user-friendly randomized password (e.g. Brgy-X7k2M9p4)."""
-    chars = string.ascii_letters + string.digits
-    rand_suffix = ''.join(secrets.choice(chars) for _ in range(length))
-    return f"Brgy-{rand_suffix}"
-
-
-def send_approval_credentials_email(request, resident, password):
-    """Sends notification email to approved resident with their login credentials."""
-    if not resident.email:
-        return False, "No email address registered for this resident."
-
-    login_url = request.build_absolute_uri(reverse('accounts:login'))
-    subject = "🏛️ Your Barangay e-Portal Account Has Been Approved!"
-    message = f"""Mabuhay, {resident.get_full_name() or resident.username}!
-
-We are pleased to inform you that your Barangay Resident account has been officially verified and APPROVED by the Barangay Administrator.
-
-Your Account Login Credentials:
-─────────────────────────────────────────────
-• Username: {resident.username}
-• Registered Email: {resident.email}
-• Temporary Password: {password}
-─────────────────────────────────────────────
-
-You can sign in immediately at:
-{login_url}
-
-For your account security, please change your password after logging in.
-
-Thank you,
-Barangay Hall Administration
-Barangay e-Portal Digital Services
-"""
-    try:
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[resident.email],
-            fail_silently=False,
-        )
-        return True, "Email sent successfully."
-    except Exception as exc:
-        logger.error(f"Failed to send approval email to {resident.email}: {exc}")
-        return False, str(exc)
+from apps.accounts.models import User, Resident, Purok, Officer, StaffAssignment, PermissionRule
+from apps.accounts.permissions import require_perm, registry, check_user_perm, has_perm
+from apps.accounts.forms import (
+    ResidentRegistrationForm,
+    UserLoginForm,
+    ForcePasswordChangeForm,
+    ProfileUpdateForm,
+)
+from apps.core.ratelimit import ratelimit
+from apps.accounts.services import (
+    clean_demographics,
+    update_resident_demographics_service,
+    update_resident_account_service,
+    register_resident_service,
+    approve_resident_service,
+    reject_resident_service,
+    resend_temporary_password_service,
+    change_password_service,
+    disable_account_service,
+)
 
 
-def is_admin(user):
-    return user.is_authenticated and (user.role == User.ROLE_ADMIN or user.is_staff or user.is_superuser)
-
-
-def is_kapitan_or_admin(user):
-    return user.is_authenticated and (user.role in [User.ROLE_ADMIN, User.ROLE_KAPITAN] or user.is_staff)
-
-
+@ratelimit(key='ip', rate='signup')
 def signup_view(request):
-    if request.user.is_authenticated:
-        return redirect('accounts:dashboard')
+    if request.user.is_authenticated and request.user.status == User.STATUS_ACTIVE:
+        return redirect('home')
 
     if request.method == 'POST':
         form = ResidentRegistrationForm(request.POST, request.FILES)
         if form.is_valid():
-            user = form.save()
-            return render(request, 'accounts/signup.html', {
-                'form': ResidentRegistrationForm(),
-                'registration_submitted': True,
-                'registered_user': user,
-            })
+            try:
+                user, resident = register_resident_service(
+                    form.cleaned_data,
+                    request.FILES.get('id_photo')
+                )
+                return render(request, 'accounts/signup.html', {
+                    'form': ResidentRegistrationForm(),
+                    'registration_submitted': True,
+                    'registered_user': user,
+                })
+            except ValueError as err:
+                form.add_error(None, str(err))
     else:
         form = ResidentRegistrationForm()
 
@@ -105,9 +64,12 @@ def signup_view(request):
 
 def login_view(request):
     if request.user.is_authenticated:
-        if request.user.role == User.ROLE_RESIDENT and not request.user.is_approved:
-            return redirect('accounts:pending_approval')
-        return redirect('accounts:dashboard')
+        if request.user.status == User.STATUS_ACTIVE:
+            if request.user.must_change_password:
+                return redirect('accounts:change_password')
+            return redirect('home')
+        else:
+            logout(request)
 
     if request.method == 'POST':
         form = UserLoginForm(request, data=request.POST)
@@ -115,293 +77,157 @@ def login_view(request):
             user = form.get_user()
             login(request, user)
             messages.success(request, f"Welcome back, {user.get_full_name() or user.username}!")
-            if user.role == User.ROLE_RESIDENT and not user.is_approved:
-                return redirect('accounts:pending_approval')
-            return redirect('accounts:dashboard')
-        else:
-            messages.error(request, "Invalid username or password.")
+            if user.must_change_password:
+                return redirect('accounts:change_password')
+            return redirect('home')
     else:
-        form = UserLoginForm()
+        form = UserLoginForm(request)
 
     return render(request, 'accounts/login.html', {'form': form})
 
 
 def logout_view(request):
     logout(request)
-    messages.info(request, "You have been logged out.")
+    messages.info(request, "You have been safely signed out.")
     return redirect('accounts:login')
 
 
 @login_required
+def change_password_view(request):
+    user = request.user
+    if not user.must_change_password:
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = ForcePasswordChangeForm(request.POST, user=user)
+        if form.is_valid():
+            new_pw = form.cleaned_data['new_password']
+            change_password_service(user, new_pw)
+            # Rotate the current session key so the old session is invalidated
+            update_session_auth_hash(request, user)
+            messages.success(request, "Your password has been successfully updated. Welcome to the portal!")
+            return redirect('home')
+    else:
+        form = ForcePasswordChangeForm(user=user)
+
+    return render(request, 'accounts/change_password.html', {'form': form})
+
+
+@login_required
 def pending_approval_view(request):
-    """
-    Dedicated screen for unapproved residents.
-    Enforced by ApprovalGateMiddleware.
-    """
     return render(request, 'accounts/pending_approval.html', {'user': request.user})
 
 
 @login_required
-def dashboard_view(request):
-    user = request.user
-
-    # Fetch latest Kapitan status
-    kapitan_status = KapitanStatus.objects.order_by('-updated_at').first()
-
-    if user.is_admin_user:
-        # Admin metrics
-        pending_appointments = Appointment.objects.filter(status=Appointment.STATUS_SUBMITTED).count()
-        total_appointments = Appointment.objects.count()
-        pending_verifications = User.objects.filter(role=User.ROLE_RESIDENT, is_approved=False, rejection_reason__isnull=True).count()
-        total_residents = User.objects.filter(role=User.ROLE_RESIDENT, is_approved=True).count()
-
-        recent_appointments = Appointment.objects.select_related('resident').order_by('-created_at')[:8]
-        pending_residents = User.objects.filter(role=User.ROLE_RESIDENT, is_approved=False, rejection_reason__isnull=True)[:5]
-        latest_announcements = Announcement.objects.order_by('-created_at')[:4]
-
-        context = {
-            'role': 'admin',
-            'pending_appointments': pending_appointments,
-            'total_appointments': total_appointments,
-            'pending_verifications': pending_verifications,
-            'total_residents': total_residents,
-            'recent_appointments': recent_appointments,
-            'pending_residents': pending_residents,
-            'latest_announcements': latest_announcements,
-            'kapitan_status': kapitan_status,
-        }
-        return render(request, 'accounts/dashboard_admin.html', context)
-
-    elif user.is_kapitan_user:
-        total_appointments = Appointment.objects.count()
-        active_announcements = Announcement.objects.count()
-        latest_announcements = Announcement.objects.order_by('-created_at')[:5]
-        recent_appointments = Appointment.objects.select_related('resident').order_by('-created_at')[:6]
-
-        context = {
-            'role': 'kapitan',
-            'kapitan_status': kapitan_status,
-            'total_appointments': total_appointments,
-            'active_announcements': active_announcements,
-            'latest_announcements': latest_announcements,
-            'recent_appointments': recent_appointments,
-        }
-        return render(request, 'accounts/dashboard_kapitan.html', context)
-
-    else:
-        # Resident view
-        user_appointments = Appointment.objects.filter(resident=user).order_by('-created_at')
-        active_appointments = user_appointments.exclude(status__in=[Appointment.STATUS_COMPLETED, Appointment.STATUS_REJECTED])
-        completed_appointments = user_appointments.filter(status=Appointment.STATUS_COMPLETED)
-        latest_announcements = Announcement.objects.order_by('-created_at')[:5]
-
-        context = {
-            'role': 'resident',
-            'user_appointments': user_appointments[:5],
-            'active_count': active_appointments.count(),
-            'completed_count': completed_appointments.count(),
-            'latest_announcements': latest_announcements,
-            'kapitan_status': kapitan_status,
-        }
-        return render(request, 'accounts/dashboard_resident.html', context)
-
-
-@login_required
-@user_passes_test(is_admin)
-def approval_list_view(request):
+def serve_id_photo_view(request, resident_id):
     """
-    Approval dashboard for admins to inspect resident registrations and ID proofs.
+    Secure endpoint serving resident identification documents only to:
+    - Admin or authorized staff
+    - The resident owner themself
+    Direct unauthenticated or unauthorized access returns 403.
     """
-    pending_residents = User.objects.filter(role=User.ROLE_RESIDENT, is_approved=False).order_by('-date_joined')
-    return render(request, 'accounts/approval_list.html', {'pending_residents': pending_residents})
+    resident = get_object_or_404(Resident, id=resident_id)
+
+    is_owner = (resident.user_id == request.user.id)
+    is_staff_or_admin = (
+        request.user.role in [User.ROLE_ADMIN, User.ROLE_STAFF, User.ROLE_KAPITAN]
+        or request.user.is_staff
+        or request.user.is_superuser
+    )
+
+    if not (is_owner or is_staff_or_admin):
+        raise PermissionDenied("You do not have permission to view this identification document.")
+
+    if not resident.id_photo:
+        raise Http404("No ID photo found for this resident.")
+
+    try:
+        handle = resident.id_photo.open('rb')
+    except (FileNotFoundError, OSError, ValueError):
+        raise Http404("ID photo file not found on server.")
+    content_type = mimetypes.guess_type(resident.id_photo.name)[0] or 'application/octet-stream'
+    response = FileResponse(handle, content_type=content_type, as_attachment=False)
+    response['X-Content-Type-Options'] = 'nosniff'
+    response['Cache-Control'] = 'private, no-store'
+    return response
 
 
-@login_required
-@user_passes_test(is_admin)
+@require_perm('accounts', 'approve')
 def approve_resident_view(request, user_id):
     if request.method == 'POST':
-        resident = get_object_or_404(User, id=user_id, role=User.ROLE_RESIDENT)
-        
-        # Generate unique randomized password for resident login
-        random_password = generate_random_password(8)
-        resident.set_password(random_password)
-        resident.is_approved = True
-        resident.rejection_reason = None
-        resident.verified_at = timezone.now()
-        resident.verified_by = request.user
-        resident.save()
-
-        # Send official email with randomized password
-        email_sent, email_msg = send_approval_credentials_email(request, resident, random_password)
-
-        # Create persistent notification
-        Notification.objects.create(
-            recipient=resident,
-            sender=request.user,
-            title="Account Verified & Approved!",
-            message="Your Barangay Resident account has been verified and approved. You now have full access to services.",
-            notification_type=Notification.TYPE_APPROVAL,
-            link_url="/dashboard/"
-        )
-
-        # Broadcast via WebSockets to resident's personal channel
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            f"user_{resident.id}",
-            {
-                "type": "send_notification",
-                "title": "Account Approved!",
-                "message": "Your registration has been approved. You now have full access to barangay services.",
-                "notification_type": "approval",
-                "link_url": "/dashboard/",
-            }
-        )
-
-        if email_sent:
-            messages.success(
-                request,
-                f"Resident {resident.get_full_name() or resident.username} approved! "
-                f"Login credentials and temporary password [{random_password}] were sent to {resident.email}."
-            )
-        else:
+        user_to_approve = get_object_or_404(User, id=user_id)
+        link_resident_id = request.POST.get('link_resident_id')
+        res = approve_resident_service(user_to_approve, request.user, link_resident_id=link_resident_id, request=request)
+        linked_str = ""
+        if res.get('linked_resident'):
+            linked_str = f" Linked to existing record #{res['linked_resident'].id} ({res['linked_resident'].get_full_name()})."
+        if not res.get('email_sent', True):
             messages.warning(
                 request,
-                f"Resident {resident.get_full_name() or resident.username} approved! "
-                f"Generated Password: [{random_password}]. "
-                f"(Email delivery note: {email_msg})"
+                f"Account for {user_to_approve.get_full_name() or user_to_approve.username} approved! "
+                f"Warning: Failed to deliver temporary password: {res.get('email_error')}. Please use 'Resend temporary password'.{linked_str}"
             )
-    return redirect('accounts:approval_list')
+        else:
+            messages.success(
+                request,
+                f"Account for {user_to_approve.get_full_name() or user_to_approve.username} approved! "
+                f"Temporary credentials were sent to {user_to_approve.email}.{linked_str}"
+            )
+    return redirect(request.META.get('HTTP_REFERER') or reverse('accounts:residents_tabbed'))
 
 
-@login_required
-@user_passes_test(is_admin)
+@require_perm('accounts', 'resend_password')
+def resend_temp_password_view(request, user_id):
+    if request.method == 'POST':
+        user_obj = get_object_or_404(User, id=user_id)
+        res = resend_temporary_password_service(user_obj, request.user, request)
+        if not res.get('email_sent', True):
+            messages.warning(request, res.get('message', 'Failed to deliver temporary password.'))
+        else:
+            messages.success(request, res.get('message', 'Temporary password resent successfully.'))
+    return redirect(request.META.get('HTTP_REFERER') or reverse('accounts:residents_tabbed'))
+
+
+@require_perm('accounts', 'reject')
 def reject_resident_view(request, user_id):
     if request.method == 'POST':
-        resident = get_object_or_404(User, id=user_id, role=User.ROLE_RESIDENT)
-        reason = request.POST.get('rejection_reason', 'ID proof is unclear or invalid. Please re-register or contact the barangay hall.')
-        resident.is_approved = False
-        resident.rejection_reason = reason
-        resident.save()
-
-        # Create persistent notification
-        Notification.objects.create(
-            recipient=resident,
-            sender=request.user,
-            title="Account Verification Declined",
-            message=f"Reason: {reason}",
-            notification_type=Notification.TYPE_APPROVAL,
-            link_url="/accounts/pending/"
-        )
-
-        # Broadcast via WebSockets
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            f"user_{resident.id}",
-            {
-                "type": "send_notification",
-                "title": "Verification Declined",
-                "message": f"Reason: {reason}",
-                "notification_type": "approval",
-                "link_url": "/accounts/pending/",
-            }
-        )
-
-        messages.warning(request, f"Resident {resident.username} application was rejected.")
-    return redirect('accounts:approval_list')
-
-
-@login_required
-@user_passes_test(is_admin)
-def rbi_directory_view(request):
-    """
-    Registry of Barangay Inhabitants (RBI) & Household Demographics Directory.
-    Admin-only searchable, paginated table of residents filterable by Purok, Senior Citizens, PWDs, 4Ps, and Households.
-    """
-    purok_filter = request.GET.get('purok', '')
-    is_senior = request.GET.get('is_senior', '')
-    is_pwd = request.GET.get('is_pwd', '')
-    is_4ps = request.GET.get('is_4ps', '')
-    household_filter = request.GET.get('household', '')
-    search_query = request.GET.get('q', '').strip()
-
-    queryset = User.objects.filter(role=User.ROLE_RESIDENT).select_related('household').order_by('last_name', 'first_name')
-
-    if purok_filter:
-        if purok_filter.isdigit():
-            queryset = queryset.filter(purok_id=int(purok_filter))
+        user_to_reject = get_object_or_404(User, id=user_id)
+        reason = request.POST.get('rejection_reason', '').strip()
+        if not reason:
+            messages.error(request, "Rejection reason is required. Please provide a clear explanation.")
         else:
-            queryset = queryset.filter(purok__name=purok_filter)
-    if is_senior == '1':
-        queryset = queryset.filter(is_senior=True)
-    if is_pwd == '1':
-        queryset = queryset.filter(is_pwd=True)
-    if is_4ps == '1':
-        queryset = queryset.filter(is_4ps=True)
-    if household_filter:
-        queryset = queryset.filter(household__household_number=household_filter)
-    if search_query:
-        queryset = queryset.filter(
-            Q(first_name__icontains=search_query) |
-            Q(last_name__icontains=search_query) |
-            Q(username__icontains=search_query) |
-            Q(address__icontains=search_query) |
-            Q(occupation__icontains=search_query)
-        )
-
-    # Demographics KPI aggregates
-    total_residents = User.objects.filter(role=User.ROLE_RESIDENT, is_approved=True).count()
-    total_households = Household.objects.count()
-    total_seniors = User.objects.filter(role=User.ROLE_RESIDENT, is_senior=True).count()
-    total_pwd = User.objects.filter(role=User.ROLE_RESIDENT, is_pwd=True).count()
-    total_4ps = User.objects.filter(role=User.ROLE_RESIDENT, is_4ps=True).count()
-
-    paginator = Paginator(queryset, 15)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    context = {
-        'page_obj': page_obj,
-        'purok_filter': purok_filter,
-        'is_senior': is_senior,
-        'is_pwd': is_pwd,
-        'is_4ps': is_4ps,
-        'household_filter': household_filter,
-        'search_query': search_query,
-        'purok_choices': User.PUROK_CHOICES,
-        'total_residents': total_residents,
-        'total_households': total_households,
-        'total_seniors': total_seniors,
-        'total_pwd': total_pwd,
-        'total_4ps': total_4ps,
-    }
-    return render(request, 'accounts/rbi_directory.html', context)
+            res = reject_resident_service(user_to_reject, request.user, reason, request)
+            messages.warning(
+                request,
+                f"Registration for {user_to_reject.get_full_name() or user_to_reject.username} was rejected. Notice sent to {user_to_reject.email}."
+            )
+    return redirect(request.META.get('HTTP_REFERER') or reverse('accounts:residents_tabbed'))
 
 
-@login_required
-@user_passes_test(is_kapitan_or_admin)
 def residents_tabbed_view(request):
+    if not request.user.is_authenticated:
+        return redirect(f"/accounts/login/?next={request.path}")
+    if not (check_user_perm(request.user, 'residents', 'view') or check_user_perm(request.user, 'accounts', 'view')):
+        raise PermissionDenied("You do not have permission to view residents.")
     """
     Residents Management Module (/accounts/residents/)
-    Tri-Tab Interface (Admin/Staff Only):
-    PENDING - Unapproved registrations; inline action buttons to VIEW PROOF, APPROVE, or REJECT.
-    APPROVED - Searchable RBI directory of verified residents with edit capabilities.
-    REJECTED - List of declined registration attempts with logged rejection reasons and option to re-evaluate.
+    Tabs:
+    - PENDING: Unreviewed applicants (status=pending). Side-by-side review of ID photo and details.
+    - APPROVED: Verified residents (status=active).
+    - REJECTED: Declined applicants (status=rejected).
     """
     active_tab = request.GET.get('tab', 'pending')
-    if active_tab not in ['pending', 'approved', 'rejected']:
+    if active_tab in ['records', 'residents_records']:
+        active_tab = 'records'
+    elif active_tab not in ['pending', 'approved', 'rejected']:
         active_tab = 'pending'
 
-    # Base querysets
-    pending_qs = User.objects.filter(role=User.ROLE_RESIDENT, is_approved=False).exclude(rejection_reason__gt='').order_by('-date_joined')
-    approved_qs = User.objects.filter(role=User.ROLE_RESIDENT, is_approved=True).select_related('household').order_by('last_name', 'first_name')
-    rejected_qs = User.objects.filter(role=User.ROLE_RESIDENT, is_approved=False, rejection_reason__gt='').order_by('-date_joined')
+    # Filter by user status
+    pending_qs = User.objects.filter(status=User.STATUS_PENDING).select_related('resident_profile', 'purok').order_by('-date_joined')
+    approved_qs = User.objects.filter(status=User.STATUS_ACTIVE, role=User.ROLE_RESIDENT).select_related('resident_profile', 'purok').order_by('last_name', 'first_name')
+    rejected_qs = User.objects.filter(status=User.STATUS_REJECTED).select_related('resident_profile', 'purok').order_by('-reviewed_at', '-date_joined')
 
-    # Counts
-    pending_count = pending_qs.count()
-    approved_count = approved_qs.count()
-    rejected_count = rejected_qs.count()
-
-    # Search / Filters
+    # Search filter
     search_query = request.GET.get('q', '').strip()
     purok_filter = request.GET.get('purok', '')
 
@@ -411,22 +237,43 @@ def residents_tabbed_view(request):
             Q(last_name__icontains=search_query) |
             Q(username__icontains=search_query) |
             Q(email__icontains=search_query) |
-            Q(phone_number__icontains=search_query)
+            Q(phone_number__icontains=search_query) |
+            Q(resident_profile__contact_no__icontains=search_query) |
+            Q(resident_profile__address__icontains=search_query)
         )
         if active_tab == 'pending':
             pending_qs = pending_qs.filter(query_filter)
-        elif active_tab == 'approved':
+        elif active_tab in ['approved', 'records']:
             approved_qs = approved_qs.filter(query_filter)
         elif active_tab == 'rejected':
             rejected_qs = rejected_qs.filter(query_filter)
 
-    if purok_filter and active_tab == 'approved':
+    if purok_filter and active_tab in ['approved', 'records']:
         if purok_filter.isdigit():
             approved_qs = approved_qs.filter(purok_id=int(purok_filter))
         else:
             approved_qs = approved_qs.filter(purok__name=purok_filter)
 
-    # Pagination for approved
+    if active_tab == 'pending':
+        for u in pending_qs:
+            dob = u.date_of_birth
+            if not dob and hasattr(u, 'resident_profile') and u.resident_profile:
+                dob = u.resident_profile.birthdate
+            matches = []
+            if dob and u.first_name and u.last_name:
+                candidates = Resident.objects.filter(
+                    user__isnull=True,
+                    first_name__iexact=u.first_name.strip(),
+                    last_name__iexact=u.last_name.strip(),
+                    birthdate=dob
+                )
+                matches = [c for c in candidates if c.age and c.age >= 18]
+            u.possible_existing_records = matches
+
+    pending_count = pending_qs.count()
+    approved_count = approved_qs.count()
+    rejected_count = rejected_qs.count()
+
     paginator = Paginator(approved_qs, 15)
     page_number = request.GET.get('page')
     approved_page = paginator.get_page(page_number)
@@ -435,7 +282,27 @@ def residents_tabbed_view(request):
     if main_tab not in ['residents', 'rbi']:
         main_tab = 'residents'
 
+    puroks = Purok.objects.all()
+
+    can_view_needs = (
+        request.user.role in [User.ROLE_ADMIN, User.ROLE_KAPITAN] or
+        request.user.is_superuser or
+        has_perm(request.user, 'residents', 'view_needs')
+    )
+    can_edit_needs = (
+        request.user.role in [User.ROLE_ADMIN, User.ROLE_KAPITAN] or
+        request.user.is_superuser or
+        has_perm(request.user, 'residents', 'edit_needs')
+    )
+
     context = {
+        'gender_choices': Resident.GENDER_CHOICES,
+        'civil_status_choices': Resident.CIVIL_STATUS_CHOICES,
+        'can_register_resident': (
+            request.user.role in [User.ROLE_ADMIN, User.ROLE_KAPITAN] or
+            request.user.is_superuser or
+            has_perm(request.user, 'residents', 'create')
+        ),
         'main_tab': main_tab,
         'active_tab': active_tab,
         'pending_residents': pending_qs,
@@ -446,55 +313,26 @@ def residents_tabbed_view(request):
         'rejected_count': rejected_count,
         'search_query': search_query,
         'purok_filter': purok_filter,
-        'purok_choices': User.PUROK_CHOICES,
+        'puroks': puroks,
+        'can_view_needs': can_view_needs,
+        'can_edit_needs': can_edit_needs,
     }
     return render(request, 'accounts/residents_tabbed.html', context)
 
 
-@login_required
-@user_passes_test(is_admin)
+@require_perm('accounts', 'approve')
 def reevaluate_resident_view(request, user_id):
-    resident = get_object_or_404(User, id=user_id, role=User.ROLE_RESIDENT)
+    user_obj = get_object_or_404(User, id=user_id)
     if request.method == 'POST':
         action = request.POST.get('action', 'approve')
         if action == 'approve':
-            random_password = generate_random_password(8)
-            resident.set_password(random_password)
-            resident.is_approved = True
-            resident.rejection_reason = ''
-            resident.save()
-
-            email_sent, email_msg = send_approval_credentials_email(request, resident, random_password)
-
-            # Create notification
-            Notification.objects.create(
-                recipient=resident,
-                sender=request.user,
-                title="Account Re-evaluated & Approved!",
-                message="Your resident account registration was re-evaluated and officially approved.",
-                notification_type=Notification.TYPE_APPROVAL,
-                link_url="/dashboard/"
-            )
-
-            if email_sent:
-                messages.success(
-                    request,
-                    f"Resident {resident.get_full_name() or resident.username} has been re-evaluated and approved! "
-                    f"Login credentials with temporary password [{random_password}] were sent to {resident.email}."
-                )
-            else:
-                messages.warning(
-                    request,
-                    f"Resident {resident.get_full_name() or resident.username} approved! "
-                    f"Generated Password: [{random_password}]. "
-                    f"(Email delivery note: {email_msg})"
-                )
+            res = approve_resident_service(user_obj, request.user, request)
+            messages.success(request, f"Resident {user_obj.get_full_name() or user_obj.username} re-evaluated and approved!")
         else:
-            # Revert to pending
-            resident.rejection_reason = ''
-            resident.is_approved = False
-            resident.save()
-            messages.info(request, f"Resident {resident.username} returned to pending verification.")
+            user_obj.status = User.STATUS_PENDING
+            user_obj.rejection_reason = ''
+            user_obj.save()
+            messages.info(request, f"Resident {user_obj.username} returned to pending review.")
     return redirect('/accounts/residents/?tab=rejected')
 
 
@@ -505,16 +343,12 @@ def profile_view(request):
         form = ProfileUpdateForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
             form.save()
-            messages.success(request, "Your profile and status message have been updated successfully.")
+            messages.success(request, "Your profile has been updated.")
             return redirect('accounts:profile')
     else:
         form = ProfileUpdateForm(instance=user)
 
-    context = {
-        'form': form,
-        'user_obj': user,
-    }
-    return render(request, 'accounts/profile.html', context)
+    return render(request, 'accounts/profile.html', {'form': form, 'user_obj': user})
 
 
 @login_required
@@ -525,112 +359,176 @@ def remove_avatar_view(request):
             user.avatar.delete(save=False)
             user.avatar = None
             user.save()
-            messages.success(request, "Profile avatar removed. Reverted to initial text badge.")
+            messages.success(request, "Profile avatar removed.")
     return redirect('accounts:profile')
 
 
-@login_required
-def settings_view(request):
-    user = request.user
-    active_tab = request.GET.get('tab', 'personal')
+def _safe_back(request, fallback='accounts:residents_tabbed'):
+    """Redirect to the same-site referer, else to ``fallback`` (never offsite)."""
+    referer = request.META.get('HTTP_REFERER', '')
+    if referer and url_has_allowed_host_and_scheme(
+        referer, allowed_hosts={request.get_host()}, require_https=request.is_secure(),
+    ):
+        return redirect(referer)
+    return redirect(reverse(fallback))
 
-    personal_form = PersonalInfoForm(instance=user)
-    duty_form = DutyStatusForm(instance=user)
-    password_form = PasswordChangeForm(user=user)
+
+@require_perm('residents', 'edit')
+def resident_edit_view(request, user_id):
+    resident_user = get_object_or_404(User, id=user_id)
+    if request.method == 'POST':
+        try:
+            user, resident = update_resident_account_service(request.user, resident_user, request.POST)
+        except ValueError as e:
+            messages.error(request, str(e))
+            return _safe_back(request)
+
+        name = user.get_full_name() or user.username
+        if resident is None:
+            messages.warning(
+                request,
+                f"Account details for {name} were updated, but this user has no resident (RBI) profile, "
+                "so demographics were not saved.",
+            )
+        else:
+            messages.success(request, f"Resident profile for {name} updated.")
+    return _safe_back(request)
+
+
+@require_perm('residents', 'delete')
+def resident_delete_view(request, user_id):
+    resident_user = get_object_or_404(User, id=user_id)
+    if request.method == 'POST':
+        name = resident_user.get_full_name() or resident_user.username
+        resident_user.delete()
+        messages.success(request, f"Resident account for {name} has been removed.")
+    return redirect(request.META.get('HTTP_REFERER') or reverse('accounts:residents_tabbed'))
+
+
+@require_perm('residents', 'create')
+def staff_register_resident_view(request):
+    if request.method == 'POST':
+        try:
+            from apps.accounts.services import staff_register_resident_service
+            resident = staff_register_resident_service(request.user, request.POST)
+            messages.success(request, f"Resident {resident.get_full_name()} registered successfully.")
+        except (ValueError, PermissionDenied) as e:
+            messages.error(request, str(e))
+    return redirect(request.META.get('HTTP_REFERER') or reverse('accounts:residents_tabbed'))
+
+
+@require_perm('residents', 'edit_needs')
+def update_resident_needs_view(request, resident_id):
+    from apps.accounts.models import Resident
+    resident = get_object_or_404(Resident, id=resident_id)
+    if request.method == 'POST':
+        try:
+            from apps.accounts.services import update_resident_needs_service
+            update_resident_needs_service(resident, request.user, request.POST)
+            messages.success(request, f"Needs-attention details updated for {resident.get_full_name()}.")
+        except (ValueError, PermissionDenied) as e:
+            messages.error(request, str(e))
+    return redirect(request.META.get('HTTP_REFERER') or reverse('accounts:residents_tabbed'))
+
+
+@require_perm('residents', 'assign')
+def assign_resident_officer_view(request):
+    if request.method == 'POST':
+        officer_id = request.POST.get('officer_id')
+        officer = get_object_or_404(Officer, id=officer_id) if officer_id else None
+        purok_id = request.POST.get('purok_id')
+        resident_id = request.POST.get('resident_id')
+
+        try:
+            from apps.accounts.services import assign_resident_officer_service, assign_purok_residents_officer_service
+            from apps.accounts.models import Resident
+            if purok_id:
+                purok = get_object_or_404(Purok, id=purok_id)
+                count = assign_purok_residents_officer_service(purok, officer, request.user)
+                messages.success(request, f"Assigned {count} residents in {purok.name} to {officer.position if officer else 'None'}.")
+            elif resident_id:
+                resident = get_object_or_404(Resident, id=resident_id)
+                assign_resident_officer_service(resident, officer, request.user)
+                messages.success(request, f"Assigned {resident.get_full_name()} to {officer.position if officer else 'None'}.")
+        except (ValueError, PermissionDenied) as e:
+            messages.error(request, str(e))
+    return redirect(request.META.get('HTTP_REFERER') or reverse('accounts:residents_tabbed'))
+
+
+@login_required
+def dashboard_view(request):
+    """
+    Barangay Dashboard view displaying separate numbers for registered residents,
+    portal accounts, needs-attention count, and residents per purok leader.
+    """
+    from apps.accounts.services import get_dashboard_metrics
+    metrics = get_dashboard_metrics(request.user)
+    return render(request, 'accounts/dashboard.html', {
+        'metrics': metrics,
+        'residents_per_purok_leader': metrics['residents_per_purok_leader'],
+    })
+
+
+@require_perm('officers', 'edit')
+def officers_permissions_view(request):
+    """
+    Admin Permission & Officer Assignment Management Page.
+    Dynamically lists all registered modules and actions from code registry.
+    Allows editing PermissionRule records and staff assignments.
+    """
+    officers = Officer.objects.select_related('user').all()
+    all_modules = registry.get_modules()
 
     if request.method == 'POST':
-        action = request.POST.get('action')
+        # Update permissions
+        action_type = request.POST.get('action_type')
+        if action_type == 'update_rules':
+            officer_id = request.POST.get('officer_id')
+            officer = get_object_or_404(Officer, id=officer_id)
 
-        if action == 'change_password':
-            active_tab = 'security'
-            password_form = PasswordChangeForm(user=user, data=request.POST)
-            if password_form.is_valid():
-                user_updated = password_form.save()
-                update_session_auth_hash(request, user_updated)
-                messages.success(request, "Your password has been changed successfully.")
-                return redirect(f"{reverse('accounts:settings')}?tab=security")
-            else:
-                messages.error(request, "Please correct the password errors below.")
+            for mod, acts in all_modules.items():
+                for act in acts:
+                    field_name = f"perm_{officer.id}_{mod}_{act}"
+                    allowed = field_name in request.POST
+                    PermissionRule.objects.update_or_create(
+                        officer=officer,
+                        module=mod,
+                        action=act,
+                        defaults={'allowed': allowed}
+                    )
+            messages.success(request, f"Permissions for {officer.position} updated successfully.")
+            return redirect('accounts:officers_permissions')
 
-        elif action == 'set_duty_status':
-            active_tab = 'duty'
-            duty_form = DutyStatusForm(request.POST, instance=user)
-            if duty_form.is_valid():
-                duty_form.save()
-                messages.success(request, f"Duty status updated to: {user.get_duty_status_display()}.")
-                return redirect(f"{reverse('accounts:settings')}?tab=duty")
-            else:
-                messages.error(request, "Please correct the errors in the duty status form.")
+        elif action_type == 'assign_staff':
+            officer_id = request.POST.get('officer_id')
+            user_id = request.POST.get('user_id')
+            scope_type = request.POST.get('scope_type')
+            scope_value = request.POST.get('scope_value', '').strip()
 
-        else:
-            # Default / personal_info
-            active_tab = 'personal'
-            personal_form = PersonalInfoForm(request.POST, instance=user)
-            if personal_form.is_valid():
-                personal_form.save()
-                messages.success(request, "Personal information updated successfully.")
-                return redirect(f"{reverse('accounts:settings')}?tab=personal")
-            else:
-                messages.error(request, "Please correct the errors in your personal information.")
+            officer = get_object_or_404(Officer, id=officer_id)
+            assigned_user = get_object_or_404(User, id=user_id)
+
+            StaffAssignment.objects.create(
+                user=assigned_user,
+                officer=officer,
+                scope_type=scope_type,
+                scope_value=scope_value
+            )
+            messages.success(request, f"Assignment created for {assigned_user.get_full_name()} as {officer.position}.")
+            return redirect('accounts:officers_permissions')
+
+    # Build existing rules dictionary: (officer_id, module, action) -> bool
+    rules_qs = PermissionRule.objects.all()
+    rules_dict = {(r.officer_id, r.module, r.action): r.allowed for r in rules_qs}
+
+    staff_assignments = StaffAssignment.objects.select_related('user', 'officer').all()
+    staff_users = User.objects.filter(role__in=[User.ROLE_STAFF, User.ROLE_ADMIN, User.ROLE_KAPITAN])
 
     context = {
-        'form': personal_form,  # For backward compatibility if anything reads form
-        'personal_form': personal_form,
-        'duty_form': duty_form,
-        'password_form': password_form,
-        'active_tab': active_tab,
-        'user_obj': user,
-        'is_superuser': user.is_superuser or user.is_staff,
+        'officers': officers,
+        'modules': all_modules,
+        'rules_dict': rules_dict,
+        'staff_assignments': staff_assignments,
+        'staff_users': staff_users,
     }
-    return render(request, 'accounts/settings.html', context)
-
-
-@login_required
-@user_passes_test(is_kapitan_or_admin)
-def resident_edit_view(request, user_id):
-    resident = get_object_or_404(User, id=user_id, role=User.ROLE_RESIDENT)
-    if request.method == 'POST':
-        first_name = request.POST.get('first_name', '').strip()
-        last_name = request.POST.get('last_name', '').strip()
-        phone_number = request.POST.get('phone_number', '').strip()
-        email = request.POST.get('email', '').strip()
-        street_address = request.POST.get('street_address', '').strip()
-        purok_name = request.POST.get('purok', '').strip()
-        civil_status = request.POST.get('civil_status', resident.civil_status)
-
-        if first_name:
-            resident.first_name = first_name
-        if last_name:
-            resident.last_name = last_name
-        if email:
-            resident.email = email
-        resident.phone_number = phone_number
-        resident.street_address = street_address
-        resident.civil_status = civil_status
-
-        if purok_name:
-            purok_obj, _ = Purok.objects.get_or_create(name=purok_name)
-            resident.purok = purok_obj
-
-        resident.save()
-        messages.success(request, f"Resident profile for {resident.get_full_name() or resident.username} has been updated.")
-        return redirect(request.META.get('HTTP_REFERER') or reverse('accounts:residents_tabbed'))
-
-    return redirect('accounts:residents_tabbed')
-
-
-@login_required
-@user_passes_test(is_kapitan_or_admin)
-def resident_delete_view(request, user_id):
-    resident = get_object_or_404(User, id=user_id, role=User.ROLE_RESIDENT)
-    if request.method == 'POST':
-        name = resident.get_full_name() or resident.username
-        resident.delete()
-        messages.success(request, f"Resident account for {name} has been deleted.")
-        return redirect(request.META.get('HTTP_REFERER') or reverse('accounts:residents_tabbed'))
-
-    messages.warning(request, "Invalid request method for deleting resident.")
-    return redirect('accounts:residents_tabbed')
-
-
-
+    return render(request, 'accounts/officers_permissions.html', context)

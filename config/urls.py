@@ -2,18 +2,11 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 
 from apps.communications import views as comm_views
 
-def hig_demo_view(request):
-    """Demo page showing Apple HIG design system"""
-    return render(request, 'hig-demo.html')
-
 urlpatterns = [
-    # Apple HIG Demo Page
-    path('hig-demo/', hig_demo_view, name='hig_demo'),
-    
     # Root only Django Admin
     path('admin/', admin.site.urls),
 
@@ -28,6 +21,7 @@ urlpatterns = [
     # Module 2: Home
     path('feed/', comm_views.feed_view, name='feed'),
     path('home/', comm_views.feed_view, name='home'),
+    path('home/', include('apps.communications.urls', namespace='communications')),
 
     # Module 3: Announcements
     path('announcements/', lambda request: redirect('communications:announcements_list'), name='announcements_hub'),
@@ -41,7 +35,8 @@ urlpatterns = [
 
     # Module 6, 8, 9: Appointments, Health Center, Documents
     path('appointments/', include('apps.appointments.urls', namespace='appointments')),
-    path('communications/', include('apps.communications.urls', namespace='communications')),
+    path('communications/<path:subpath>', lambda request, subpath: redirect(f'/home/{subpath}')),
+    path('communications/', lambda request: redirect('home')),
 
     # Module 10: Records (Issued Documents & Health Records)
     path('records/', include('apps.records.urls', namespace='records')),

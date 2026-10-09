@@ -1,3 +1,4 @@
+{% load core_tags %}
 <!-- Clean Modern Appointments Data Table Component (Reference Design) -->
 <table class="clean-table">
     <thead>
@@ -40,59 +41,57 @@
 
             <!-- Column 5: STATUS (Clean Text Pill) -->
             <td>
-                {% if apt.status == 'approved_scheduled' %}
-                <span class="status-text-pill status-approved"><i class="fa-solid fa-circle-check"></i> Approved</span>
-                {% elif apt.status == 'ready_for_pickup' %}
-                <span class="status-text-pill status-builtin"><i class="fa-solid fa-box-archive"></i> Ready</span>
+                {% if apt.status == 'approved' %}
+                <span class="status-text-pill status-approved" data-status-pill="approved">{% icon 'circle-check' %} Approved</span>
                 {% elif apt.status == 'completed' %}
-                <span class="status-text-pill status-completed"><i class="fa-solid fa-check-double"></i> Completed</span>
-                {% elif apt.status == 'under_review' %}
-                <span class="status-text-pill status-review"><i class="fa-solid fa-clock"></i> In Review</span>
+                <span class="status-text-pill status-completed" data-status-pill="completed">{% icon 'check-check' %} Completed</span>
                 {% elif apt.status == 'rejected' %}
-                <span class="status-text-pill status-rejected"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>
+                <span class="status-text-pill status-rejected" data-status-pill="rejected">{% icon 'circle-x' %} Rejected</span>
+                {% elif apt.status == 'no_show' %}
+                <span class="status-text-pill status-no_show" data-status-pill="no_show" style="color: #4B5563;">{% icon 'user-x' %} No-Show</span>
                 {% else %}
-                <span class="status-text-pill status-builtin"><i class="fa-regular fa-clock"></i> Pending</span>
+                <span class="status-text-pill status-pending" data-status-pill="pending">{% icon 'clock' %} Pending</span>
                 {% endif %}
             </td>
 
             <!-- Column 6: SCHEDULE (Date + Time Slot Subtext) -->
             <td>
-                <div style="font-weight: 600; color: #334155; font-size: 0.8125rem;">
-                    {{ apt.preferred_date|date:"Y-m-d" }}
+                <div style="font-weight: 600; color: #374151; font-size: 0.875rem;">
+                    {{ apt.appt_date|date:"Y-m-d" }}
                 </div>
                 <div class="cell-subtext">
-                    {% if apt.preferred_time_slot == 'morning' %}8:00 AM - 11:30 AM{% elif apt.preferred_time_slot == 'afternoon' %}1:00 PM - 4:30 PM{% else %}{{ apt.get_preferred_time_slot_display }}{% endif %}
+                    {% if apt.time_window == 'morning' %}8:00 AM - 11:30 AM{% elif apt.time_window == 'afternoon' %}1:00 PM - 4:30 PM{% else %}{{ apt.get_time_window_display }}{% endif %}
                 </div>
             </td>
 
             <!-- Column 7: ACTION (Floating Action Menu: View, Edit, Delete) -->
             <td style="text-align: center; position: relative;">
                 <div class="action-dropdown-container">
-                    <button type="button" class="btn-action-circle" onclick="toggleActionMenu(event, this)" title="Appointment Actions">
-                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                    <button type="button" class="btn-action-circle" data-row-action="toggle-menu" title="Appointment Actions" aria-label="Appointment Actions">
+                        {% icon 'ellipsis-vertical' %}
                     </button>
                     <div class="action-dropdown-menu">
                         <a href="{% url 'appointments:detail' apt.id %}" class="action-menu-item">
-                            <i class="fa-regular fa-eye" style="color: #2563EB; width: 16px;"></i> View
+                            {% icon 'eye' cls='icon-primary' %} View
                         </a>
                         <button type="button" class="action-menu-item" 
-                            onclick="openEditAppointmentModal(this)"
+                            data-row-action="edit-appointment"
                             data-id="{{ apt.id }}"
                             data-ref="APT-{{ apt.id }}"
                             data-name="{{ apt.get_applicant_name }}"
-                            data-date="{{ apt.preferred_date|date:'Y-m-d' }}"
-                            data-slot="{{ apt.preferred_time_slot }}"
+                            data-date="{{ apt.appt_date|date:'Y-m-d' }}"
+                            data-slot="{{ apt.time_window }}"
                             data-status="{{ apt.status }}"
                             data-purpose="{{ apt.purpose }}"
                             data-notes="{{ apt.admin_notes }}">
-                            <i class="fa-regular fa-pen-to-square" style="color: #D97706; width: 16px;"></i> Edit
+                            {% icon 'square-pen' cls='icon-muted' %} Edit
                         </button>
                         <button type="button" class="action-menu-item text-danger" 
-                            onclick="openDeleteAppointmentModal(this)"
+                            data-row-action="delete-appointment"
                             data-id="{{ apt.id }}"
                             data-ref="APT-{{ apt.id }}"
                             data-name="{{ apt.get_applicant_name }}">
-                            <i class="fa-regular fa-trash-can" style="color: #DC2626; width: 16px;"></i> Delete
+                            {% icon 'trash-2' cls='icon-danger' %} Delete
                         </button>
                     </div>
                 </div>
@@ -109,7 +108,7 @@
     </div>
     <div class="pagination-controls">
         <span class="pagination-page-label">Page <strong>1</strong> of <strong>1</strong></span>
-        <a href="javascript:void(0)" class="btn-page-pill disabled">&lt; Previous</a>
-        <a href="javascript:void(0)" class="btn-page-pill disabled">Next &gt;</a>
+        <span class="btn-page-pill disabled" aria-disabled="true">&lt; Previous</span>
+        <span class="btn-page-pill disabled" aria-disabled="true">Next &gt;</span>
     </div>
 </div>

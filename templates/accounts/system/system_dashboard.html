@@ -1,0 +1,1112 @@
+{% extends 'base.html' %}
+{% load static core_tags %}
+
+{% block title %}System Administration & Configuration - BARANGAY.PH{% endblock %}
+
+{% block extra_css %}
+<style>
+    .system-tabs-bar {
+        display: flex;
+        gap: 0.35rem;
+        background: #F3F4F6;
+        padding: 0.35rem;
+        border-radius: 12px;
+        margin-bottom: 1.75rem;
+        overflow-x: auto;
+    }
+    .system-tab-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.55rem 1.15rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #4B5563;
+        text-decoration: none;
+        transition: all 0.15s ease;
+        white-space: nowrap;
+    }
+    .system-tab-link:hover {
+        color: #111827;
+        background: rgba(255, 255, 255, 0.7);
+    }
+    .system-tab-link.active {
+        background: #FFFFFF;
+        color: #111827;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.08);
+        font-weight: 700;
+    }
+    .system-subtab-bar {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.25rem;
+    }
+    .system-subtab-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.45rem 1rem;
+        border-radius: 8px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #4B5563;
+        background: #F9FAFB;
+        border: 1px solid #E5E7EB;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+    .system-subtab-link:hover {
+        background: #F3F4F6;
+        color: #111827;
+    }
+    .system-subtab-link.active {
+        background: #111827;
+        color: #FFFFFF;
+        border-color: #111827;
+    }
+    .system-card-modern,
+    .system-admin-container .card {
+        background: #FFFFFF !important;
+        border: 1px solid #E5E7EB !important;
+        border-radius: 16px !important;
+        padding: 1.75rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05) !important;
+    }
+    .system-settings-layout {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        gap: 1.5rem;
+        align-items: start;
+        width: 100%;
+    }
+    @media (max-width: 900px) {
+        .system-settings-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+    .system-vert-tabs-card {
+        background: #FFFFFF;
+        border: 1px solid #E5E7EB;
+        border-radius: 8px;
+        padding: 0.35rem 0;
+        box-shadow: none;
+    }
+    .system-vert-tab-item {
+        display: block;
+        padding: 0.75rem 1.25rem;
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #8E8E93;
+        text-decoration: none;
+        border-left: 4px solid transparent;
+        transition: all 0.15s ease;
+    }
+    .system-vert-tab-item:hover {
+        color: #111827;
+        background: #F9FAFB;
+    }
+    .system-vert-tab-item.active {
+        color: #1D1D1F;
+        font-weight: 700;
+        border-left: 4px solid #0071E3;
+        background: #FFFFFF;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="system-admin-container" style="width: 100%; margin: 1rem 0; padding: 0;">
+
+    <!-- Endpoint configuration for static/js/system_settings.js (no secrets). "0" and "__name__" are placeholders. -->
+    <div id="system-settings-config" hidden
+         data-email-preview-url="{% url 'accounts:system_email_preview' template_name='__name__' %}"
+         data-email-edit-url="{% url 'accounts:system_email_edit' template_name='__name__' %}"
+         data-post-category-create-url="{% url 'accounts:system_post_category_create' %}"
+         data-post-category-edit-url="{% url 'accounts:system_post_category_edit' category_id=0 %}"
+         data-document-type-create-url="{% url 'accounts:system_document_type_create' %}"
+         data-document-type-edit-url="{% url 'accounts:system_document_type_edit' doc_id=0 %}"
+         data-health-service-create-url="{% url 'accounts:system_health_service_create' %}"
+         data-health-service-edit-url="{% url 'accounts:system_health_service_edit' svc_id=0 %}"
+         data-concern-category-create-url="{% url 'accounts:system_concern_category_create' %}"
+         data-concern-category-edit-url="{% url 'accounts:system_concern_category_edit' cat_id=0 %}"></div>
+
+    <!-- Page Header: Simple Minimal Text per Screenshot 5 -->
+    <div style="margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <h1 style="font-size: 1.75rem; font-weight: 800; color: #111827; margin: 0; letter-spacing: -0.02em;">
+            System Settings
+        </h1>
+        {% if can.edit_officers %}
+        <div>
+            <a href="{% url 'accounts:officers_permissions' %}" class="btn btn-secondary btn-sm" style="font-weight: 600;">
+                {% icon 'shield-half' %} Officer Roles &amp; Permissions
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- 2-Column Split: Vertical Tabs on Left (Screenshot 5) | Module Content on Right -->
+    <div class="system-settings-layout">
+        <!-- LEFT COLUMN: Vertical Tabs Card (Screenshot 5) -->
+        <div class="system-vert-tabs-card" aria-label="Settings navigation">
+            <a href="?tab=barangay_info" class="system-vert-tab-item {% if active_tab == 'barangay_info' %}active{% endif %}" {% if active_tab == 'barangay_info' %}aria-current="page"{% endif %}>
+                Barangay Info
+            </a>
+            <a href="?tab=post_categories" class="system-vert-tab-item {% if active_tab == 'post_categories' %}active{% endif %}" {% if active_tab == 'post_categories' %}aria-current="page"{% endif %}>
+                Post Categories
+            </a>
+            <a href="?tab=document_health&amp;subtab=documents" class="system-vert-tab-item {% if active_tab == 'document_health' %}active{% endif %}" {% if active_tab == 'document_health' %}aria-current="page"{% endif %}>
+                Document &amp; Health
+            </a>
+            <a href="?tab=user_management&amp;subtab=staff" class="system-vert-tab-item {% if active_tab == 'user_management' %}active{% endif %}" {% if active_tab == 'user_management' %}aria-current="page"{% endif %}>
+                User Management
+            </a>
+            <a href="?tab=appointment_setup" class="system-vert-tab-item {% if active_tab == 'appointment_setup' %}active{% endif %}" {% if active_tab == 'appointment_setup' %}aria-current="page"{% endif %}>
+                Appointment Set-up
+            </a>
+            <a href="?tab=account" class="system-vert-tab-item {% if active_tab == 'account' %}active{% endif %}" {% if active_tab == 'account' %}aria-current="page"{% endif %}>
+                Account
+            </a>
+        </div>
+
+        <!-- RIGHT COLUMN: Module Context Display -->
+        <div class="system-settings-content-pane" style="min-width: 0; width: 100%;">
+
+    <!-- TAB 1: BARANGAY INFORMATION -->
+    {% if active_tab == 'barangay_info' %}
+    <div class="card" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.75rem; box-shadow: none;">
+        <h2 style="font-size: 1.25rem; font-weight: 800; color: #111827; margin: 0 0 0.25rem 0;">Barangay Information</h2>
+        <p style="color: #6B7280; font-size: 0.875rem; margin: 0 0 1.5rem 0;">
+            Printed on every document letterhead and used by automated emails.
+            Last updated: <time datetime="{{ info.updated_at|date:'c' }}">{{ info.updated_at|date:"M j, Y g:i A" }}</time>
+        </p>
+        <form method="post" action="{% url 'accounts:system_barangay_info_update' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <fieldset {% if not can.edit %}disabled{% endif %} style="border: none; padding: 0; margin: 0;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <label for="bi-name" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Barangay Name *</label>
+                        <input type="text" name="name" id="bi-name" class="form-control" value="{{ info.name }}" maxlength="150" required>
+                    </div>
+                    <div>
+                        <label for="bi-city" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">City / Municipality</label>
+                        <input type="text" name="city" id="bi-city" class="form-control" value="{{ info.city }}" maxlength="100">
+                    </div>
+                    <div>
+                        <label for="bi-province" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Province</label>
+                        <input type="text" name="province" id="bi-province" class="form-control" value="{{ info.province }}" maxlength="100">
+                    </div>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label for="bi-address" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Address</label>
+                    <textarea name="address" id="bi-address" class="form-control" rows="2">{{ info.address }}</textarea>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <label for="bi-contact" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Contact Number</label>
+                        <input type="tel" inputmode="tel" name="contact_no" id="bi-contact" class="form-control" value="{{ info.contact_no }}" maxlength="50" aria-describedby="bi-contact-help">
+                        <small id="bi-contact-help" style="color: #6B7280; font-size: 0.875rem;">Digits, spaces, dashes and parentheses only (7 to 15 characters), e.g. 0917 123 4567 or (02) 8123-4567.</small>
+                    </div>
+                    <div>
+                        <label for="bi-hours" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Office Hours</label>
+                        <input type="text" name="office_hours" id="bi-hours" class="form-control" value="{{ info.office_hours }}" maxlength="120">
+                    </div>
+                    <div>
+                        <label for="bi-venue" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Venue</label>
+                        <input type="text" name="venue" id="bi-venue" class="form-control" value="{{ info.venue }}" maxlength="150">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1.25rem; align-items: flex-start; flex-wrap: wrap; margin-bottom: 1.25rem;">
+                    <div style="width: 96px; height: 96px; border: 1px dashed #D1D5DB; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #F9FAFB;">
+                        {% if info.logo %}
+                        <img src="{{ info.logo.url }}" alt="Current barangay logo" id="bi-logo-preview" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                        {% else %}
+                        <img alt="New logo preview" id="bi-logo-preview" hidden style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                        <span id="bi-logo-empty" style="font-size: 0.875rem; color: #6B7280; text-align: center;">No logo</span>
+                        {% endif %}
+                    </div>
+                    <div style="flex: 1; min-width: 240px;">
+                        <label for="bi-logo" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Logo File</label>
+                        <input type="file" name="logo" id="bi-logo" accept="image/*" class="form-control" data-logo-input>
+                        {% if info.logo %}
+                        <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 600; margin-top: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" name="clear_logo" value="1">
+                            <span>Remove current logo</span>
+                        </label>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if can.edit %}
+                <div style="text-align: right;">
+                    <button type="submit" class="btn btn-primary" style="font-weight: 700;">
+                        {% icon 'save' %} Save Barangay Information
+                    </button>
+                </div>
+                {% endif %}
+            </fieldset>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- TAB 2: POST CATEGORIES -->
+    {% if active_tab == 'post_categories' %}
+    <div class="card" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.75rem; box-shadow: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.25rem;">
+            <div>
+                <h2 style="font-size: 1.25rem; font-weight: 800; color: #111827; margin: 0 0 0.25rem 0;">Post Categories</h2>
+                <p style="color: #6B7280; font-size: 0.875rem; margin: 0;">Tags used to classify announcement feeds and community posts.</p>
+            </div>
+            {% if can.manage_categories %}
+            <button type="button" class="btn btn-primary btn-sm" data-action="new-post-category" style="font-weight: 700;">
+                {% icon 'plus' %} New Category
+            </button>
+            {% endif %}
+        </div>
+        {% if post_categories %}
+        <div style="overflow-x: auto;">
+            <table class="table" style="width: 100%; border-collapse: collapse; margin: 0; font-size: 0.875rem;">
+                <caption class="sr-only" style="position: absolute; left: -9999px;">Post categories</caption>
+                <thead>
+                    <tr style="background: #F9FAFB; border-bottom: 2px solid #E5E7EB; text-align: left; font-size: 0.875rem; text-transform: uppercase; color: #4B5563; letter-spacing: 0.04em;">
+                        <th scope="col" style="padding: 0.75rem 1rem;">Order</th>
+                        <th scope="col" style="padding: 0.75rem 1rem;">Name</th>
+                        <th scope="col" style="padding: 0.75rem 1rem;">Expires</th>
+                        <th scope="col" style="padding: 0.75rem 1rem;">Default End</th>
+                        <th scope="col" style="padding: 0.75rem 1rem;">Notify On Post</th>
+                        <th scope="col" style="padding: 0.75rem 1rem;">Status</th>
+                        {% if can.manage_categories %}<th scope="col" style="padding: 0.75rem 1rem; text-align: right;">Actions</th>{% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cat in post_categories %}
+                    <tr style="border-bottom: 1px solid #F3F4F6;">
+                        <td style="padding: 0.85rem 1rem; color: #374151;">{{ cat.order }}</td>
+                        <td style="padding: 0.85rem 1rem; font-weight: 700; color: #111827;">
+                            {{ cat.name }}
+                            <div style="font-weight: 400; font-size: 0.875rem; color: #6B7280;"><code>{{ cat.slug }}</code></div>
+                        </td>
+                        <td style="padding: 0.85rem 1rem;">{% if cat.expires %}Yes{% else %}No{% endif %}</td>
+                        <td style="padding: 0.85rem 1rem;">{{ cat.get_default_end_display }}</td>
+                        <td style="padding: 0.85rem 1rem;">{% if cat.notify_on_post %}Yes{% else %}No{% endif %}</td>
+                        <td style="padding: 0.85rem 1rem;">
+                            {% if cat.is_active %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-secondary">Inactive</span>{% endif %}
+                            {% if cat.is_system %}<span class="badge badge-info">System</span>{% endif %}
+                        </td>
+                        {% if can.manage_categories %}
+                        <td style="padding: 0.85rem 1rem; text-align: right; white-space: nowrap;">
+                            <button type="button" class="btn btn-secondary btn-sm" data-action="edit-post-category"
+                                    data-id="{{ cat.id }}" data-name="{{ cat.name }}" data-order="{{ cat.order }}"
+                                    data-default-end="{{ cat.default_end }}" data-expires="{{ cat.expires|yesno:'1,0' }}"
+                                    data-notify="{{ cat.notify_on_post|yesno:'1,0' }}" data-active="{{ cat.is_active|yesno:'1,0' }}"
+                                    aria-label="Edit category {{ cat.name }}">
+                                {% icon 'square-pen' %} Edit
+                            </button>
+                            {% if cat.is_system %}
+                            <button type="button" class="btn btn-secondary btn-sm" disabled title="System categories cannot be deleted" aria-label="Delete category {{ cat.name }} (not allowed for system categories)">
+                                {% icon 'trash-2' %} Delete
+                            </button>
+                            {% else %}
+                            <form method="post" action="{% url 'accounts:system_post_category_delete' category_id=cat.id %}" style="display: inline;" data-confirm="Delete the post category '{{ cat.name }}'? This cannot be undone.">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm" aria-label="Delete category {{ cat.name }}">
+                                    {% icon 'trash-2' %} Delete
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color: #6B7280; font-size: 0.875rem; text-align: center; padding: 2rem 0; margin: 0;">No post categories yet.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- TAB 3: DOCUMENT & HEALTH -->
+    {% if active_tab == 'document_health' %}
+    <nav class="system-subtab-bar" aria-label="Document and health sections">
+        <a href="?tab=document_health&amp;subtab=documents" class="system-subtab-link {% if active_subtab == 'documents' %}active{% endif %}" {% if active_subtab == 'documents' %}aria-current="page"{% endif %}>
+            {% icon 'file-text' %} Documents &amp; Fees
+        </a>
+        <a href="?tab=document_health&amp;subtab=health" class="system-subtab-link {% if active_subtab == 'health' %}active{% endif %}" {% if active_subtab == 'health' %}aria-current="page"{% endif %}>
+            {% icon 'heart-pulse' %} Health Services
+        </a>
+    </nav>
+
+    {% if active_subtab == 'documents' %}
+    <div class="card" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.75rem; box-shadow: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.25rem;">
+            <div>
+                <h2 style="font-size: 1.25rem; font-weight: 800; color: #111827; margin: 0 0 0.25rem 0;">Document Price List</h2>
+                <p style="color: #6B7280; font-size: 0.875rem; margin: 0;">Fees and checklist requirements shown to residents when booking a document.</p>
+            </div>
+            {% if can.manage_documents %}
+            <button type="button" class="btn btn-primary btn-sm" data-action="new-document-type" style="font-weight: 700;">
+                {% icon 'plus' %} New Document Type
+            </button>
+            {% endif %}
+        </div>
+        {% if document_types %}
+        <div style="overflow-x: auto;">
+            <table class="table" style="width: 100%; border-collapse: collapse; margin: 0; font-size: 0.875rem;">
+                <caption class="sr-only" style="position: absolute; left: -9999px;">Document types and fees</caption>
+                <thead>
+                    <tr style="background: #F9FAFB; border-bottom: 2px solid #E5E7EB; text-align: left; font-size: 0.875rem; text-transform: uppercase; color: #4B5563; letter-spacing: 0.04em;">
+                        <th scope="col" style="padding: 0.75rem 1rem;">Order</th>
+                        <th scope="col" style="padding: 0.75rem 1rem;">Document</th>
+                        <th scope="col" style="padding: 0.75rem 1rem;">Code</th>
+                        <th scope="col" style="padding: 0.75rem 1rem;">Fee</th>
+                        <th scope="col" style="padding: 0.75rem 1rem;">Requirements</th>
+                        <th scope="col" style="padding: 0.75rem 1rem;">Status</th>
+                        {% if can.manage_documents %}<th scope="col" style="padding: 0.75rem 1rem; text-align: right;">Actions</th>{% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in document_types %}
+                    <tr style="border-bottom: 1px solid #F3F4F6;">
+                        <td style="padding: 0.85rem 1rem; color: #374151;">{{ doc.order }}</td>
+                        <td style="padding: 0.85rem 1rem; font-weight: 700; color: #111827;">{{ doc.name }}</td>
+                        <td style="padding: 0.85rem 1rem;"><code>{{ doc.code }}</code></td>
+                        <td style="padding: 0.85rem 1rem; font-weight: 700;">{% if doc.fee > 0 %}₱{{ doc.fee|floatformat:"2g" }}{% else %}Free{% endif %}</td>
+                        <td style="padding: 0.85rem 1rem; color: #374151;">
+                            {% with reqs=doc.requirements.all %}
+                            {% if reqs %}
+                            <ul style="margin: 0; padding-left: 1.1rem; font-size: 0.875rem;">
+                                {% for r in reqs %}<li>{{ r.name }}</li>{% endfor %}
+                            </ul>
+                            {% else %}<span style="color: #6B7280;">None</span>{% endif %}
+                            {% endwith %}
+                        </td>
+                        <td style="padding: 0.85rem 1rem;">
+                            {% if doc.is_active %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-secondary">Inactive</span>{% endif %}
+                        </td>
+                        {% if can.manage_documents %}
+                        <td style="padding: 0.85rem 1rem; text-align: right; white-space: nowrap;">
+                            <textarea id="doc-req-source-{{ doc.id }}" hidden readonly>{% for r in doc.requirements.all %}{{ r.name }}
+{% endfor %}</textarea>
+                            <textarea id="doc-desc-source-{{ doc.id }}" hidden readonly>{{ doc.description }}</textarea>
+                            <button type="button" class="btn btn-secondary btn-sm" data-action="edit-document-type"
+                                    data-id="{{ doc.id }}" data-name="{{ doc.name }}" data-code="{{ doc.code }}"
+                                    data-fee="{{ doc.fee|stringformat:'.2f' }}" data-order="{{ doc.order }}"
+                                    data-active="{{ doc.is_active|yesno:'1,0' }}"
+                                    data-requirements-source="doc-req-source-{{ doc.id }}"
+                                    data-description-source="doc-desc-source-{{ doc.id }}"
+                                    aria-label="Edit document type {{ doc.name }}">
+                                {% icon 'square-pen' %} Edit
+                            </button>
+                            <form method="post" action="{% url 'accounts:system_document_type_delete' doc_id=doc.id %}" style="display: inline;" data-confirm="Delete the document type '{{ doc.name }}'? This cannot be undone.">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm" aria-label="Delete document type {{ doc.name }}">
+                                    {% icon 'trash-2' %} Delete
+                                </button>
+                            </form>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color: #6B7280; font-size: 0.875rem; text-align: center; padding: 2rem 0; margin: 0;">No document types yet.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if active_subtab == 'health' %}
+    <div class="card" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.75rem; box-shadow: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.25rem;">
+            <div>
+                <h2 style="font-size: 1.25rem; font-weight: 800; color: #111827; margin: 0 0 0.25rem 0;">Health Center Services</h2>
+                <p style="color: #6B7280; font-size: 0.875rem; margin: 0;">Toggle which medical services are currently offered and bookable.</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                {% if can.manage_schedule %}
+                <a href="{% url 'appointments:schedule_manage' %}" class="btn btn-secondary btn-sm" style="font-weight: 700;">
+                    {% icon 'calendar-check' %} Manage Schedules
+                </a>
+                {% endif %}
+                {% if can.manage_health_services %}
+                <button type="button" class="btn btn-primary btn-sm" data-action="new-health-service" style="font-weight: 700;">
+                    {% icon 'plus' %} New Service
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        {% if health_services %}
+        <div style="overflow-x: auto;">
+            <table class="table" style="width: 100%; border-collapse: collapse; margin: 0; font-size: 0.875rem;">
+                <caption class="sr-only" style="position: absolute; left: -9999px;">Health care services</caption>
+                <thead>
+                    <tr style="background: #F9FAFB; border-bottom: 2px solid #E5E7EB; text-align: left; font-size: 0.875rem; text-transform: uppercase; color: #4B5563; letter-spacing: 0.04em;">
+                        <th scope="col" style="padding: 0.75rem 1rem;">Service</th>
+                        <th scope="col" style="padding: 0.75rem 1rem;">Schedule</th>
+                        <th scope="col" style="padding: 0.75rem 1rem;">Cost</th>
+                        <th scope="col" style="padding: 0.75rem 1rem;">Status</th>
+                        {% if can.manage_health_services %}<th scope="col" style="padding: 0.75rem 1rem; text-align: right;">Actions</th>{% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for svc in health_services %}
+                    <tr style="border-bottom: 1px solid #F3F4F6;">
+                        <td style="padding: 0.85rem 1rem; font-weight: 700; color: #111827;">
+                            {{ svc.name }}
+                            {% if svc.description %}<div style="font-weight: 400; font-size: 0.875rem; color: #6B7280;">{{ svc.description|truncatechars:90 }}</div>{% endif %}
+                        </td>
+                        <td style="padding: 0.85rem 1rem; color: #374151;">{{ svc.get_schedule_display }}</td>
+                        <td style="padding: 0.85rem 1rem;">
+                            {% if svc.is_free %}<span class="badge badge-success">Free</span>{% else %}<span class="badge badge-warning">Paid</span>{% endif %}
+                        </td>
+                        <td style="padding: 0.85rem 1rem;">
+                            {% if svc.is_active %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-secondary">Inactive</span>{% endif %}
+                        </td>
+                        {% if can.manage_health_services %}
+                        <td style="padding: 0.85rem 1rem; text-align: right; white-space: nowrap;">
+                            <textarea id="hsvc-desc-source-{{ svc.id }}" hidden readonly>{{ svc.description }}</textarea>
+                            <button type="button" class="btn btn-secondary btn-sm" data-action="edit-health-service"
+                                    data-id="{{ svc.id }}" data-name="{{ svc.name }}" data-days="{{ svc.available_date }}"
+                                    data-time="{{ svc.available_time }}" data-free="{{ svc.is_free|yesno:'1,0' }}"
+                                    data-active="{{ svc.is_active|yesno:'1,0' }}"
+                                    data-description-source="hsvc-desc-source-{{ svc.id }}"
+                                    aria-label="Edit health service {{ svc.name }}">
+                                {% icon 'square-pen' %} Edit
+                            </button>
+                            <form method="post" action="{% url 'accounts:system_health_service_delete' svc_id=svc.id %}" style="display: inline;" data-confirm="Delete the health service '{{ svc.name }}'? This cannot be undone.">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm" aria-label="Delete health service {{ svc.name }}">
+                                    {% icon 'trash-2' %} Delete
+                                </button>
+                            </form>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color: #6B7280; font-size: 0.875rem; text-align: center; padding: 2rem 0; margin: 0;">No health services yet.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <!-- TAB 4: USER MANAGEMENT -->
+    {% if active_tab == 'user_management' %}
+    <nav class="system-subtab-bar" aria-label="User management sections">
+        <a href="?tab=user_management&amp;subtab=staff" class="system-subtab-link {% if active_subtab == 'staff' %}active{% endif %}" {% if active_subtab == 'staff' %}aria-current="page"{% endif %}>
+            {% icon 'user-cog' %} Staff Accounts
+        </a>
+        <a href="?tab=user_management&amp;subtab=concerns" class="system-subtab-link {% if active_subtab == 'concerns' %}active{% endif %}" {% if active_subtab == 'concerns' %}aria-current="page"{% endif %}>
+            {% icon 'messages-square' %} Concern Categories
+        </a>
+    </nav>
+
+    {% if active_subtab == 'staff' %}
+    {% if terms_ending_soon %}
+    <div role="status" style="background: #F3F4F6; border: 1px solid #D1D5DB; border-radius: 8px; padding: 0.85rem 1.1rem; margin-bottom: 1rem;">
+        <div style="font-weight: 700; color: #374151; font-size: 0.875rem; margin-bottom: 0.35rem;">
+            {% icon 'triangle-alert' %}
+            {{ terms_ending_soon|length }} term{{ terms_ending_soon|length|pluralize }} ending within 30 days
+        </div>
+        <ul style="margin: 0; padding-left: 1.1rem; font-size: 0.875rem; color: #374151;">
+            {% for u in terms_ending_soon %}
+            <li>{{ u.get_full_name|default:u.username }} &ndash; {{ u.term_end|date:"M j, Y" }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    <div class="card" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.75rem; box-shadow: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.25rem;">
+            <div>
+                <h2 style="font-size: 1.25rem; font-weight: 800; color: #111827; margin: 0 0 0.25rem 0;">Staff Accounts</h2>
+                <p style="color: #6B7280; font-size: 0.875rem; margin: 0;">Staff, administrators and the Punong Barangay. Access is controlled by officer roles.</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                {% if can.edit_officers %}
+                <a href="{% url 'accounts:officers_permissions' %}" class="btn btn-secondary btn-sm" style="font-weight: 700;">
+                    {% icon 'shield-half' %} Officer Roles &amp; Permissions
+                </a>
+                {% endif %}
+                {% if can.manage_staff %}
+                <button type="button" class="btn btn-primary btn-sm" data-action="new-staff" style="font-weight: 700;">
+                    {% icon 'user-plus' %} New Staff Account
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        {% if staff_users %}
+        <div style="overflow-x: auto;">
+            <table class="table" style="width: 100%; border-collapse: collapse; margin: 0; font-size: 0.875rem;">
+                <caption class="sr-only" style="position: absolute; left: -9999px;">Staff accounts</caption>
+                <thead>
+                    <tr style="background: #F9FAFB; border-bottom: 2px solid #E5E7EB; text-align: left; font-size: 0.875rem; text-transform: uppercase; color: #4B5563; letter-spacing: 0.04em;">
+                        <th scope="col" style="padding: 0.75rem 1rem;">Name</th>
+                        <th scope="col" style="padding: 0.75rem 1rem;">Role</th>
+                        <th scope="col" style="padding: 0.75rem 1rem;">Assigned Officer</th>
+                        <th scope="col" style="padding: 0.75rem 1rem;">Term End</th>
+                        <th scope="col" style="padding: 0.75rem 1rem;">Status</th>
+                        {% if can.manage_staff %}<th scope="col" style="padding: 0.75rem 1rem; text-align: right;">Actions</th>{% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in staff_users %}
+                    <tr style="border-bottom: 1px solid #F3F4F6;">
+                        <td style="padding: 0.85rem 1rem; font-weight: 700; color: #111827;">
+                            {{ u.get_full_name|default:u.username }}
+                            <div style="font-weight: 400; font-size: 0.875rem; color: #6B7280;">{{ u.email }}</div>
+                        </td>
+                        <td style="padding: 0.85rem 1rem;"><span class="badge badge-secondary">{{ u.get_role_display }}</span></td>
+                        <td style="padding: 0.85rem 1rem; color: #374151;">
+                            {% for a in u.staff_assignments.all %}
+                            <div>{{ a.officer.position }}{% if a.officer.committee %} - {{ a.officer.committee }}{% endif %}</div>
+                            {% empty %}<span style="color: #6B7280;">None</span>{% endfor %}
+                        </td>
+                        <td style="padding: 0.85rem 1rem; color: #374151;">
+                            {% if u.term_end %}
+                            {{ u.term_end|date:"M j, Y" }}
+                            {% if u.id in ending_soon_ids %}<span class="badge badge-warning">Ending soon</span>{% endif %}
+                            {% else %}<span style="color: #6B7280;">&mdash;</span>{% endif %}
+                        </td>
+                        <td style="padding: 0.85rem 1rem;">
+                            {% if u.status == 'active' %}<span class="badge badge-success">{{ u.get_status_display }}</span>{% else %}<span class="badge badge-secondary">{{ u.get_status_display }}</span>{% endif %}
+                        </td>
+                        {% if can.manage_staff %}
+                        <td style="padding: 0.85rem 1rem; text-align: right; white-space: nowrap;">
+                            {% if u.id == request.user.id %}
+                            <button type="button" class="btn btn-secondary btn-sm" disabled title="You cannot disable your own account" aria-label="Disable {{ u.get_full_name|default:u.username }} (not allowed for your own account)">
+                                {% icon 'user-x' %} Disable
+                            </button>
+                            {% elif u.status == 'active' %}
+                            <form method="post" action="{% url 'accounts:system_staff_account_disable' user_id=u.id %}" style="display: inline;" data-confirm="Disable the account of {{ u.get_full_name|default:u.username }}? They will no longer be able to sign in.">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm" aria-label="Disable {{ u.get_full_name|default:u.username }}">
+                                    {% icon 'user-x' %} Disable
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color: #6B7280; font-size: 0.875rem; text-align: center; padding: 2rem 0; margin: 0;">No staff accounts yet.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if active_subtab == 'concerns' %}
+    <div class="card" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.75rem; box-shadow: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.25rem;">
+            <div>
+                <h2 style="font-size: 1.25rem; font-weight: 800; color: #111827; margin: 0 0 0.25rem 0;">Concern Categories</h2>
+                <p style="color: #6B7280; font-size: 0.875rem; margin: 0;">Categories residents pick when sending a concern, and where each one is routed.</p>
+            </div>
+            {% if can.manage_concerns %}
+            <button type="button" class="btn btn-primary btn-sm" data-action="new-concern-category" style="font-weight: 700;">
+                {% icon 'plus' %} New Category
+            </button>
+            {% endif %}
+        </div>
+        {% if concern_categories %}
+        <div style="overflow-x: auto;">
+            <table class="table" style="width: 100%; border-collapse: collapse; margin: 0; font-size: 0.875rem;">
+                <caption class="sr-only" style="position: absolute; left: -9999px;">Concern categories</caption>
+                <thead>
+                    <tr style="background: #F9FAFB; border-bottom: 2px solid #E5E7EB; text-align: left; font-size: 0.875rem; text-transform: uppercase; color: #4B5563; letter-spacing: 0.04em;">
+                        <th scope="col" style="padding: 0.75rem 1rem;">Category</th>
+                        <th scope="col" style="padding: 0.75rem 1rem;">Routing Type</th>
+                        <th scope="col" style="padding: 0.75rem 1rem;">Routing Target</th>
+                        <th scope="col" style="padding: 0.75rem 1rem;">Status</th>
+                        {% if can.manage_concerns %}<th scope="col" style="padding: 0.75rem 1rem; text-align: right;">Actions</th>{% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cc in concern_categories %}
+                    <tr style="border-bottom: 1px solid #F3F4F6;">
+                        <td style="padding: 0.85rem 1rem; font-weight: 700; color: #111827;">{{ cc.name }}</td>
+                        <td style="padding: 0.85rem 1rem; color: #374151;">{{ cc.get_routing_target_type_display }}</td>
+                        <td style="padding: 0.85rem 1rem; color: #374151;">{{ cc.routing_target_value|default:"—" }}</td>
+                        <td style="padding: 0.85rem 1rem;">
+                            {% if cc.is_active %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-secondary">Inactive</span>{% endif %}
+                        </td>
+                        {% if can.manage_concerns %}
+                        <td style="padding: 0.85rem 1rem; text-align: right; white-space: nowrap;">
+                            <textarea id="ccat-desc-source-{{ cc.id }}" hidden readonly>{{ cc.description }}</textarea>
+                            <button type="button" class="btn btn-secondary btn-sm" data-action="edit-concern-category"
+                                    data-id="{{ cc.id }}" data-name="{{ cc.name }}" data-routing-type="{{ cc.routing_target_type }}"
+                                    data-routing-value="{{ cc.routing_target_value }}" data-active="{{ cc.is_active|yesno:'1,0' }}"
+                                    data-description-source="ccat-desc-source-{{ cc.id }}"
+                                    aria-label="Edit concern category {{ cc.name }}">
+                                {% icon 'square-pen' %} Edit
+                            </button>
+                            <form method="post" action="{% url 'accounts:system_concern_category_delete' cat_id=cc.id %}" style="display: inline;" data-confirm="Delete the concern category '{{ cc.name }}'? This cannot be undone.">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm" aria-label="Delete concern category {{ cc.name }}">
+                                    {% icon 'trash-2' %} Delete
+                                </button>
+                            </form>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color: #6B7280; font-size: 0.875rem; text-align: center; padding: 2rem 0; margin: 0;">No concern categories yet.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <!-- TAB 5: EMAIL TEMPLATES PREVIEW -->
+    {% if active_tab == 'email_templates' %}
+    <div class="card" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.75rem; box-shadow: none;">
+        <h2 style="font-size: 1.25rem; font-weight: 800; color: #111827; margin: 0 0 0.5rem 0;">
+            Official Automated Email Notifications Catalog
+        </h2>
+        <p style="color: #6B7280; font-size: 0.875rem; margin-top: 0; margin-bottom: 1rem;">
+            Preview and edit the automated dispatch templates. Templates automatically pull metadata from Barangay Information.
+        </p>
+        <div id="email-status" role="status" aria-live="polite" hidden style="border-radius: 8px; padding: 0.6rem 0.9rem; margin-bottom: 1rem; font-size: 0.875rem; font-weight: 600;"></div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem;">
+            {% for t in email_templates_list %}
+            <div class="card" style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                        <h3 style="font-size: 0.95rem; font-weight: 700; color: #111827; margin: 0;">
+                            {{ t.title }}
+                        </h3>
+                        <code style="font-size: 0.875rem; background: #E5E7EB; padding: 2px 6px; border-radius: 4px;">{{ t.name }}.txt</code>
+                    </div>
+                    <p style="font-size: 0.875rem; color: #6B7280; margin: 0 0 1rem 0;">
+                        {{ t.description }}
+                    </p>
+                </div>
+                {% if can.preview_emails %}
+                <div style="display: flex; gap: 0.5rem;">
+                    <button type="button" class="btn btn-secondary btn-sm" data-action="email-preview" data-template="{{ t.name }}" aria-label="Preview {{ t.title }}" style="flex: 1; font-weight: 700;">
+                        {% icon 'eye' %} Preview
+                    </button>
+                    {% if can.edit %}
+                    <button type="button" class="btn btn-primary btn-sm" data-action="email-edit" data-template="{{ t.name }}" data-title="{{ t.title }}" aria-label="Edit {{ t.title }}" style="flex: 1; font-weight: 700;">
+                        {% icon 'square-pen' %} Edit
+                    </button>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+{% if active_tab == 'email_templates' and can.preview_emails %}
+<!-- MODAL: EMAIL TEMPLATE PREVIEW -->
+<div id="emailPreviewModal" class="modal-backdrop" data-modal role="dialog" aria-modal="true" aria-labelledby="ep-title" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39,0.6); z-index: 99999; align-items: center; justify-content: center;">
+    <div style="background: #FFFFFF; border-radius: 12px; max-width: 680px; width: 95%; max-height: 90vh; overflow-y: auto; padding: 1.75rem; box-shadow: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E5E7EB; padding-bottom: 0.75rem; margin-bottom: 1rem;">
+            <h3 id="ep-title" style="font-size: 1.15rem; font-weight: 800; color: #111827; margin: 0;">
+                Email Preview
+            </h3>
+            <button type="button" data-action="close-modal" aria-label="Close preview" style="border: none; background: none; font-size: 1.25rem; cursor: pointer; color: #6B7280;">&times;</button>
+        </div>
+        <div style="margin-bottom: 1rem;">
+            <div style="font-size: 0.875rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">Subject Line:</div>
+            <div id="ep-subject" style="font-size: 0.95rem; font-weight: 700; color: #1E3A8A; margin-top: 0.25rem; padding: 0.5rem; background: #F3F4F6; border-radius: 6px;"></div>
+        </div>
+        <div>
+            <div style="font-size: 0.875rem; font-weight: 700; color: #6B7280; text-transform: uppercase; margin-bottom: 0.35rem;">Email Message Body:</div>
+            <pre id="ep-body" style="font-family: inherit; white-space: pre-wrap; font-size: 0.875rem; line-height: 1.6; color: #374151; background: #F9FAFB; border: 1px solid #E5E7EB; padding: 1rem; border-radius: 6px;"></pre>
+        </div>
+        <div style="text-align: right; margin-top: 1.25rem;">
+            <button type="button" class="btn btn-secondary" data-action="close-modal">Close Preview</button>
+        </div>
+    </div>
+</div>
+
+{% if can.edit %}
+<!-- MODAL: EMAIL TEMPLATE EDIT -->
+<div id="emailEditModal" class="modal-backdrop" data-modal role="dialog" aria-modal="true" aria-labelledby="ee-title" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39,0.6); z-index: 99999; align-items: center; justify-content: center;">
+    <div style="background: #FFFFFF; border-radius: 12px; max-width: 680px; width: 95%; max-height: 90vh; overflow-y: auto; padding: 1.75rem; box-shadow: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E5E7EB; padding-bottom: 0.75rem; margin-bottom: 1rem;">
+            <div>
+                <h3 id="ee-title" style="font-size: 1.15rem; font-weight: 800; color: #111827; margin: 0;">
+                    Edit Email Template
+                </h3>
+                <span id="ee-filename" style="font-size: 0.875rem; color: #6B7280;"></span>
+            </div>
+            <button type="button" data-action="close-modal" aria-label="Close editor" style="border: none; background: none; font-size: 1.25rem; cursor: pointer; color: #6B7280;">&times;</button>
+        </div>
+        <form id="emailEditForm" method="post">
+            {% csrf_token %}
+            <div id="ee-error" role="alert" hidden style="background: #FFFFFF; border: 1px solid #DC2626; color: #DC2626; border-radius: 8px; padding: 0.6rem 0.9rem; margin-bottom: 1rem; font-size: 0.875rem;"></div>
+            <div id="ee-subject-group" style="margin-bottom: 1rem;">
+                <label for="ee-subject" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Subject Line *</label>
+                <input type="text" name="subject" id="ee-subject" class="form-control" required style="font-size: 0.875rem;">
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+                <label for="ee-body" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Email Message Body *</label>
+                <textarea name="body" id="ee-body" class="form-control" rows="12" required style="font-size: 0.875rem; font-family: monospace; line-height: 1.5;"></textarea>
+            </div>
+            <div style="background: #F3F4F6; border: 1px solid #D1D5DB; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.25rem;">
+                <div style="font-size: 0.875rem; font-weight: 700; color: #1E3A8A; text-transform: uppercase; margin-bottom: 0.35rem;">Dynamic Placeholders Available:</div>
+                <div style="font-size: 0.875rem; color: #1E3A8A; line-height: 1.5;">
+                    <code>&#123;&#123; first_name &#125;&#125;</code>, <code>&#123;&#123; last_name &#125;&#125;</code>, <code>&#123;&#123; barangay_name &#125;&#125;</code>, <code>&#123;&#123; reference_no &#125;&#125;</code>, <code>&#123;&#123; service &#125;&#125;</code>, <code>&#123;&#123; date &#125;&#125;</code>, <code>&#123;&#123; time_window &#125;&#125;</code>, <code>&#123;&#123; venue &#125;&#125;</code>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+                <button type="button" class="btn btn-secondary" data-action="close-modal">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="ee-save-btn" style="font-weight: 700;">
+                    {% icon 'save' %} Save Template Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endif %}
+
+{% if active_tab == 'post_categories' and can.manage_categories %}
+<!-- MODAL: POST CATEGORY FORM -->
+<div id="postCategoryModal" class="modal-backdrop" data-modal role="dialog" aria-modal="true" aria-labelledby="cat-modal-title" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39,0.6); z-index: 99999; align-items: center; justify-content: center;">
+    <div style="background: #FFFFFF; border-radius: 12px; max-width: 500px; width: 95%; max-height: 90vh; overflow-y: auto; padding: 1.75rem;">
+        <h3 id="cat-modal-title" style="margin-top: 0; font-size: 1.15rem; font-weight: 800; color: #111827;">Post Category</h3>
+        <form id="postCategoryForm" method="post" action="{% url 'accounts:system_post_category_create' %}">
+            {% csrf_token %}
+            <div style="margin-bottom: 1rem;">
+                <label for="cat-name-input" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Category Name *</label>
+                <input type="text" name="name" id="cat-name-input" class="form-control" maxlength="50" required>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div>
+                    <label for="cat-order-input" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Order</label>
+                    <input type="number" name="order" id="cat-order-input" class="form-control" value="0" min="0">
+                </div>
+                <div>
+                    <label for="cat-end-select" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Default End</label>
+                    <select name="default_end" id="cat-end-select" class="form-control">
+                        <option value="none">None</option>
+                        <option value="end_of_month">End of Month</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.25rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 600; cursor: pointer;">
+                    <input type="hidden" name="expires" value="0">
+                    <input type="checkbox" name="expires" id="cat-expires-input" value="1" checked>
+                    <span>Posts can expire by date</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 600; cursor: pointer;">
+                    <input type="hidden" name="notify_on_post" value="0">
+                    <input type="checkbox" name="notify_on_post" id="cat-notify-input" value="1">
+                    <span>Send broadcast in-app notification on post</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 600; cursor: pointer;">
+                    <input type="hidden" name="is_active" value="0">
+                    <input type="checkbox" name="is_active" id="cat-active-input" value="1" checked>
+                    <span>Active category</span>
+                </label>
+            </div>
+            <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" data-action="close-modal">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="font-weight: 700;">Save Category</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+{% if active_tab == 'document_health' and active_subtab == 'documents' and can.manage_documents %}
+<!-- MODAL: DOCUMENT TYPE FORM -->
+<div id="docTypeModal" class="modal-backdrop" data-modal role="dialog" aria-modal="true" aria-labelledby="doc-modal-title" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39,0.6); z-index: 99999; align-items: center; justify-content: center;">
+    <div style="background: #FFFFFF; border-radius: 12px; max-width: 520px; width: 95%; max-height: 90vh; overflow-y: auto; padding: 1.75rem;">
+        <h3 id="doc-modal-title" style="margin-top: 0; font-size: 1.15rem; font-weight: 800; color: #111827;">Document Type</h3>
+        <form id="docTypeForm" method="post" action="{% url 'accounts:system_document_type_create' %}">
+            {% csrf_token %}
+            <div style="margin-bottom: 0.75rem;">
+                <label for="doc-name-input" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Document Name *</label>
+                <input type="text" name="name" id="doc-name-input" class="form-control" maxlength="150" required>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                <div>
+                    <label for="doc-code-input" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Code</label>
+                    <input type="text" name="code" id="doc-code-input" class="form-control" maxlength="50" placeholder="auto from name">
+                </div>
+                <div>
+                    <label for="doc-fee-input" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Fee / Price (₱) *</label>
+                    <input type="number" step="0.01" min="0" name="fee" id="doc-fee-input" class="form-control" value="0.00" required>
+                </div>
+            </div>
+            <div style="margin-bottom: 0.75rem;">
+                <label for="doc-order-input" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Order</label>
+                <input type="number" name="order" id="doc-order-input" class="form-control" value="0" min="0">
+            </div>
+            <div style="margin-bottom: 0.75rem;">
+                <label for="doc-desc-input" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Description</label>
+                <textarea name="description" id="doc-desc-input" class="form-control" rows="2"></textarea>
+            </div>
+            <div style="margin-bottom: 0.75rem;">
+                <label for="doc-req-input" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Checklist Requirements (one per line)</label>
+                <textarea name="requirements_needed" id="doc-req-input" class="form-control" rows="3" placeholder="e.g. Proof of Identity&#10;Community Tax Certificate (Cedula)"></textarea>
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 600; cursor: pointer;">
+                    <input type="hidden" name="is_active" value="0">
+                    <input type="checkbox" name="is_active" id="doc-active-input" value="1" checked>
+                    <span>Active and available for resident booking</span>
+                </label>
+            </div>
+            <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" data-action="close-modal">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="font-weight: 700;">Save Document Type</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+{% if active_tab == 'document_health' and active_subtab == 'health' and can.manage_health_services %}
+<!-- MODAL: HEALTH SERVICE FORM -->
+<div id="healthSvcModal" class="modal-backdrop" data-modal role="dialog" aria-modal="true" aria-labelledby="hsvc-modal-title" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39,0.6); z-index: 99999; align-items: center; justify-content: center;">
+    <div style="background: #FFFFFF; border-radius: 12px; max-width: 500px; width: 95%; max-height: 90vh; overflow-y: auto; padding: 1.75rem;">
+        <h3 id="hsvc-modal-title" style="margin-top: 0; font-size: 1.15rem; font-weight: 800; color: #111827;">Health Care Service</h3>
+        <form id="healthSvcForm" method="post" action="{% url 'accounts:system_health_service_create' %}">
+            {% csrf_token %}
+            <div style="margin-bottom: 0.75rem;">
+                <label for="hsvc-name-input" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Service Name *</label>
+                <input type="text" name="name" id="hsvc-name-input" class="form-control" maxlength="150" required>
+            </div>
+            <div style="margin-bottom: 0.75rem;">
+                <label for="hsvc-desc-input" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Description</label>
+                <textarea name="description" id="hsvc-desc-input" class="form-control" rows="2"></textarea>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                <div>
+                    <label for="hsvc-days-input" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Available Days</label>
+                    <input type="text" name="available_date" id="hsvc-days-input" class="form-control" maxlength="120" placeholder="Mon, Wed, Fri">
+                </div>
+                <div>
+                    <label for="hsvc-time-input" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Time Window</label>
+                    <input type="text" name="available_time" id="hsvc-time-input" class="form-control" maxlength="120" placeholder="8:00 AM - 12:00 PM">
+                </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.25rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 600; cursor: pointer;">
+                    <input type="hidden" name="is_free" value="0">
+                    <input type="checkbox" name="is_free" id="hsvc-free-input" value="1" checked>
+                    <span>Completely free service</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 600; cursor: pointer;">
+                    <input type="hidden" name="is_active" value="0">
+                    <input type="checkbox" name="is_active" id="hsvc-active-input" value="1" checked>
+                    <span>Active and bookable</span>
+                </label>
+            </div>
+            <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" data-action="close-modal">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="font-weight: 700;">Save Health Service</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+{% if active_tab == 'user_management' and active_subtab == 'concerns' and can.manage_concerns %}
+<!-- MODAL: CONCERN CATEGORY FORM -->
+<div id="concernCatModal" class="modal-backdrop" data-modal role="dialog" aria-modal="true" aria-labelledby="ccat-modal-title" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39,0.6); z-index: 99999; align-items: center; justify-content: center;">
+    <div style="background: #FFFFFF; border-radius: 12px; max-width: 500px; width: 95%; max-height: 90vh; overflow-y: auto; padding: 1.75rem;">
+        <h3 id="ccat-modal-title" style="margin-top: 0; font-size: 1.15rem; font-weight: 800; color: #111827;">Concern Category</h3>
+        <form id="concernCatForm" method="post" action="{% url 'accounts:system_concern_category_create' %}">
+            {% csrf_token %}
+            <div style="margin-bottom: 0.75rem;">
+                <label for="ccat-name-input" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Category Name *</label>
+                <input type="text" name="name" id="ccat-name-input" class="form-control" maxlength="100" required>
+            </div>
+            <div style="margin-bottom: 0.75rem;">
+                <label for="ccat-desc-input" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Description</label>
+                <textarea name="description" id="ccat-desc-input" class="form-control" rows="2"></textarea>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                <div>
+                    <label for="ccat-type-select" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Routing Type</label>
+                    <select name="routing_target_type" id="ccat-type-select" class="form-control">
+                        <option value="service_area">Service Area</option>
+                        <option value="committee">Committee</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="ccat-val-input" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Target Value</label>
+                    <input type="text" name="routing_target_value" id="ccat-val-input" class="form-control" maxlength="100" placeholder="e.g. Health, Peace and Order">
+                </div>
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 600; cursor: pointer;">
+                    <input type="hidden" name="is_active" value="0">
+                    <input type="checkbox" name="is_active" id="ccat-active-input" value="1" checked>
+                    <span>Active category</span>
+                </label>
+            </div>
+            <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" data-action="close-modal">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="font-weight: 700;">Save Category</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+{% if active_tab == 'user_management' and active_subtab == 'staff' and can.manage_staff %}
+<!-- MODAL: STAFF ACCOUNT FORM -->
+<div id="staffModal" class="modal-backdrop" data-modal role="dialog" aria-modal="true" aria-labelledby="staff-modal-title" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39,0.6); z-index: 99999; align-items: center; justify-content: center;">
+    <div style="background: #FFFFFF; border-radius: 12px; max-width: 520px; width: 95%; max-height: 90vh; overflow-y: auto; padding: 1.75rem;">
+        <h3 id="staff-modal-title" style="margin-top: 0; font-size: 1.15rem; font-weight: 800; color: #111827;">Create Staff Account</h3>
+        <p style="font-size: 0.875rem; color: #6B7280; margin-top: -0.25rem; margin-bottom: 1rem;">
+            A temporary password will be generated and dispatched automatically to the staff email address.
+        </p>
+        <form method="post" action="{% url 'accounts:system_staff_account_create' %}">
+            {% csrf_token %}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                <div>
+                    <label for="staff-first-name" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">First Name</label>
+                    <input type="text" name="first_name" id="staff-first-name" class="form-control" required>
+                </div>
+                <div>
+                    <label for="staff-last-name" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Last Name</label>
+                    <input type="text" name="last_name" id="staff-last-name" class="form-control" required>
+                </div>
+            </div>
+            <div style="margin-bottom: 0.75rem;">
+                <label for="staff-email" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Email Address *</label>
+                <input type="email" name="email" id="staff-email" class="form-control" required>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                <div>
+                    <label for="staff-officer" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Officer Position</label>
+                    <select name="officer_id" id="staff-officer" class="form-control">
+                        {% for off in officers %}
+                        <option value="{{ off.id }}">{{ off.position }}{% if off.committee %} - {{ off.committee }}{% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="staff-term-end" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Term End Date</label>
+                    <input type="date" name="term_end" id="staff-term-end" class="form-control">
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem;">
+                <div>
+                    <label for="staff-scope-type" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Scope Type</label>
+                    <select name="scope_type" id="staff-scope-type" class="form-control">
+                        <option value="service_area">Service Area</option>
+                        <option value="purok">Purok</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="staff-scope-value" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.25rem;">Scope Value</label>
+                    <input type="text" name="scope_value" id="staff-scope-value" class="form-control" value="general">
+                </div>
+            </div>
+            <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" data-action="close-modal">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="font-weight: 700;">Create &amp; Dispatch Credentials</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+    <!-- TAB 5: APPOINTMENT SET-UP -->
+    {% if active_tab == 'appointment_setup' %}
+    <div class="card" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.75rem; box-shadow: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+            <div>
+                <h2 style="font-size: 1.25rem; font-weight: 800; color: #111827; margin: 0 0 0.25rem 0;">Appointment Set-up</h2>
+                <p style="color: #6B7280; font-size: 0.875rem; margin: 0;">Configure appointment slots, health center clinic schedules, and booking rules.</p>
+            </div>
+            <a href="{% url 'appointments:schedule_manage' %}" class="btn btn-primary btn-sm" style="font-weight: 700;">
+                {% icon 'calendar' %} Manage Schedules
+            </a>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+            <div style="border: 1px solid #E5E7EB; border-radius: 10px; padding: 1.25rem; background: #F9FAFB;">
+                <h3 style="font-size: 1rem; font-weight: 700; color: #111827; margin: 0 0 0.5rem 0;">Health Center Schedule</h3>
+                <p style="font-size: 0.875rem; color: #4B5563; margin-bottom: 1rem;">Set weekly operating hours, available health worker slots, and clinic shifts.</p>
+                <a href="{% url 'appointments:schedule_manage' %}" class="btn btn-secondary btn-sm" style="font-weight: 600;">
+                    Configure Schedules
+                </a>
+            </div>
+            <div style="border: 1px solid #E5E7EB; border-radius: 10px; padding: 1.25rem; background: #F9FAFB;">
+                <h3 style="font-size: 1rem; font-weight: 700; color: #111827; margin: 0 0 0.5rem 0;">Healthcare Services Catalog</h3>
+                <p style="font-size: 0.875rem; color: #4B5563; margin-bottom: 1rem;">Update available medical consultations, dental procedures, and prenatal programs.</p>
+                <a href="?tab=document_health&amp;subtab=health" class="btn btn-secondary btn-sm" style="font-weight: 600;">
+                    Edit Services ({{ health_services.count }})
+                </a>
+            </div>
+            <div style="border: 1px solid #E5E7EB; border-radius: 10px; padding: 1.25rem; background: #F9FAFB;">
+                <h3 style="font-size: 1rem; font-weight: 700; color: #111827; margin: 0 0 0.5rem 0;">Document Request Types</h3>
+                <p style="font-size: 0.875rem; color: #4B5563; margin-bottom: 1rem;">Manage processing fees, required document attachments, and turnaround times.</p>
+                <a href="?tab=document_health&amp;subtab=documents" class="btn btn-secondary btn-sm" style="font-weight: 600;">
+                    Edit Documents ({{ document_types.count }})
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- TAB 6: ACCOUNT SETTINGS -->
+    {% if active_tab == 'account' %}
+    <div class="card" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.75rem; box-shadow: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+            <div>
+                <h2 style="font-size: 1.25rem; font-weight: 800; color: #111827; margin: 0 0 0.25rem 0;">Account Settings</h2>
+                <p style="color: #6B7280; font-size: 0.875rem; margin: 0;">Manage your administrator profile, security credentials, and contact info.</p>
+            </div>
+            <a href="{% url 'accounts:profile' %}" class="btn btn-primary btn-sm" style="font-weight: 700;">
+                {% icon 'user-pen' %} Edit Profile
+            </a>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem;">
+            <div style="border: 1px solid #E5E7EB; border-radius: 10px; padding: 1.25rem; background: #F9FAFB;">
+                <div style="font-size: 0.8125rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">Username</div>
+                <div style="font-size: 1rem; font-weight: 700; color: #111827; margin-top: 0.25rem;">{{ request.user.username }}</div>
+            </div>
+            <div style="border: 1px solid #E5E7EB; border-radius: 10px; padding: 1.25rem; background: #F9FAFB;">
+                <div style="font-size: 0.8125rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">Email Address</div>
+                <div style="font-size: 1rem; font-weight: 700; color: #111827; margin-top: 0.25rem;">{{ request.user.email|default:"Not configured" }}</div>
+            </div>
+            <div style="border: 1px solid #E5E7EB; border-radius: 10px; padding: 1.25rem; background: #F9FAFB;">
+                <div style="font-size: 0.8125rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">Role / Position</div>
+                <div style="font-size: 1rem; font-weight: 700; color: #111827; margin-top: 0.25rem;">{{ request.user.get_role_display }}</div>
+            </div>
+        </div>
+        <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
+            <a href="{% url 'accounts:profile' %}" class="btn btn-primary" style="font-size: 0.875rem;">
+                {% icon 'user' %} Go to Profile
+            </a>
+            <a href="{% url 'accounts:password_reset' %}" class="btn btn-secondary" style="font-size: 0.875rem;">
+                {% icon 'key-round' %} Reset Password
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+        </div> <!-- /.system-settings-content-pane -->
+    </div> <!-- /.system-settings-layout -->
+</div> <!-- /.system-admin-container -->
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/system_settings.js' %}" defer></script>
+{% endblock %}

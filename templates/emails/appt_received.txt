@@ -1,0 +1,14 @@
+Subject: We got your appointment request ({{ reference_no }})
+
+Hi {{ first_name }},
+
+Thanks for booking with us. We received your request for {{ service }} on {{ date }}, {{ time_window }}.
+
+It isn't confirmed yet. One of our staff will check it first, and we'll email you again once it's approved. We try to reply within one working day.
+
+Your reference number is {{ reference_no }}. You can check the status any time under My Appointments after you log in.
+
+If you need to change anything, message us in the portal or call {{ barangay_contact|default:contact_no|default:"(02) 8123-4567" }} (8 AM to 5 PM, Monday to Friday).
+
+Salamat po,
+Barangay {{ barangay_name }} Office

@@ -1,0 +1,198 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Barangay Statistics Report - {{ report.filters.date_from }} to {{ report.filters.date_to }}</title>
+    <style>
+        body { font-family: var(--font-sans, system-ui, sans-serif); margin: 0; padding: 2cm; color: #111827; background: #FFFFFF; }
+        .header { text-align: center; border-bottom: 2px solid #1E3A8A; padding-bottom: 12px; margin-bottom: 25px; }
+        .header h1 { font-size: 16pt; margin: 0 0 5px 0; }
+        .header p { margin: 0; color: #6B7280; font-size: 10pt; }
+        .section-title { font-size: 12pt; font-weight: bold; color: #1E3A8A; border-bottom: 1px solid #D1D5DB; padding-bottom: 5px; margin: 25px 0 10px 0; text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 10pt; }
+        th, td { padding: 6px 10px; border: 1px solid #D1D5DB; text-align: left; }
+        th { background-color: #F9FAFB; font-weight: bold; }
+        td.num, th.num { text-align: right; }
+        tr.highest td { background: #F3F4F6; font-weight: bold; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .toolbar { margin-bottom: 20px; background: #F3F4F6; border: 1px solid #D1D5DB; padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
+        .toolbar button { background: #1E3A8A; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .signatures { margin-top: 40px; display: flex; justify-content: space-between; }
+        .signature { text-align: center; width: 220px; }
+        .signature div:first-child { border-top: 1px solid #111827; padding-top: 5px; font-weight: bold; }
+        .signature div:last-child { font-size: 9pt; color: #4B5563; }
+        @media print { .no-print { display: none; } body { padding: 1cm; } }
+    </style>
+</head>
+<body>
+    <div class="toolbar no-print">
+        <span><strong>Barangay Official Statistics Report</strong> (ready for print or Save as PDF)</span>
+        <button type="button" data-action="print">Print / Save as PDF</button>
+    </div>
+
+    <div class="header">
+        <h1>{{ info.name }} - Statistics Report</h1>
+        <p>{% if info.city %}{{ info.city }}{% endif %}{% if info.city and info.province %}, {% endif %}{% if info.province %}{{ info.province }}{% endif %}</p>
+        <p>Period: {{ report.filters.date_from }} to {{ report.filters.date_to }} &middot; {{ report.filters.purok_name|default:"All puroks" }}</p>
+        <p>Generated {% now "F d, Y h:i A" %}</p>
+    </div>
+
+    {% with s=report.summary d=report.demographics %}
+    <div class="section-title">1. Summary</div>
+    <table>
+        <tr><th>Metric</th><th class="num">Value</th></tr>
+        <tr><td>Population</td><td class="num">{{ s.population }}</td></tr>
+        <tr><td>Households</td><td class="num">{{ s.households }}</td></tr>
+        <tr><td>Minors (0-17)</td><td class="num">{{ s.minors }}</td></tr>
+        <tr><td>Senior citizens (60+)</td><td class="num">{{ s.seniors }}</td></tr>
+        <tr><td>Persons with disability</td><td class="num">{{ s.pwd }}</td></tr>
+        <tr><td>Solo parents</td><td class="num">{{ s.solo_parents }}</td></tr>
+        <tr><td>4Ps beneficiaries</td><td class="num">{{ s.four_ps }}</td></tr>
+        <tr><td>Appointments in period</td><td class="num">{{ s.appointments_total }}</td></tr>
+        <tr><td>Documents issued</td><td class="num">{{ s.documents_issued }}</td></tr>
+        <tr><td>Document revenue ({{ s.currency }})</td><td class="num">{{ s.revenue_total }}</td></tr>
+        <tr><td>Blotter cases filed</td><td class="num">{{ s.blotter_cases }}</td></tr>
+        <tr><td>Blotter settlement rate</td><td class="num">{% if s.settlement_rate is None %}-{% else %}{{ s.settlement_rate }}%{% endif %}</td></tr>
+    </table>
+
+    <div class="grid-2">
+        <div>
+            <div class="section-title">2. Gender</div>
+            <table>
+                <tr><th>Gender</th><th class="num">Count</th></tr>
+                {% for row in d.gender %}<tr><td>{{ row.label }}</td><td class="num">{{ row.count }}</td></tr>{% endfor %}
+            </table>
+        </div>
+        <div>
+            <div class="section-title">3. Civil status</div>
+            <table>
+                <tr><th>Status</th><th class="num">Count</th></tr>
+                {% for row in d.civil_status %}<tr><td>{{ row.label }}</td><td class="num">{{ row.count }}</td></tr>{% endfor %}
+            </table>
+        </div>
+        <div>
+            <div class="section-title">4. Sectors</div>
+            <table>
+                <tr><th>Sector</th><th class="num">Count</th></tr>
+                {% for row in d.sectors %}<tr><td>{{ row.label }}</td><td class="num">{{ row.count }}</td></tr>{% endfor %}
+            </table>
+        </div>
+        <div>
+            <div class="section-title">5. Age bands</div>
+            <table>
+                <tr><th>Age band</th><th class="num">Count</th></tr>
+                {% for row in d.age_bands %}<tr><td>{{ row.label }}</td><td class="num">{{ row.count }}</td></tr>{% endfor %}
+            </table>
+        </div>
+    </div>
+    {% endwith %}
+
+    <div class="section-title">6. Purok density</div>
+    <table>
+        <tr><th class="num">Rank</th><th>Purok</th><th class="num">Households</th><th class="num">% households</th><th class="num">Residents</th><th class="num">% population</th></tr>
+        {% for row in report.purok_density.rows %}
+        <tr{% if row.is_highest %} class="highest"{% endif %}>
+            <td class="num">{{ row.rank|default_if_none:"-" }}</td>
+            <td>{{ row.name }}{% if row.is_highest %} (highest){% endif %}</td>
+            <td class="num">{{ row.households }}</td>
+            <td class="num">{{ row.pct_households }}%</td>
+            <td class="num">{{ row.residents }}</td>
+            <td class="num">{{ row.pct_population }}%</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    {% with a=report.appointments %}
+    <div class="section-title">7. Appointments and services</div>
+    <div class="grid-2">
+        <div>
+            <table>
+                <tr><th>Status</th><th class="num">Count</th></tr>
+                {% for row in a.by_status %}<tr><td>{{ row.label }}</td><td class="num">{{ row.count }}</td></tr>{% endfor %}
+            </table>
+        </div>
+        <div>
+            <table>
+                <tr><th>Category</th><th class="num">Count</th></tr>
+                {% for row in a.by_category %}<tr><td>{{ row.label }}</td><td class="num">{{ row.count }}</td></tr>{% endfor %}
+            </table>
+        </div>
+        <div>
+            <table>
+                <tr><th>Document type</th><th class="num">Requests</th></tr>
+                {% for row in a.by_document_type %}<tr><td>{{ row.name }}</td><td class="num">{{ row.count }}</td></tr>{% endfor %}
+            </table>
+        </div>
+        <div>
+            <table>
+                <tr><th>Health service</th><th class="num">Requests</th></tr>
+                {% for row in a.by_health_service %}<tr><td>{{ row.name }}</td><td class="num">{{ row.count }}</td></tr>{% endfor %}
+            </table>
+        </div>
+    </div>
+    {% endwith %}
+
+    {% with r=report.revenue %}
+    <div class="section-title">8. Document revenue ({{ r.currency }})</div>
+    <div class="grid-2">
+        <div>
+            <table>
+                <tr><th>Month</th><th class="num">Revenue</th><th class="num">Documents</th></tr>
+                {% for row in r.months %}<tr><td>{{ row.label }}</td><td class="num">{{ row.revenue }}</td><td class="num">{{ row.count }}</td></tr>{% endfor %}
+                <tr><th>Total</th><th class="num">{{ r.total }}</th><th class="num">{{ r.count }}</th></tr>
+            </table>
+        </div>
+        <div>
+            <table>
+                <tr><th>Document type</th><th class="num">Revenue</th><th class="num">Documents</th></tr>
+                {% for row in r.by_document_type %}<tr><td>{{ row.name }}</td><td class="num">{{ row.revenue }}</td><td class="num">{{ row.count }}</td></tr>{% endfor %}
+            </table>
+        </div>
+    </div>
+    {% endwith %}
+
+    {% with b=report.blotter %}
+    <div class="section-title">9. Blotter (Katarungang Pambarangay)</div>
+    <table>
+        <tr><th>Metric</th><th class="num">Value</th></tr>
+        <tr><td>Cases filed in period</td><td class="num">{{ b.total }}</td></tr>
+        <tr><td>Open (filed or under mediation)</td><td class="num">{{ b.open }}</td></tr>
+        <tr><td>Closed (settled, escalated, dismissed, withdrawn)</td><td class="num">{{ b.closed }}</td></tr>
+        <tr><td>Settlement rate</td><td class="num" id="print-settlement-rate">{% if b.settlement_rate is None %}-{% else %}{{ b.settlement_rate }}%{% endif %}</td></tr>
+        <tr><td>Average days to settle</td><td class="num">{{ b.avg_days_to_settle|default_if_none:"-" }}</td></tr>
+    </table>
+    <div class="grid-2">
+        <div>
+            <table>
+                <tr><th>Status</th><th class="num">Cases</th></tr>
+                {% for row in b.by_status %}<tr><td>{{ row.label }}</td><td class="num">{{ row.count }}</td></tr>{% endfor %}
+            </table>
+        </div>
+        <div>
+            <table>
+                <tr><th>Incident type</th><th class="num">Cases</th></tr>
+                {% for row in b.by_type %}<tr><td>{{ row.label }}</td><td class="num">{{ row.count }}</td></tr>{% endfor %}
+            </table>
+        </div>
+        <div>
+            <table>
+                <tr><th>Purok</th><th class="num">Cases</th></tr>
+                {% for row in b.by_purok %}<tr><td>{{ row.name }}</td><td class="num">{{ row.count }}</td></tr>{% endfor %}
+            </table>
+        </div>
+        <div>
+            <table>
+                <tr><th>Month</th><th class="num">Filed</th><th class="num">Settled</th><th class="num">Closed</th><th class="num">Rate</th></tr>
+                {% for row in b.months %}<tr><td>{{ row.label }}</td><td class="num">{{ row.filed }}</td><td class="num">{{ row.settled }}</td><td class="num">{{ row.closed }}</td><td class="num">{% if row.settlement_rate is None %}-{% else %}{{ row.settlement_rate }}%{% endif %}</td></tr>{% endfor %}
+            </table>
+        </div>
+    </div>
+    {% endwith %}
+
+    <div class="signatures">
+        <div class="signature"><div>BARANGAY SECRETARY</div><div>Records &amp; Demographics Officer</div></div>
+        <div class="signature"><div>PUNONG BARANGAY</div><div>Barangay Chairman</div></div>
+    </div>
+    <script src="{% static 'js/statistics.js' %}" defer></script>
+</body>
+</html>

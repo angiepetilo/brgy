@@ -5,11 +5,11 @@
 {% block content %}
 <div style="max-width: 640px; margin: 1.25rem auto;">
     <div class="page-header" style="margin-bottom: 1.25rem;">
-        <a href="{% url 'appointments:list' %}" style="font-size: 0.8125rem; font-weight: 700; display: inline-flex; align-items: center; margin-bottom: 0.35rem; text-transform: uppercase;">
+        <a href="{% url 'appointments:list' %}" style="font-size: 0.875rem; font-weight: 700; display: inline-flex; align-items: center; margin-bottom: 0.35rem; text-transform: uppercase;">
             BACK TO REQUESTS
         </a>
-        <h1 style="font-size: 1.25rem; font-weight: 600; color: #0f172a; line-height: 1.2;">Request Official Barangay Document</h1>
-        <p style="color: #64748b; font-size: 0.8125rem; margin-top: 0.2rem;">Fill in your document details and preferred processing schedule.</p>
+        <h1 style="font-size: 1.25rem; font-weight: 600; color: #111827; line-height: 1.2;">Request Official Barangay Document</h1>
+        <p style="color: #6B7280; font-size: 0.875rem; margin-top: 0.2rem;">Fill in your document details and preferred processing schedule.</p>
     </div>
 
     <div class="card">
@@ -41,13 +41,13 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
                         <label>Preferred Date *</label>
-                        {{ form.preferred_date }}
-                        {% if form.preferred_date.errors %}<div class="form-error">{{ form.preferred_date.errors.0 }}</div>{% endif %}
+                        {{ form.appt_date }}
+                        {% if form.appt_date.errors %}<div class="form-error">{{ form.appt_date.errors.0 }}</div>{% endif %}
                     </div>
                     <div class="form-group">
                         <label>Preferred Time Slot *</label>
-                        {{ form.preferred_time_slot }}
-                        {% if form.preferred_time_slot.errors %}<div class="form-error">{{ form.preferred_time_slot.errors.0 }}</div>{% endif %}
+                        {{ form.time_window }}
+                        {% if form.time_window.errors %}<div class="form-error">{{ form.time_window.errors.0 }}</div>{% endif %}
                     </div>
                 </div>
 

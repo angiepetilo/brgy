@@ -1,0 +1,9 @@
+{
+  "verdict": "APPROVED",
+  "findings": [
+    "Non-blocking, deferred - Live DB is still at appointments 0015. The final step must back up to backups\\db.sqlite3.<ts>.A.bak, record row counts, migrate, re-count, run pragma integrity_check and confirm [X] 0016_backfill_fee_at_booking. The backfill copies the document fees that are set at migrate time.",
+    "Non-blocking - apps/accounts/views.py resident_delete_view still redirects to the raw HTTP_REFERER. Switch it to the new _safe_back helper (Stage B is a natural place).",
+    "Non-blocking, pre-existing - the update_status POST in appointment_detail_view saves AppointmentStatusUpdateForm directly. That skips the transition services, check_user_perm, check_staff_appointment_scope and log_activity, so pending can jump to completed with no issued-document log or audit entry. Remove the form, or route it through the services, in a later stage."
+  ],
+  "reviewDoc": "c:\\brgy\\.agents\\tasks\\review-stageA.md"
+}

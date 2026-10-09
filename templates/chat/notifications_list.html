@@ -5,8 +5,8 @@
 {% block content %}
 <div style="max-width: 800px; margin: 0 auto;">
     <div class="page-header" style="margin-bottom: 1.25rem;">
-        <h1 style="font-size: 1.25rem; font-weight: 600; color: #0f172a; line-height: 1.2;">Notification Center</h1>
-        <p style="color: #64748b; font-size: 0.8125rem; margin-top: 0.2rem;">Real-time alerts, document appointment status changes, and community updates</p>
+        <h1 style="font-size: 1.25rem; font-weight: 600; color: #111827; line-height: 1.2;">Notification Center</h1>
+        <p style="color: #6B7280; font-size: 0.875rem; margin-top: 0.2rem;">Real-time alerts, document appointment status changes, and community updates</p>
     </div>
 
     <div class="card">
@@ -17,18 +17,18 @@
             {% if notifications %}
             <div>
                 {% for notif in notifications %}
-                <div class="notification-item-row {% if not notif.is_read %}unread{% endif %}" style="padding: 1rem 1.25rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
+                <div class="notification-item-row {% if not notif.is_read %}unread{% endif %}" style="padding: 1rem 1.25rem; border-bottom: 1px solid #F3F4F6; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
                     <div>
                         <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
                             <span class="badge {% if notif.notification_type == 'appointment' %}badge-info{% elif notif.notification_type == 'approval' %}badge-success{% else %}badge-primary{% endif %}">
                                 {{ notif.get_notification_type_display }}
                             </span>
-                            <strong style="font-size: 0.95rem; color: #0f172a;">{{ notif.title }}</strong>
+                            <strong style="font-size: 0.95rem; color: #111827;">{{ notif.title }}</strong>
                         </div>
-                        <p style="font-size: 0.875rem; color: #475569; margin-bottom: 0.5rem; line-height: 1.4;">
+                        <p style="font-size: 0.875rem; color: #4B5563; margin-bottom: 0.5rem; line-height: 1.4;">
                             {{ notif.message }}
                         </p>
-                        <div style="font-size: 0.75rem; color: #94a3b8;">
+                        <div style="font-size: 0.875rem; color: #6B7280;">
                             {{ notif.created_at|date:"F d, Y at h:i A" }}
                         </div>
                     </div>
@@ -41,8 +41,8 @@
                 {% endfor %}
             </div>
             {% else %}
-            <div style="text-align: center; padding: 4rem 1.5rem; color: #64748b;">
-                <h3 style="color: #0f172a; margin-bottom: 0.25rem;">NO NOTIFICATIONS</h3>
+            <div style="text-align: center; padding: 4rem 1.5rem; color: #6B7280;">
+                <h3 style="color: #111827; margin-bottom: 0.25rem;">NO NOTIFICATIONS</h3>
                 <p style="font-size: 0.875rem;">You are all caught up!</p>
             </div>
             {% endif %}

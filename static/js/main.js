@@ -122,13 +122,18 @@ document.addEventListener('DOMContentLoaded', () => {
             mainContainer.classList.remove('sidebar-collapsed');
             localStorage.setItem('fb_sidebar_collapsed', '0');
         }
+        if (sidebarCollapseBtn) {
+            const exp = sidebarCollapseBtn.querySelector('.collapse-label-expanded');
+            const col = sidebarCollapseBtn.querySelector('.collapse-label-collapsed');
+            if (exp) exp.style.display = collapsed ? 'none' : 'inline-flex';
+            if (col) col.style.display = collapsed ? 'inline-flex' : 'none';
+        }
     }
 
     if (sidebarCollapseBtn && leftSidebar && mainContainer) {
-        // Initialize from saved state on wide viewports
-        if (window.innerWidth >= 1024 && localStorage.getItem('fb_sidebar_collapsed') === '1') {
-            setSidebarState(true);
-        }
+        // Initialize from saved state on wide viewports (default expanded)
+        const isCollapsedSaved = localStorage.getItem('fb_sidebar_collapsed') === '1';
+        setSidebarState(isCollapsedSaved && window.innerWidth >= 1024);
 
         sidebarCollapseBtn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -235,22 +240,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             const newComment = document.createElement('div');
                             newComment.className = 'comment-item';
-                            newComment.style.cssText = 'padding: 0.65rem 0.75rem; background: #F8FAFC; border: 1px solid #E2E8F0;';
+                            newComment.style.cssText = 'padding: 0.65rem 0.75rem; background: #F9FAFB; border: 1px solid #E5E7EB;';
                             newComment.innerHTML = `
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
                                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                        <span style="font-weight: 700; font-size: 0.75rem; color: #1B2430; background: #E2E8F0; padding: 2px 5px;">
+                                        <span style="font-weight: 700; font-size: 0.75rem; color: #1F2937; background: #E5E7EB; padding: 2px 5px;">
                                             [${data.initials || 'RD'}]
                                         </span>
-                                        <span style="font-weight: 700; font-size: 0.8125rem; color: #0F172A;">
+                                        <span style="font-weight: 700; font-size: 0.8125rem; color: #111827;">
                                             ${escapeHtml(data.author)}
                                         </span>
                                     </div>
-                                    <span style="font-size: 0.7rem; color: #94A3B8;">
+                                    <span style="font-size: 0.7rem; color: #6B7280;">
                                         ${data.created_at}
                                     </span>
                                 </div>
-                                <div style="font-size: 0.8125rem; color: #334155; line-height: 1.4;">
+                                <div style="font-size: 0.8125rem; color: #374151; line-height: 1.4;">
                                     ${escapeHtml(data.content)}
                                 </div>
                             `;
@@ -405,3 +410,109 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// ==========================================
+// Delegated page actions (CSP: no inline handlers in templates)
+//   data-confirm="Message"   on a button/link (click) or a <form> (submit)
+//   data-action="dismiss"    removes the closest [data-dismiss-target] or the parent element
+//   data-action="print" | "back" | "reload"
+//   data-action="scroll-to"  data-target="#id"
+//   data-action="click-target" data-target="#id"  (e.g. open a hidden file input)
+//   data-auto-submit         on a <select>/<input>: submit its form on change
+// ==========================================
+(function () {
+    document.addEventListener('click', function (event) {
+        var confirmEl = event.target.closest('[data-confirm]');
+        if (confirmEl && confirmEl.tagName !== 'FORM') {
+            if (!window.confirm(confirmEl.getAttribute('data-confirm'))) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                return;
+            }
+        }
+
+        var actionEl = event.target.closest('[data-action]');
+        if (!actionEl) return;
+        var action = actionEl.getAttribute('data-action');
+        var targetSel = actionEl.getAttribute('data-target');
+        switch (action) {
+            case 'dismiss': {
+                event.preventDefault();
+                var box = actionEl.closest('[data-dismiss-target]') || actionEl.parentElement;
+                if (box) box.remove();
+                break;
+            }
+            case 'print':
+                event.preventDefault();
+                window.print();
+                break;
+            case 'back':
+                event.preventDefault();
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    window.location.assign('/');
+                }
+                break;
+            case 'reload':
+                event.preventDefault();
+                window.location.reload();
+                break;
+            case 'scroll-to': {
+                event.preventDefault();
+                var target = targetSel && document.querySelector(targetSel);
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
+                break;
+            }
+            case 'click-target': {
+                event.preventDefault();
+                var clickTarget = targetSel && document.querySelector(targetSel);
+                if (clickTarget) clickTarget.click();
+                break;
+            }
+            default:
+                break;
+        }
+    });
+
+    document.addEventListener('submit', function (event) {
+        var form = event.target;
+        if (form && form.hasAttribute && form.hasAttribute('data-confirm')) {
+            if (!window.confirm(form.getAttribute('data-confirm'))) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            }
+        }
+    }, true);
+
+    document.addEventListener('change', function (event) {
+        var el = event.target;
+        if (el && el.hasAttribute && el.hasAttribute('data-auto-submit') && el.form) {
+            if (typeof el.form.requestSubmit === 'function') {
+                el.form.requestSubmit();
+            } else {
+                el.form.submit();
+            }
+        }
+    });
+
+    // Global 4-digit year constraint for date inputs
+    document.addEventListener('input', function (event) {
+        var el = event.target;
+        if (el && el.type === 'date' && el.value) {
+            var parts = el.value.split('-');
+            if (parts[0] && parts[0].length > 4) {
+                parts[0] = parts[0].slice(0, 4);
+                el.value = parts.join('-');
+            }
+        }
+    });
+
+    document.addEventListener('focusin', function (event) {
+        var el = event.target;
+        if (el && el.type === 'date') {
+            if (!el.getAttribute('min')) el.setAttribute('min', '1900-01-01');
+            if (!el.getAttribute('max')) el.setAttribute('max', '9999-12-31');
+        }
+    });
+})();

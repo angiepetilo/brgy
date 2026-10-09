@@ -1,21 +1,19 @@
-<div class="post-trigger-card" onclick="openCreatePostModal()" role="button" tabindex="0" aria-label="Open post creation dialog">
+{% load core_tags %}
+<div class="post-trigger-card" data-post-action="open-create" role="button" tabindex="0" aria-label="Open the post an announcement dialog">
   {% if user.avatar %}
     <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="trigger-avatar">
   {% else %}
     <div class="trigger-avatar-initial">{{ user.first_name|slice:":1"|default:user.username|slice:":1"|upper }}</div>
   {% endif %}
   <div class="trigger-input-placeholder">
-    What's on your mind, {{ user.first_name|default:user.username }}?
+    Post an announcement for residents, {{ user.first_name|default:user.username }}
   </div>
   <div class="trigger-quick-actions">
-    <button type="button" class="action-btn live" title="Broadcast Live / Alert" onclick="event.stopPropagation(); openCreatePostModal();" aria-label="Live Alert">
-      <i class="fa-solid fa-video"></i>
+    <button type="button" class="btn btn-secondary btn-sm action-btn" data-post-action="open-create" title="Create post" aria-label="Create post">
+      {% icon 'megaphone' %}
     </button>
-    <button type="button" class="action-btn media" title="Attach Media" onclick="event.stopPropagation(); openCreatePostModal();" aria-label="Media Attachment">
-      <i class="fa-solid fa-images"></i>
-    </button>
-    <button type="button" class="action-btn feeling" title="Feeling / Activity" onclick="event.stopPropagation(); openCreatePostModal();" aria-label="Feeling / Activity">
-      <i class="fa-solid fa-face-smile"></i>
+    <button type="button" class="btn btn-secondary btn-sm action-btn media" data-post-action="open-create" title="Add photo" aria-label="Add photo">
+      {% icon 'image' %}
     </button>
   </div>
 </div>

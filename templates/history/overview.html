@@ -1,0 +1,373 @@
+{% extends 'base.html' %}
+{% load static core_tags %}
+
+{% block title %}History & Audit Log - Barangay.ph{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="padding: 1.25rem 0;">
+    <!-- Page Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="font-size: 1.6rem; font-weight: 800; color: #111827; margin: 0; display: flex; align-items: center; gap: 0.65rem;">
+                {% icon 'history' cls='icon-primary' %}
+                Audit Trail & History Records
+            </h1>
+            <p style="color: #6B7280; margin: 0.35rem 0 0 0; font-size: 0.875rem;">
+                Complete read-only record of system approvals, rejections, completions, no-shows, and email outbox logs.
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <span class="badge badge-primary" style="font-size: 0.875rem; padding: 0.4rem 0.75rem;">ADMINISTRATOR AUDIT</span>
+        </div>
+    </div>
+
+    <!-- Summary KPI Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+        <div class="card" style="padding: 1rem; border-radius: 10px; border: 1px solid #E5E7EB; background: #FFFFFF;">
+            <div style="font-size: 0.875rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">Total Action Events</div>
+            <div style="font-size: 1.6rem; font-weight: 800; color: #111827; margin-top: 0.25rem;">{{ total_activities }}</div>
+            <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.2rem;">All recorded decisions</div>
+        </div>
+
+        <div class="card" style="padding: 1rem; border-radius: 10px; border: 1px solid #16A34A; background: #FFFFFF;">
+            <div style="font-size: 0.875rem; font-weight: 700; color: #111827; text-transform: uppercase;">Approved</div>
+            <div style="font-size: 1.6rem; font-weight: 800; color: #111827; margin-top: 0.25rem;">{{ approved_count }}</div>
+            <div style="font-size: 0.875rem; color: #111827; margin-top: 0.2rem;">Registrations & appointments</div>
+        </div>
+
+        <div class="card" style="padding: 1rem; border-radius: 10px; border: 1px solid #DC2626; background: #FFFFFF;">
+            <div style="font-size: 0.875rem; font-weight: 700; color: #DC2626; text-transform: uppercase;">Rejected</div>
+            <div style="font-size: 1.6rem; font-weight: 800; color: #DC2626; margin-top: 0.25rem;">{{ rejected_count }}</div>
+            <div style="font-size: 0.875rem; color: #DC2626; margin-top: 0.2rem;">With state of rejection log</div>
+        </div>
+
+        <div class="card" style="padding: 1rem; border-radius: 10px; border: 1px solid #D1D5DB; background: #F3F4F6;">
+            <div style="font-size: 0.875rem; font-weight: 700; color: #1E3A8A; text-transform: uppercase;">Completed</div>
+            <div style="font-size: 1.6rem; font-weight: 800; color: #1E3A8A; margin-top: 0.25rem;">{{ completed_count }}</div>
+            <div style="font-size: 0.875rem; color: #1E3A8A; margin-top: 0.2rem;">Finalized requests</div>
+        </div>
+
+        <div class="card" style="padding: 1rem; border-radius: 10px; border: 1px solid #F3F4F6; background: #F3F4F6;">
+            <div style="font-size: 0.875rem; font-weight: 700; color: #374151; text-transform: uppercase;">No-Shows</div>
+            <div style="font-size: 1.6rem; font-weight: 800; color: #374151; margin-top: 0.25rem;">{{ noshow_count }}</div>
+            <div style="font-size: 0.875rem; color: #374151; margin-top: 0.2rem;">Unattended appointments</div>
+        </div>
+
+        <div class="card" style="padding: 1rem; border-radius: 10px; border: 1px solid #E5E7EB; background: #FFFFFF;">
+            <div style="font-size: 0.875rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">Emails Dispatched</div>
+            <div style="font-size: 1.6rem; font-weight: 800; color: #1E3A8A; margin-top: 0.25rem;">{{ total_emails }}</div>
+            <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.2rem;">
+                <span style="color: #111827; font-weight: 600;">{{ emails_sent }} sent</span> · 
+                <span style="color: #DC2626;">{{ emails_failed }} failed</span> · 
+                <span style="color: #1E3A8A;">{{ emails_queued }} queued</span>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .tab-link {
+            border: none;
+            border-radius: 0;
+            font-weight: 700;
+            padding: 0.65rem 1.25rem;
+            background: transparent;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+        .tab-link.active {
+            border-bottom: 3px solid #1E3A8A;
+            color: #1E3A8A;
+        }
+        .tab-link.inactive {
+            border-bottom: 3px solid transparent;
+            color: #6B7280;
+        }
+    </style>
+
+    <!-- Navigation Tabs -->
+    <div style="display: flex; gap: 0.5rem; border-bottom: 2px solid #E5E7EB; margin-bottom: 1.25rem;">
+        <a href="?tab=activity" class="btn tab-link {% if active_tab == 'activity' %}active{% else %}inactive{% endif %}">
+            {% icon 'list-checks' %} Activity Audit Trail
+            <span class="badge badge-secondary" style="font-size: 0.875rem;">{{ total_activities }}</span>
+        </a>
+        <a href="?tab=emails" class="btn tab-link {% if active_tab == 'emails' %}active{% else %}inactive{% endif %}">
+            {% icon 'mail-open' %} Email Dispatch Log
+            <span class="badge badge-secondary" style="font-size: 0.875rem;">{{ total_emails }}</span>
+        </a>
+    </div>
+
+    <!-- TAB 1: ACTIVITY LOG -->
+    {% if active_tab == 'activity' %}
+    <div class="card" style="border: 1px solid #E5E7EB; border-radius: 12px; background: #FFFFFF; overflow: hidden;">
+        <!-- Filter Bar -->
+        <div style="padding: 1rem 1.25rem; background: #F9FAFB; border-bottom: 1px solid #E5E7EB;">
+            <form method="get" action="" style="display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center;">
+                <input type="hidden" name="tab" value="activity">
+                <input type="text" name="q" value="{{ q }}" placeholder="Search name, ID, remarks, IP..." class="form-control" style="font-size: 0.875rem; max-width: 240px;">
+                
+                <!-- User Filter -->
+                <select name="user" class="form-control" style="font-size: 0.875rem; max-width: 170px;">
+                    <option value="">-- All Users --</option>
+                    {% for u in staff_and_admins %}
+                    <option value="{{ u.id }}" {% if user_filter == u.id|stringformat:"s" or user_filter == u.username %}selected{% endif %}>{{ u.get_full_name|default:u.username }}</option>
+                    {% endfor %}
+                </select>
+
+                <!-- Module / Action Type Filter -->
+                <select name="module" class="form-control" style="font-size: 0.875rem; max-width: 170px;">
+                    <option value="">-- All Modules --</option>
+                    {% for m in action_types %}
+                    <option value="{{ m }}" {% if module_filter == m %}selected{% endif %}>{{ m }}</option>
+                    {% endfor %}
+                </select>
+
+                <!-- Date Filter -->
+                <input type="date" name="date" value="{{ date_filter }}" class="form-control" style="font-size: 0.875rem; max-width: 160px;" title="Filter by date">
+
+                <!-- Action Filter -->
+                <select name="action" class="form-control" style="font-size: 0.875rem; max-width: 140px;">
+                    <option value="">-- All Actions --</option>
+                    <option value="approve" {% if action_filter == 'approve' %}selected{% endif %}>Approve</option>
+                    <option value="reject" {% if action_filter == 'reject' %}selected{% endif %}>Reject</option>
+                    <option value="complete" {% if action_filter == 'complete' %}selected{% endif %}>Complete</option>
+                    <option value="no_show" {% if action_filter == 'no_show' %}selected{% endif %}>No-Show</option>
+                    <option value="create" {% if action_filter == 'create' %}selected{% endif %}>Create</option>
+                    <option value="update" {% if action_filter == 'update' %}selected{% endif %}>Update</option>
+                    <option value="delete" {% if action_filter == 'delete' %}selected{% endif %}>Delete</option>
+                </select>
+
+                <button type="submit" class="btn btn-primary btn-sm" style="padding: 0.45rem 1rem; font-size: 0.875rem;">
+                    {% icon 'filter' %} Apply
+                </button>
+                {% if q or action_filter or module_filter or user_filter or date_filter %}
+                <a href="?tab=activity" class="btn btn-secondary btn-sm" style="padding: 0.45rem 0.9rem; font-size: 0.875rem;">Reset</a>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Table -->
+        <div style="overflow-x: auto;">
+            <table class="table" style="width: 100%; border-collapse: collapse; margin: 0; font-size: 0.875rem;">
+                <thead>
+                    <tr style="background: #F9FAFB; border-bottom: 2px solid #E5E7EB; text-align: left; font-size: 0.875rem; text-transform: uppercase; color: #4B5563; letter-spacing: 0.04em;">
+                        <th style="padding: 0.75rem 1rem;">Timestamp</th>
+                        <th style="padding: 0.75rem 1rem;">Actor / Officer</th>
+                        <th style="padding: 0.75rem 1rem;">Action</th>
+                        <th style="padding: 0.75rem 1rem;">Module / Target</th>
+                        <th style="padding: 0.75rem 1rem;">Subject / Target</th>
+                        <th style="padding: 0.75rem 1rem;">Details</th>
+                        <th style="padding: 0.75rem 1rem;">IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in activity_page %}
+                    <tr style="border-bottom: 1px solid #F3F4F6;">
+                        <td style="padding: 0.75rem 1rem; color: #6B7280; white-space: nowrap;">
+                            {% icon 'clock' %}
+                            {{ item.created_at|date:"M d, Y · h:i A" }}
+                        </td>
+                        <td style="padding: 0.75rem 1rem; font-weight: 600; color: #111827;">
+                            {% if item.actor %}
+                                {{ item.actor.get_full_name|default:item.actor.username }}
+                                <span style="font-size: 0.875rem; color: #6B7280; display: block;">{{ item.actor.get_role_display }}</span>
+                            {% else %}
+                                <span style="color: #6B7280; font-style: italic;">System Automatic</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 0.75rem 1rem;">
+                            <span class="badge {{ item.badge_class }}" style="text-transform: uppercase; font-size: 0.875rem;">
+                                {{ item.get_action_display }}
+                            </span>
+                        </td>
+                        <td style="padding: 0.75rem 1rem; color: #374151; font-weight: 500;">
+                            {{ item.action_type }}
+                            {% if item.target_id %}
+                            <span style="font-size: 0.875rem; color: #6B7280; display: block;">Ref: #{{ item.target_id }}</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 0.75rem 1rem; font-weight: 600; color: #111827;">
+                            {{ item.target_name|default:"-" }}
+                        </td>
+                        <td style="padding: 0.75rem 1rem; color: #374151;">
+                            {% if item.details %}
+                                <div style="max-width: 380px; word-break: break-word; line-height: 1.4;">
+                                    {{ item.details }}
+                                </div>
+                            {% else %}
+                                <span style="color: #6B7280; font-style: italic;">No additional notes</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 0.75rem 1rem; color: #6B7280; font-size: 0.875rem; font-family: monospace;">
+                            {{ item.ip_address|default:"127.0.0.1" }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" style="padding: 3rem 1rem; text-align: center; color: #6B7280;">
+                            {% icon 'list-checks' cls='icon-lg icon-muted icon-block' %}
+                            No activity audit records match your filters.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if activity_page.paginator.num_pages > 1 %}
+        <div style="padding: 0.85rem 1.25rem; background: #F9FAFB; border-top: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.875rem; color: #6B7280;">
+                Page {{ activity_page.number }} of {{ activity_page.paginator.num_pages }} ({{ activity_page.paginator.count }} records)
+            </span>
+            <div style="display: flex; gap: 0.35rem;">
+                {% if activity_page.has_previous %}
+                <a href="?tab=activity&page={{ activity_page.previous_page_number }}&q={{ q }}&action={{ action_filter }}&module={{ module_filter }}&user={{ user_filter }}&date={{ date_filter }}" class="btn btn-secondary btn-sm">Previous</a>
+                {% endif %}
+                {% if activity_page.has_next %}
+                <a href="?tab=activity&page={{ activity_page.next_page_number }}&q={{ q }}&action={{ action_filter }}&module={{ module_filter }}&user={{ user_filter }}&date={{ date_filter }}" class="btn btn-secondary btn-sm">Next</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- TAB 2: EMAIL LOG -->
+    {% if active_tab == 'emails' %}
+    <div class="card" style="border: 1px solid #E5E7EB; border-radius: 12px; background: #FFFFFF; overflow: hidden;">
+        <!-- Filter Bar -->
+        <div style="padding: 1rem 1.25rem; background: #F9FAFB; border-bottom: 1px solid #E5E7EB;">
+            <form method="get" action="" style="display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center;">
+                <input type="hidden" name="tab" value="emails">
+                <input type="text" name="q" value="{{ q }}" placeholder="Search recipient, subject, error..." class="form-control" style="font-size: 0.875rem; max-width: 280px;">
+                
+                <!-- Status Filter -->
+                <select name="status" class="form-control" style="font-size: 0.875rem; max-width: 140px;">
+                    <option value="">-- All Statuses --</option>
+                    <option value="queued" {% if status_filter == 'queued' %}selected{% endif %}>Queued</option>
+                    <option value="sent" {% if status_filter == 'sent' %}selected{% endif %}>Sent</option>
+                    <option value="failed" {% if status_filter == 'failed' %}selected{% endif %}>Failed</option>
+                </select>
+
+                <!-- Date Filter -->
+                <input type="date" name="date" value="{{ date_filter }}" class="form-control" style="font-size: 0.875rem; max-width: 160px;" title="Filter by date">
+
+                <button type="submit" class="btn btn-primary btn-sm" style="padding: 0.45rem 1rem; font-size: 0.875rem;">
+                    {% icon 'filter' %} Apply
+                </button>
+                {% if q or status_filter or date_filter %}
+                <a href="?tab=emails" class="btn btn-secondary btn-sm" style="padding: 0.45rem 0.9rem; font-size: 0.875rem;">Reset</a>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Table -->
+        <div style="overflow-x: auto;">
+            <table class="table" style="width: 100%; border-collapse: collapse; margin: 0; font-size: 0.875rem;">
+                <thead>
+                    <tr style="background: #F9FAFB; border-bottom: 2px solid #E5E7EB; text-align: left; font-size: 0.875rem; text-transform: uppercase; color: #4B5563; letter-spacing: 0.04em;">
+                        <th style="padding: 0.75rem 1rem;">Timestamp</th>
+                        <th style="padding: 0.75rem 1rem;">Recipient</th>
+                        <th style="padding: 0.75rem 1rem;">Subject</th>
+                        <th style="padding: 0.75rem 1rem;">Template</th>
+                        <th style="padding: 0.75rem 1rem;">Status</th>
+                        <th style="padding: 0.75rem 1rem;">Attempts</th>
+                        <th style="padding: 0.75rem 1rem;">Error / Delivery Info</th>
+                        <th style="padding: 0.75rem 1rem; text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in email_page %}
+                    <tr style="border-bottom: 1px solid #F3F4F6;">
+                        <td style="padding: 0.75rem 1rem; color: #6B7280; white-space: nowrap;">
+                            {% icon 'clock' %}
+                            {{ item.created_at|date:"M d, Y · h:i A" }}
+                        </td>
+                        <td style="padding: 0.75rem 1rem;">
+                            <div style="font-weight: 600; color: #111827;">{{ item.recipient }}</div>
+                            {% if item.recipient_name %}
+                            <span style="font-size: 0.875rem; color: #6B7280;">{{ item.recipient_name }}</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 0.75rem 1rem; font-weight: 600; color: #1E3A8A;">
+                            {{ item.subject }}
+                        </td>
+                        <td style="padding: 0.75rem 1rem; color: #4B5563;">
+                            <span class="badge badge-secondary" style="font-size: 0.875rem;">{{ item.email_type|default:"Notification" }}</span>
+                        </td>
+                        <td style="padding: 0.75rem 1rem;">
+                            {% if item.status == 'sent' %}
+                            <span class="badge badge-success" style="font-size: 0.875rem; font-weight: 700;">
+                                {% icon 'check' %} SENT
+                            </span>
+                            {% elif item.status == 'queued' %}
+                            <span class="badge badge-info" style="font-size: 0.875rem; font-weight: 700;">
+                                {% icon 'clock' %} QUEUED
+                            </span>
+                            {% else %}
+                            <span class="badge badge-danger" style="font-size: 0.875rem; font-weight: 700;">
+                                {% icon 'triangle-alert' %} FAILED
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 0.75rem 1rem; color: #4B5563; font-weight: 600;">
+                            {{ item.attempts }} / 3
+                        </td>
+                        <td style="padding: 0.75rem 1rem; color: #DC2626; font-size: 0.875rem;">
+                            {% if item.error_message %}
+                                <div style="max-width: 300px; word-break: break-word;">{{ item.error_message }}</div>
+                            {% elif item.status == 'sent' %}
+                                <span style="color: #111827;">{% icon 'circle-check' cls='icon-success' %} Delivered</span>
+                            {% else %}
+                                <span style="color: #1E3A8A;">{% icon 'loader-circle' %} Waiting for outbox runner</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 0.75rem 1rem; text-align: right;">
+                            {% if item.status == 'failed' and not item.is_secret %}
+                            <form method="post" action="{% url 'history:resend_email' item.id %}" style="display: inline; margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger" style="font-size: 0.875rem; padding: 0.25rem 0.65rem;" title="Retry delivery">
+                                    {% icon 'rotate-cw' %} Resend
+                                </button>
+                            </form>
+                            {% elif item.is_secret %}
+                            <span style="font-size: 0.875rem; color: #6B7280; font-style: italic;">Credentials Protected</span>
+                            {% else %}
+                            <span style="font-size: 0.875rem; color: #6B7280;">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" style="padding: 3rem 1rem; text-align: center; color: #6B7280;">
+                            {% icon 'mail-open' cls='icon-lg icon-muted icon-block' %}
+                            No emails logged matching your filters.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if email_page.paginator.num_pages > 1 %}
+        <div style="padding: 0.85rem 1.25rem; background: #F9FAFB; border-top: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.875rem; color: #6B7280;">
+                Page {{ email_page.number }} of {{ email_page.paginator.num_pages }} ({{ email_page.paginator.count }} records)
+            </span>
+            <div style="display: flex; gap: 0.35rem;">
+                {% if email_page.has_previous %}
+                <a href="?tab=emails&page={{ email_page.previous_page_number }}&q={{ q }}&status={{ status_filter }}&date={{ date_filter }}" class="btn btn-secondary btn-sm">Previous</a>
+                {% endif %}
+                {% if email_page.has_next %}
+                <a href="?tab=emails&page={{ email_page.next_page_number }}&q={{ q }}&status={{ status_filter }}&date={{ date_filter }}" class="btn btn-secondary btn-sm">Next</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

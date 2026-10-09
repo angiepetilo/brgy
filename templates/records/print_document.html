@@ -1,0 +1,131 @@
+{% load core_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ log.control_number }} - Official Barangay Document</title>
+    <style>
+        body {
+            font-family: var(--font-sans, system-ui, sans-serif);
+            margin: 0;
+            padding: 2.5cm 2cm;
+            color: #111827;
+            background: #FFFFFF;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #111827;
+            padding-bottom: 12px;
+            margin-bottom: 30px;
+        }
+        .republic {
+            font-size: 11pt;
+            letter-spacing: 0.05em;
+        }
+        .barangay-title {
+            font-size: 16pt;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+        .doc-title {
+            text-align: center;
+            font-size: 20pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin: 35px 0 25px 0;
+            text-decoration: underline;
+        }
+        .control-number {
+            text-align: right;
+            font-family: monospace;
+            font-size: 11pt;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .body-text {
+            font-size: 12pt;
+            line-height: 1.8;
+            text-align: justify;
+            text-indent: 2em;
+            margin-bottom: 20px;
+        }
+        .signatures {
+            margin-top: 60px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signature-block {
+            text-align: center;
+            width: 240px;
+        }
+        .line {
+            border-top: 1px solid #111827;
+            margin-top: 45px;
+            padding-top: 5px;
+            font-weight: bold;
+        }
+        @media print {
+            .no-print { display: none; }
+            body { padding: 1cm; }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print" style="margin-bottom: 20px; background: #F3F4F6; padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-family: var(--font-sans, system-ui, sans-serif);">
+        <span><strong>Official Barangay Clearance Document</strong> (Ready for print/export)</span>
+        <button type="button" data-action="print" style="background: #1E3A8A; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer;">
+            Print / Save as PDF
+        </button>
+    </div>
+
+    <div class="header">
+        <div class="republic">Republic of the Philippines</div>
+        <div class="republic">City / Municipality of General Santos · Province of South Cotabato</div>
+        <div class="barangay-title">OFFICE OF THE BARANGAY CHAIRMAN</div>
+        <div class="republic">Barangay Hall Administration Center</div>
+    </div>
+
+    <div class="control-number">
+        CONTROL NO: {{ log.control_number }}
+    </div>
+
+    <div class="doc-title">
+        {{ appointment.get_service_title }}
+    </div>
+
+    <div class="body-text">
+        TO WHOM IT MAY CONCERN:
+    </div>
+
+    <div class="body-text">
+        This is to certify that <strong>{{ log.issued_to|display_name:log.appointment.get_applicant_name|upper }}</strong>, of legal age, Filipino citizen, is a bonafide resident of {{ log.appointment.get_applicant_address|default:"this Barangay" }}.
+    </div>
+
+    <div class="body-text">
+        Based on official records in this office, the subject individual has no derogatory record filed against him/her and is known to be of good moral character and a law-abiding citizen in the community.
+    </div>
+
+    <div class="body-text">
+        This certification is issued upon the request of the above-named person for the purpose of: <strong>{{ log.appointment.purpose|upper }}</strong>.
+    </div>
+
+    <div class="body-text">
+        Issued this {{ log.issued_at|date:"jS" }} day of {{ log.issued_at|date:"F, Y" }} at the Barangay Hall.
+    </div>
+
+    <div class="signatures">
+        <div class="signature-block">
+            <div style="font-size: 10pt; color: #4B5563;">Processed & Verified by:</div>
+            <div class="line">{{ log.issued_by|display_name:"Barangay Staff" }}</div>
+            <div style="font-size: 10pt;">Barangay Records Officer</div>
+        </div>
+
+        <div class="signature-block">
+            <div style="font-size: 10pt; color: #4B5563;">Approved & Enacted by:</div>
+            <div class="line">PUNONG BARANGAY</div>
+            <div style="font-size: 10pt;">Punong Barangay / Kapitan</div>
+        </div>
+    </div>
+</body>
+</html>

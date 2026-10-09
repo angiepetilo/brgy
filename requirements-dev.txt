@@ -1,0 +1,9 @@
+-r requirements.txt
+
+# Test runner (php artisan test style output: pytest -v / pytest -k name / pytest -x)
+pytest==9.1.1
+pytest-django==4.14.0
+pytest-xdist==3.8.0
+
+# Dependency vulnerability scanner (run: pip-audit -r requirements.txt)
+pip-audit==2.10.1

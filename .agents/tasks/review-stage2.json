@@ -1,0 +1,11 @@
+{
+  "verdict": "APPROVED",
+  "findings": [
+    "Non-blocking (possible): pending and rejected sign-ups still count in population, sector totals and the RBI tab because only is_archived is excluded (plan-accepted). Decide in a later stage whether to also filter on linked user status.",
+    "Non-blocking (confirmed): staff_register_resident_service accepts a blank gender; only the modal's HTML required enforces it. Require gender for new staff registrations server-side.",
+    "Non-blocking (confirmed): approve_resident_service merge discards the applicant's self-declared is_pwd/is_4ps/is_solo_parent (only blank gender is back-filled). Consider OR-ing the flags.",
+    "Non-blocking (likely): resident_edit_view skips demographics silently when the User has no Resident but still flashes success. Show a notice or hide the fields.",
+    "Non-blocking (confirmed): local _truthy in accounts/services.py must be replaced by parse_bool in Stage 3 (task 3.1); residents_tabbed Edit buttons extend an existing inline onclick payload."
+  ],
+  "reviewDoc": "c:\\brgy/.agents/tasks/review-stage2.md"
+}

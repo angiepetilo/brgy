@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static core_tags %}
 
 {% block title %}Residents Management - Barangay e-Portal{% endblock %}
 
@@ -15,9 +16,9 @@
         right: 0;
         top: calc(100% + 4px);
         background: #FFFFFF;
-        border: 1px solid #E2E8F0;
+        border: 1px solid #E5E7EB;
         border-radius: 10px;
-        box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.18), 0 4px 6px -2px rgba(15, 23, 42, 0.05);
+        box-shadow: none;
         z-index: 1050;
         min-width: 135px;
         padding: 0.35rem;
@@ -28,7 +29,7 @@
         animation: fadeInMenu 0.15s ease-out;
     }
     @keyframes fadeInMenu {
-        from { opacity: 0; transform: translateY(-4px); }
+        from { opacity: 0; transform: none; }
         to { opacity: 1; transform: translateY(0); }
     }
     .action-menu-item {
@@ -37,9 +38,9 @@
         align-items: center;
         gap: 0.6rem;
         padding: 0.5rem 0.75rem;
-        font-size: 0.8125rem;
+        font-size: 0.875rem;
         font-weight: 600;
-        color: #1E293B;
+        color: #1F2937;
         background: none;
         border: none;
         border-radius: 6px;
@@ -49,31 +50,31 @@
         box-sizing: border-box;
     }
     .action-menu-item:hover {
-        background: #F1F5F9;
-        color: #0F172A;
+        background: #F3F4F6;
+        color: #111827;
     }
     .action-menu-item.text-danger {
         color: #DC2626;
     }
     .action-menu-item.text-danger:hover {
-        background: #FEF2F2;
-        color: #B91C1C;
+        background: #FFFFFF;
+        color: #DC2626;
     }
     .form-control-modern {
         width: 100%;
         padding: 0.65rem 0.9rem 0.65rem 2.4rem;
-        border: 1.5px solid #CBD5E1;
+        border: 1.5px solid #D1D5DB;
         border-radius: 9px;
         font-size: 0.875rem;
-        color: #0F172A;
+        color: #111827;
         background: #FFFFFF;
         transition: all 0.2s ease;
         box-sizing: border-box;
     }
     .form-control-modern:focus {
         outline: none;
-        border-color: #2563EB;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+        border-color: #1E3A8A;
+        box-shadow: none;
     }
     .form-control-modern.has-clear {
         padding-right: 2.4rem;
@@ -85,251 +86,92 @@
 <div class="residents-management-container">
 
     <!-- Header Section -->
-    <div class="page-header" style="margin-bottom: 1.25rem;">
-        <h1 style="font-size: 1.25rem; font-weight: 700; color: #0F172A; margin: 0; text-transform: uppercase;">
-            Residents Management
-        </h1>
-        <p style="color: #64748B; font-size: 0.8125rem; margin: 0.25rem 0 0 0;">
-            Official resident records, status verification, and inhabitant registration
-        </p>
-    </div>
-
-    <!-- Resident Module Navigation Tabs (Without Icons) -->
-    <div class="residents-module-tabs" style="display: flex; gap: 0.5rem; border-bottom: 2px solid #E2E8F0; margin-bottom: 1.5rem; overflow-x: auto;">
-        <a href="{% url 'accounts:residents_tabbed' %}?main_tab=residents&tab={{ active_tab }}&q={{ search_query }}" class="btn {% if main_tab != 'rbi' %}btn-primary{% else %}btn-secondary{% endif %}" style="font-weight: 700; border-bottom: none; border-radius: 8px 8px 0 0; min-height: 44px; min-width: 140px; display: inline-flex; align-items: center; justify-content: center;">
-            Residents
-        </a>
-        <a href="{% url 'accounts:residents_tabbed' %}?main_tab=rbi" class="btn {% if main_tab == 'rbi' %}btn-primary{% else %}btn-secondary{% endif %}" style="font-weight: 700; border-bottom: none; border-radius: 8px 8px 0 0; min-height: 44px; min-width: 240px; display: inline-flex; align-items: center; justify-content: center;">
-            Record of Barangay Inhabitants
-        </a>
-    </div>
-
-    {% if main_tab == 'rbi' %}
-    <!-- Tab 2: Record of Barangay Inhabitants (Coming Soon Text Design) -->
-    <div class="card" style="border: 1px solid #E2E8F0; border-radius: 12px; background: #FFFFFF; padding: 4.5rem 1.5rem; text-align: center; box-shadow: none;">
-        <div style="font-size: 0.8125rem; font-weight: 700; color: #2563EB; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem;">
-            Record of Barangay Inhabitants (RBI)
+    <div class="page-header" style="margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin: 0;">
+                Residents
+            </h1>
         </div>
-        <h2 style="font-size: 2.25rem; font-weight: 800; color: #0F172A; margin: 0 0 0.5rem 0; letter-spacing: -0.02em;">
-            Coming Soon
-        </h2>
-        <p style="color: #64748B; font-size: 0.9375rem; max-width: 480px; margin: 0 auto; line-height: 1.5;">
-            The comprehensive inhabitant records and demographic census will be available in the upcoming release.
-        </p>
+        {% if can_register_resident %}
+        <button type="button" class="btn btn-primary" data-action="open-register-resident" aria-haspopup="dialog" style="font-weight: 600; font-size: 0.8125rem; padding: 0.45rem 1.15rem; border-radius: 6px; background: #0071E3;">
+            Register Residents
+        </button>
+        {% endif %}
     </div>
-    {% else %}
 
-    <!-- Modern Filter & Search Controls (Without Filter Button) -->
-    <div class="card" style="margin-bottom: 1.25rem; border: 1px solid #E2E8F0; border-radius: 14px; background: #FFFFFF; box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.04);">
-        <div class="card-body" style="padding: 1rem 1.25rem;">
-            <form id="residents-filter-form" method="get" action="{% url 'accounts:residents_tabbed' %}" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
-                <input type="hidden" name="main_tab" value="residents">
-                
-                <!-- Modern Application Status Dropdown -->
-                <div style="flex: 1.1; min-width: 200px;">
-                    <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.72rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.35rem; letter-spacing: 0.03em;">
-                        <i class="fa-solid fa-layer-group" style="color: #2563EB;"></i> Application Status
-                    </label>
-                    <div style="position: relative;">
-                        <i class="fa-solid fa-users" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94A3B8; font-size: 0.88rem; pointer-events: none;"></i>
-                        <select name="tab" class="form-control-modern" onchange="this.form.submit()" style="font-weight: 600; cursor: pointer; appearance: auto;">
-                            <option value="pending" {% if active_tab == 'pending' %}selected{% endif %}>Pending ({{ pending_count }})</option>
-                            <option value="approved" {% if active_tab == 'approved' %}selected{% endif %}>Approved ({{ approved_count }})</option>
-                            <option value="rejected" {% if active_tab == 'rejected' %}selected{% endif %}>Rejected ({{ rejected_count }})</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Modern Search Bar -->
-                <div style="flex: 2; min-width: 260px;">
-                    <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.72rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.35rem; letter-spacing: 0.03em;">
-                        <i class="fa-solid fa-magnifying-glass" style="color: #2563EB;"></i> Search Resident
-                    </label>
-                    <div style="position: relative;">
-                        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94A3B8; font-size: 0.88rem; pointer-events: none;"></i>
-                        <input type="text" name="q" value="{{ search_query }}" class="form-control-modern{% if search_query %} has-clear{% endif %}" placeholder="Search resident name, username, phone, or email..." onkeydown="if(event.key === 'Enter'){ this.form.submit(); }">
-                        {% if search_query %}
-                        <a href="{% url 'accounts:residents_tabbed' %}?tab={{ active_tab }}" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #94A3B8; text-decoration: none; font-size: 0.95rem; cursor: pointer;" title="Clear search">
-                            <i class="fa-solid fa-circle-xmark"></i>
-                        </a>
-                        {% endif %}
-                    </div>
-                </div>
-
-                {% if active_tab == 'approved' %}
-                <!-- Modern Purok Jurisdiction Dropdown -->
-                <div style="flex: 1.1; min-width: 180px;">
-                    <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.72rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.35rem; letter-spacing: 0.03em;">
-                        <i class="fa-solid fa-location-dot" style="color: #2563EB;"></i> Purok Jurisdiction
-                    </label>
-                    <div style="position: relative;">
-                        <i class="fa-solid fa-map-pin" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94A3B8; font-size: 0.88rem; pointer-events: none;"></i>
-                        <select name="purok" class="form-control-modern" onchange="this.form.submit()" style="font-weight: 600; cursor: pointer; appearance: auto;">
-                            <option value="">All Puroks</option>
-                            {% for code, label in purok_choices %}
-                            <option value="{{ code }}" {% if purok_filter == code %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
+    <!-- Search & Filter Controls -->
+    <div style="margin-bottom: 1.25rem;">
+        <form id="residents-filter-form" method="get" action="{% url 'accounts:residents_tabbed' %}" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <!-- Modern Search Bar -->
+            <div style="flex: 1; max-width: 480px; position: relative;">
+                {% icon 'search' cls='icon-muted' style='position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; width: 16px; height: 16px; color: #9CA3AF;' %}
+                <input type="text" name="q" value="{{ search_query }}" class="form-control-modern{% if search_query %} has-clear{% endif %}" placeholder="Search by applicant name" style="padding-left: 2.25rem; height: 38px; border-radius: 8px; border: 1px solid #E5E7EB; width: 100%; font-size: 0.875rem;">
+                {% if search_query %}
+                <a href="{% url 'accounts:residents_tabbed' %}?tab={{ active_tab }}" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #9CA3AF; text-decoration: none;" title="Clear search" aria-label="Clear search">
+                    {% icon 'circle-x' %}
+                </a>
                 {% endif %}
-            </form>
-        </div>
+            </div>
+
+            <!-- Status Dropdown Filter -->
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <select name="tab" class="form-control-modern" data-auto-submit style="height: 38px; border-radius: 8px; border: 1px solid #E5E7EB; font-size: 0.875rem; font-weight: 500; cursor: pointer; padding: 0 1.75rem 0 0.85rem; appearance: auto; background: #FFFFFF;">
+                    <option value="pending" {% if active_tab == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="records" {% if active_tab == 'records' or active_tab == 'approved' %}selected{% endif %}>Approved</option>
+                    <option value="rejected" {% if active_tab == 'rejected' %}selected{% endif %}>Declined</option>
+                </select>
+                {% if active_tab != 'pending' and puroks %}
+                <select name="purok" class="form-control-modern" data-auto-submit style="height: 38px; border-radius: 8px; border: 1px solid #E5E7EB; font-size: 0.875rem; font-weight: 500; cursor: pointer; padding: 0 1.75rem 0 0.85rem; appearance: auto; background: #FFFFFF;">
+                    <option value="">All Puroks</option>
+                    {% for p in puroks %}
+                    <option value="{{ p.id }}" {% if purok_filter == p.id|stringformat:"s" or purok_filter == p.name %}selected{% endif %}>{{ p.name }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+            </div>
+        </form>
     </div>
 
-    <!-- TAB 1: PENDING RESIDENTS -->
-    {% if active_tab == 'pending' %}
-    <div class="data-table-card">
-        <div style="background: #FFFFFF; padding: 1rem 1.25rem; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-weight: 700; font-size: 0.8125rem; letter-spacing: 0.05em; text-transform: uppercase; color: #0F172A;">
-                UNAPPROVED RESIDENT REGISTRATIONS AWAITING VERIFICATION
-            </span>
-            <span class="status-text-pill status-builtin" style="font-size: 0.75rem;">
-                <i class="fa-solid fa-clock"></i> {{ pending_count }} Awaiting
-            </span>
-        </div>
-        <div>
-            {% if pending_residents %}
-            <div class="table-responsive">
-                <table class="clean-table">
-                    <thead>
-                        <tr>
-                            <th class="col-idx">#</th>
-                            <th style="width: 36%;">APPLICANT NAME</th>
-                            <th style="width: 22%;">PUROK</th>
-                            <th style="width: 14%;">STATUS</th>
-                            <th style="width: 18%;">REGISTERED ON</th>
-                            <th style="width: 10%; text-align: center;">ACTION</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+    <!-- Data Table Card -->
+    <div class="data-table-card" style="border: 1px solid #E5E7EB; border-radius: 8px; background: #FFFFFF; overflow: hidden;">
+        <div class="table-responsive">
+            <table class="clean-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 1px solid #E5E7EB; background: #FAFAFA;">
+                        <th class="col-idx" style="width: 50px; text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280;">#</th>
+                        <th style="text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280; width: 38%;">Applicant</th>
+                        <th style="text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280; width: 26%;">Registered on</th>
+                        <th style="text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280; width: 20%;">Status</th>
+                        <th style="width: 60px; text-align: center; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if active_tab == 'pending' %}
                         {% for resident in pending_residents %}
-                        <tr>
-                            <td class="col-idx">{{ forloop.counter }}</td>
-                            <td>
-                                <div class="cell-title">{{ resident.get_full_name|default:resident.username }}</div>
-                                <div class="cell-subtext">@{{ resident.username }}{% if resident.email %} &bull; {{ resident.email }}{% endif %}</div>
-                            </td>
-                            <td>
-                                <div style="font-weight: 600; color: #0F172A; font-size: 0.8125rem;">
-                                    {{ resident.get_purok_display|default:resident.address|default:"Unassigned" }}
+                        <tr style="border-bottom: 1px solid #F3F4F6;">
+                            <td class="col-idx" style="padding: 0.65rem 0.85rem; font-size: 0.875rem; color: #111827;">{{ forloop.counter }}</td>
+                            <td style="padding: 0.65rem 0.85rem;">
+                                <div class="cell-title" style="font-weight: 600; font-size: 0.875rem; color: #111827;">{{ resident.get_full_name|default:resident.username }}</div>
+                                <div class="cell-subtext" style="font-size: 0.75rem; color: #6B7280;">@{{ resident.username }}{% if resident.email %} &bull; {{ resident.email }}{% endif %}</div>
+                                {% if resident.possible_existing_records %}
+                                <div style="margin-top: 4px; padding: 2px 6px; background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 4px; font-size: 0.75rem; color: #92400E; display: inline-flex; align-items: center; gap: 4px;">
+                                    {% icon 'triangle-alert' %}
+                                    <span>Existing record found: <strong>{{ resident.possible_existing_records.0.get_full_name }}</strong></span>
                                 </div>
-                            </td>
-                            <td>
-                                <span class="status-text-pill status-builtin">
-                                    <i class="fa-solid fa-clock"></i> Pending
-                                </span>
-                            </td>
-                            <td style="color: #334155; font-size: 0.8125rem;">
-                                {{ resident.date_joined|date:"Y-m-d" }}
-                            </td>
-                            <td style="text-align: center; position: relative;">
-                                <div class="action-dropdown-container">
-                                    <button type="button" class="btn-action-circle" onclick="toggleActionMenu(event, this)" title="Resident Options">
-                                        <i class="fa-solid fa-ellipsis-vertical"></i>
-                                    </button>
-                                    <div class="action-dropdown-menu">
-                                        <button type="button" class="action-menu-item open-resident-modal-btn" 
-                                            data-id="{{ resident.id }}"
-                                            data-name="{{ resident.get_full_name|default:resident.username }}"
-                                            data-username="{{ resident.username }}"
-                                            data-email="{{ resident.email|default:'N/A' }}"
-                                            data-phone="{{ resident.phone_number|default:'N/A' }}"
-                                            data-address="{{ resident.street_address|default:resident.address|default:'N/A' }}"
-                                            data-purok="{{ resident.get_purok_display|default:'Unassigned' }}"
-                                            data-date="{{ resident.date_joined|date:'M d, Y' }}"
-                                            data-idproof="{% if resident.id_proof %}{{ resident.id_proof.url }}{% endif %}"
-                                            data-status="pending">
-                                            <i class="fa-regular fa-eye" style="color: #2563EB; width: 16px;"></i> View
-                                        </button>
-                                        <button type="button" class="action-menu-item" onclick="openEditResidentModal({id: '{{ resident.id }}', first_name: '{{ resident.first_name|escapejs }}', last_name: '{{ resident.last_name|escapejs }}', username: '{{ resident.username|escapejs }}', email: '{{ resident.email|escapejs }}', phone: '{{ resident.phone_number|escapejs }}', address: '{{ resident.street_address|default:resident.address|escapejs }}', purok: '{{ resident.get_purok_display|escapejs }}', civil: '{{ resident.civil_status|escapejs }}'})">
-                                            <i class="fa-regular fa-pen-to-square" style="color: #D97706; width: 16px;"></i> Edit
-                                        </button>
-                                        <button type="button" class="action-menu-item text-danger" onclick="openDeleteResidentModal('{{ resident.id }}', '{{ resident.get_full_name|default:resident.username|escapejs }}')">
-                                            <i class="fa-regular fa-trash-can" style="color: #DC2626; width: 16px;"></i> Delete
-                                        </button>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Table Footer Bar -->
-            <div class="table-footer-bar">
-                <div class="footer-count">
-                    Showing <strong>1</strong> to <strong>{{ pending_residents|length }}</strong> of <strong>{{ pending_count }}</strong> resident applications
-                </div>
-                <div class="pagination-controls">
-                    <span class="pagination-page-label">Page <strong>1</strong> of <strong>1</strong></span>
-                    <a href="javascript:void(0)" class="btn-page-pill disabled">&lt; Previous</a>
-                    <a href="javascript:void(0)" class="btn-page-pill disabled">Next &gt;</a>
-                </div>
-            </div>
-            {% else %}
-            <div style="text-align: center; padding: 3rem 1.5rem; color: #64748B;">
-                <h3 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.25rem;">NO PENDING REGISTRATIONS</h3>
-                <p style="font-size: 0.8125rem;">All resident applications have been evaluated.</p>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- TAB 2: APPROVED RESIDENTS (RBI DIRECTORY) -->
-    {% elif active_tab == 'approved' %}
-    <div class="data-table-card">
-        <div style="background: #FFFFFF; padding: 1rem 1.25rem; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-weight: 700; font-size: 0.8125rem; letter-spacing: 0.05em; text-transform: uppercase; color: #0F172A;">
-                VERIFIED RESIDENTS DIRECTORY (RBI)
-            </span>
-            <span class="status-text-pill status-available" style="font-size: 0.75rem;">
-                <i class="fa-solid fa-circle-check"></i> {{ approved_count }} Verified
-            </span>
-        </div>
-        <div>
-            {% if approved_page %}
-            <div class="table-responsive">
-                <table class="clean-table">
-                    <thead>
-                        <tr>
-                            <th class="col-idx">#</th>
-                            <th style="width: 36%;">RESIDENT NAME</th>
-                            <th style="width: 22%;">PUROK</th>
-                            <th style="width: 14%;">STATUS</th>
-                            <th style="width: 18%;">REGISTERED ON</th>
-                            <th style="width: 10%; text-align: center;">ACTION</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for resident in approved_page %}
-                        <tr>
-                            <td class="col-idx">{{ forloop.counter }}</td>
-                            <td>
-                                <div class="cell-title">{{ resident.get_full_name|default:resident.username }}</div>
-                                <div class="cell-subtext">@{{ resident.username }}{% if resident.email %} &bull; {{ resident.email }}{% endif %}</div>
-                            </td>
-                            <td>
-                                <div style="font-weight: 600; color: #0F172A; font-size: 0.8125rem;">
-                                    {{ resident.get_purok_display|default:"Unassigned" }}
-                                </div>
-                                {% if resident.household %}
-                                <div class="cell-subtext">HH #{{ resident.household.household_number }}</div>
                                 {% endif %}
                             </td>
-                            <td>
-                                <span class="status-text-pill status-available">
-                                    <i class="fa-solid fa-circle-check"></i> Approved
+                            <td style="padding: 0.65rem 0.85rem; color: #111827; font-size: 0.875rem;">
+                                {{ resident.date_joined|date:"m/d/y" }}
+                            </td>
+                            <td style="padding: 0.65rem 0.85rem;">
+                                <span class="badge" style="background: #FEF3C7; color: #92400E; font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px; font-weight: 500; text-transform: lowercase;">
+                                    pending
                                 </span>
                             </td>
-                            <td style="color: #334155; font-size: 0.8125rem;">
-                                {{ resident.date_joined|date:"Y-m-d" }}
-                            </td>
-                            <td style="text-align: center; position: relative;">
+                            <td style="text-align: center; padding: 0.65rem 0.85rem; position: relative;">
                                 <div class="action-dropdown-container">
-                                    <button type="button" class="btn-action-circle" onclick="toggleActionMenu(event, this)" title="Resident Options">
-                                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                                    <button type="button" class="btn-action-circle" data-row-action="toggle-menu" title="Resident Options" aria-label="Resident Options" style="border: none; background: transparent; cursor: pointer; color: #6B7280; font-size: 1rem; padding: 4px;">
+                                        {% icon 'ellipsis-vertical' %}
                                     </button>
                                     <div class="action-dropdown-menu">
                                         <button type="button" class="action-menu-item open-resident-modal-btn" 
@@ -337,107 +179,56 @@
                                             data-name="{{ resident.get_full_name|default:resident.username }}"
                                             data-username="{{ resident.username }}"
                                             data-email="{{ resident.email|default:'N/A' }}"
-                                            data-phone="{{ resident.phone_number|default:'N/A' }}"
-                                            data-address="{{ resident.street_address|default:resident.address|default:'N/A' }}"
-                                            data-purok="{{ resident.get_purok_display|default:'Unassigned' }}"
+                                            data-phone="{{ resident.resident_profile.contact_no|default:resident.phone_number|default:'N/A' }}"
+                                            data-address="{{ resident.resident_profile.address|default:resident.street_address|default:resident.address|default:'N/A' }}"
+                                            data-purok="{{ resident.resident_profile.purok.name|default:resident.get_purok_display|default:'Unassigned' }}"
+                                            data-birthdate="{% if resident.resident_profile and resident.resident_profile.birthdate %}{{ resident.resident_profile.birthdate|date:'M d, Y' }}{% elif resident.date_of_birth %}{{ resident.date_of_birth|date:'M d, Y' }}{% else %}N/A{% endif %}"
+                                            data-age="{% if resident.resident_profile and resident.resident_profile.age %}{{ resident.resident_profile.age }} yrs old{% else %}N/A{% endif %}"
                                             data-date="{{ resident.date_joined|date:'M d, Y' }}"
-                                            data-idproof="{% if resident.id_proof %}{{ resident.id_proof.url }}{% endif %}"
-                                            data-status="approved">
-                                            <i class="fa-regular fa-eye" style="color: #2563EB; width: 16px;"></i> View
+                                            data-idproof="{% if resident.resident_profile and resident.resident_profile.id_photo %}{{ resident.resident_profile.id_photo_protected_url }}{% elif resident.id_proof %}{{ resident.id_proof.url }}{% endif %}"
+                                            data-match-id="{% if resident.possible_existing_records %}{{ resident.possible_existing_records.0.id }}{% endif %}"
+                                            data-match-name="{% if resident.possible_existing_records %}{{ resident.possible_existing_records.0.get_full_name|escapejs }}{% endif %}"
+                                            data-match-dob="{% if resident.possible_existing_records %}{{ resident.possible_existing_records.0.birthdate|date:'M d, Y' }}{% endif %}"
+                                            data-status="pending">
+                                            {% icon 'eye' cls='icon-primary' %} View
                                         </button>
-                                        <button type="button" class="action-menu-item" onclick="openEditResidentModal({id: '{{ resident.id }}', first_name: '{{ resident.first_name|escapejs }}', last_name: '{{ resident.last_name|escapejs }}', username: '{{ resident.username|escapejs }}', email: '{{ resident.email|escapejs }}', phone: '{{ resident.phone_number|escapejs }}', address: '{{ resident.street_address|default:resident.address|escapejs }}', purok: '{{ resident.get_purok_display|escapejs }}', civil: '{{ resident.civil_status|escapejs }}'})">
-                                            <i class="fa-regular fa-pen-to-square" style="color: #D97706; width: 16px;"></i> Edit
+                                        <button type="button" class="action-menu-item" data-row-action="edit-resident" data-id="{{ resident.id }}" data-first-name="{{ resident.first_name }}" data-last-name="{{ resident.last_name }}" data-username="{{ resident.username }}" data-email="{{ resident.email }}" data-phone="{{ resident.phone_number }}" data-address="{{ resident.street_address|default:resident.address }}" data-purok="{{ resident.get_purok_display }}" data-civil="{{ resident.resident_profile.civil_status }}" data-gender="{{ resident.resident_profile.gender }}" data-solo="{{ resident.resident_profile.is_solo_parent|yesno:'true,false' }}" data-pwd="{{ resident.resident_profile.is_pwd|yesno:'true,false' }}" data-fourps="{{ resident.resident_profile.is_4ps|yesno:'true,false' }}">
+                                            {% icon 'square-pen' cls='icon-muted' %} Edit
                                         </button>
-                                        <button type="button" class="action-menu-item text-danger" onclick="openDeleteResidentModal('{{ resident.id }}', '{{ resident.get_full_name|default:resident.username|escapejs }}')">
-                                            <i class="fa-regular fa-trash-can" style="color: #DC2626; width: 16px;"></i> Delete
+                                        <button type="button" class="action-menu-item text-danger" data-row-action="delete-resident" data-id="{{ resident.id }}" data-name="{{ resident.get_full_name|default:resident.username }}">
+                                            {% icon 'trash-2' cls='icon-danger' %} Delete
                                         </button>
                                     </div>
                                 </div>
                             </td>
                         </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Table Footer Bar with Live Pagination -->
-            <div class="table-footer-bar">
-                <div class="footer-count">
-                    Showing <strong>1</strong> to <strong>{{ approved_page|length }}</strong> of <strong>{{ approved_count }}</strong> verified residents
-                </div>
-                <div class="pagination-controls">
-                    <span class="pagination-page-label">Page <strong>{{ approved_page.number }}</strong> of <strong>{{ approved_page.paginator.num_pages }}</strong></span>
-                    {% if approved_page.has_previous %}
-                    <a href="?tab=approved&page={{ approved_page.previous_page_number }}&q={{ search_query }}&purok={{ purok_filter }}" class="btn-page-pill">&lt; Previous</a>
-                    {% else %}
-                    <a href="javascript:void(0)" class="btn-page-pill disabled">&lt; Previous</a>
-                    {% endif %}
-                    {% if approved_page.has_next %}
-                    <a href="?tab=approved&page={{ approved_page.next_page_number }}&q={{ search_query }}&purok={{ purok_filter }}" class="btn-page-pill">Next &gt;</a>
-                    {% else %}
-                    <a href="javascript:void(0)" class="btn-page-pill disabled">Next &gt;</a>
-                    {% endif %}
-                </div>
-            </div>
-            {% else %}
-            <div style="text-align: center; padding: 3rem 1.5rem; color: #64748B;">
-                <h3 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.25rem;">NO VERIFIED RESIDENTS FOUND</h3>
-                <p style="font-size: 0.8125rem;">Adjust search filters or select Pending to approve applications.</p>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- TAB 3: REJECTED RESIDENTS -->
-    {% elif active_tab == 'rejected' %}
-    <div class="data-table-card">
-        <div style="background: #FFFFFF; padding: 1rem 1.25rem; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-weight: 700; font-size: 0.8125rem; letter-spacing: 0.05em; text-transform: uppercase; color: #0F172A;">
-                DECLINED REGISTRATION ATTEMPTS & REJECTION AUDIT
-            </span>
-            <span class="status-text-pill status-rejected" style="font-size: 0.75rem;">
-                <i class="fa-solid fa-circle-xmark"></i> {{ rejected_count }} Declined
-            </span>
-        </div>
-        <div>
-            {% if rejected_residents %}
-            <div class="table-responsive">
-                <table class="clean-table">
-                    <thead>
+                        {% empty %}
                         <tr>
-                            <th class="col-idx">#</th>
-                            <th style="width: 36%;">APPLICANT NAME</th>
-                            <th style="width: 22%;">PUROK</th>
-                            <th style="width: 14%;">STATUS</th>
-                            <th style="width: 18%;">REGISTERED ON</th>
-                            <th style="width: 10%; text-align: center;">ACTION</th>
+                            <td colspan="5" style="text-align: center; padding: 2.5rem 1rem; color: #6B7280; font-size: 0.875rem;">
+                                No pending resident applications.
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        {% for resident in rejected_residents %}
-                        <tr>
-                            <td class="col-idx">{{ forloop.counter }}</td>
-                            <td>
-                                <div class="cell-title">{{ resident.get_full_name|default:resident.username }}</div>
-                                <div class="cell-subtext">@{{ resident.username }}{% if resident.email %} &bull; {{ resident.email }}{% endif %}</div>
+                        {% endfor %}
+                    {% elif active_tab == 'records' or active_tab == 'approved' %}
+                        {% for resident in approved_page %}
+                        <tr style="border-bottom: 1px solid #F3F4F6;">
+                            <td class="col-idx" style="padding: 0.65rem 0.85rem; font-size: 0.875rem; color: #111827;">{{ forloop.counter }}</td>
+                            <td style="padding: 0.65rem 0.85rem;">
+                                <div class="cell-title" style="font-weight: 600; font-size: 0.875rem; color: #111827;">{{ resident.get_full_name|default:resident.username }}</div>
+                                <div class="cell-subtext" style="font-size: 0.75rem; color: #6B7280;">@{{ resident.username }}{% if resident.email %} &bull; {{ resident.email }}{% endif %}</div>
                             </td>
-                            <td>
-                                <div style="font-weight: 600; color: #0F172A; font-size: 0.8125rem;">
-                                    {{ resident.get_purok_display|default:resident.address|default:"Unassigned" }}
-                                </div>
+                            <td style="padding: 0.65rem 0.85rem; color: #111827; font-size: 0.875rem;">
+                                {{ resident.date_joined|date:"m/d/y" }}
                             </td>
-                            <td>
-                                <span class="status-text-pill status-rejected">
-                                    <i class="fa-solid fa-circle-xmark"></i> Rejected
+                            <td style="padding: 0.65rem 0.85rem;">
+                                <span class="badge" style="background: #D1FAE5; color: #065F46; font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px; font-weight: 500; text-transform: lowercase;">
+                                    approved
                                 </span>
                             </td>
-                            <td style="color: #334155; font-size: 0.8125rem;">
-                                {{ resident.date_joined|date:"Y-m-d" }}
-                            </td>
-                            <td style="text-align: center; position: relative;">
+                            <td style="text-align: center; padding: 0.65rem 0.85rem; position: relative;">
                                 <div class="action-dropdown-container">
-                                    <button type="button" class="btn-action-circle" onclick="toggleActionMenu(event, this)" title="Resident Options">
-                                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                                    <button type="button" class="btn-action-circle" data-row-action="toggle-menu" title="Resident Options" aria-label="Resident Options" style="border: none; background: transparent; cursor: pointer; color: #6B7280; font-size: 1rem; padding: 4px;">
+                                        {% icon 'ellipsis-vertical' %}
                                     </button>
                                     <div class="action-dropdown-menu">
                                         <button type="button" class="action-menu-item open-resident-modal-btn" 
@@ -445,161 +236,293 @@
                                             data-name="{{ resident.get_full_name|default:resident.username }}"
                                             data-username="{{ resident.username }}"
                                             data-email="{{ resident.email|default:'N/A' }}"
-                                            data-phone="{{ resident.phone_number|default:'N/A' }}"
-                                            data-address="{{ resident.street_address|default:resident.address|default:'N/A' }}"
-                                            data-purok="{{ resident.get_purok_display|default:'Unassigned' }}"
+                                            data-phone="{{ resident.resident_profile.contact_no|default:resident.phone_number|default:'N/A' }}"
+                                            data-address="{{ resident.resident_profile.address|default:resident.street_address|default:resident.address|default:'N/A' }}"
+                                            data-purok="{{ resident.resident_profile.purok.name|default:resident.get_purok_display|default:'Unassigned' }}"
+                                            data-birthdate="{% if resident.resident_profile and resident.resident_profile.birthdate %}{{ resident.resident_profile.birthdate|date:'M d, Y' }}{% elif resident.date_of_birth %}{{ resident.date_of_birth|date:'M d, Y' }}{% else %}N/A{% endif %}"
+                                            data-age="{% if resident.resident_profile and resident.resident_profile.age %}{{ resident.resident_profile.age }} yrs old{% else %}N/A{% endif %}"
                                             data-date="{{ resident.date_joined|date:'M d, Y' }}"
-                                            data-idproof="{% if resident.id_proof %}{{ resident.id_proof.url }}{% endif %}"
+                                            data-idproof="{% if resident.resident_profile and resident.resident_profile.id_photo %}{{ resident.resident_profile.id_photo_protected_url }}{% elif resident.id_proof %}{{ resident.id_proof.url }}{% endif %}"
+                                            data-status="approved">
+                                            {% icon 'eye' cls='icon-primary' %} View
+                                        </button>
+                                        <button type="button" class="action-menu-item" data-row-action="edit-resident" data-id="{{ resident.id }}" data-first-name="{{ resident.first_name }}" data-last-name="{{ resident.last_name }}" data-username="{{ resident.username }}" data-email="{{ resident.email }}" data-phone="{{ resident.phone_number }}" data-address="{{ resident.street_address|default:resident.address }}" data-purok="{{ resident.get_purok_display }}" data-civil="{{ resident.resident_profile.civil_status }}" data-gender="{{ resident.resident_profile.gender }}" data-solo="{{ resident.resident_profile.is_solo_parent|yesno:'true,false' }}" data-pwd="{{ resident.resident_profile.is_pwd|yesno:'true,false' }}" data-fourps="{{ resident.resident_profile.is_4ps|yesno:'true,false' }}">
+                                            {% icon 'square-pen' cls='icon-muted' %} Edit
+                                        </button>
+                                        <button type="button" class="action-menu-item text-danger" data-row-action="delete-resident" data-id="{{ resident.id }}" data-name="{{ resident.get_full_name|default:resident.username }}">
+                                            {% icon 'trash-2' cls='icon-danger' %} Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 2.5rem 1rem; color: #6B7280; font-size: 0.875rem;">
+                                No verified residents found.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% elif active_tab == 'rejected' %}
+                        {% for resident in rejected_residents %}
+                        <tr style="border-bottom: 1px solid #F3F4F6;">
+                            <td class="col-idx" style="padding: 0.65rem 0.85rem; font-size: 0.875rem; color: #111827;">{{ forloop.counter }}</td>
+                            <td style="padding: 0.65rem 0.85rem;">
+                                <div class="cell-title" style="font-weight: 600; font-size: 0.875rem; color: #111827;">{{ resident.get_full_name|default:resident.username }}</div>
+                                <div class="cell-subtext" style="font-size: 0.75rem; color: #6B7280;">@{{ resident.username }}{% if resident.email %} &bull; {{ resident.email }}{% endif %}</div>
+                            </td>
+                            <td style="padding: 0.65rem 0.85rem; color: #111827; font-size: 0.875rem;">
+                                {{ resident.date_joined|date:"m/d/y" }}
+                            </td>
+                            <td style="padding: 0.65rem 0.85rem;">
+                                <span class="badge" style="background: #FEE2E2; color: #991B1B; font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px; font-weight: 500; text-transform: lowercase;">
+                                    declined
+                                </span>
+                            </td>
+                            <td style="text-align: center; padding: 0.65rem 0.85rem; position: relative;">
+                                <div class="action-dropdown-container">
+                                    <button type="button" class="btn-action-circle" data-row-action="toggle-menu" title="Resident Options" aria-label="Resident Options" style="border: none; background: transparent; cursor: pointer; color: #6B7280; font-size: 1rem; padding: 4px;">
+                                        {% icon 'ellipsis-vertical' %}
+                                    </button>
+                                    <div class="action-dropdown-menu">
+                                        <button type="button" class="action-menu-item open-resident-modal-btn" 
+                                            data-id="{{ resident.id }}"
+                                            data-name="{{ resident.get_full_name|default:resident.username }}"
+                                            data-username="{{ resident.username }}"
+                                            data-email="{{ resident.email|default:'N/A' }}"
+                                            data-phone="{{ resident.resident_profile.contact_no|default:resident.phone_number|default:'N/A' }}"
+                                            data-address="{{ resident.resident_profile.address|default:resident.street_address|default:resident.address|default:'N/A' }}"
+                                            data-purok="{{ resident.resident_profile.purok.name|default:resident.get_purok_display|default:'Unassigned' }}"
+                                            data-birthdate="{% if resident.resident_profile and resident.resident_profile.birthdate %}{{ resident.resident_profile.birthdate|date:'M d, Y' }}{% elif resident.date_of_birth %}{{ resident.date_of_birth|date:'M d, Y' }}{% else %}N/A{% endif %}"
+                                            data-age="{% if resident.resident_profile and resident.resident_profile.age %}{{ resident.resident_profile.age }} yrs old{% else %}N/A{% endif %}"
+                                            data-date="{{ resident.date_joined|date:'M d, Y' }}"
+                                            data-idproof="{% if resident.resident_profile and resident.resident_profile.id_photo %}{{ resident.resident_profile.id_photo_protected_url }}{% elif resident.id_proof %}{{ resident.id_proof.url }}{% endif %}"
                                             data-reason="{{ resident.rejection_reason|default:'' }}"
                                             data-status="rejected">
-                                            <i class="fa-regular fa-eye" style="color: #2563EB; width: 16px;"></i> View
+                                            {% icon 'eye' cls='icon-primary' %} View
                                         </button>
-                                        <button type="button" class="action-menu-item" onclick="openEditResidentModal({id: '{{ resident.id }}', first_name: '{{ resident.first_name|escapejs }}', last_name: '{{ resident.last_name|escapejs }}', username: '{{ resident.username|escapejs }}', email: '{{ resident.email|escapejs }}', phone: '{{ resident.phone_number|escapejs }}', address: '{{ resident.street_address|default:resident.address|escapejs }}', purok: '{{ resident.get_purok_display|escapejs }}', civil: '{{ resident.civil_status|escapejs }}'})">
-                                            <i class="fa-regular fa-pen-to-square" style="color: #D97706; width: 16px;"></i> Edit
+                                        <button type="button" class="action-menu-item" data-row-action="edit-resident" data-id="{{ resident.id }}" data-first-name="{{ resident.first_name }}" data-last-name="{{ resident.last_name }}" data-username="{{ resident.username }}" data-email="{{ resident.email }}" data-phone="{{ resident.phone_number }}" data-address="{{ resident.street_address|default:resident.address }}" data-purok="{{ resident.get_purok_display }}" data-civil="{{ resident.resident_profile.civil_status }}" data-gender="{{ resident.resident_profile.gender }}" data-solo="{{ resident.resident_profile.is_solo_parent|yesno:'true,false' }}" data-pwd="{{ resident.resident_profile.is_pwd|yesno:'true,false' }}" data-fourps="{{ resident.resident_profile.is_4ps|yesno:'true,false' }}">
+                                            {% icon 'square-pen' cls='icon-muted' %} Edit
                                         </button>
-                                        <button type="button" class="action-menu-item text-danger" onclick="openDeleteResidentModal('{{ resident.id }}', '{{ resident.get_full_name|default:resident.username|escapejs }}')">
-                                            <i class="fa-regular fa-trash-can" style="color: #DC2626; width: 16px;"></i> Delete
+                                        <button type="button" class="action-menu-item text-danger" data-row-action="delete-resident" data-id="{{ resident.id }}" data-name="{{ resident.get_full_name|default:resident.username }}">
+                                            {% icon 'trash-2' cls='icon-danger' %} Delete
                                         </button>
                                     </div>
                                 </div>
                             </td>
                         </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 2.5rem 1rem; color: #6B7280; font-size: 0.875rem;">
+                                No declined applications.
+                            </td>
+                        </tr>
                         {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
 
-            <!-- Table Footer Bar -->
-            <div class="table-footer-bar">
-                <div class="footer-count">
-                    Showing <strong>1</strong> to <strong>{{ rejected_residents|length }}</strong> of <strong>{{ rejected_count }}</strong> declined registrations
+        <!-- Annotation / Guidance from Reference Mockup -->
+        <div style="text-align: center; color: #111827; font-size: 0.8125rem; font-weight: 500; padding: 2.5rem 1rem; line-height: 1.5; border-top: 1px solid #F3F4F6;">
+            this would be a every residents informations.<br>
+            profile information would be this to register account for residents
+        </div>
+
+        {% if active_tab == 'records' or active_tab == 'approved' %}
+            {% if approved_page.has_other_pages %}
+            <div class="table-footer-bar" style="padding: 0.75rem 1rem; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E5E7EB; background: #FAFAFA;">
+                <div class="footer-count" style="font-size: 0.8125rem; color: #6B7280;">
+                    Showing {{ approved_page.start_index }} to {{ approved_page.end_index }} of {{ approved_count }} residents
                 </div>
-                <div class="pagination-controls">
-                    <span class="pagination-page-label">Page <strong>1</strong> of <strong>1</strong></span>
-                    <a href="javascript:void(0)" class="btn-page-pill disabled">&lt; Previous</a>
-                    <a href="javascript:void(0)" class="btn-page-pill disabled">Next &gt;</a>
+                <div class="pagination-controls" style="display: flex; gap: 0.5rem; align-items: center;">
+                    {% if approved_page.has_previous %}
+                    <a href="?tab=records&page={{ approved_page.previous_page_number }}&q={{ search_query }}&purok={{ purok_filter }}" class="btn-page-pill" style="font-size: 0.8125rem; text-decoration: none; padding: 0.25rem 0.65rem; border: 1px solid #D1D5DB; border-radius: 4px; color: #111827;">&lt; Previous</a>
+                    {% endif %}
+                    <span style="font-size: 0.8125rem; color: #6B7280;">Page {{ approved_page.number }} of {{ approved_page.paginator.num_pages }}</span>
+                    {% if approved_page.has_next %}
+                    <a href="?tab=records&page={{ approved_page.next_page_number }}&q={{ search_query }}&purok={{ purok_filter }}" class="btn-page-pill" style="font-size: 0.8125rem; text-decoration: none; padding: 0.25rem 0.65rem; border: 1px solid #D1D5DB; border-radius: 4px; color: #111827;">Next &gt;</a>
+                    {% endif %}
                 </div>
-            </div>
-            {% else %}
-            <div style="text-align: center; padding: 3rem 1.5rem; color: #64748B;">
-                <h3 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.25rem;">NO DECLINED REGISTRATIONS</h3>
-                <p style="font-size: 0.8125rem;">No rejected resident applications are currently logged.</p>
             </div>
             {% endif %}
-        </div>
+        {% endif %}
     </div>
-    {% endif %}
-    {% endif %}
 
 </div>
 
 <!-- Interactive Resident Detail & Verification Modal (Triggered by Eye Icon) -->
-<div id="residentDetailModal" class="modal-backdrop-custom" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); z-index: 2000; align-items: center; justify-content: center; padding: 1rem;">
-    <div style="background: #FFFFFF; border-radius: 8px; max-width: 620px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);">
+<!-- Interactive Resident Detail & Verification Modal (Triggered by Eye Icon) -->
+<div id="residentDetailModal" class="modal-backdrop-custom" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.65); z-index: 2000; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: #FFFFFF; border-radius: 12px; max-width: 860px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: none;">
         <!-- Modal Header -->
-        <div style="padding: 1rem 1.25rem; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center;">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <i class="fa-solid fa-id-card" style="color: #2563EB; font-size: 1.25rem;"></i>
-                <h3 id="m-applicant-title" style="margin: 0; font-size: 1.125rem; font-weight: 700; color: #0F172A;">Applicant Details</h3>
+        <div style="padding: 1.15rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: #F3F4F6; color: #1E3A8A; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                    {% icon 'contact' %}
+                </div>
+                <h3 id="m-applicant-title" style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #111827;">Verify Resident Applicant</h3>
             </div>
-            <button type="button" onclick="closeResidentModal()" style="border: none; background: none; font-size: 1.25rem; color: #64748B; cursor: pointer;">
-                <i class="fa-solid fa-xmark"></i>
+            <button type="button" data-res-action="close-detail" style="border: none; background: none; font-size: 1.25rem; color: #6B7280; cursor: pointer;" aria-label="Close">
+                {% icon 'x' %}
             </button>
         </div>
 
-        <!-- Modal Body -->
-        <div style="padding: 1.25rem;">
-            <!-- Applicant Overview -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem; background: #F8FAFC; padding: 1rem; border-radius: 6px; border: 1px solid #E2E8F0;">
-                <div>
-                    <span style="font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase;">Full Name</span>
-                    <div id="m-name" style="font-weight: 700; color: #0F172A; font-size: 0.95rem;">-</div>
+        <!-- Modal Body: Side-by-Side Design -->
+        <div style="padding: 1.5rem;">
+            <div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 1.25rem; align-items: stretch; margin-bottom: 1rem;" class="resident-side-by-side-wrap">
+                <!-- Left Side: Applicant Overview -->
+                <div style="background: #F9FAFB; padding: 1.25rem; border-radius: 10px; border: 1px solid #E5E7EB; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;">
+                        <div>
+                            <span style="font-size: 0.875rem; font-weight: 800; color: #6B7280; text-transform: uppercase; letter-spacing: 0.04em;">Full Name</span>
+                            <div id="m-name" style="font-weight: 800; color: #111827; font-size: 1.05rem; margin-top: 0.15rem;">-</div>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.875rem; font-weight: 800; color: #6B7280; text-transform: uppercase; letter-spacing: 0.04em;">Username</span>
+                            <div id="m-username" style="font-weight: 700; color: #1E3A8A; font-size: 0.95rem; margin-top: 0.15rem;">-</div>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.875rem; font-weight: 800; color: #6B7280; text-transform: uppercase; letter-spacing: 0.04em;">Contact No.</span>
+                            <div id="m-phone" style="color: #111827; font-weight: 600; margin-top: 0.15rem;">-</div>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.875rem; font-weight: 800; color: #6B7280; text-transform: uppercase; letter-spacing: 0.04em;">Email</span>
+                            <div id="m-email" style="color: #111827; font-weight: 600; margin-top: 0.15rem; word-break: break-all;">-</div>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.875rem; font-weight: 800; color: #6B7280; text-transform: uppercase; letter-spacing: 0.04em;">Birthdate</span>
+                            <div id="m-birthdate" style="color: #111827; font-weight: 600; margin-top: 0.15rem;">-</div>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.875rem; font-weight: 800; color: #6B7280; text-transform: uppercase; letter-spacing: 0.04em;">Calculated Age</span>
+                            <div id="m-age" style="font-weight: 700; color: #1E3A8A; font-size: 0.95rem; margin-top: 0.15rem;">-</div>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.875rem; font-weight: 800; color: #6B7280; text-transform: uppercase; letter-spacing: 0.04em;">Purok Jurisdiction</span>
+                            <div id="m-purok" style="font-weight: 700; color: #111827; margin-top: 0.15rem;">-</div>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.875rem; font-weight: 800; color: #6B7280; text-transform: uppercase; letter-spacing: 0.04em;">Registered On</span>
+                            <div id="m-date" style="color: #111827; font-weight: 600; margin-top: 0.15rem;">-</div>
+                        </div>
+                        <div style="grid-column: span 2;">
+                            <span style="font-size: 0.875rem; font-weight: 800; color: #6B7280; text-transform: uppercase; letter-spacing: 0.04em;">Residential Address</span>
+                            <div id="m-address" style="color: #111827; font-weight: 600; margin-top: 0.15rem; line-height: 1.4;">-</div>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <span style="font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase;">Username</span>
-                    <div id="m-username" style="font-weight: 600; color: #2563EB;">-</div>
-                </div>
-                <div>
-                    <span style="font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase;">Contact No.</span>
-                    <div id="m-phone" style="color: #0F172A;">-</div>
-                </div>
-                <div>
-                    <span style="font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase;">Email</span>
-                    <div id="m-email" style="color: #0F172A;">-</div>
-                </div>
-                <div>
-                    <span style="font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase;">Purok Jurisdiction</span>
-                    <div id="m-purok" style="font-weight: 600; color: #0F172A;">-</div>
-                </div>
-                <div>
-                    <span style="font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase;">Registered On</span>
-                    <div id="m-date" style="color: #0F172A;">-</div>
-                </div>
-                <div style="grid-column: span 2;">
-                    <span style="font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase;">Residential Address</span>
-                    <div id="m-address" style="color: #0F172A;">-</div>
+
+                <!-- Right Side: Proof of Identity / Photo uploaded by resident -->
+                <div style="display: flex; flex-direction: column;">
+                    <span style="display: block; font-size: 0.875rem; font-weight: 800; color: #4B5563; text-transform: uppercase; margin-bottom: 0.45rem; letter-spacing: 0.04em;">
+                        {% icon 'image' cls='icon-primary' %} Proof of Identity / Government ID
+                    </span>
+                    <div id="m-idproof-container" style="flex: 1; min-height: 220px; text-align: center; background: #F3F4F6; border: 1.5px dashed #D1D5DB; border-radius: 8px; padding: 0.85rem; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                        <!-- Dynamically populated -->
+                    </div>
                 </div>
             </div>
 
-            <!-- Proof of Identity -->
-            <div style="margin-bottom: 1.25rem;">
-                <span style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.5rem;">Proof of Identity / Government ID</span>
-                <div id="m-idproof-container" style="text-align: center; background: #F1F5F9; border: 1px dashed #CBD5E1; border-radius: 6px; padding: 1rem; min-height: 120px; display: flex; align-items: center; justify-content: center;">
-                    <!-- Dynamically populated -->
+            <!-- Rejection reason if present (for declined state) -->
+            <div id="m-rejection-box" style="display: none; margin-bottom: 1rem; padding: 0.75rem 1rem; background: #FFFFFF; border: 1px solid #DC2626; border-radius: 6px;">
+                <span style="font-size: 0.875rem; font-weight: 700; color: #DC2626; text-transform: uppercase;">Logged Rejection Reason:</span>
+                <p id="m-rejection-text" style="color: #DC2626; font-size: 0.875rem; margin: 0.25rem 0 0 0;"></p>
+            </div>
+
+            <!-- Actions Container: PENDING RESIDENTS -->
+            <div id="m-pending-actions" style="display: none; border-top: 1px solid #E5E7EB; padding-top: 1rem; margin-top: 0.5rem;">
+                <div id="m-possible-match-banner" style="display: none; margin-bottom: 1rem; padding: 0.75rem 1rem; background: #F3F4F6; border: 1.5px solid #374151; border-radius: 8px;">
+                    <div style="font-size: 0.875rem; font-weight: 700; color: #374151; display: flex; align-items: center; gap: 0.5rem;">
+                        {% icon 'triangle-alert' %}
+                        <span>Possible Existing Record Found in Barangay Registry</span>
+                    </div>
+                    <p style="font-size: 0.875rem; color: #374151; margin: 0.35rem 0 0.5rem 0;">
+                        An existing inhabitant record with the same name and birthdate was found: <strong id="m-match-details">-</strong>.
+                        Please inspect the uploaded ID photo above to verify if they are the same person before confirming link.
+                    </p>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 700; color: #374151; cursor: pointer;">
+                        <input type="checkbox" id="m-confirm-link-checkbox">
+                        <span>Confirm and Link to this existing record on approval</span>
+                    </label>
                 </div>
-            </div>
 
-            <!-- Rejection reason if present -->
-            <div id="m-rejection-box" style="display: none; margin-bottom: 1rem; padding: 0.75rem 1rem; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 6px;">
-                <span style="font-size: 0.75rem; font-weight: 700; color: #DC2626; text-transform: uppercase;">Logged Rejection Reason:</span>
-                <p id="m-rejection-text" style="color: #991B1B; font-size: 0.875rem; margin: 0.25rem 0 0 0;"></p>
-            </div>
-
-            <!-- Actions Container -->
-            <div id="m-pending-actions" style="display: none; border-top: 1px solid #E2E8F0; padding-top: 1rem; margin-top: 1rem;">
-                <div style="display: flex; gap: 0.75rem; justify-content: flex-end; flex-wrap: wrap;">
+                <div style="display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center; flex-wrap: wrap;" id="m-primary-action-buttons">
                     <!-- Approve Form -->
                     <form id="m-approve-form" method="post" action="">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-primary" style="font-weight: 700; min-height: 40px; padding: 0.5rem 1.25rem;">
-                            <i class="fa-solid fa-check" style="margin-right: 0.35rem;"></i> Approve Registration
+                        <input type="hidden" name="link_resident_id" id="m-link-resident-input" value="">
+                        <button type="submit" class="btn btn-primary" style="font-weight: 800; min-height: 42px; padding: 0.5rem 1.35rem; display: inline-flex; align-items: center; gap: 0.4rem; background: #1E3A8A;">
+                            {% icon 'check' %} APPROVE REGISTRATION
                         </button>
                     </form>
 
-                    <!-- Reject Form -->
-                    <form id="m-reject-form" method="post" action="" style="display: inline-flex; gap: 0.5rem;" onsubmit="return confirm('Are you sure you want to decline this registration?');">
+                    <!-- Reject Button (Reveals state of rejection input) -->
+                    <button type="button" id="btn-trigger-reject" class="btn btn-danger" data-res-action="toggle-reject" style="font-weight: 800; min-height: 42px; padding: 0.5rem 1.35rem; display: inline-flex; align-items: center; gap: 0.4rem;">
+                        {% icon 'x' %} REJECT
+                    </button>
+                </div>
+
+                <!-- State of Rejection Box: ONLY SHOWN IF BUTTON REJECT WAS CLICKED -->
+                <div id="m-reject-expandable-box" style="display: none; margin-top: 1rem; background: #FFFFFF; border: 1.5px solid #DC2626; border-radius: 8px; padding: 1.15rem;">
+                    <form id="m-reject-form" method="post" action="" data-confirm="Confirm rejection of this resident registration?">
                         {% csrf_token %}
-                        <input type="text" name="rejection_reason" placeholder="State rejection reason..." class="form-control" style="font-size: 0.8125rem; max-width: 200px;" required>
-                        <button type="submit" class="btn btn-danger" style="font-weight: 700; min-height: 40px;">
-                            <i class="fa-solid fa-xmark" style="margin-right: 0.35rem;"></i> Reject
-                        </button>
+                        <label style="display: block; font-size: 0.875rem; font-weight: 800; color: #DC2626; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.04em;">
+                            {% icon 'circle-alert' %} Select or State Rejection Reason <span style="color: #DC2626;">*</span>
+                        </label>
+
+                        <!-- Dropdown of Common Reasons -->
+                        <div style="margin-bottom: 0.75rem;">
+                            <select id="m-rejection-preset-select" class="form-control" style="font-size: 0.875rem;">
+                                <option value="">-- Choose common reason or specify below --</option>
+                                <option value="unclear ID photo">unclear ID photo</option>
+                                <option value="under 18">under 18</option>
+                                <option value="not a resident of this barangay">not a resident of this barangay</option>
+                                <option value="duplicate account">duplicate account</option>
+                                <option value="__other__">Other (custom explanation)</option>
+                            </select>
+                        </div>
+
+                        <!-- Required Reason Input / Other field -->
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <div style="flex: 1;">
+                                <input type="text" name="rejection_reason" id="m-rejection-input-field" placeholder="Write it so the resident can understand it." class="form-control" style="font-size: 0.875rem; width: 100%; min-height: 40px;" required>
+                                <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.25rem;">Write it so the resident can understand it.</div>
+                            </div>
+                            <button type="submit" class="btn btn-danger" style="font-weight: 800; min-height: 40px; padding: 0 1.25rem; white-space: nowrap; align-self: flex-start;">
+                                {% icon 'x' %} Confirm Rejection
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-res-action="cancel-reject" style="font-weight: 700; min-height: 40px; padding: 0 1rem; align-self: flex-start;">
+                                Cancel
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
 
             <!-- Re-evaluate Actions (For rejected) -->
-            <div id="m-rejected-actions" style="display: none; border-top: 1px solid #E2E8F0; padding-top: 1rem; margin-top: 1rem;">
+            <div id="m-rejected-actions" style="display: none; border-top: 1px solid #E5E7EB; padding-top: 1rem; margin-top: 1rem;">
                 <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
                     <form id="m-reeval-approve-form" method="post" action="">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="approve">
                         <button type="submit" class="btn btn-primary" style="font-weight: 700; min-height: 40px;">
-                            <i class="fa-solid fa-check" style="margin-right: 0.35rem;"></i> Re-evaluate & Approve
+                            {% icon 'check' %} Re-evaluate & Approve
                         </button>
                     </form>
                     <form id="m-reeval-pending-form" method="post" action="">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="pending">
                         <button type="submit" class="btn btn-secondary" style="font-weight: 700; min-height: 40px;">
-                            <i class="fa-solid fa-clock-rotate-left" style="margin-right: 0.35rem;"></i> Return to Pending
+                            {% icon 'history' %} Return to Pending
                         </button>
                     </form>
                 </div>
             </div>
 
             <!-- Close button for approved view -->
-            <div id="m-approved-actions" style="display: none; border-top: 1px solid #E2E8F0; padding-top: 1rem; margin-top: 1rem; text-align: right;">
-                <button type="button" onclick="closeResidentModal()" class="btn btn-secondary" style="font-weight: 700; min-height: 40px;">
+            <div id="m-approved-actions" style="display: none; border-top: 1px solid #E5E7EB; padding-top: 1rem; margin-top: 1rem; text-align: right;">
+                <button type="button" data-res-action="close-detail" class="btn btn-secondary" style="font-weight: 700; min-height: 40px;">
                     Close
                 </button>
             </div>
@@ -608,289 +531,189 @@
 </div>
 
 <!-- EDIT RESIDENT MODAL -->
-<div id="editResidentModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
-    <div style="background: #FFFFFF; border-radius: 12px; width: 100%; max-width: 540px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); overflow: hidden; animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
-        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: space-between; background: #F8FAFC;">
+<div id="editResidentModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: #FFFFFF; border-radius: 16px; width: 100%; max-width: 540px; border: 1px solid #E5E7EB; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); overflow: hidden; animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between; background: #F9FAFB;">
             <div style="display: flex; align-items: center; gap: 0.65rem;">
-                <div style="width: 32px; height: 32px; border-radius: 8px; background: #FEF3C7; color: #D97706; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
-                    <i class="fa-solid fa-user-pen"></i>
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: #F3F4F6; color: #374151; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
+                    {% icon 'user-pen' %}
                 </div>
-                <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #0F172A;">Edit Resident Details</h3>
+                <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #111827;">Edit Resident Details</h3>
             </div>
-            <button type="button" onclick="closeEditResidentModal()" style="border: none; background: transparent; color: #64748B; font-size: 1.25rem; cursor: pointer;">&times;</button>
+            <button type="button" data-res-action="close-edit" style="border: none; background: transparent; color: #6B7280; font-size: 1.25rem; cursor: pointer;">&times;</button>
         </div>
         <form id="editResidentForm" method="post" action="">
             {% csrf_token %}
             <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; max-height: 70vh; overflow-y: auto;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div>
-                        <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem; text-transform: uppercase;">First Name</label>
+                        <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; margin-bottom: 0.35rem; text-transform: uppercase;">First Name</label>
                         <input type="text" name="first_name" id="edit-res-first-name" class="form-control" style="font-size: 0.875rem;" required>
                     </div>
                     <div>
-                        <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem; text-transform: uppercase;">Last Name</label>
+                        <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; margin-bottom: 0.35rem; text-transform: uppercase;">Last Name</label>
                         <input type="text" name="last_name" id="edit-res-last-name" class="form-control" style="font-size: 0.875rem;" required>
                     </div>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div>
-                        <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem; text-transform: uppercase;">Email Address</label>
+                        <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; margin-bottom: 0.35rem; text-transform: uppercase;">Email Address</label>
                         <input type="email" name="email" id="edit-res-email" class="form-control" style="font-size: 0.875rem;">
                     </div>
                     <div>
-                        <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem; text-transform: uppercase;">Contact Number</label>
-                        <input type="text" name="phone_number" id="edit-res-phone" class="form-control" style="font-size: 0.875rem;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; margin-bottom: 0.35rem; text-transform: uppercase;">Contact Number</label>
+                        <input type="text" name="phone_number" id="edit-res-phone" class="form-control" style="font-size: 0.875rem;" inputmode="numeric" pattern="09[0-9]{9}" maxlength="11" placeholder="09171234567" title="11 digits starting with 09, e.g. 09171234567" autocomplete="tel" data-phone>
                     </div>
                 </div>
                 <div>
-                    <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem; text-transform: uppercase;">Purok Jurisdiction</label>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; margin-bottom: 0.35rem; text-transform: uppercase;">Purok Jurisdiction</label>
                     <input type="text" name="purok" id="edit-res-purok" class="form-control" style="font-size: 0.875rem;" placeholder="e.g. Purok 1, Riverside">
                 </div>
                 <div>
-                    <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem; text-transform: uppercase;">Complete Street Address</label>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; margin-bottom: 0.35rem; text-transform: uppercase;">Complete Street Address</label>
                     <textarea name="street_address" id="edit-res-address" rows="2" class="form-control" style="font-size: 0.875rem; resize: vertical;"></textarea>
                 </div>
                 <div>
-                    <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem; text-transform: uppercase;">Civil Status</label>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; margin-bottom: 0.35rem; text-transform: uppercase;">Civil Status</label>
                     <select name="civil_status" id="edit-res-civil" class="form-control" style="font-size: 0.875rem;">
-                        <option value="Single">Single</option>
-                        <option value="Married">Married</option>
-                        <option value="Widowed">Widowed</option>
-                        <option value="Separated">Separated</option>
+                        {% for code, label in civil_status_choices %}
+                        <option value="{{ code }}">{{ label }}</option>
+                        {% endfor %}
                     </select>
                 </div>
+                <div>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; margin-bottom: 0.35rem; text-transform: uppercase;">Gender</label>
+                    <select name="gender" id="edit-res-gender" class="form-control" style="font-size: 0.875rem;">
+                        <option value="">Not specified</option>
+                        {% for code, label in gender_choices %}
+                        <option value="{{ code }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 1rem; font-size: 0.875rem; color: #374151;">
+                    <label style="display: inline-flex; align-items: center; gap: 0.4rem;"><input type="checkbox" name="is_solo_parent" id="edit-res-solo" value="1"> Solo Parent</label>
+                    <label style="display: inline-flex; align-items: center; gap: 0.4rem;"><input type="checkbox" name="is_pwd" id="edit-res-pwd" value="1"> PWD</label>
+                    <label style="display: inline-flex; align-items: center; gap: 0.4rem;"><input type="checkbox" name="is_4ps" id="edit-res-4ps" value="1"> 4Ps Beneficiary</label>
+                </div>
             </div>
-            <div style="padding: 1rem 1.5rem; background: #F8FAFC; border-top: 1px solid #E2E8F0; display: flex; justify-content: flex-end; gap: 0.75rem;">
-                <button type="button" onclick="closeEditResidentModal()" class="btn btn-secondary" style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1rem;">Cancel</button>
-                <button type="submit" class="btn btn-primary" style="font-size: 0.8125rem; font-weight: 700; padding: 0.45rem 1.25rem; background: #2563EB;">Save Changes</button>
+            <div style="padding: 1rem 1.5rem; background: #F9FAFB; border-top: 1px solid #E5E7EB; display: flex; justify-content: flex-end; gap: 0.75rem;">
+                <button type="button" data-res-action="close-edit" class="btn btn-secondary" style="font-size: 0.875rem; font-weight: 600; padding: 0.45rem 1rem;">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="font-size: 0.875rem; font-weight: 700; padding: 0.45rem 1.25rem; background: #1E3A8A;">Save Changes</button>
             </div>
         </form>
     </div>
 </div>
 
+{% if can_register_resident %}
+<!-- REGISTER RESIDENT MODAL (staff registration; posts to accounts:staff_register_resident) -->
+<div id="registerResidentModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="registerResidentTitle" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: #FFFFFF; border-radius: 16px; width: 100%; max-width: 580px; border: 1px solid #E5E7EB; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); overflow: hidden; animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between; background: #F9FAFB;">
+            <h3 id="registerResidentTitle" style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #111827;">Register Resident</h3>
+            <button type="button" data-action="close-register-resident" aria-label="Close" style="border: none; background: transparent; color: #6B7280; font-size: 1.25rem; cursor: pointer;">&times;</button>
+        </div>
+        <form method="post" action="{% url 'accounts:staff_register_resident' %}">
+            {% csrf_token %}
+            <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; max-height: 70vh; overflow-y: auto;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label for="reg-res-first-name" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; margin-bottom: 0.35rem; text-transform: uppercase;">First Name *</label>
+                        <input type="text" name="first_name" id="reg-res-first-name" class="form-control" style="font-size: 0.875rem;" required>
+                    </div>
+                    <div>
+                        <label for="reg-res-middle-name" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; margin-bottom: 0.35rem; text-transform: uppercase;">Middle Name</label>
+                        <input type="text" name="middle_name" id="reg-res-middle-name" class="form-control" style="font-size: 0.875rem;">
+                    </div>
+                    <div>
+                        <label for="reg-res-last-name" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; margin-bottom: 0.35rem; text-transform: uppercase;">Last Name *</label>
+                        <input type="text" name="last_name" id="reg-res-last-name" class="form-control" style="font-size: 0.875rem;" required>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label for="reg-res-birthdate" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; margin-bottom: 0.35rem; text-transform: uppercase;">Birthdate *</label>
+                        <input type="date" name="birthdate" id="reg-res-birthdate" class="form-control" style="font-size: 0.875rem;" min="1900-01-01" max="9999-12-31" required>
+                    </div>
+                    <div>
+                        <label for="reg-res-gender" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; margin-bottom: 0.35rem; text-transform: uppercase;">Gender *</label>
+                        <select name="gender" id="reg-res-gender" class="form-control" style="font-size: 0.875rem;" required>
+                            <option value="">-- Select --</option>
+                            {% for code, label in gender_choices %}
+                            <option value="{{ code }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="reg-res-civil" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; margin-bottom: 0.35rem; text-transform: uppercase;">Civil Status</label>
+                        <select name="civil_status" id="reg-res-civil" class="form-control" style="font-size: 0.875rem;">
+                            {% for code, label in civil_status_choices %}
+                            <option value="{{ code }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 1rem; font-size: 0.875rem; color: #374151;">
+                    <label style="display: inline-flex; align-items: center; gap: 0.4rem;"><input type="checkbox" name="is_solo_parent" value="1"> Solo Parent</label>
+                    <label style="display: inline-flex; align-items: center; gap: 0.4rem;"><input type="checkbox" name="is_pwd" value="1"> PWD</label>
+                    <label style="display: inline-flex; align-items: center; gap: 0.4rem;"><input type="checkbox" name="is_4ps" value="1"> 4Ps Beneficiary</label>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label for="reg-res-purok" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; margin-bottom: 0.35rem; text-transform: uppercase;">Purok</label>
+                        <select name="purok" id="reg-res-purok" class="form-control" style="font-size: 0.875rem;">
+                            <option value="">-- Unassigned --</option>
+                            {% for p in puroks %}
+                            <option value="{{ p.id }}">{{ p.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="reg-res-contact" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; margin-bottom: 0.35rem; text-transform: uppercase;">Contact Number</label>
+                        <input type="text" name="contact_no" id="reg-res-contact" class="form-control" style="font-size: 0.875rem;" inputmode="numeric" pattern="09[0-9]{9}" maxlength="11" placeholder="09171234567" title="11 digits starting with 09, e.g. 09171234567" autocomplete="tel" data-phone>
+                    </div>
+                </div>
+                <div>
+                    <label for="reg-res-address" style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; margin-bottom: 0.35rem; text-transform: uppercase;">Address</label>
+                    <textarea name="address" id="reg-res-address" rows="2" class="form-control" style="font-size: 0.875rem; resize: vertical;"></textarea>
+                </div>
+            </div>
+            <div style="padding: 1rem 1.5rem; background: #F9FAFB; border-top: 1px solid #E5E7EB; display: flex; justify-content: flex-end; gap: 0.75rem;">
+                <button type="button" data-action="close-register-resident" class="btn btn-secondary" style="font-size: 0.875rem; font-weight: 600; padding: 0.45rem 1rem;">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="font-size: 0.875rem; font-weight: 700; padding: 0.45rem 1.25rem;">Register</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
 <!-- DELETE RESIDENT MODAL -->
-<div id="deleteResidentModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
-    <div style="background: #FFFFFF; border-radius: 12px; width: 100%; max-width: 440px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); overflow: hidden; animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
-        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #FEE2E2; background: #FEF2F2; display: flex; align-items: center; gap: 0.75rem;">
-            <div style="width: 36px; height: 36px; border-radius: 50%; background: #FEE2E2; border: 2px solid #FCA5A5; color: #DC2626; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
-                <i class="fa-solid fa-triangle-exclamation"></i>
+<div id="deleteResidentModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: #FFFFFF; border-radius: 16px; width: 100%; max-width: 440px; border: 1px solid #E5E7EB; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); overflow: hidden; animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #F3F4F6; background: #FFFFFF; display: flex; align-items: center; gap: 0.75rem;">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: #FEF2F2; color: #DC2626; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+                {% icon 'triangle-alert' %}
             </div>
             <div>
-                <h3 style="margin: 0; font-size: 1rem; font-weight: 700; color: #991B1B;">Delete Resident Account</h3>
-                <p style="margin: 0; font-size: 0.75rem; color: #B91C1C;">This action cannot be undone.</p>
+                <h3 style="margin: 0; font-size: 1rem; font-weight: 700; color: #111827;">Delete Resident Account</h3>
+                <p style="margin: 0; font-size: 0.8125rem; color: #DC2626;">This action cannot be undone.</p>
             </div>
         </div>
         <form id="deleteResidentForm" method="post" action="">
             {% csrf_token %}
-            <div style="padding: 1.25rem 1.5rem; color: #334155; font-size: 0.875rem; line-height: 1.5;">
-                Are you sure you want to permanently delete resident account for <strong id="delete-resident-name" style="color: #0F172A;"></strong>? All associated registrations and profile information will be removed.
+            <div style="padding: 1.25rem 1.5rem; color: #374151; font-size: 0.875rem; line-height: 1.5;">
+                Are you sure you want to permanently delete resident account for <strong id="delete-resident-name" style="color: #111827;"></strong>? All associated registrations and profile information will be removed.
             </div>
-            <div style="padding: 1rem 1.5rem; background: #F8FAFC; border-top: 1px solid #E2E8F0; display: flex; justify-content: flex-end; gap: 0.75rem;">
-                <button type="button" onclick="closeDeleteResidentModal()" class="btn btn-secondary" style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1rem;">Cancel</button>
-                <button type="submit" class="btn btn-danger" style="font-size: 0.8125rem; font-weight: 700; padding: 0.45rem 1.25rem; background: #DC2626; border-color: #DC2626;">Yes, Delete Account</button>
+            <div style="padding: 1rem 1.5rem; background: #F9FAFB; border-top: 1px solid #E5E7EB; display: flex; justify-content: flex-end; gap: 0.75rem;">
+                <button type="button" data-res-action="close-delete" class="btn btn-secondary" style="font-size: 0.875rem; font-weight: 600; padding: 0.45rem 1rem;">Cancel</button>
+                <button type="submit" class="btn btn-danger" style="font-size: 0.875rem; font-weight: 700; padding: 0.45rem 1.25rem; background: #DC2626; border-color: #DC2626;">Yes, Delete Account</button>
             </div>
         </form>
     </div>
 </div>
 
-<script>
-function toggleActionMenu(event, btn) {
-    event.stopPropagation();
-    var menu = btn.nextElementSibling;
-    if (!menu) return;
-    var isOpen = menu.classList.contains('show');
-    
-    // Close any other open dropdowns
-    document.querySelectorAll('.action-dropdown-menu.show').forEach(function(el) {
-        el.classList.remove('show');
-    });
-    
-    if (!isOpen) {
-        menu.classList.add('show');
-        
-        // Break completely out of table-responsive / overflow containers using fixed viewport coordinates
-        var rect = btn.getBoundingClientRect();
-        menu.style.position = 'fixed';
-        menu.style.zIndex = '99999';
-        
-        var menuWidth = menu.offsetWidth || 140;
-        var menuHeight = menu.offsetHeight || 135;
-        
-        // Align right edge of menu to right edge of button
-        var left = rect.right - menuWidth;
-        if (left < 10) left = 10;
-        menu.style.left = left + 'px';
-        menu.style.right = 'auto';
-        
-        // Check if menu goes below bottom of viewport
-        if (rect.bottom + menuHeight > window.innerHeight && rect.top > menuHeight) {
-            menu.style.top = (rect.top - menuHeight - 4) + 'px';
-        } else {
-            menu.style.top = (rect.bottom + 4) + 'px';
-        }
-    }
-}
+<script src="{% static 'js/residents.js' %}"></script>
+{% endblock %}
 
-// Close dropdowns on scroll or resize so fixed menu doesn't detach
-window.addEventListener('scroll', function() {
-    document.querySelectorAll('.action-dropdown-menu.show').forEach(function(el) {
-        el.classList.remove('show');
-    });
-}, true);
-
-window.addEventListener('resize', function() {
-    document.querySelectorAll('.action-dropdown-menu.show').forEach(function(el) {
-        el.classList.remove('show');
-    });
-});
-
-// Close dropdowns on outside click
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('.action-dropdown-container') && !e.target.closest('.action-dropdown-menu')) {
-        document.querySelectorAll('.action-dropdown-menu.show').forEach(function(el) {
-            el.classList.remove('show');
-        });
-    }
-});
-
-function openResidentModal(data) {
-    document.getElementById('m-name').textContent = data.name;
-    document.getElementById('m-username').textContent = '@' + data.username;
-    document.getElementById('m-phone').textContent = data.phone;
-    document.getElementById('m-email').textContent = data.email;
-    document.getElementById('m-purok').textContent = data.purok;
-    document.getElementById('m-date').textContent = data.date;
-    document.getElementById('m-address').textContent = data.address;
-
-    var idProofContainer = document.getElementById('m-idproof-container');
-    if (data.idproof) {
-        idProofContainer.innerHTML = '<a href="' + data.idproof + '" target="_blank" style="text-decoration:none;"><img src="' + data.idproof + '" style="max-height: 220px; max-width: 100%; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><div style="margin-top:0.5rem; font-size:0.75rem; font-weight:700; color:#2563EB;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open Full Image</div></a>';
-    } else {
-        idProofContainer.innerHTML = '<span class="badge badge-danger">NO PROOF UPLOADED</span>';
-    }
-
-    var pendingActions = document.getElementById('m-pending-actions');
-    var rejectedActions = document.getElementById('m-rejected-actions');
-    var approvedActions = document.getElementById('m-approved-actions');
-    var rejectionBox = document.getElementById('m-rejection-box');
-
-    pendingActions.style.display = 'none';
-    rejectedActions.style.display = 'none';
-    approvedActions.style.display = 'none';
-    rejectionBox.style.display = 'none';
-
-    if (data.status === 'pending') {
-        document.getElementById('m-applicant-title').textContent = 'Verify Resident Applicant';
-        pendingActions.style.display = 'block';
-        document.getElementById('m-approve-form').action = '/accounts/residents/' + data.id + '/approve/';
-        document.getElementById('m-reject-form').action = '/accounts/residents/' + data.id + '/reject/';
-    } else if (data.status === 'rejected') {
-        document.getElementById('m-applicant-title').textContent = 'Declined Resident Application';
-        rejectedActions.style.display = 'block';
-        if (data.reason) {
-            rejectionBox.style.display = 'block';
-            document.getElementById('m-rejection-text').textContent = data.reason;
-        }
-        document.getElementById('m-reeval-approve-form').action = '/accounts/residents/' + data.id + '/reevaluate/';
-        document.getElementById('m-reeval-pending-form').action = '/accounts/residents/' + data.id + '/reevaluate/';
-    } else {
-        document.getElementById('m-applicant-title').textContent = 'Verified Resident Profile';
-        approvedActions.style.display = 'block';
-    }
-
-    var modal = document.getElementById('residentDetailModal');
-    modal.style.display = 'flex';
-}
-
-function closeResidentModal() {
-    var modal = document.getElementById('residentDetailModal');
-    modal.style.display = 'none';
-}
-
-function openEditResidentModal(data) {
-    // Close any open menus
-    document.querySelectorAll('.action-dropdown-menu.show').forEach(function(el) {
-        el.classList.remove('show');
-    });
-    
-    var form = document.getElementById('editResidentForm');
-    form.action = '/accounts/residents/' + data.id + '/edit/';
-    
-    document.getElementById('edit-res-first-name').value = data.first_name || '';
-    document.getElementById('edit-res-last-name').value = data.last_name || '';
-    document.getElementById('edit-res-email').value = data.email === 'N/A' ? '' : (data.email || '');
-    document.getElementById('edit-res-phone').value = data.phone === 'N/A' ? '' : (data.phone || '');
-    document.getElementById('edit-res-purok').value = data.purok === 'Unassigned' ? '' : (data.purok || '');
-    document.getElementById('edit-res-address').value = data.address === 'N/A' ? '' : (data.address || '');
-    
-    var civilSelect = document.getElementById('edit-res-civil');
-    if (civilSelect && data.civil) {
-        civilSelect.value = data.civil;
-    }
-    
-    var modal = document.getElementById('editResidentModal');
-    modal.style.display = 'flex';
-}
-
-function closeEditResidentModal() {
-    document.getElementById('editResidentModal').style.display = 'none';
-}
-
-function openDeleteResidentModal(id, name) {
-    // Close any open menus
-    document.querySelectorAll('.action-dropdown-menu.show').forEach(function(el) {
-        el.classList.remove('show');
-    });
-    
-    var form = document.getElementById('deleteResidentForm');
-    form.action = '/accounts/residents/' + id + '/delete/';
-    document.getElementById('delete-resident-name').textContent = name;
-    
-    var modal = document.getElementById('deleteResidentModal');
-    modal.style.display = 'flex';
-}
-
-function closeDeleteResidentModal() {
-    document.getElementById('deleteResidentModal').style.display = 'none';
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    var buttons = document.querySelectorAll('.open-resident-modal-btn');
-    buttons.forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            // Close any open menus
-            document.querySelectorAll('.action-dropdown-menu.show').forEach(function(el) {
-                el.classList.remove('show');
-            });
-            var data = {
-                id: this.getAttribute('data-id'),
-                name: this.getAttribute('data-name'),
-                username: this.getAttribute('data-username'),
-                email: this.getAttribute('data-email'),
-                phone: this.getAttribute('data-phone'),
-                address: this.getAttribute('data-address'),
-                purok: this.getAttribute('data-purok'),
-                date: this.getAttribute('data-date'),
-                idproof: this.getAttribute('data-idproof'),
-                reason: this.getAttribute('data-reason'),
-                status: this.getAttribute('data-status')
-            };
-            openResidentModal(data);
-        });
-    });
-
-    // Close on backdrop click for all modals
-    ['residentDetailModal', 'editResidentModal', 'deleteResidentModal'].forEach(function(modalId) {
-        var modal = document.getElementById(modalId);
-        if (modal) {
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
-        }
-    });
-});
-</script>
+{% block extra_js %}
+<script src="{% static 'js/resident_register_modal.js' %}" defer></script>
 {% endblock %}

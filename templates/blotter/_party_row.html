@@ -1,0 +1,26 @@
+<fieldset class="blotter-party-row" data-party-row>
+    <legend class="blotter-sr-only">Party</legend>
+    {{ party.resident }}
+    <div class="form-group">
+        <label for="{{ party.role.id_for_label }}">Role</label>
+        {{ party.role }}
+        {% for error in party.role.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+    </div>
+    <div class="form-group">
+        <label for="{{ party.full_name.id_for_label }}">Full name</label>
+        {{ party.full_name }}
+        {% for error in party.full_name.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+    </div>
+    <div class="form-group">
+        <label for="{{ party.address.id_for_label }}">Address</label>
+        {{ party.address }}
+        {% for error in party.address.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+    </div>
+    <div class="form-group">
+        <label for="{{ party.contact_no.id_for_label }}">{{ party.contact_no.label }}</label>
+        {{ party.contact_no }}
+        {% for error in party.contact_no.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+    </div>
+    {% for error in party.non_field_errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+    <button type="button" class="btn btn-secondary btn-sm blotter-remove-party" data-remove-party>Remove</button>
+</fieldset>

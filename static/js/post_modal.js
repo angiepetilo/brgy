@@ -3,13 +3,19 @@
  */
 
 /* ================= Create Modal ================= */
-function openCreatePostModal() {
+function openCreatePostModal(triggerFilePicker) {
   const modal = document.getElementById('createPostModal');
   if (modal) {
     modal.style.display = 'flex';
     const input = document.getElementById('postContentInput');
     if (input) {
       input.focus();
+    }
+    if (triggerFilePicker) {
+      setTimeout(function() {
+        const fileInput = document.getElementById('postImageFileInput');
+        if (fileInput) fileInput.click();
+      }, 50);
     }
   }
 }
@@ -184,5 +190,66 @@ document.addEventListener('keydown', function(event) {
     closeCreatePostModal();
     closeEditPostModal();
     closeAllPostMenus();
+  }
+});
+
+/* ================= Delegated listeners (CSP: no inline handlers) ================= */
+document.addEventListener('click', function(event) {
+  var el = event.target.closest('[data-post-action]');
+  if (el) {
+    var action = el.getAttribute('data-post-action');
+    if (action === 'open-create') {
+      event.stopPropagation();
+      var isMedia = el.classList.contains('media') || (el.closest && el.closest('.media'));
+      openCreatePostModal(Boolean(isMedia));
+    } else if (action === 'close-create') {
+      closeCreatePostModal();
+    } else if (action === 'close-edit') {
+      closeEditPostModal();
+    } else if (action === 'toggle-menu') {
+      togglePostMenu(event, el.getAttribute('data-menu-id'));
+    } else if (action === 'open-edit') {
+      event.preventDefault();
+      openEditPostModal(el);
+    } else if (action === 'clear-image') {
+      clearSelectedImage();
+    } else if (action === 'clear-edit-image') {
+      clearEditSelectedImage();
+    }
+    return;
+  }
+  // Click on the dimmed backdrop (not the dialog) closes the modal.
+  var backdrop = event.target.matches && event.target.matches('[data-post-backdrop]') ? event.target : null;
+  if (backdrop) {
+    if (backdrop.getAttribute('data-post-backdrop') === 'edit') {
+      closeEditPostModal();
+    } else {
+      closeCreatePostModal();
+    }
+  }
+});
+
+document.addEventListener('keydown', function(event) {
+  var trigger = event.target.closest && event.target.closest('.post-trigger-card[data-post-action="open-create"]');
+  if (trigger && (event.key === 'Enter' || event.key === ' ')) {
+    event.preventDefault();
+    openCreatePostModal();
+  }
+});
+
+document.addEventListener('input', function(event) {
+  if (event.target.id === 'postContentInput') {
+    toggleSubmitButton();
+  }
+});
+
+document.addEventListener('change', function(event) {
+  var el = event.target;
+  if (el.id === 'postImageFileInput') {
+    handleImageSelection(el);
+  } else if (el.id === 'editPostImageFileInput') {
+    handleEditImageSelection(el);
+  } else if (el.hasAttribute && el.hasAttribute('data-pin-toggle') && el.parentElement) {
+    el.parentElement.style.opacity = el.checked ? '1' : '0.5';
   }
 });

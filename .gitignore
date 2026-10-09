@@ -1,9 +1,31 @@
+# Python
 .venv/
 __pycache__/
 *.py[cod]
 *$py.class
+*.egg-info/
+dist/
+build/
+
+# Django secrets and environment
+.env
+.env.local
+.env.*.local
+
+# Django generated
 *.sqlite3
-media/
 staticfiles/
+logs/
+
+# Private uploads (ID photos — never public)
+private_media/
+
+# Public uploads (kept out of repo; restore from backup)
+media/
+
+# OS
 .DS_Store
 Thumbs.db
+
+# Local DB backups
+backups/

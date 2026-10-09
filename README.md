@@ -21,15 +21,12 @@ A production-ready, real-time Barangay Information and Management System built w
   - Real-time demographic KPI cards and pagination.
 
 ### 2. Peace, Order & Katarungang Pambarangay (`/blotter/`)
-- **Incident Blotter Logging (`BlotterRecord`):**
-  - Track incidents with unique case numbers (`BLOT-YYYY-XXXX`).
-  - Complainant and Respondent profiles, incident location, time, and factual narrative.
-  - Status lifecycle: `Open`, `Settled`, `Referred to Court`.
-- **Katarungang Pambarangay Mediation (`KPCase`):**
-  - Scheduled conciliation hearing dates and times.
-  - Lupon Tagapamayapa mediation proceedings and agreements.
-  - Upload scanned Kasunduan / Amicable Settlement documents.
-  - Flag issuance of official **Certificate to File Action (CFA)** when disputes cannot be resolved at the barangay level.
+- **Blotter cases (`BlotterCase`, `BlotterParty`, `BlotterHearing`):**
+  - Unique case numbers (`BLT-YYYY-NNNN`), incident type, date/time, location, purok and narrative.
+  - Complainants, respondents and witnesses (optionally linked to a Resident; 11-digit 09 mobile numbers).
+  - Status lifecycle: Filed -> Under mediation -> Settled / Escalated, or Dismissed / Withdrawn.
+  - Mediation hearings with attendance and outcome notes; printable case summary; JSON API.
+  - Role-based permissions (`blotter.*`), purok scope and confidential cases; settlement-rate statistics.
 
 ### 3. Legislative & Transparency Portal (`/communications/transparency/`)
 - **Full Disclosure Legislation Registry (`LegislativeRecord`):**
@@ -136,8 +133,14 @@ Open **`http://127.0.0.1:8000/`** in your browser.
 ---
 
 ## 🧪 Automated Test Suite
-Run the 11 integration tests covering roles, the approval gate, appointments, automated QR code generation, RBI directory, Blotter proceedings, Transparency, and Asset inventory:
+All tests live in the top-level `tests/` folder, one subfolder per module. Install the dev tools once, then run `pytest`, which prints one line per test, similar to `php artisan test`:
 ```powershell
-.\.venv\Scripts\python.exe manage.py test
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+.\.venv\Scripts\python.exe -m pytest                       # whole suite
+.\.venv\Scripts\python.exe -m pytest tests/appointments    # one module
+.\.venv\Scripts\python.exe -m pytest -k booking            # filter by name
+.\.venv\Scripts\python.exe -m pytest -x                    # stop at first failure
+.\.venv\Scripts\python.exe -m pytest -n auto               # parallel
+.\.venv\Scripts\python.exe manage.py test tests            # Django runner also works
 ```
-All 11 tests pass with 0 errors.
+See [docs/testing.md](docs/testing.md) for the folder layout, factories, and how to run the suite on MySQL.

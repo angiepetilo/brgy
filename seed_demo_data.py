@@ -6,12 +6,15 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
 from django.utils import timezone
-from apps.accounts.models import User, Household
-from apps.appointments.models import Appointment, IssuedDocumentLog
-from apps.communications.models import KapitanStatus, Announcement, LegislativeRecord
+from apps.accounts.models import User, Household, Purok, Resident
+from apps.appointments.models import Appointment, DocumentType, IssuedDocumentLog
+from apps.communications.models import Announcement
 from apps.chat.models import Message, Notification
-from apps.blotter.models import BlotterRecord, KPCase
-from apps.finance.models import AssetInventory
+
+
+def purok_for(name):
+    purok, _ = Purok.objects.get_or_create(name=name)
+    return purok
 
 
 def seed():
@@ -30,8 +33,7 @@ def seed():
             'is_superuser': True,
             'phone_number': '0917-111-2222',
             'address': 'Barangay Hall, Main District',
-            'purok': 'Purok 1',
-            'civil_status': 'Married',
+            'purok': purok_for('Purok 1'),
             'occupation': 'Barangay Secretary',
         }
     )
@@ -53,8 +55,7 @@ def seed():
             'is_approved': True,
             'phone_number': '0917-555-8888',
             'address': 'Barangay Executive Quarters, Zone 1',
-            'purok': 'Purok 1',
-            'civil_status': 'Married',
+            'purok': purok_for('Purok 1'),
             'occupation': 'Punong Barangay / Public Servant',
         }
     )
@@ -76,8 +77,7 @@ def seed():
             'is_approved': True,
             'phone_number': '0928-444-5555',
             'address': 'Block 12 Lot 4, Sunflower St., Purok Maharlika',
-            'purok': 'Purok 2',
-            'civil_status': 'Single',
+            'purok': purok_for('Purok 2'),
             'occupation': 'Customer Support Associate',
             'date_of_birth': date(1996, 5, 14),
             'verified_at': timezone.now(),
@@ -102,8 +102,7 @@ def seed():
             'is_approved': False,
             'phone_number': '0919-777-6666',
             'address': 'Unit 3B, Jasmine Condominiums, Purok Pag-asa',
-            'purok': 'Purok 4',
-            'civil_status': 'Married',
+            'purok': purok_for('Purok 4'),
             'occupation': 'Electrician',
             'date_of_birth': date(1988, 11, 23),
         }
@@ -126,12 +125,9 @@ def seed():
             'is_approved': True,
             'phone_number': '0920-111-3333',
             'address': '104 Acacia Ave, Purok 1',
-            'purok': 'Purok 1',
-            'civil_status': 'Widowed',
+            'purok': purok_for('Purok 1'),
             'occupation': 'Retired Carpenter',
             'date_of_birth': date(1955, 3, 10),
-            'is_senior': True,
-            'is_pwd': True,
             'verified_at': timezone.now(),
             'verified_by': admin_user,
         }
@@ -152,11 +148,9 @@ def seed():
             'is_approved': True,
             'phone_number': '0930-888-9999',
             'address': 'Lot 8 Riverside Purok 3',
-            'purok': 'Purok 3',
-            'civil_status': 'Married',
+            'purok': purok_for('Purok 3'),
             'occupation': 'Sari-Sari Store Owner',
             'date_of_birth': date(1982, 8, 20),
-            'is_4ps': True,
             'verified_at': timezone.now(),
             'verified_by': admin_user,
         }
@@ -166,50 +160,50 @@ def seed():
         elena_user.save()
         print("Created 4Ps Resident: elena / resident123")
 
+    # 6b. Resident profiles: Resident is the single source of demographics.
+    # Seniors are derived from birthdate (Pedro, b. 1955), so nothing is stored for them.
+    demographics = [
+        (maria_user, {'gender': 'female', 'civil_status': 'single', 'is_solo_parent': True}),
+        (juan_user, {'gender': 'male', 'civil_status': 'married'}),
+        (pedro_user, {'gender': 'male', 'civil_status': 'widowed', 'is_pwd': True}),
+        (elena_user, {'gender': 'female', 'civil_status': 'married', 'is_4ps': True}),
+    ]
+    for user, values in demographics:
+        if not user.date_of_birth:
+            continue
+        Resident.objects.update_or_create(
+            user=user,
+            defaults={
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'birthdate': user.date_of_birth,
+                'contact_no': user.phone_number,
+                'address': user.address,
+                'purok': user.purok,
+                **values,
+            },
+        )
+    print("Created sample Resident profiles with demographics.")
     # 7. Households (RBI)
     hh1, _ = Household.objects.get_or_create(
-        household_number='HH-2026-001',
+        household_name='Santos Family Residence',
         defaults={
-            'head': maria_user,
             'address': 'Block 12 Lot 4, Sunflower St.',
-            'purok': 'Purok 2',
         }
     )
     hh2, _ = Household.objects.get_or_create(
-        household_number='HH-2026-002',
+        household_name='Dela Cruz Family Residence',
         defaults={
-            'head': juan_user,
             'address': 'Unit 3B, Jasmine Condominiums',
-            'purok': 'Purok 4',
         }
     )
     hh3, _ = Household.objects.get_or_create(
-        household_number='HH-2026-003',
+        household_name='Penduko Family Residence',
         defaults={
-            'head': pedro_user,
             'address': '104 Acacia Ave',
-            'purok': 'Purok 1',
         }
     )
-    # Link household FK
-    if not maria_user.household:
-        maria_user.household = hh1
-        maria_user.save()
-    if not juan_user.household:
-        juan_user.household = hh2
-        juan_user.save()
-    if not pedro_user.household:
-        pedro_user.household = hh3
-        pedro_user.save()
     print("Created sample Households.")
-
-    # 8. Kapitan Status
-    if not KapitanStatus.objects.exists():
-        KapitanStatus.objects.create(
-            status=KapitanStatus.STATUS_ON_DUTY,
-            updated_by=kapitan_user,
-        )
-        print("Created initial Kapitan Status: On Duty")
 
     # 9. Announcements
     if not Announcement.objects.exists():
@@ -249,13 +243,18 @@ def seed():
         print("Created sample Announcements.")
 
     # 10. Document Appointments & Completed Clearance with QR
+    clearance_type, _ = DocumentType.objects.get_or_create(
+        code='clearance',
+        defaults={'name': 'Barangay Clearance', 'fee': 0, 'is_active': True},
+    )
     apt_completed, created_apt = Appointment.objects.get_or_create(
         resident=maria_user,
-        document_type=Appointment.DOC_CLEARANCE,
+        document_type=clearance_type,
         defaults={
             'purpose': 'Local Employment Requirement (Call Center Support Specialist)',
-            'preferred_date': timezone.now().date() - timedelta(days=1),
-            'preferred_time_slot': Appointment.TIME_SLOT_MORNING,
+            'appt_date': timezone.localdate() - timedelta(days=1),
+            'time_window': Appointment.TIME_SLOT_MORNING,
+            'fee_at_booking': clearance_type.fee,
             'status': Appointment.STATUS_COMPLETED,
             'admin_notes': 'Clearance verified, signed and released.',
             'processed_by': admin_user,
@@ -265,141 +264,6 @@ def seed():
         apt_completed.status = Appointment.STATUS_COMPLETED
         apt_completed.save()  # Triggers signal for IssuedDocumentLog & QR code generation!
         print("Created Completed Clearance with automated QR code log.")
-
-    # 11. Peace & Order / Blotter Cases & KP Mediation
-    if not BlotterRecord.objects.exists():
-        b1 = BlotterRecord.objects.create(
-            case_number='BLOT-2026-0001',
-            complainant_name='Ricardo Dalisay',
-            respondent_name='Joaquin Tuazon',
-            incident_type='Excessive Noise & Public Disturbance',
-            incident_location='Corner Daisy St., Purok 2',
-            incident_date=timezone.now() - timedelta(days=2),
-            narrative='Complainant reported respondent playing loud videoke sound system past 1:00 AM despite multiple neighbor requests to lower volume.',
-            status=BlotterRecord.STATUS_OPEN,
-            created_by=admin_user,
-        )
-        KPCase.objects.create(
-            blotter=b1,
-            hearing_date=timezone.now() + timedelta(days=3),
-            mediator_notes='First conciliation hearing set before the Punong Barangay.',
-            certificate_to_file_action=False,
-        )
-
-        b2 = BlotterRecord.objects.create(
-            case_number='BLOT-2026-0002',
-            complainant_name='Tomas Alcantara',
-            respondent_name='Felipe Morales',
-            incident_type='Boundary Fence Encroachment',
-            incident_location='Lot 5 Block 3, Purok 1',
-            incident_date=timezone.now() - timedelta(days=14),
-            narrative='Dispute regarding 0.8 meter overhang fence constructed along common pathway boundary.',
-            status=BlotterRecord.STATUS_SETTLED,
-            created_by=admin_user,
-        )
-        KPCase.objects.create(
-            blotter=b2,
-            hearing_date=timezone.now() - timedelta(days=7),
-            mediator_notes='Both parties entered into an Amicable Settlement (Kasunduan). Respondent agreed to adjust fence boundary within 30 days.',
-            certificate_to_file_action=False,
-        )
-
-        b3 = BlotterRecord.objects.create(
-            case_number='BLOT-2026-0003',
-            complainant_name='Gloria Diaz',
-            respondent_name='Mark Anthony',
-            incident_type='Unjust Vexation & Property Damage',
-            incident_location='Purok 4 Commercial Center',
-            incident_date=timezone.now() - timedelta(days=21),
-            narrative='Repeated verbal threats and deliberate damage to retail storefront gate.',
-            status=BlotterRecord.STATUS_REFERRED,
-            created_by=admin_user,
-        )
-        KPCase.objects.create(
-            blotter=b3,
-            hearing_date=timezone.now() - timedelta(days=10),
-            mediator_notes='Three conciliation notices served. Respondent failed to appear without justifiable cause. Conciliation terminated.',
-            certificate_to_file_action=True,
-        )
-        print("Created sample Blotter and KP Mediation records.")
-
-    # 12. Legislative Records (Transparency Portal)
-    if not LegislativeRecord.objects.exists():
-        LegislativeRecord.objects.create(
-            title="Comprehensive Anti-Littering and Solid Waste Segregation Ordinance of 2026",
-            category=LegislativeRecord.CATEGORY_ORDINANCE,
-            document_number="Barangay Ordinance No. 2026-01",
-            date_approved=date(2026, 1, 15),
-            summary="Mandating household source segregation of biodegradable and recyclable wastes, imposing penalties for improper garbage disposal on waterways and public streets.",
-            is_public=True,
-        )
-
-        LegislativeRecord.objects.create(
-            title="Resolution Authorizing the Procurement of Rescue Tools and Disaster Preparedness Equipment",
-            category=LegislativeRecord.CATEGORY_RESOLUTION,
-            document_number="Barangay Resolution No. 2026-14",
-            date_approved=date(2026, 2, 28),
-            summary="Authorizing the allocation of 5% Barangay Disaster Risk Reduction and Management Fund (BDRRMF) for the purchase of chainsaws, life vests, and mobile emergency generators.",
-            is_public=True,
-        )
-
-        LegislativeRecord.objects.create(
-            title="Executive Order Reconstituting the Barangay Peace and Order Council (BPOC)",
-            category=LegislativeRecord.CATEGORY_EXECUTIVE_ORDER,
-            document_number="Executive Order No. 2026-02",
-            date_approved=date(2026, 3, 5),
-            summary="Reorganizing the composition, roles, and operational directives of the Barangay Peace and Order Council in partnership with the PNP local precinct.",
-            is_public=True,
-        )
-        print("Created sample Legislative records for Transparency Portal.")
-
-    # 13. Asset & Property Inventory
-    if not AssetInventory.objects.exists():
-        AssetInventory.objects.create(
-            item_name="Barangay Patrol Rescue Vehicle (Toyota Hilux 4x4)",
-            category=AssetInventory.CATEGORY_VEHICLE,
-            quantity=1,
-            condition=AssetInventory.CONDITION_GOOD,
-            date_acquired=date(2024, 3, 15),
-            serial_number="SAB-4182 / Property #2024-001",
-            remarks="Assigned to Barangay Tanod Quick Response Unit.",
-        )
-        AssetInventory.objects.create(
-            item_name="Portable Heavy-Duty Honda Inverter Generator (7.5 kW)",
-            category=AssetInventory.CATEGORY_EQUIPMENT,
-            quantity=2,
-            condition=AssetInventory.CONDITION_GOOD,
-            date_acquired=date(2024, 6, 10),
-            serial_number="GEN-HND-9921",
-            remarks="Stored in Emergency Operations Center.",
-        )
-        AssetInventory.objects.create(
-            item_name="Stihl MS 382 Heavy Duty Rescue Chainsaw",
-            category=AssetInventory.CATEGORY_EMERGENCY,
-            quantity=3,
-            condition=AssetInventory.CONDITION_MAINTENANCE,
-            date_acquired=date(2023, 11, 20),
-            serial_number="CS-STL-402",
-            remarks="Under scheduled blade replacement and carb cleaning.",
-        )
-        AssetInventory.objects.create(
-            item_name="Foldable Disaster Relief Aluminum Tents (10x10)",
-            category=AssetInventory.CATEGORY_EMERGENCY,
-            quantity=15,
-            condition=AssetInventory.CONDITION_GOOD,
-            date_acquired=date(2024, 1, 12),
-            serial_number="TNT-EVAC-01-15",
-            remarks="Available at Multi-Purpose Covered Court storage.",
-        )
-        AssetInventory.objects.create(
-            item_name="Conference Hall Stackable Heavy Duty Chairs",
-            category=AssetInventory.CATEGORY_FURNITURE,
-            quantity=80,
-            condition=AssetInventory.CONDITION_GOOD,
-            date_acquired=date(2023, 8, 5),
-            remarks="Barangay Session Hall assembly.",
-        )
-        print("Created sample Asset Inventory records.")
 
     print("\n--- SEED COMPLETE ---")
     print("Test Accounts Available:")

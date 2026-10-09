@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static core_tags %}
+{% block title %}Blotter - Barangay.ph{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/blotter.css' %}">{% endblock %}
+
+{% block content %}
+<div class="container-fluid blotter-page" id="blotter-list">
+    <div class="page-header blotter-header">
+        <div>
+            <h1 class="page-title">{% icon 'scale' %} Blotter</h1>
+            <p class="page-subtitle">Katarungang Pambarangay incident records and mediation.</p>
+        </div>
+        {% if can_create %}
+        <a class="btn btn-primary" href="{% url 'blotter:case_create' %}" id="blotter-new-case">
+            {% icon 'plus' %} File a case
+        </a>
+        {% endif %}
+    </div>
+
+    <form class="card blotter-filters" method="get" action="{% url 'blotter:case_list' %}" aria-label="Filter cases">
+        <div class="form-group">
+            <label for="f-q">Search</label>
+            <input class="form-control" type="search" id="f-q" name="q" value="{{ filters.q }}" maxlength="100" placeholder="Case no. or party name">
+        </div>
+        <div class="form-group">
+            <label for="f-status">Status</label>
+            <select class="form-control" id="f-status" name="status">
+                <option value="">All statuses</option>
+                {% for code, label in status_choices %}<option value="{{ code }}" {% if filters.status == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="f-type">Incident type</label>
+            <select class="form-control" id="f-type" name="incident_type">
+                <option value="">All types</option>
+                {% for code, label in type_choices %}<option value="{{ code }}" {% if filters.incident_type == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="f-purok">Purok</label>
+            <select class="form-control" id="f-purok" name="purok">
+                <option value="">All puroks</option>
+                {% for purok in puroks %}<option value="{{ purok.pk }}" {% if filters.purok == purok.pk %}selected{% endif %}>{{ purok.name }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="f-from">Incident from</label>
+            <input class="form-control" type="date" id="f-from" name="date_from" value="{{ filters.date_from|date:'Y-m-d' }}">
+        </div>
+        <div class="form-group">
+            <label for="f-to">Incident to</label>
+            <input class="form-control" type="date" id="f-to" name="date_to" value="{{ filters.date_to|date:'Y-m-d' }}">
+        </div>
+        <div class="blotter-filter-actions">
+            <button type="submit" class="btn btn-primary">Apply</button>
+            <a class="btn btn-secondary" href="{% url 'blotter:case_list' %}">Reset</a>
+        </div>
+    </form>
+
+    {% if filter_error %}<div class="blotter-error" role="alert">{{ filter_error }}</div>{% endif %}
+
+    <div class="card data-table-card">
+        {% if page_obj.object_list %}
+        <div class="table-responsive-wrapper">
+            <table class="blotter-table">
+                <caption class="blotter-sr-only">Blotter cases</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Case no.</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Parties</th>
+                        <th scope="col">Purok</th>
+                        <th scope="col">Incident date</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for case in page_obj.object_list %}
+                    <tr>
+                        <td><a href="{% url 'blotter:case_detail' case.pk %}">{{ case.case_no }}</a>{% if case.is_confidential %} <span class="badge badge-danger">Confidential</span>{% endif %}</td>
+                        <td>{{ case.get_incident_type_display }}</td>
+                        <td>
+                            {% for party in case.parties.all %}{% if party.role != 'witness' %}<span class="blotter-party-chip">{{ party.full_name }} <small>({{ party.get_role_display }})</small></span>{% endif %}{% endfor %}
+                        </td>
+                        <td>{{ case.purok.name|default:"-" }}</td>
+                        <td>{{ case.incident_date|date:"M d, Y" }}</td>
+                        <td><span class="blotter-status blotter-status-{{ case.status }}">{{ case.get_status_display }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="blotter-empty" id="blotter-empty">No blotter cases match these filters.</div>
+        {% endif %}
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="blotter-pagination" aria-label="Pages">
+        {% if page_obj.has_previous %}<a class="btn btn-secondary btn-sm" href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} ({{ page_obj.paginator.count }} cases)</span>
+        {% if page_obj.has_next %}<a class="btn btn-secondary btn-sm" href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ page_obj.next_page_number }}">Next</a>{% endif %}
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
