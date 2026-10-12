@@ -173,12 +173,12 @@ class Facebook3ColumnLayoutAndStatsTests(TestCase):
         self.assertIn('records', lowered)
 
         # Center Feed Post Card and Interaction Bar with 3-Dots Menu
-        self.assertIn('[BARANGAY ADMINISTRATOR]', content)
+        self.assertIn('BARANGAY ADMINISTRATOR', content)
         self.assertIn('#lucide-ellipsis', content)
         self.assertIn('post-card-menu-container', content)
         self.assertNotIn('Like (', content)
         self.assertNotIn('Support (', content)
-        self.assertIn('Comments (', content)
+        self.assertIn('comments-counter', content)
 
 
         # Right Sidebar Panel Stat Cards & Plain Header

@@ -1,52 +1,99 @@
 /*
- * Staff "Register Resident" modal (templates/accounts/residents_tabbed.html).
- * One delegated listener; no inline handlers. Opens on [data-action="open-register-resident"],
- * closes on [data-action="close-register-resident"], backdrop click or Escape, and returns
- * focus to the button that opened it.
+ * Staff "Register Resident" modal and "Data Privacy Notice" modal
+ * (templates/accounts/residents_tabbed.html).
+ * Delegated listeners; no inline handlers. CSP-compliant.
  */
 (function () {
     'use strict';
 
-    var modal = null;
-    var opener = null;
+    var regModal = null;
+    var regOpener = null;
+    var privacyModal = null;
+    var privacyOpener = null;
 
-    function getModal() {
-        if (!modal) {
-            modal = document.getElementById('registerResidentModal');
+    function getRegModal() {
+        if (!regModal) {
+            regModal = document.getElementById('registerResidentModal');
         }
-        return modal;
+        return regModal;
     }
 
-    function openModal(trigger) {
-        var el = getModal();
+    function getPrivacyModal() {
+        if (!privacyModal) {
+            privacyModal = document.getElementById('privacyNoticeModal');
+        }
+        return privacyModal;
+    }
+
+    function openRegModal(trigger) {
+        var el = getRegModal();
         if (!el) { return; }
-        opener = trigger;
+        regOpener = trigger;
         el.style.display = 'flex';
         var first = el.querySelector('input, select, textarea');
         if (first) { first.focus(); }
     }
 
-    function closeModal() {
-        var el = getModal();
+    function closeRegModal() {
+        var el = getRegModal();
         if (!el || el.style.display === 'none') { return; }
         el.style.display = 'none';
-        if (opener && typeof opener.focus === 'function') { opener.focus(); }
-        opener = null;
+        if (regOpener && typeof regOpener.focus === 'function') { regOpener.focus(); }
+        regOpener = null;
+    }
+
+    function openPrivacyModal(trigger) {
+        var el = getPrivacyModal();
+        if (!el) { return; }
+        privacyOpener = trigger;
+        el.style.display = 'flex';
+        var dismissBtn = el.querySelector('#dismissPrivacyNoticeModalBtn, [data-action="close-privacy-notice"]');
+        if (dismissBtn) { dismissBtn.focus(); }
+    }
+
+    function closePrivacyModal() {
+        var el = getPrivacyModal();
+        if (!el || el.style.display === 'none') { return; }
+        el.style.display = 'none';
+        if (privacyOpener && typeof privacyOpener.focus === 'function') { privacyOpener.focus(); }
+        privacyOpener = null;
     }
 
     document.addEventListener('click', function (event) {
         var target = event.target;
-        var opens = target.closest('[data-action="open-register-resident"]');
-        if (opens) {
-            openModal(opens);
+
+        // Privacy Modal triggers
+        var openPrivacy = target.closest('[data-action="open-privacy-notice"]') || (target.tagName === 'A' && target.getAttribute('href') === '#privacy-notice');
+        if (openPrivacy) {
+            event.preventDefault();
+            openPrivacyModal(openPrivacy);
             return;
         }
-        if (target.closest('[data-action="close-register-resident"]') || target === getModal()) {
-            closeModal();
+
+        if (target.closest('[data-action="close-privacy-notice"]') || target === getPrivacyModal()) {
+            closePrivacyModal();
+            return;
+        }
+
+        // Register Resident triggers
+        var opens = target.closest('[data-action="open-register-resident"]');
+        if (opens) {
+            openRegModal(opens);
+            return;
+        }
+        if (target.closest('[data-action="close-register-resident"]') || target === getRegModal()) {
+            closeRegModal();
         }
     });
 
     document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape') { closeModal(); }
+        if (event.key === 'Escape') {
+            var priv = getPrivacyModal();
+            if (priv && priv.style.display !== 'none') {
+                closePrivacyModal();
+                return;
+            }
+            closeRegModal();
+        }
     });
 })();

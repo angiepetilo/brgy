@@ -13,10 +13,10 @@
 
 <div style="display: grid; grid-template-columns: 2.5fr 1fr; gap: 2rem;">
     <!-- Main Article Body -->
-    <article class="card">
+    <article class="card" style="border: 1px solid #E5E7EB; border-radius: 12px; overflow: hidden; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);">
         {% if announcement.image %}
-        <div style="max-height: 420px; overflow: hidden; background: #E5E7EB;">
-            <img src="{{ announcement.image.url }}" alt="{{ announcement.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+        <div style="max-height: 440px; overflow: hidden; background: #F9FAFB; border-bottom: 1px solid #E5E7EB;">
+            <img src="{{ announcement.image.url }}" alt="{{ announcement.title }}" style="width: 100%; height: auto; max-height: 440px; object-fit: contain; display: block;">
         </div>
         {% endif %}
 

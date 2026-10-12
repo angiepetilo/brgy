@@ -11,16 +11,7 @@
   });
 
   // ---------- confirmations ----------
-  document.querySelectorAll('form[data-confirm]').forEach(function (form) {
-    form.addEventListener('submit', function (event) {
-      if (!window.confirm(form.getAttribute('data-confirm'))) { event.preventDefault(); }
-    });
-  });
-  document.querySelectorAll('[data-confirm-button]').forEach(function (button) {
-    button.addEventListener('click', function (event) {
-      if (!window.confirm(button.getAttribute('data-confirm-button'))) { event.preventDefault(); }
-    });
-  });
+  // Handled globally by main.js showConfirmModal dialog for form[data-confirm] and [data-confirm-button]
 
   // ---------- party rows ----------
   var rows = document.querySelector('[data-party-rows]');
@@ -68,6 +59,36 @@
       renumber();
       var first = row.querySelector('select, input:not([type="hidden"])');
       if (first) { first.focus(); }
+    });
+  }
+
+  // ---------- other incident type toggle ----------
+  var typeSelect = document.getElementById('id_incident_type');
+  var otherWrapper = document.getElementById('other-type-wrapper');
+  var otherInput = document.getElementById('id_other_incident_type');
+
+  if (typeSelect && otherWrapper) {
+    var checkOther = function () {
+      if (typeSelect.value === 'other') {
+        otherWrapper.style.display = 'block';
+        if (otherInput && otherInput.value === '') {
+          otherInput.focus();
+        }
+      } else {
+        otherWrapper.style.display = 'none';
+      }
+    };
+    typeSelect.addEventListener('change', checkOther);
+    checkOther();
+  }
+
+  // ---------- quick status dropdown filter ----------
+  var quickFilter = document.getElementById('blotter-status-dropdown');
+  if (quickFilter) {
+    quickFilter.addEventListener('change', function () {
+      if (this.value) {
+        window.location.href = this.value;
+      }
     });
   }
 })();

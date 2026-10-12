@@ -27,8 +27,8 @@
 }
 
 .hig-card-title {
-  font-size: var(--text-large);
-  font-weight: var(--weight-semibold);
+  font-size: var(--text-section);
+  font-weight: var(--weight-medium);
   color: var(--color-text-primary);
   margin: 0;
 }

@@ -12,175 +12,513 @@
 
 @media (min-width: 768px) {
   
-  /* Main App Container - Grid Layout (2-column default, 3-column with right sidebar) */
-  .app-container.desktop,
-  .fb-main-container.dashboard-layout {
-    display: grid;
-    grid-template-columns: 240px 1fr;
-    min-height: calc(100vh - var(--toolbar-height, 64px));
-    height: auto;
-    overflow: visible;
-    transition: grid-template-columns var(--transition-fast, 0.2s ease);
+  :root {
+    --sidebar-width: 240px;
+    --sidebar-collapsed-width: 68px;
   }
 
+  body.sidebar-collapsed,
   .fb-main-container.dashboard-layout.sidebar-collapsed {
-    grid-template-columns: 64px 1fr !important;
+    --sidebar-width: 68px;
   }
 
-  .fb-main-container.dashboard-layout:has(.fb-right-sidebar) {
-    grid-template-columns: 240px 1fr 300px;
-  }
-
-  .fb-main-container.dashboard-layout.sidebar-collapsed:has(.fb-right-sidebar) {
-    grid-template-columns: 64px 1fr 300px !important;
-  }
-  
   /* ============================================
-     SIDEBAR (240px Fixed Width)
+     1. WINDOW TOOLBAR & SIDEBAR INTEGRATION (macOS HIG)
      ============================================ */
-  
   .hig-sidebar,
   .fb-left-sidebar {
-    width: 240px;
-    background: var(--color-sidebar);
-    border-right: 1px solid var(--color-border);
-    display: flex;
-    flex-direction: column;
-    position: sticky;
-    top: 64px;
-    height: calc(100vh - 64px);
-    overflow-y: auto;
-    overflow-x: hidden;
-    transition: width var(--transition-fast, 0.2s ease);
+    width: var(--sidebar-width) !important;
+    min-width: var(--sidebar-width) !important;
+    max-width: var(--sidebar-width) !important;
+    flex-shrink: 0 !important;
+    background: #F5F5F7 !important; /* macOS Native Sidebar Fill */
+    border-right: 1px solid #E5E5E7 !important; /* 1px solid stroke */
+    border-top: none !important;
+    border-left: none !important;
+    border-bottom: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: 1020 !important;
+    overflow: hidden !important; /* Zero-gap, prevent outer container scrollbar cutoff */
+    transition: width 0.2s ease, min-width 0.2s ease, max-width 0.2s ease !important;
   }
-  
-  /* Sidebar Header */
-  .hig-sidebar-header {
-    height: 52px;
-    min-height: 52px;
+
+  /* Unified Sidebar & Header Branding (Fixed 52px height) */
+  .sidebar-brand-header {
+    height: 52px !important;
+    min-height: 52px !important;
+    max-height: 52px !important;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 16px;
-    border-bottom: 1px solid var(--color-border);
+    padding: 0 12px;
+    border-bottom: 1px solid #E5E5E7;
+    background: #F5F5F7;
     flex-shrink: 0;
   }
 
-  .hig-sidebar-menu-heading {
-    font-size: var(--text-label, 0.75rem);
-    font-weight: var(--weight-semibold, 700);
-    color: var(--color-text-secondary, #6B7280);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .btn-sidebar-collapse {
-    width: 30px;
-    height: 30px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    background: #FFFFFF;
-    border: 1px solid var(--color-border, #E5E7EB);
-    color: var(--color-text-secondary, #6B7280);
-    cursor: pointer;
-    transition: all var(--transition-fast, 0.15s ease);
-    padding: 0;
-  }
-  .btn-sidebar-collapse:hover {
-    background: var(--color-hover, #F3F4F6);
-    color: var(--color-text-primary, #111827);
-  }
-
-  /* Collapsed Sidebar */
-  .hig-sidebar.collapsed,
-  .fb-left-sidebar.collapsed {
-    width: 64px !important;
-    min-width: 64px !important;
-  }
-  .hig-sidebar.collapsed .hig-sidebar-header {
-    justify-content: center !important;
-    padding: 0 !important;
-  }
-  .hig-sidebar.collapsed .hig-sidebar-menu-heading {
-    display: none !important;
-  }
-  .hig-sidebar.collapsed .hig-nav-label,
-  .hig-sidebar.collapsed .hig-nav-section-title,
-  .hig-sidebar.collapsed .hig-footer-info {
-    display: none !important;
-  }
-  .hig-sidebar.collapsed .hig-nav-item {
-    justify-content: center !important;
-    padding: 0 !important;
-    width: 44px !important;
-    height: 44px !important;
-    margin: 4px auto !important;
-    border-radius: 10px !important;
-  }
-  .hig-sidebar.collapsed .hig-nav-section {
-    margin: 12px 8px !important;
-    border-top: 1px solid var(--color-border) !important;
-  }
-  .hig-sidebar.collapsed .hig-sidebar-footer {
-    padding: 12px 0 !important;
-  }
-  .hig-sidebar.collapsed .hig-footer-user {
-    justify-content: center !important;
-    padding: 0 !important;
-  }
-  .hig-sidebar.collapsed .collapse-label-expanded {
-    display: none !important;
-  }
-  .hig-sidebar.collapsed .collapse-label-collapsed {
-    display: inline-flex !important;
-  }
-  
-  /* Sidebar Navigation */
-  .hig-sidebar-nav {
-    flex: 1;
-    padding: 12px 10px;
-    overflow-y: auto;
-  }
-  
-  .hig-nav-item {
-    height: 32px;
-    padding: 0 10px;
+  .sidebar-brand-link {
     display: flex;
     align-items: center;
     gap: 8px;
-    border-radius: var(--radius-md);
-    font-size: var(--text-body);
-    font-weight: var(--weight-medium);
-    color: var(--color-text-primary);
     text-decoration: none;
-    transition: background var(--transition-fast);
-    cursor: pointer;
-    margin-bottom: 2px;
+    min-width: 0;
+    overflow: hidden;
   }
-  
-  .hig-nav-item:hover:not(.hig-nav-item-active) {
-    background: var(--color-hover);
-  }
-  
-  .hig-nav-item-active,
-  .hig-nav-item.active {
-    background: var(--color-accent-blue);
-    color: var(--color-text-inverse);
-  }
-  
-  .hig-nav-icon {
-    width: 18px;
-    height: 18px;
+
+  .sidebar-brand-logo {
+    height: 28px;
+    width: 28px;
+    object-fit: contain;
     flex-shrink: 0;
   }
-  
+
+  .sidebar-brand-text {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: -0.08px;
+    color: #1D1D1F;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+
+  .sidebar-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: #86868B;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 0;
+    transition: all 0.15s ease;
+  }
+
+  .sidebar-toggle-btn:hover {
+    background: #E8E8ED;
+    color: #1D1D1F;
+  }
+
+  .sidebar-toggle-icon-collapse,
+  .sidebar-toggle-icon-expand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+  }
+
+  .hig-sidebar:not(.collapsed) .sidebar-toggle-icon-expand {
+    display: none !important;
+  }
+
+  .hig-sidebar.collapsed .sidebar-toggle-icon-collapse {
+    display: none !important;
+  }
+
+  /* Subheadings & Section Titles */
+  .hig-sidebar-header {
+    height: 28px;
+    min-height: 28px;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    flex-shrink: 0;
+    border-bottom: none;
+  }
+
+  .hig-sidebar-menu-heading,
+  .hig-nav-section-title {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    color: #86868B !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06px !important;
+  }
+
+  .hig-nav-section {
+    padding: 6px 14px 2px 14px;
+  }
+
+  /* 2. Navigation Items: 32px height, 10px h-pad, 6px v-pad/radius, 13pt Regular */
+  .hig-sidebar-nav {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    padding: 6px 10px;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+  }
+
+  .hig-sidebar-nav::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .hig-sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+  }
+
+  .hig-sidebar-nav::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .hig-nav-item,
+  a.hig-nav-item {
+    position: relative !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+    padding: 6px 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    border-radius: 6px !important;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif !important;
+    font-size: 13px !important; /* 13 pt */
+    font-weight: 400 !important; /* Regular */
+    letter-spacing: -0.08px !important;
+    color: #86868B !important; /* Secondary inactive text */
+    background: transparent !important;
+    text-decoration: none !important;
+    outline: none !important;
+    transition: all 0.12s ease !important;
+    cursor: pointer !important;
+    margin-bottom: 2px !important;
+    user-select: none !important;
+    box-sizing: border-box !important;
+  }
+
+  .hig-nav-item:hover:not(.hig-nav-item-active) {
+    background: #E8E8ED !important;
+    color: #1D1D1F !important;
+  }
+
+  .hig-nav-item-active,
+  .hig-nav-item.active {
+    background: #0071E3 !important; /* System Accent Blue fill */
+    color: #FFFFFF !important;      /* Crisp white text */
+    font-weight: 600 !important;
+    box-shadow: 0 1px 2px rgba(0, 113, 227, 0.25) !important;
+  }
+
+  .hig-nav-item-active .hig-nav-icon,
+  .hig-nav-item.active .hig-nav-icon,
+  .hig-nav-item-active svg,
+  .hig-nav-item.active svg {
+    color: #FFFFFF !important;
+    stroke: #FFFFFF !important;
+  }
+
+  .hig-nav-item-active .hig-nav-label,
+  .hig-nav-item.active .hig-nav-label {
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+  }
+
+  .hig-nav-item-active:hover,
+  .hig-nav-item.active:hover {
+    background: #0060C0 !important;
+    color: #FFFFFF !important;
+  }
+
+  .hig-nav-icon {
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0 !important;
+  }
+
   .hig-nav-label {
     flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    line-height: 1;
+  }
+
+  .hig-nav-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 18px;
+    min-width: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 600;
+    background: #D1D1D6;
+    color: #1D1D1F;
+    line-height: 1;
+  }
+
+  .hig-nav-item-active .hig-nav-badge {
+    background: rgba(255, 255, 255, 0.28) !important;
+    color: #FFFFFF !important;
+  }
+
+  /* Sidebar User Footer */
+  .hig-sidebar-footer {
+    padding: 10px 14px;
+    background: #F5F5F7;
+    border-top: 1px solid #E5E5E7;
+    flex-shrink: 0;
+  }
+
+  .hig-footer-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .hig-footer-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #E5E5E7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: #1D1D1F;
+    flex-shrink: 0;
+  }
+
+  .hig-footer-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hig-footer-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1D1D1F;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .hig-footer-role {
+    font-size: 10px;
+    color: #86868B;
+    line-height: 1.2;
+  }
+
+  /* Collapsed Sidebar State */
+  .hig-sidebar.collapsed,
+  .fb-left-sidebar.collapsed {
+    width: 68px !important;
+    min-width: 68px !important;
+    max-width: 68px !important;
+  }
+
+  .hig-sidebar.collapsed .sidebar-brand-header {
+    padding: 0 8px;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .hig-sidebar.collapsed .sidebar-brand-text {
+    display: none !important;
+  }
+
+  .hig-sidebar.collapsed .hig-sidebar-header,
+  .hig-sidebar.collapsed .hig-sidebar-menu-heading,
+  .hig-sidebar.collapsed .hig-nav-label,
+  .hig-sidebar.collapsed .hig-nav-section-title,
+  .hig-sidebar.collapsed .hig-footer-info {
+    display: none !important;
+  }
+
+  .hig-sidebar.collapsed .hig-nav-item,
+  .fb-left-sidebar.collapsed .hig-nav-item {
+    position: relative !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    width: 36px !important;
+    height: 32px !important;
+    margin: 2px auto !important;
+    border-radius: 6px !important;
+    overflow: visible !important;
+  }
+
+  /* Collapsed Notification Count Badge (Floating top-right indicator) */
+  .hig-sidebar.collapsed .hig-nav-badge,
+  .fb-left-sidebar.collapsed .hig-nav-badge {
+    position: absolute !important;
+    top: 3px !important;
+    right: 3px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    max-width: 24px !important;
+    padding: 0 4px !important;
+    border-radius: 999px !important;
+    font-size: 10px !important; /* 10pt */
+    font-weight: 700 !important;
+    line-height: 14px !important;
+    text-align: center !important;
+    background: #FF3B30 !important;
+    color: #FFFFFF !important;
+    border: 1.5px solid #F5F5F7 !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+    z-index: 10 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    pointer-events: none !important;
+    margin: 0 !important;
+  }
+
+  .hig-sidebar.collapsed .hig-nav-item-active .hig-nav-badge,
+  .hig-sidebar.collapsed .hig-nav-item.active .hig-nav-badge,
+  .fb-left-sidebar.collapsed .hig-nav-item-active .hig-nav-badge,
+  .fb-left-sidebar.collapsed .hig-nav-item.active .hig-nav-badge {
+    border-color: #0071E3 !important;
+  }
+
+  .hig-sidebar.collapsed .hig-nav-section {
+    margin: 6px 8px !important;
+    padding: 0 !important;
+    border-top: 1px solid #E5E5E7 !important;
+  }
+
+  .hig-sidebar.collapsed .hig-footer-user {
+    justify-content: center !important;
+    padding: 0 !important;
+  }
+
+  /* ============================================
+     TOP WINDOW TOOLBAR (Strictly 52px, #FFFFFF, 1px bottom #E5E5E7)
+     ============================================ */
+  .fb-topbar {
+    height: 52px !important;
+    min-height: 52px !important;
+    max-height: 52px !important;
+    margin-left: var(--sidebar-width, 240px) !important;
+    width: calc(100% - var(--sidebar-width, 240px)) !important;
+    background: #FFFFFF !important;
+    border-bottom: 1px solid #E5E5E7 !important;
+    box-shadow: none !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1010 !important;
+    padding: 0 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    transition: margin-left 0.2s ease, width 0.2s ease !important;
+  }
+
+  .fb-topbar .fb-topbar-left .mobile-brand-only {
+    display: none !important;
+  }
+
+  /* Trailing-edge alignment for controls */
+  .fb-topbar-center {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+  }
+
+  .fb-topbar-center .fb-nav-tab {
+    height: 30px;
+    min-height: 30px;
+    padding: 0 10px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 6px;
+    color: #86868B;
+    background: transparent;
+    border: none;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.12s ease;
+  }
+
+  .fb-topbar-center .fb-nav-tab:hover {
+    background: #F5F5F7;
+    color: #1D1D1F;
+  }
+
+  .fb-topbar-center .fb-nav-tab.active {
+    background: #E8F2FF;
+    color: #0071E3;
+    font-weight: 600;
+  }
+
+  .fb-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+  }
+
+  .fb-topbar-right .btn-top-action {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    border-radius: 6px !important;
+    background: transparent !important;
+    color: #86868B !important;
+    border: 1px solid transparent !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.12s ease !important;
+    padding: 0 !important;
+  }
+
+  .fb-topbar-right .btn-top-action:hover {
+    background: #F5F5F7 !important;
+    color: #1D1D1F !important;
+  }
+
+  .fb-topbar-right .btn-top-profile {
+    border-radius: 50% !important;
+    overflow: hidden !important;
+  }
+
+  /* Main Canvas Container */
+  .fb-main-container.dashboard-layout {
+    display: block !important;
+    margin-left: var(--sidebar-width, 240px) !important;
+    width: calc(100% - var(--sidebar-width, 240px)) !important;
+    min-height: calc(100vh - 52px) !important;
+    background: #FFFFFF !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    transition: margin-left 0.2s ease, width 0.2s ease !important;
+  }
+
+  .fb-main-container.dashboard-layout .main-content-area,
+  .fb-main-container.dashboard-layout .fb-center-content {
+    max-width: 100% !important;
+    width: 100% !important;
+    background: transparent !important;
   }
   
   .hig-nav-badge {

@@ -27,8 +27,7 @@
         </div>
         {% endif %}
     </div>
-
-    <form class="stats-filters" id="stats-filters" method="get" action="{% url 'statistics:overview' %}">
+    <form class="stats-filters" id="stats-filters" method="get" action="{% url 'statistics:overview' %}" style="display: none;">
         <div>
             <label for="stats-date-from">From</label>
             <input type="date" id="stats-date-from" name="date_from" value="{{ date_from }}">
@@ -50,11 +49,11 @@
         <a class="stats-btn" id="stats-reset" href="{% url 'statistics:overview' %}">Reset</a>
     </form>
 
-    <p class="stats-note" id="stats-scope-note">
+    <p class="stats-note" id="stats-scope-note" style="display: none;">
         {% icon 'info' %}
         Date filters apply to appointments, revenue and blotter cases only. Resident and household figures are a current snapshot.
     </p>
-    <p class="stats-range" id="stats-range" aria-live="polite"></p>
+    <p class="stats-range" id="stats-range" aria-live="polite" style="display: none;"></p>
     <div class="stats-error" id="stats-error" role="alert" aria-live="assertive" {% if not filter_error %}hidden{% endif %}>{{ filter_error }}</div>
 
     <section class="stats-kpis" aria-label="Key figures">

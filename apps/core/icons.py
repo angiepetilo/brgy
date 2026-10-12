@@ -33,15 +33,20 @@ ICON_NAMES = (
 
 ALIASES = {
     # Design-guide names (Lucide 0.x) -> Lucide 1.x canonical ids.
+    'building': 'building-2',
     'alert-triangle': 'triangle-alert',
     'home': 'house',
     'edit': 'square-pen',
+    'pencil': 'square-pen',
     'trash': 'trash-2',
     'close': 'x',
     'spinner': 'loader-circle',
     'external-link': 'arrow-up-right',
     'help': 'info',
     'key': 'key-round',
+    'check-circle': 'circle-check',
+    'move-right': 'arrow-right',
+    'transfer': 'arrow-right',
 }
 
 

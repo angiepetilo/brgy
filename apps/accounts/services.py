@@ -631,12 +631,12 @@ def delete_staff_assignment_service(actor, assignment_id):
     return True
 
 
-def staff_register_resident_service(staff_user, data):
+def staff_register_resident_service(staff_user, data, files=None):
     """
-    Staff-registered residents/households:
-    - Have no User and may include minors. The 18+ rule applies only to account creation.
-    - Minimal fields for minors / residents: first_name, last_name, birthdate, purok.
-    - Can create or link Household.
+    Staff-registered residents:
+    - If email is provided (account registration), creates a User (status=pending) + Resident,
+      saves the ID photo in private storage, and sets up login credentials for review.
+    - If no email is provided (minor/household member stub), creates Resident without User.
     - Logged in ActivityLog.
     """
     from apps.accounts.models import Household, Purok, Resident
@@ -650,8 +650,9 @@ def staff_register_resident_service(staff_user, data):
     middle_name = data.get('middle_name', '').strip()
     last_name = data.get('last_name', '').strip()
     birthdate = data.get('birthdate')
-    contact_no = data.get('contact_no', '').strip()
-    address = data.get('address', '').strip()
+    contact_no = data.get('contact_no', '').strip() or data.get('phone_number', '').strip()
+    address = data.get('address', '').strip() or data.get('street_address', '').strip()
+    email = data.get('email', '').strip().lower()
     purok_val = data.get('purok')
 
     if not first_name or not last_name or not birthdate:
@@ -668,7 +669,15 @@ def staff_register_resident_service(staff_user, data):
         raise ValueError("Birthdate cannot be in the future.")
 
     demographics = clean_demographics(data)
-    contact_no = clean_ph_mobile(contact_no, label='Contact number')
+    contact_no = clean_ph_mobile(contact_no, required=bool(email), label='Contact number')
+
+    id_photo_file = None
+    if files:
+        id_photo_file = files.get('id_photo')
+        if id_photo_file:
+            clean_upload(id_photo_file)
+        if files.get('id_photo_back'):
+            clean_upload(files.get('id_photo_back'))
 
     purok = None
     if isinstance(purok_val, Purok):
@@ -681,19 +690,72 @@ def staff_register_resident_service(staff_user, data):
     if household_id:
         household = Household.objects.filter(id=household_id).first()
 
+    user = None
+    if email:
+        age = calculate_age(birthdate)
+        if age < 18:
+            raise ValueError("This portal is for residents 18 and above.")
+
+        user = User.objects.filter(email__iexact=email).first()
+        if user and user.status == User.STATUS_REJECTED:
+            user.first_name = first_name
+            user.last_name = last_name
+            user.status = User.STATUS_PENDING
+            user.rejection_reason = ''
+            user.reviewed_by = None
+            user.reviewed_at = None
+            user.phone_number = contact_no
+            user.address = address
+            user.purok = purok
+            user.set_unusable_password()
+            user.save()
+        elif user:
+            raise ValueError("An account with this email already exists.")
+        else:
+            base_username = email.split('@')[0].replace('.', '_').replace('-', '_')
+            username = base_username
+            counter = 1
+            while User.objects.filter(username=username).exists():
+                username = f"{base_username}{counter}"
+                counter += 1
+
+            user = User.objects.create(
+                username=username,
+                email=email,
+                first_name=first_name,
+                last_name=last_name,
+                role=User.ROLE_RESIDENT,
+                status=User.STATUS_PENDING,
+                must_change_password=False,
+                phone_number=contact_no,
+                address=address,
+                purok=purok,
+            )
+            user.set_unusable_password()
+            user.save()
+
     with transaction.atomic():
-        resident = Resident.objects.create(
-            user=None,
-            first_name=first_name,
-            middle_name=middle_name,
-            last_name=last_name,
-            birthdate=birthdate,
-            contact_no=contact_no,
-            address=address,
-            purok=purok,
-            household=household,
+        defaults = {
+            'first_name': first_name,
+            'middle_name': middle_name,
+            'last_name': last_name,
+            'birthdate': birthdate,
+            'contact_no': contact_no,
+            'address': address,
+            'purok': purok,
+            'household': household,
+            'consent_recorded': True,
+            'consent_recorded_date': timezone.localdate(),
             **demographics,
-        )
+        }
+        if user:
+            resident, _ = Resident.objects.update_or_create(user=user, defaults=defaults)
+        else:
+            resident = Resident.objects.create(user=None, **defaults)
+
+        if id_photo_file:
+            resident.id_photo = id_photo_file
+            resident.save(update_fields=['id_photo'])
 
         if data.get('create_household'):
             household_name = data.get('household_name') or f"Family of {last_name}"
@@ -709,10 +771,10 @@ def staff_register_resident_service(staff_user, data):
         log_activity(
             actor=staff_user,
             action='create',
-            action_type='Resident',
+            action_type='Resident' if not user else 'Resident Account',
             target_id=str(resident.id),
             target_name=resident.get_full_name(),
-            details=f"Staff {staff_user.username} registered resident {resident.get_full_name()} (Age: {resident.age})"
+            details=f"Staff {staff_user.username} registered resident {'account ' if user else ''}{resident.get_full_name()} (Age: {resident.age})"
         )
 
     return resident

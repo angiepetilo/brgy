@@ -25,4 +25,7 @@ urlpatterns = [
     path('api/slots/', views.api_slots_view, name='api_slots'),
     path('api/validate-email/', views.api_validate_email_view, name='api_validate_email'),
     path('api/public-book/', views.public_appointment_book_view, name='api_public_book'),
+    path('documents/<int:pk>/print/', views.print_document_view, name='print_document'),
+    path('documents/<int:pk>/customize/', views.save_customized_document_view, name='customize_document'),
+    path('health/<int:pk>/print/', views.print_health_record_view, name='print_health'),
 ]

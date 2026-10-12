@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+{% load static core_tags %}
+
+{% block title %}Resident Accounts - Barangay.ph{% endblock %}
+
+{% block content %}
+<div class="residents-management-container" style="width: 100%; padding: 0.5rem 0;">
+
+    <!-- Header Section -->
+    <div class="page-header" style="margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin: 0;">
+                Resident Accounts
+            </h1>
+            <p style="margin: 0.2rem 0 0 0; font-size: 0.8125rem; color: #6B7280;">
+                Online registration accounts, applicant verification documents, and credential dispatch.
+            </p>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="hig-segmented-control hig-segmented-3" style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem;">
+        <a href="{% url 'accounts:resident_accounts_list' %}?tab=pending" 
+           class="btn {% if active_tab == 'pending' %}btn-primary{% else %}btn-secondary{% endif %}" 
+           style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.45rem;">
+            <span>Pending Signups</span>
+            {% if pending_count > 0 %}
+            <span style="background: #FEF3C7; color: #92400E; font-size: 0.75rem; padding: 1px 7px; border-radius: 9999px; font-weight: 700;">{{ pending_count }}</span>
+            {% endif %}
+        </a>
+        <a href="{% url 'accounts:resident_accounts_list' %}?tab=approved" 
+           class="btn {% if active_tab == 'approved' %}btn-primary{% else %}btn-secondary{% endif %}" 
+           style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.45rem;">
+            <span>Approved Accounts</span>
+            <span style="background: #E5E7EB; color: #374151; font-size: 0.75rem; padding: 1px 7px; border-radius: 9999px; font-weight: 700;">{{ approved_count }}</span>
+        </a>
+        <a href="{% url 'accounts:resident_accounts_list' %}?tab=rejected" 
+           class="btn {% if active_tab == 'rejected' %}btn-primary{% else %}btn-secondary{% endif %}" 
+           style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.45rem;">
+            <span>Declined Signups</span>
+            <span style="background: #FEE2E2; color: #991B1B; font-size: 0.75rem; padding: 1px 7px; border-radius: 9999px; font-weight: 700;">{{ rejected_count }}</span>
+        </a>
+    </div>
+
+    <!-- Search Controls -->
+    <div style="margin-bottom: 1.25rem;">
+        <form id="accounts-filter-form" method="get" action="{% url 'accounts:resident_accounts_list' %}" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <input type="hidden" name="tab" value="{{ active_tab }}">
+            
+            <div class="search-input-container" style="flex: 1; max-width: 480px; position: relative;">
+                <span class="search-input-icon" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; width: 16px; height: 16px; color: #9CA3AF; display: flex; align-items: center; justify-content: center; z-index: 2;">
+                    {% icon 'search' style='width: 16px; height: 16px;' %}
+                </span>
+                <input type="text" name="q" value="{{ search_query }}" class="search-input-field" placeholder="Search by applicant name, username, email, phone..." style="padding-left: 38px !important; height: 38px; border-radius: 8px; border: 1px solid #E5E7EB; width: 100%; font-size: 0.875rem;">
+                {% if search_query %}
+                <a href="{% url 'accounts:resident_accounts_list' %}?tab={{ active_tab }}" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #9CA3AF; text-decoration: none; z-index: 2;" title="Clear search" aria-label="Clear search">
+                    {% icon 'circle-x' %}
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Data Table Card -->
+    <div class="data-table-card" style="border: 1px solid #E5E7EB; border-radius: 8px; background: #FFFFFF; overflow: hidden; box-shadow: none;">
+        <div class="table-responsive" style="overflow-x: auto;">
+            <table class="clean-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 1px solid #E5E7EB; background: #FAFAFA;">
+                        <th style="width: 45px; text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280;">#</th>
+                        <th style="text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280; width: 28%;">Applicant</th>
+                        <th style="text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280; width: 24%;">Profile Details</th>
+                        <th style="text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280; width: 16%;">Uploaded ID</th>
+                        <th style="text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280; width: 14%;">Registered On</th>
+                        <th style="width: 110px; text-align: center; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in accounts %}
+                    <tr style="border-bottom: 1px solid #F3F4F6;">
+                        <td style="padding: 0.65rem 0.85rem; font-size: 0.875rem; color: #6B7280;">{{ forloop.counter }}</td>
+                        <td style="padding: 0.65rem 0.85rem;">
+                            <div style="font-weight: 600; font-size: 0.875rem; color: #111827;">{{ u.get_full_name|default:u.username }}</div>
+                            <div style="font-size: 0.75rem; color: #6B7280;">
+                                @{{ u.username }} &bull; <span style="color: #0071E3;">{{ u.email }}</span>
+                            </div>
+                            {% if u.phone_number or u.resident_profile.contact_no %}
+                            <div style="font-size: 0.75rem; color: #4B5563;">
+                                {% icon 'phone' style='width: 12px; height: 12px; vertical-align: middle;' %}
+                                {{ u.resident_profile.contact_no|default:u.phone_number }}
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 0.65rem 0.85rem; font-size: 0.8125rem; color: #374151;">
+                            <div><strong>Purok:</strong> {{ u.resident_profile.purok.name|default:u.get_purok_display|default:'Unassigned' }}</div>
+                            <div><strong>Address:</strong> {{ u.resident_profile.address|default:u.street_address|default:u.address|default:'-'|truncatechars:35 }}</div>
+                            {% if u.resident_profile.birthdate or u.date_of_birth %}
+                            <div style="font-size: 0.75rem; color: #6B7280;">
+                                DOB: {{ u.resident_profile.birthdate|date:"M d, Y"|default:u.date_of_birth|date:"M d, Y" }}
+                                {% if u.resident_profile.age %}({{ u.resident_profile.age }} yrs old){% endif %}
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 0.65rem 0.85rem;">
+                            {% if u.resident_profile and u.resident_profile.id_photo %}
+                            <button type="button" class="btn btn-secondary btn-sm btn-preview-id"
+                                    data-url="{% url 'accounts:serve_id_photo' u.resident_profile.id %}"
+                                    data-name="{{ u.get_full_name|default:u.username }}"
+                                    style="font-size: 0.75rem; padding: 3px 8px; display: inline-flex; align-items: center; gap: 4px;">
+                                {% icon 'file-badge' %} View ID File
+                            </button>
+                            {% elif u.id_proof %}
+                            <button type="button" class="btn btn-secondary btn-sm btn-preview-id"
+                                    data-url="{% url 'accounts:serve_user_id_proof' u.id %}"
+                                    data-name="{{ u.get_full_name|default:u.username }}"
+                                    style="font-size: 0.75rem; padding: 3px 8px; display: inline-flex; align-items: center; gap: 4px;">
+                                {% icon 'file-badge' %} View ID Proof
+                            </button>
+                            {% else %}
+                            <span style="font-size: 0.75rem; color: #9CA3AF; font-style: italic;">No document</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 0.65rem 0.85rem; font-size: 0.875rem; color: #374151;">
+                            {{ u.date_joined|date:"m/d/y g:i A" }}
+                        </td>
+                        <td style="text-align: center; padding: 0.65rem 0.85rem; white-space: nowrap;">
+                            <div style="display: inline-flex; align-items: center; gap: 4px;">
+                                <button type="button" class="btn-action-circle btn-view-resident-account"
+                                        data-id="{{ u.id }}"
+                                        data-name="{{ u.get_full_name|default:u.username }}"
+                                        data-username="{{ u.username }}"
+                                        data-email="{{ u.email }}"
+                                        data-phone="{{ u.resident_profile.contact_no|default:u.phone_number|default:'-' }}"
+                                        data-purok="{{ u.resident_profile.purok.name|default:u.get_purok_display|default:'Unassigned' }}"
+                                        data-address="{{ u.resident_profile.address|default:u.street_address|default:u.address|default:'-' }}"
+                                        data-birthdate="{% if u.resident_profile and u.resident_profile.birthdate %}{{ u.resident_profile.birthdate|date:'M d, Y' }}{% elif u.date_of_birth %}{{ u.date_of_birth|date:'M d, Y' }}{% else %}-{% endif %}"
+                                        data-age="{% if u.resident_profile and u.resident_profile.age %}{{ u.resident_profile.age }} yrs old{% else %}-{% endif %}"
+                                        data-status="{% if not u.is_approved %}pending{% else %}{{ u.status }}{% endif %}"
+                                        data-doc-url="{% if u.resident_profile and u.resident_profile.id_photo %}{% url 'accounts:serve_id_photo' u.resident_profile.id %}{% elif u.id_proof %}{% url 'accounts:serve_user_id_proof' u.id %}{% endif %}"
+                                        data-approve-url="{% url 'accounts:resident_approve_direct' user_id=u.id %}"
+                                        data-reject-url="{% url 'accounts:resident_reject_direct' user_id=u.id %}"
+                                        title="View Account Profile" aria-label="View Account Profile"
+                                        style="border: none; background: transparent; cursor: pointer; color: #4B5563; font-size: 1.1rem; padding: 4px; display: inline-flex; align-items: center;">
+                                    {% icon 'eye' %}
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 3rem 1.5rem; color: #6B7280; font-size: 0.875rem;">
+                            No {{ active_tab }} resident sign up accounts found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <div style="padding: 0.75rem 1rem; border-top: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; font-size: 0.8125rem;">
+            <div style="color: #6B7280;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
+            <div style="display: flex; gap: 0.35rem;">
+                {% if page_obj.has_previous %}
+                <a href="?tab={{ active_tab }}&page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-secondary btn-sm">Previous</a>
+                {% endif %}
+                {% if page_obj.has_next %}
+                <a href="?tab={{ active_tab }}&page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-secondary btn-sm">Next</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ==================== ACCOUNT PROFILE & DOCUMENT DETAIL MODAL ==================== -->
+<div id="accountDetailModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: #FFFFFF; border-radius: 14px; width: 100%; max-width: 680px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05); overflow: hidden; animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div style="padding: 1.15rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <h3 id="det-name" style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #111827;">Applicant Details</h3>
+                <span id="det-username" style="font-size: 0.8125rem; color: #6B7280;"></span>
+            </div>
+            <button type="button" id="btn-close-account-detail" style="border: none; background: transparent; color: #6B7280; font-size: 0.8125rem; font-weight: 600; cursor: pointer; text-transform: uppercase;">CLOSE</button>
+        </div>
+
+        <div style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1rem; max-height: 72vh; overflow-y: auto;">
+            <!-- Profile Info Grid -->
+            <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 1rem;">
+                <h4 style="margin: 0 0 0.75rem 0; font-size: 0.8125rem; font-weight: 700; color: #374151; text-transform: uppercase;">Registration Information</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.875rem;">
+                    <div>
+                        <span style="display: block; font-size: 0.75rem; color: #6B7280;">Personal Email (for password delivery):</span>
+                        <strong id="det-email" style="color: #0071E3;">-</strong>
+                    </div>
+                    <div>
+                        <span style="display: block; font-size: 0.75rem; color: #6B7280;">Mobile Phone:</span>
+                        <strong id="det-phone" style="color: #111827;">-</strong>
+                    </div>
+                    <div>
+                        <span style="display: block; font-size: 0.75rem; color: #6B7280;">Purok Jurisdiction:</span>
+                        <span id="det-purok" style="color: #111827;">-</span>
+                    </div>
+                    <div>
+                        <span style="display: block; font-size: 0.75rem; color: #6B7280;">Birthdate &amp; Age:</span>
+                        <span id="det-birthdate" style="color: #111827;">-</span>
+                    </div>
+                </div>
+                <div style="margin-top: 0.75rem; font-size: 0.875rem;">
+                    <span style="display: block; font-size: 0.75rem; color: #6B7280;">Barangay Address:</span>
+                    <span id="det-address" style="color: #111827;">-</span>
+                </div>
+            </div>
+
+            <!-- Uploaded Document Card -->
+            <div style="border: 1px solid #E5E7EB; border-radius: 8px; padding: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <h4 style="margin: 0; font-size: 0.8125rem; font-weight: 700; color: #374151; text-transform: uppercase;">Uploaded Verification Document</h4>
+                    <a id="det-doc-link" href="#" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 2px 8px; display: inline-flex; align-items: center; gap: 4px;">
+                        {% icon 'external-link' %} Open Full Size
+                    </a>
+                </div>
+                <div id="det-doc-container" style="text-align: center; background: #F3F4F6; border-radius: 6px; padding: 0.75rem; min-height: 180px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                    <img id="det-doc-img" src="" alt="ID Document Preview" style="max-width: 100%; max-height: 280px; object-fit: contain; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <div id="det-no-doc" style="display: none; color: #9CA3AF; font-size: 0.875rem;">No identification document was uploaded.</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="padding: 1rem 1.5rem; background: #FAFAFA; border-top: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; gap: 0.75rem;">
+            <!-- Left: Reject button (pending only) -->
+            <div>
+                <button type="button" id="det-reject-btn" class="btn btn-danger" style="display: none; font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1.1rem; border-radius: 6px; background: #DC2626; border-color: #DC2626;">
+                    {% icon 'x' %} Decline Registration
+                </button>
+            </div>
+            <!-- Right: Close + Approve -->
+            <div style="display: flex; gap: 0.65rem; align-items: center;">
+                <button type="button" id="btn-cancel-account-detail" class="btn btn-secondary" style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1rem; border-radius: 6px;">
+                    Close
+                </button>
+                <form id="det-approve-form" method="post" action="" style="margin: 0; display: none;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn" style="background: #16A34A; color: #FFFFFF; font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1.25rem; border-radius: 6px; border: none; cursor: pointer;">
+                        {% icon 'check' %} Approve &amp; Send Temp Password
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== REJECT ACCOUNT MODAL ==================== -->
+<div id="rejectAccountModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: #FFFFFF; border-radius: 12px; width: 100%; max-width: 460px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); overflow: hidden;">
+        <div style="padding: 1.15rem 1.5rem; border-bottom: 1px solid #E5E7EB;">
+            <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #DC2626;">Decline Account Registration</h3>
+        </div>
+        <form id="rejectAccountForm" method="post" action="">
+            {% csrf_token %}
+            <div style="padding: 1.25rem 1.5rem;">
+                <p style="font-size: 0.875rem; color: #374151; margin: 0 0 0.75rem 0;">
+                    Please provide the reason for declining registration for <strong id="reject-applicant-name"></strong>. An official notification will be emailed to them.
+                </p>
+                <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Rejection Reason *</label>
+                <textarea name="rejection_reason" rows="3" required placeholder="e.g. Uploaded ID is unreadable, or applicant is outside barangay jurisdiction..." style="width: 100%; border-radius: 6px; border: 1px solid #D1D5DB; padding: 0.5rem; font-size: 0.875rem;"></textarea>
+            </div>
+            <div style="padding: 1rem 1.5rem; background: #FAFAFA; border-top: 1px solid #E5E7EB; display: flex; justify-content: flex-end; gap: 0.75rem;">
+                <button type="button" id="btn-cancel-reject-account" class="btn btn-secondary" style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1rem; border-radius: 6px;">Cancel</button>
+                <button type="submit" class="btn btn-danger" style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1.25rem; border-radius: 6px; background: #DC2626; border-color: #DC2626;">Decline Registration</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/resident_accounts.js' %}" defer></script>
+{% endblock %}

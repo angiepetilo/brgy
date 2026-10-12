@@ -80,19 +80,36 @@
             gap: 2.5rem;
             align-items: center;
         }
-        .hero-title {
-            font-size: 2.5rem;
-            font-weight: 800;
-            line-height: 1.15;
+        .landing-hero .hero-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #FFFFFF !important;
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
             margin-bottom: 1rem;
-            color: #FFFFFF;
         }
+        .landing-hero h1,
+        .landing-hero .hero-title,
+        .hero-title {
+            font-size: 2.5rem !important;
+            font-weight: 800 !important;
+            line-height: 1.15 !important;
+            margin-bottom: 1rem !important;
+            color: #FFFFFF !important;
+        }
+        .landing-hero p,
+        .landing-hero .hero-subtitle,
         .hero-subtitle {
-            font-size: 1.05rem;
-            line-height: 1.6;
-            opacity: 0.92;
-            margin-bottom: 1.75rem;
-            color: #F3F4F6;
+            font-size: 1.05rem !important;
+            line-height: 1.6 !important;
+            opacity: 0.95 !important;
+            margin-bottom: 1.75rem !important;
+            color: #F3F4F6 !important;
         }
         .hero-cta-btn {
             background: #FFFFFF;
@@ -732,13 +749,13 @@
     <section class="landing-hero">
         <div class="hero-inner">
             <div>
-                <span style="display: inline-block; background: rgba(255, 255, 255, 0.2); padding: 0.35rem 0.85rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 1rem;">
+                <span class="hero-badge" style="display: inline-block; background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: #FFFFFF; padding: 0.35rem 0.85rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 1rem;">
                     Official Community Services & Health Center
                 </span>
-                <h1 class="hero-title">
+                <h1 class="hero-title" style="color: #FFFFFF !important;">
                     Fast, Seamless Barangay Appointments & Online Certifications
                 </h1>
-                <p class="hero-subtitle">
+                <p class="hero-subtitle" style="color: #F3F4F6 !important;">
                     Request official clearances, schedule health consultations, dental procedures, and track processing in real-time from anywhere.
                 </p>
                 <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
@@ -792,7 +809,7 @@
                 <!-- Step 4 -->
                 <div class="step-item">
                     <div class="step-number-badge">4</div>
-                    <div class="step-heading">Confirmation / Visit</div>
+                    <div class="step-heading">Confirmation and Pickup</div>
                     <div class="step-desc">Receive real-time alert for document pickup or hall visit.</div>
                 </div>
             </div>
@@ -874,36 +891,19 @@
         </div>
     </section>
 
-    <!-- Official Emergency Hotline Section (Displayed below Available Services & Consultations) -->
-    <section class="landing-civic" data-section="emergency" aria-label="Emergency Hotline" style="margin: 2.5rem 0;">
-        <div class="civic-section civic-emergency" style="padding: 1.25rem 1.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.25rem; border-radius: 12px; background: #FEF2F2; border: 1.5px solid #FCA5A5; box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.08);">
-            <div style="display: flex; align-items: center; gap: 1rem;">
-                <div style="width: 48px; height: 48px; border-radius: 12px; background: #DC2626; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
-                    {% icon 'triangle-alert' %}
-                </div>
+    <!-- Emergency Hotline & Assistance Section -->
+    <section class="emergency-section" data-section="emergency" style="max-width: 1200px; margin: 0 auto 3rem auto; padding: 0 1.5rem;">
+        <div class="card" style="border: 1px solid #DC2626; border-left: 4px solid #DC2626; border-radius: 8px; background: #FFFFFF; padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                {% icon 'triangle-alert' cls='icon-danger' %}
                 <div>
-                    <div style="font-weight: 800; color: #991B1B; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.03em;">
-                        Official Barangay Emergency Hotline
-                    </div>
-                    <div style="font-size: 0.875rem; color: #7F1D1D; margin-top: 3px;">
-                        Immediate 24/7 emergency response, rescue, and ambulance dispatch across all networks (Smart, TNT, Globe, TM, DITO).
-                    </div>
+                    <h3 style="margin: 0; font-size: 1rem; font-weight: 700; color: #111827;">Emergency Hotline and Assistance</h3>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem; color: #6B7280;">For immediate dispatch, medical emergencies, and calamity reporting.</p>
                 </div>
             </div>
-            <div class="civic-hotline" style="margin: 0; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-                {% if admin_phone %}
-                <a class="civic-hotline-number" href="tel:{{ admin_phone|cut:' '|cut:'-' }}" style="font-weight: 800; font-size: 1.1rem; color: #FFFFFF; background: #DC2626; padding: 0.65rem 1.35rem; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 2px 4px rgba(220, 38, 38, 0.25);">
-                    {% icon 'phone-call' %} {{ admin_phone }}
-                </a>
-                {% else %}
-                <a class="civic-hotline-number" href="tel:0281234567" style="font-weight: 800; font-size: 1.1rem; color: #FFFFFF; background: #DC2626; padding: 0.65rem 1.35rem; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 2px 4px rgba(220, 38, 38, 0.25);">
-                    {% icon 'phone-call' %} (02) 8123-4567
-                </a>
-                {% endif %}
-                <a href="#portal-footer" style="font-size: 0.875rem; font-weight: 700; color: #B91C1C; text-decoration: none; padding: 0.65rem 1rem; border: 1.5px solid #F87171; border-radius: 8px; background: #FFFFFF; display: inline-flex; align-items: center; gap: 0.4rem;">
-                    {% icon 'phone' cls='icon-xs' %} All Telco Networks
-                </a>
-            </div>
+            <a href="tel:{{ barangay_info.contact_no|default:'09171234567' }}" class="btn btn-danger" style="font-weight: 700;">
+                {% icon 'phone' %} Call {{ barangay_info.contact_no|default:'09171234567' }}
+            </a>
         </div>
     </section>
 
@@ -1129,13 +1129,13 @@
                         </label>
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;">
                             <div class="input-group-modern">
-                                <input type="text" name="first_name" id="input_first_name" placeholder="First Name *" value="{{ request.user.first_name }}" class="form-control-modern" required>
+                                <input type="text" name="first_name" id="input_first_name" placeholder="e.g. Juan *" value="" class="form-control-modern" required>
                             </div>
                             <div class="input-group-modern">
-                                <input type="text" name="middle_name" id="input_middle_name" placeholder="Middle Name" class="form-control-modern">
+                                <input type="text" name="middle_name" id="input_middle_name" placeholder="e.g. Santos (Optional)" value="" class="form-control-modern">
                             </div>
                             <div class="input-group-modern">
-                                <input type="text" name="last_name" id="input_last_name" placeholder="Last Name *" value="{{ request.user.last_name }}" class="form-control-modern" required>
+                                <input type="text" name="last_name" id="input_last_name" placeholder="e.g. Dela Cruz *" value="" class="form-control-modern" required>
                             </div>
                         </div>
                     </div>
@@ -1147,7 +1147,7 @@
                                 <span>AGE *</span>
                             </label>
                             <div class="input-group-modern">
-                                <input type="number" name="age" id="input_age" min="1" max="120" placeholder="e.g. 28" required class="form-control-modern">
+                                <input type="number" name="age" id="input_age" min="1" max="120" placeholder="e.g. 28" value="" required class="form-control-modern">
                             </div>
                         </div>
                         <div>
@@ -1155,7 +1155,7 @@
                                 <span>RESIDENTIAL ADDRESS *</span>
                             </label>
                             <div class="input-group-modern">
-                                <input type="text" name="address" id="input_address" placeholder="House #, Street..." required class="form-control-modern">
+                                <input type="text" name="address" id="input_address" placeholder="e.g. Block 5 Lot 12, Rizal St." value="" required class="form-control-modern">
                             </div>
                         </div>
                     </div>
@@ -1167,7 +1167,7 @@
                                 <span>EMAIL ADDRESS *</span>
                             </label>
                             <div class="input-group-modern">
-                                <input type="email" name="email" id="input_email" placeholder="active.email@example.com" value="{{ request.user.email }}" required class="form-control-modern">
+                                <input type="email" name="email" id="input_email" placeholder="e.g. resident@example.com" value="" required class="form-control-modern">
                             </div>
                             <div id="email-verification-feedback" style="font-size: 11px; margin-top: 0.2rem; min-height: 16px; display: flex; align-items: center; gap: 0.35rem;"></div>
                         </div>
@@ -1177,7 +1177,7 @@
                                 <span style="font-size: 11px; color: #86868B; font-weight: 500; text-transform: none;">11 digits</span>
                             </label>
                             <div class="input-group-modern">
-                                <input type="tel" name="phone_number" id="input_phone_number" maxlength="11" inputmode="numeric" pattern="09[0-9]{9}" autocomplete="tel" title="11 digits starting with 09, e.g. 09171234567" placeholder="09XXXXXXXXX" value="{{ request.user.phone_number }}" required class="form-control-modern" data-phone>
+                                <input type="tel" name="phone_number" id="input_phone_number" maxlength="11" inputmode="numeric" pattern="09[0-9]{9}" autocomplete="tel" title="11 digits starting with 09, e.g. 09171234567" placeholder="e.g. 09171234567" value="" required class="form-control-modern" data-phone>
                             </div>
                             <div id="phone-feedback" style="font-size: 11px; color: #86868B; margin-top: 0.2rem;">
                                 Must be 11 digits starting with 09
@@ -1190,7 +1190,7 @@
                         <label class="form-label-modern" for="input_purpose" style="font-size: 11px; font-weight: 700; color: #86868B;">
                             <span>PURPOSE OF REQUEST *</span>
                         </label>
-                        <textarea name="purpose" id="input_purpose" rows="2" class="form-control-modern" placeholder="Describe the purpose of your document clearance or appointment..." required></textarea>
+                        <textarea name="purpose" id="input_purpose" rows="2" class="form-control-modern" placeholder="e.g. Requirement for job application, health consultation..." required></textarea>
                     </div>
 
                     <!-- Time Picker & Schedule & Assistance Row -->

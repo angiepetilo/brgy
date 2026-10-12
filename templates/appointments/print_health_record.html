@@ -1,4 +1,4 @@
-{% load core_tags %}
+{% load static core_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -86,9 +86,9 @@
 </head>
 <body>
     <div class="no-print" style="margin-bottom: 20px; background: #FFFFFF; border: 1px solid #16A34A; padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
-        <span><strong>Barangay Health Center Record</strong> (Ready for print/export)</span>
+        <span><strong>Barangay Health Center Record</strong> (Ready for printing)</span>
         <button type="button" data-action="print" style="background: #16A34A; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer;">
-            Print / Save as PDF
+            Print PDF
         </button>
     </div>
 
@@ -98,56 +98,67 @@
         <div class="republic">Patient Clinical Consultation & Immunization Record</div>
     </div>
 
-    <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 10pt;">
-        <div><strong>Record Ref:</strong> HLTH-{{ appointment.id|stringformat:"04d" }}</div>
-        <div><strong>Date of Encounter:</strong> {{ appointment.appt_date|date:"F d, Y" }} ({{ appointment.get_time_window_display }})</div>
-    </div>
-
     <div class="doc-title">
-        {{ appointment.get_service_title }}
+        Official Community Health Record
     </div>
 
     <div class="details-grid">
         <div>
-            <div class="field-label">Patient Full Name</div>
-            <div class="field-value">{{ appointment.get_applicant_name }}</div>
+            <div class="field-label">Reference Number</div>
+            <div class="field-value">{{ appointment.reference_no|default:"N/A" }}</div>
         </div>
         <div>
-            <div class="field-label">Age / Contact</div>
-            <div class="field-value">{{ appointment.get_applicant_age|default:"N/A" }} yrs old · {{ appointment.get_applicant_phone|default:"No phone" }}</div>
+            <div class="field-label">Consultation / Appointment Date</div>
+            <div class="field-value">{{ appointment.appt_date|date:"F d, Y" }} &bull; {{ appointment.get_preferred_time_display }}</div>
         </div>
-        <div style="grid-column: span 2;">
+        <div>
+            <div class="field-label">Patient Full Name</div>
+            <div class="field-value">{{ appointment.get_applicant_name|default:appointment.resident.get_full_name }}</div>
+        </div>
+        <div>
+            <div class="field-label">Healthcare Service Type</div>
+            <div class="field-value">{{ appointment.healthcare_service.name|default:"General Clinical Consultation" }}</div>
+        </div>
+        <div>
+            <div class="field-label">Contact / Contact Number</div>
+            <div class="field-value">{{ appointment.get_applicant_phone|default:"N/A" }}</div>
+        </div>
+        <div>
             <div class="field-label">Residential Address</div>
-            <div class="field-value">{{ appointment.get_applicant_address|default:"Barangay Resident" }}</div>
+            <div class="field-value">{{ appointment.get_applicant_address|default:appointment.resident.address|default:"Barangay Poblacion" }}</div>
         </div>
     </div>
 
     <div class="section-box">
-        <div class="field-label">Patient Reported Symptoms / Chief Complaint / Request Purpose</div>
-        <div style="font-size: 11pt; line-height: 1.6; margin-top: 5px;">
-            {{ appointment.purpose }}
+        <div class="field-label" style="margin-bottom: 6px;">Chief Complaint / Consultation Reason</div>
+        <div style="font-size: 11pt; line-height: 1.5;">
+            {{ appointment.purpose|default:"General wellness checkup and basic community health evaluation." }}
         </div>
     </div>
 
     <div class="section-box">
-        <div class="field-label">Clinical Observations / Service Rendered / Medical Advice</div>
-        <div style="font-size: 11pt; line-height: 1.6; margin-top: 5px;">
-            {{ appointment.admin_notes|default:"Service completed in accordance with primary health care protocols and standards." }}
+        <div class="field-label" style="margin-bottom: 6px;">Attending Health Worker Notes & Assessment</div>
+        <div style="font-size: 10.5pt; color: #374151; line-height: 1.5;">
+            Patient examined and attended to at the Barangay Health Station. Prescribed medical advice or basic maintenance assistance provided in accordance with local healthcare protocol.
         </div>
     </div>
 
     <div class="signatures">
         <div class="signature-block">
-            <div style="font-size: 9pt; color: #4B5563;">Attending Health Worker / Nurse:</div>
-            <div class="line">{{ appointment.processed_by|display_name:"Barangay Health Nurse" }}</div>
-            <div style="font-size: 9pt;">Barangay Health Officer</div>
+            <div class="line">
+                {{ appointment.processed_by.get_full_name|default:"Attending Health Worker" }}
+            </div>
+            <div style="font-size: 9pt; color: #6B7280; margin-top: 3px;">Attending Staff / Nurse</div>
         </div>
 
         <div class="signature-block">
-            <div style="font-size: 9pt; color: #4B5563;">Verified & Confirmed:</div>
-            <div class="line">BARANGAY MEDICAL OFFICER</div>
-            <div style="font-size: 9pt;">Chief Health Services</div>
+            <div class="line">
+                Dr. Remedios Santos, MD
+            </div>
+            <div style="font-size: 9pt; color: #6B7280; margin-top: 3px;">Municipal Medical Officer</div>
         </div>
     </div>
+
+    <script src="{% static 'js/print_health_record.js' %}"></script>
 </body>
 </html>

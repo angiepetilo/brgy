@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load core_tags %}
+{% load static core_tags %}
 
 {% block title %}Officers & Permissions Management - Barangay e-Portal{% endblock %}
 
@@ -12,12 +12,23 @@
                 Officer Roles & Access Permissions
             </h1>
             <p style="font-size: 0.875rem; color: #6B7280; margin: 0.25rem 0 0 0;">
-                Module action permissions and staff assignment scopes. Dynamically generated from code registry.
+                Module action permissions, staff assignment scopes, and Purok leadership jurisdiction.
             </p>
         </div>
-        <a href="{% url 'accounts:residents_tabbed' %}" class="btn btn-secondary btn-sm" style="font-weight: 700;">
-            {% icon 'arrow-left' %} Back to Residents
-        </a>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-primary btn-sm" id="btn-create-officer" style="font-weight: 700; background: #1E3A8A; display: inline-flex; align-items: center; gap: 0.4rem;">
+                {% icon 'plus' %} Create Officer Role
+            </button>
+            <a href="{% url 'accounts:system_dashboard' %}" class="btn btn-outline-secondary btn-sm" style="font-weight: 700;">
+                {% icon 'settings' %} System Settings
+            </a>
+            <a href="{% url 'accounts:household_list' %}" class="btn btn-outline-secondary btn-sm" style="font-weight: 700;">
+                {% icon 'home' %} Households
+            </a>
+            <a href="{% url 'accounts:residents_tabbed' %}" class="btn btn-secondary btn-sm" style="font-weight: 700;">
+                {% icon 'arrow-left' %} Back to Residents
+            </a>
+        </div>
     </div>
 
     <!-- 1. Staff Scope Assignments Card -->
@@ -27,9 +38,9 @@
                 <div style="width: 32px; height: 32px; border-radius: 8px; background: #F3F4F6; color: #1E3A8A; display: flex; align-items: center; justify-content: center; font-size: 0.95rem;">
                     {% icon 'shield-user' %}
                 </div>
-                <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #111827;">Staff Scope Assignments</h3>
+                <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #111827;">Staff Scope & Purok Jurisdiction Assignments</h3>
             </div>
-            <span style="font-size: 0.875rem; color: #6B7280; font-weight: 600;">Staff act only inside their assignment</span>
+            <span style="font-size: 0.875rem; color: #6B7280; font-weight: 600;">Staff act only inside their assigned scope</span>
         </div>
         <div class="card-body" style="padding: 1.5rem;">
             <!-- Assignment Form -->
@@ -62,7 +73,7 @@
                     </select>
                 </div>
                 <div>
-                    <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.35rem;">Scope Value</label>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4B5563; text-transform: uppercase; margin-bottom: 0.35rem;">Assigned Scope or Purok</label>
                     <input type="text" name="scope_value" class="form-control" style="font-size: 0.875rem; width: 100%; min-width: 0;" placeholder="e.g. Health, Documents, Purok 1" required>
                 </div>
                 <div>
@@ -80,7 +91,7 @@
                             <th style="width: 25%;">STAFF MEMBER</th>
                             <th style="width: 25%;">OFFICER ROLE</th>
                             <th style="width: 20%;">SCOPE TYPE</th>
-                            <th style="width: 30%;">SCOPE VALUE</th>
+                            <th style="width: 30%;">ASSIGNED SCOPE</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -111,9 +122,9 @@
         </div>
     </div>
 
-    <!-- 2. Permission Rules Matrix (Generated from Code Registry) -->
+    <!-- 2. Permission Rules Matrix by Officer Role -->
     <div class="card" style="border: 1px solid #E5E7EB; border-radius: 12px; background: #FFFFFF; box-shadow: none; overflow: hidden;">
-        <div class="card-header" style="background: #F9FAFB; border-bottom: 1px solid #E5E7EB; padding: 1.25rem 1.5rem;">
+        <div class="card-header" style="background: #F9FAFB; border-bottom: 1px solid #E5E7EB; padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
             <div style="display: flex; align-items: center; gap: 0.65rem;">
                 <div style="width: 32px; height: 32px; border-radius: 8px; background: #F3F4F6; color: #1E3A8A; display: flex; align-items: center; justify-content: center; font-size: 0.95rem;">
                     {% icon 'list-checks' %}
@@ -123,16 +134,32 @@
                     <p style="margin: 0.15rem 0 0 0; font-size: 0.875rem; color: #6B7280;">Admin and Kapitan (Punong Barangay) have full access through permission rules.</p>
                 </div>
             </div>
+            <button type="button" class="btn btn-outline-primary btn-sm btn-open-create-officer" style="font-weight: 700;">
+                {% icon 'plus' %} Add Officer Role
+            </button>
         </div>
         <div class="card-body" style="padding: 1.5rem;">
             {% for o in officers %}
             <div style="margin-bottom: 2rem; border: 1px solid #E5E7EB; border-radius: 10px; overflow: hidden;">
-                <div style="background: #F3F4F6; padding: 0.75rem 1.25rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E5E7EB;">
+                <div style="background: #F3F4F6; padding: 0.75rem 1.25rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E5E7EB; flex-wrap: wrap; gap: 0.5rem;">
                     <div>
                         <strong style="color: #111827; font-size: 0.95rem;">{{ o.position }}</strong>
                         {% if o.committee %}<span style="color: #6B7280; font-size: 0.875rem;"> &bull; Committee: {{ o.committee }}</span>{% endif %}
+                        {% if o.user %}<span style="color: #1E3A8A; font-size: 0.875rem; font-weight: 600;"> &bull; Incumbent: {{ o.user.get_full_name|default:o.user.username }}</span>{% endif %}
                     </div>
-                    <span style="font-size: 0.875rem; color: #6B7280;">Officer ID: #{{ o.id }}</span>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span style="font-size: 0.8rem; color: #6B7280;">Officer ID: #{{ o.id }}</span>
+                        {% if o.position != 'Punong Barangay' %}
+                        <form method="post" action="{% url 'accounts:officers_permissions' %}" data-confirm="Are you sure you want to delete this officer role: {{ o.position }}?" style="margin: 0;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action_type" value="delete_officer">
+                            <input type="hidden" name="officer_id" value="{{ o.id }}">
+                            <button type="submit" class="btn-icon-subtle text-danger" title="Delete Role" aria-label="Delete {{ o.position }}" style="color: #DC2626; background: transparent; border: none; cursor: pointer; padding: 2px;">
+                                {% icon 'trash-2' style='width: 15px; height: 15px;' %}
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
                 </div>
                 <form method="post" action="{% url 'accounts:officers_permissions' %}">
                     {% csrf_token %}
@@ -167,4 +194,63 @@
         </div>
     </div>
 </div>
+
+<!-- Modal: Create Officer Role (Eleken UX with dirty protection) -->
+<div id="createOfficerModal" class="modal-backdrop-custom" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); z-index: 1050; align-items: center; justify-content: center; padding: 1rem;">
+    <div class="modal-card-custom" style="background: #FFFFFF; border-radius: 16px; max-width: 500px; width: 100%; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; display: flex; flex-direction: column;">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: #EFF6FF; color: #1E3A8A; display: flex; align-items: center; justify-content: center;">
+                    {% icon 'user-plus' %}
+                </div>
+                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: #0F172A;">Create New Officer Role</h3>
+            </div>
+            <button type="button" id="closeCreateOfficerModal" style="background: none; border: none; color: #64748B; font-size: 1.5rem; line-height: 1; cursor: pointer;">&times;</button>
+        </div>
+
+        <form id="createOfficerForm" method="post" action="{% url 'accounts:officers_permissions' %}" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; margin: 0;">
+            {% csrf_token %}
+            <input type="hidden" name="action_type" value="create_officer">
+
+            <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 0.35rem;">
+                    Officer Position Title <span style="color: #DC2626;">*</span>
+                </label>
+                <input type="text" name="position" class="form-control" placeholder="e.g. Purok Leader, Kagawad, BHW Coordinator" required style="width: 100%;">
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 0.35rem;">
+                    Committee Assignment (Optional)
+                </label>
+                <input type="text" name="committee" class="form-control" placeholder="e.g. Health, Peace and Order, Purok 1" style="width: 100%;">
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 0.35rem;">
+                    Assign Staff User (Optional)
+                </label>
+                <select name="user_id" class="form-control" style="width: 100%;">
+                    <option value="">-- Leave Vacant for Now --</option>
+                    {% for u in staff_users %}
+                    <option value="{{ u.id }}">{{ u.get_full_name|default:u.username }} ({{ u.email }})</option>
+                    {% endfor %}
+                </select>
+                <small style="color: #64748B; font-size: 0.75rem; margin-top: 0.25rem; display: block;">You can also assign scope later using the scope assignment table.</small>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem; padding-top: 1rem; border-top: 1px solid #E2E8F0; margin-top: 0.5rem;">
+                <button type="button" id="cancelCreateOfficerModal" class="btn btn-light" style="font-weight: 600;">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="background: #1E3A8A; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem;">
+                    {% icon 'plus' %} Create Role
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/officers_permissions.js' %}" defer></script>
 {% endblock %}

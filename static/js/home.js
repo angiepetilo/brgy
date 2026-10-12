@@ -2,8 +2,11 @@
 function toggleComments(elementId) {
     const el = document.getElementById(elementId);
     if (el) {
-        if (el.style.display === 'none') {
+        const isHidden = el.style.display === 'none' || window.getComputedStyle(el).display === 'none';
+        if (isHidden) {
             el.style.display = 'block';
+            const input = el.querySelector('.comment-input');
+            if (input) input.focus();
         } else {
             el.style.display = 'none';
         }

@@ -48,7 +48,7 @@ class ChatThread(models.Model):
     THREAD_CONCERN = 'concern'
     THREAD_DIRECT = 'direct'
     THREAD_TYPE_CHOICES = [
-        (THREAD_CONCERN, 'Resident Concern / Ticket'),
+        (THREAD_CONCERN, 'Resident Concern'),
         (THREAD_DIRECT, 'Direct Message'),
     ]
 
@@ -131,8 +131,8 @@ class ChatThread(models.Model):
 
     class Meta:
         ordering = ['-updated_at']
-        verbose_name = 'Chat Thread / Concern'
-        verbose_name_plural = 'Chat Threads / Concerns'
+        verbose_name = 'Chat Concern'
+        verbose_name_plural = 'Chat Concerns'
 
     def __str__(self):
         if self.thread_type == self.THREAD_CONCERN:

@@ -178,6 +178,8 @@ class User(AbstractUser):
     date_of_birth = models.DateField(null=True, blank=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     term_end = models.DateField(null=True, blank=True, help_text="End of appointment or elective term")
+    department = models.CharField(max_length=100, blank=True, default='', help_text="Assigned department in the barangay")
+    allowed_modules = models.JSONField(default=list, blank=True, help_text="Direct module permissions granted to staff")
     status_message = models.CharField(max_length=255, blank=True, default='')
     duty_status = models.CharField(max_length=20, blank=True, default='on_duty')
     duty_return_date = models.DateField(null=True, blank=True)
@@ -254,6 +256,26 @@ class Household(models.Model):
     """
     Household entity representing families / residences in the barangay.
     """
+    household_id = models.CharField(
+        max_length=50,
+        unique=True,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text="Unique Household Reference Number (e.g. HH-2026-0001)"
+    )
+    household_number = models.CharField(max_length=50, blank=True, default='', help_text="Household Number (e.g. HM-2023-001)")
+    household_family_name = models.CharField(max_length=150, blank=True, default='')
+    street = models.CharField(max_length=255, blank=True, default='')
+    sitio = models.CharField(max_length=100, blank=True, default='', help_text="Sitio / Zone name")
+    ownership_status = models.CharField(max_length=50, blank=True, default='Owned')
+    water_source = models.CharField(max_length=150, blank=True, default='Level 3 - Individual Connection')
+    toilet_type = models.CharField(max_length=150, blank=True, default='A - Pour/flush type connected to septic tank')
+    home_link = models.CharField(max_length=500, blank=True, default='', help_text="Google Maps or location link")
+
+    # Legacy fields
+    household_name = models.CharField(max_length=150, blank=True, default='')
+    address = models.TextField(blank=True, default='')
     head = models.ForeignKey(
         'Resident',
         on_delete=models.SET_NULL,
@@ -261,8 +283,6 @@ class Household(models.Model):
         blank=True,
         related_name='headed_households'
     )
-    household_name = models.CharField(max_length=150, blank=True, default='')
-    address = models.TextField(blank=True, default='')
     purok = models.ForeignKey(
         Purok,
         on_delete=models.SET_NULL,
@@ -270,17 +290,217 @@ class Household(models.Model):
         blank=True,
         related_name='households'
     )
+
+    # Primary representative / member details
+    first_name = models.CharField(max_length=100, blank=True, default='')
+    middle_name = models.CharField(max_length=100, blank=True, default='')
+    last_name = models.CharField(max_length=100, blank=True, default='')
+    relationship = models.CharField(max_length=50, blank=True, default='Head')
+    birthdate = models.DateField(null=True, blank=True)
+
+    # Profiling / field visit metadata
+    interviewed_by = models.CharField(max_length=150, blank=True, default='')
+    reviewed_by = models.CharField(max_length=150, blank=True, default='')
+    date_of_visit = models.DateField(null=True, blank=True)
+
+    # Audit tracking
+    encoded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='encoded_households'
+    )
+    date_and_time_encoded = models.DateTimeField(null=True, blank=True)
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='updated_households'
+    )
+    date_updated = models.DateTimeField(null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['purok', 'household_name', '-created_at']
+        ordering = ['purok', 'household_family_name', '-created_at']
         verbose_name = 'Household'
         verbose_name_plural = 'Households'
 
     def __str__(self):
-        head_name = self.head.get_full_name() if self.head else 'No Head'
-        return self.household_name or f"Household: {head_name} ({self.purok.name if self.purok else 'No Purok'})"
+        name = self.household_family_name or self.household_name
+        hid = f"[{self.household_id}] " if self.household_id else ""
+        return f"{hid}{name} ({self.purok.name if self.purok else 'No Purok'})"
+
+    @property
+    def age(self):
+        if not self.birthdate:
+            return None
+        from datetime import date
+        today = date.today()
+        return today.year - self.birthdate.year - ((today.month, today.day) < (self.birthdate.month, self.birthdate.day))
+
+    @property
+    def display_sitio(self):
+        return self.sitio or (self.purok.name if self.purok else 'Ylaya')
+
+    @property
+    def display_household_number(self):
+        return self.household_number or self.household_id or f"HM-2025-{self.id:03d}"
+
+    @property
+    def total_members_count(self):
+        count = self.household_members.count()
+        if count > 0:
+            return count
+        return 1 if (self.first_name or self.last_name) else 1
+
+    def get_members_list(self):
+        members = []
+        for m in self.household_members.all():
+            members.append({
+                'id': m.id,
+                'first_name': m.first_name,
+                'last_name': m.last_name,
+                'relationship': m.relationship or 'Member',
+                'birthdate': m.birthdate.strftime('%Y-%m-%d') if m.birthdate else '',
+                'age': m.age if m.age is not None else '',
+                'is_pwd': bool(m.is_pwd),
+                'is_solo_parent': bool(m.is_solo_parent),
+                'is_4ps': bool(m.is_4ps),
+                'is_senior': bool(m.is_senior),
+            })
+        if not members and (self.first_name or self.last_name):
+            head_age = self.age
+            members.append({
+                'id': 0,
+                'first_name': self.first_name,
+                'last_name': self.last_name,
+                'relationship': self.relationship or 'Head',
+                'birthdate': self.birthdate.strftime('%Y-%m-%d') if self.birthdate else '',
+                'age': head_age if head_age is not None else '',
+                'is_pwd': False,
+                'is_solo_parent': False,
+                'is_4ps': False,
+                'is_senior': bool(head_age is not None and head_age >= 60),
+            })
+        return members
+
+    @property
+    def members_json(self):
+        import json
+        return json.dumps(self.get_members_list())
+
+    @property
+    def encoded_by_name(self):
+        if self.encoded_by:
+            return self.encoded_by.get_full_name() or self.encoded_by.username
+        return 'Staff Encoder'
+
+    @property
+    def updated_by_name(self):
+        if self.updated_by:
+            return self.updated_by.get_full_name() or self.updated_by.username
+        return 'Staff Encoder'
+
+    @property
+    def display_date_encoded(self):
+        dt = self.date_and_time_encoded or self.created_at
+        if dt:
+            from django.utils import timezone
+            dt = timezone.localtime(dt)
+            return dt.strftime("%B %d, %Y | %I:%M %p").replace(" 0", " ")
+        return "--"
+
+    @property
+    def display_date_updated(self):
+        dt = self.date_updated or self.updated_at
+        if dt:
+            from django.utils import timezone
+            dt = timezone.localtime(dt)
+            return dt.strftime("%B %d, %Y | %I:%M %p").replace(" 0", " ")
+        return "--"
+
+    def save(self, *args, **kwargs):
+        from django.utils import timezone
+        if not self.household_id:
+            year = (self.date_of_visit or timezone.localdate()).year
+            prefix = f"HH-{year}-"
+            last_hh = Household.objects.filter(household_id__startswith=prefix).order_by('-household_id').first()
+            if last_hh and last_hh.household_id:
+                try:
+                    num = int(last_hh.household_id.split('-')[-1]) + 1
+                except (ValueError, IndexError):
+                    num = Household.objects.count() + 1
+            else:
+                num = Household.objects.count() + 1
+            self.household_id = f"HH-{year}-{num:04d}"
+
+        if not self.household_number:
+            self.household_number = self.household_id
+
+        if not self.household_family_name:
+            if self.last_name:
+                self.household_family_name = f"{self.last_name} Family"
+            elif self.household_name:
+                self.household_family_name = self.household_name
+
+        if not self.household_name:
+            self.household_name = self.household_family_name or self.household_id
+
+        if not self.address and self.street:
+            self.address = self.street
+        elif not self.street and self.address:
+            self.street = self.address
+
+        if not self.date_and_time_encoded:
+            self.date_and_time_encoded = timezone.now()
+        self.date_updated = timezone.now()
+
+        super().save(*args, **kwargs)
+
+
+class HouseholdMember(models.Model):
+    """
+    Individual family/household member records belonging to a Household.
+    """
+    household = models.ForeignKey(
+        Household,
+        on_delete=models.CASCADE,
+        related_name='household_members'
+    )
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    relationship = models.CharField(max_length=50, default='Member')
+    birthdate = models.DateField(null=True, blank=True)
+    is_pwd = models.BooleanField(default=False)
+    is_solo_parent = models.BooleanField(default=False)
+    is_4ps = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['id']
+        verbose_name = 'Household Member'
+        verbose_name_plural = 'Household Members'
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ({self.relationship})"
+
+    @property
+    def age(self):
+        if not self.birthdate:
+            return None
+        from datetime import date
+        today = date.today()
+        return today.year - self.birthdate.year - ((today.month, today.day) < (self.birthdate.month, self.birthdate.day))
+
+    @property
+    def is_senior(self):
+        age = self.age
+        return age is not None and age >= 60
 
 
 class Resident(models.Model):
@@ -454,6 +674,8 @@ class StaffAssignment(models.Model):
     officer = models.ForeignKey(
         Officer,
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
         related_name='officer_assignments'
     )
     scope_type = models.CharField(max_length=30, choices=SCOPE_TYPE_CHOICES)
@@ -508,9 +730,20 @@ class BarangayInfo(models.Model):
     city = models.CharField(max_length=100, blank=True, default='')
     province = models.CharField(max_length=100, blank=True, default='')
     contact_no = models.CharField(max_length=50, blank=True, default='(02) 8123-4567')
+    emergency_hotline = models.CharField(max_length=100, blank=True, default='911 / (02) 8123-4567', help_text="Official emergency hotline")
+    show_available_services = models.BooleanField(default=True, help_text="Show Available Services & Consultations on public portal")
     office_hours = models.CharField(max_length=120, blank=True, default='Monday - Friday, 8:00 AM - 5:00 PM')
     venue = models.CharField(max_length=150, blank=True, default='Barangay Session Hall')
     logo = models.ImageField(upload_to='barangay/', blank=True, null=True)
+
+    # Standard Operating Windows for Appointments
+    morning_window_start = models.CharField(max_length=20, blank=True, default='8:00 AM')
+    morning_window_end = models.CharField(max_length=20, blank=True, default='11:30 AM')
+    afternoon_window_start = models.CharField(max_length=20, blank=True, default='1:00 PM')
+    afternoon_window_end = models.CharField(max_length=20, blank=True, default='4:30 PM')
+    operating_days = models.CharField(max_length=150, blank=True, default='Monday to Friday (excluding official holidays)')
+    slot_capacity_per_window = models.PositiveIntegerField(default=20)
+
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:

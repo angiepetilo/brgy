@@ -85,7 +85,7 @@ def appointment_list_view(request):
                 is_active=True
             )
             messages.success(request, f"New Health Service '{svc_name}' created successfully!")
-            return redirect(f"{reverse('appointments:list')}?tab=health_services")
+            return redirect('appointments:list')
 
     if request.method == 'POST' and 'create_document_request' in request.POST:
         custom_doc_name = request.POST.get('custom_document_name', '').strip()
@@ -104,10 +104,10 @@ def appointment_list_view(request):
                 document_type_obj = resolve_document_type(doc_type)
             except ValueError as exc:
                 messages.error(request, str(exc))
-                return redirect(f"{reverse('appointments:list')}?tab=documents")
+                return redirect('appointments:list')
             if document_type_obj is None:
                 messages.error(request, "No active document types are configured.")
-                return redirect(f"{reverse('appointments:list')}?tab=documents")
+                return redirect('appointments:list')
             doc_type_name = document_type_obj.name
 
         officer_id = request.POST.get('officer_in_charge')
@@ -129,7 +129,7 @@ def appointment_list_view(request):
             applicant_phone=user.phone_number,
         )
         messages.success(request, f"Document request for '{doc_type_name}' submitted to {officer_name} successfully!")
-        return redirect(f"{reverse('appointments:list')}?tab=documents")
+        return redirect('appointments:list')
 
     if user.is_admin_user or user.is_kapitan_user or user.is_superuser:
         base_queryset = Appointment.objects.select_related('resident', 'healthcare_service', 'document_type', 'processed_by').all()
@@ -171,9 +171,11 @@ def appointment_list_view(request):
     elif date_filter == 'tomorrow':
         queryset = queryset.filter(appt_date=today + timedelta(days=1))
 
-    # Status filter
+    # Status filter - only display pending appointments in Appointments module by default
     if status_filter:
         queryset = queryset.filter(status=status_filter)
+    else:
+        queryset = queryset.filter(status=Appointment.STATUS_PENDING)
 
     # Service filter
     if service_filter:
@@ -311,6 +313,7 @@ def appointment_list_view(request):
         'health_appointments': health_appointments,
         'health_services_list': health_services_list,
         'active_health_services': active_health_services,
+        'healthcare_services': active_health_services,
         'status_filter': status_filter,
         'service_filter': service_filter,
         'date_filter': date_filter,
@@ -330,7 +333,8 @@ def appointment_list_view(request):
         'pending_count': pending_count,
         'approved_count': approved_count,
         'completed_count': completed_count,
-        'can_approve': check_user_perm(user, 'appointments', 'approve'),
+        'can_approve': (user.is_admin_user or user.is_kapitan_user or user.is_staff_user or user.is_staff or check_user_perm(user, 'appointments', 'approve')) if (user and user.is_authenticated) else False,
+        'can_reject': (user.is_admin_user or user.is_kapitan_user or user.is_staff_user or user.is_staff or check_user_perm(user, 'appointments', 'reject')) if (user and user.is_authenticated) else False,
         'calendar_events_json': json.dumps(events_data),
     }
     return render(request, 'appointments/appointment_list.html', context)
@@ -1122,3 +1126,148 @@ def appointment_supporting_id_view(request, pk):
         request=request,
     )
     return response
+
+
+@resident_forbidden
+def print_document_view(request, pk):
+    """
+    Print-ready layout for official issued barangay certificates / clearances.
+    Renders dynamic template with live resident data (header, title, salutation, body, signatories, footer)
+    and allows on-the-fly custom editing.
+    """
+    from apps.accounts.models import BarangayInfo, Officer
+    from apps.appointments.document_templates import (
+        render_document_letter,
+        render_document_header,
+        render_document_title,
+        render_document_footer,
+    )
+    
+    log_entry = IssuedDocumentLog.objects.select_related(
+        'appointment',
+        'appointment__document_type',
+        'appointment__resident',
+        'issued_to',
+        'issued_by'
+    ).filter(Q(pk=pk) | Q(appointment_id=pk)).first()
+
+    if not log_entry:
+        appointment = get_object_or_404(Appointment.objects.select_related('document_type', 'resident', 'processed_by'), pk=pk)
+        log_entry = IssuedDocumentLog.objects.filter(appointment=appointment).first()
+        if not log_entry:
+            year = appointment.appt_date.year if appointment.appt_date else 2026
+            control_no = f"BRGY-{year}-{appointment.id:04d}"
+            log_entry = IssuedDocumentLog.objects.create(
+                appointment=appointment,
+                control_number=control_no,
+                issued_to=appointment.resident,
+                issued_by=appointment.processed_by or request.user,
+            )
+    else:
+        appointment = log_entry.appointment
+    doc_type = getattr(appointment, 'document_type', None)
+
+    # Render dynamic parts
+    header_lines = render_document_header(appointment, log_entry)
+    doc_title = render_document_title(appointment, log_entry)
+    rendered_body = render_document_letter(appointment, log_entry)
+    paragraphs = [p.strip() for p in rendered_body.split('\n\n') if p.strip()]
+    footer_lines = render_document_footer(appointment, log_entry)
+
+    brgy_info = BarangayInfo.get_solo()
+    kapitan_officer = Officer.objects.filter(position=Officer.POSITION_PUNONG_BARANGAY).select_related('user').first()
+    kapitan_name = (kapitan_officer.user.get_full_name() if (kapitan_officer and kapitan_officer.user) else "HON. ERNESTO VALENZUELA")
+    secretary_officer = Officer.objects.filter(position=Officer.POSITION_SECRETARY).select_related('user').first()
+    secretary_name = (secretary_officer.user.get_full_name() if (secretary_officer and secretary_officer.user) else "RODRIGO ADMIN")
+
+    # Signatories
+    sig1_name = doc_type.signatory_1_name if (doc_type and doc_type.signatory_1_name) else ((log_entry.issued_by.get_full_name() or log_entry.issued_by.username) if log_entry.issued_by else "Barangay Staff")
+    sig1_title = doc_type.signatory_1_title if (doc_type and doc_type.signatory_1_title) else "Barangay Records Officer"
+    sig2_name = doc_type.signatory_2_name if (doc_type and doc_type.signatory_2_name) else kapitan_name
+    sig2_title = doc_type.signatory_2_title if (doc_type and doc_type.signatory_2_title) else "Punong Barangay"
+    salutation = doc_type.letter_salutation if (doc_type and doc_type.letter_salutation) else "TO WHOM IT MAY CONCERN:"
+
+    # Check if customized
+    is_customized = bool(
+        log_entry.customized_letter_title or
+        log_entry.customized_letter_header or
+        log_entry.customized_letter_body or
+        log_entry.customized_letter_footer
+    )
+
+    context = {
+        'log': log_entry,
+        'appointment': appointment,
+        'doc_type': doc_type,
+        'header_lines': header_lines,
+        'doc_title': doc_title,
+        'rendered_body': rendered_body,
+        'paragraphs': paragraphs,
+        'footer_lines': footer_lines,
+        'brgy_info': brgy_info,
+        'salutation': salutation,
+        'sig1_name': sig1_name,
+        'sig1_title': sig1_title,
+        'sig2_name': sig2_name,
+        'sig2_title': sig2_title,
+        'is_customized': is_customized,
+        # Raw template / customized values for the inline editor
+        'raw_header': log_entry.customized_letter_header or "\n".join(header_lines),
+        'raw_title': log_entry.customized_letter_title or doc_title,
+        'raw_body': log_entry.customized_letter_body or rendered_body,
+        'raw_footer': log_entry.customized_letter_footer or "\n".join(footer_lines),
+    }
+    return render(request, 'appointments/print_document.html', context)
+
+
+@resident_forbidden
+def save_customized_document_view(request, pk):
+    """
+    Saves or resets on-the-fly customized letter components (header, title, body, footer)
+    for a specific issued document.
+    """
+    log_entry = get_object_or_404(IssuedDocumentLog, pk=pk)
+    if request.method == 'POST':
+        action = request.POST.get('action', 'save')
+        if action == 'reset':
+            log_entry.customized_letter_title = ''
+            log_entry.customized_letter_header = ''
+            log_entry.customized_letter_body = ''
+            log_entry.customized_letter_footer = ''
+            log_entry.save(update_fields=[
+                'customized_letter_title',
+                'customized_letter_header',
+                'customized_letter_body',
+                'customized_letter_footer'
+            ])
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.content_type == 'application/json':
+                return JsonResponse({'status': 'ok', 'customized': False})
+            return redirect('appointments:print_document', pk=pk)
+        
+        log_entry.customized_letter_title = request.POST.get('customized_letter_title', '').strip()
+        log_entry.customized_letter_header = request.POST.get('customized_letter_header', '').strip()
+        log_entry.customized_letter_body = request.POST.get('customized_letter_body', '').strip()
+        log_entry.customized_letter_footer = request.POST.get('customized_letter_footer', '').strip()
+        log_entry.save(update_fields=[
+            'customized_letter_title',
+            'customized_letter_header',
+            'customized_letter_body',
+            'customized_letter_footer'
+        ])
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.content_type == 'application/json':
+            return JsonResponse({'status': 'ok', 'customized': True})
+        return redirect('appointments:print_document', pk=pk)
+    return redirect('appointments:print_document', pk=pk)
+
+
+@resident_forbidden
+def print_health_record_view(request, pk):
+    """
+    Print-ready layout for completed health center consultation record.
+    """
+    appointment = get_object_or_404(
+        Appointment.objects.select_related('healthcare_service', 'resident', 'processed_by'),
+        pk=pk,
+        category=Appointment.CATEGORY_HEALTHCARE
+    )
+    return render(request, 'appointments/print_health_record.html', {'appointment': appointment})

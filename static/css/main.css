@@ -181,35 +181,46 @@ body[data-authenticated="true"] .hig-nav-section-title {
 /* Page Titles and Section Headings */
 body[data-authenticated="true"] .page-header h1,
 body[data-authenticated="true"] .hig-title-1,
+body[data-authenticated="true"] .page-title,
 body[data-authenticated="true"] .hub-header h1 {
-  font-size: 1.35rem !important;
-  font-weight: 700;
+  font-size: 1.5rem !important; /* 24px */
+  font-weight: 600 !important;
   color: #111827;
+  line-height: 1.3 !important;
 }
 body[data-authenticated="true"] .page-header p,
+body[data-authenticated="true"] .page-subtitle,
 body[data-authenticated="true"] .hig-toolbar p {
-  font-size: 0.875rem !important;
-  color: #6B7280;
+  font-size: 0.75rem !important; /* 12px */
+  color: #6B7280 !important;
 }
 
 /* Tables across Appointments, Residents, Records, Blotter, Statistics */
 body[data-authenticated="true"] .hig-table,
+body[data-authenticated="true"] .clean-table,
 body[data-authenticated="true"] .table,
 body[data-authenticated="true"] table {
   font-size: 14px !important;
 }
 body[data-authenticated="true"] .hig-table thead th,
+body[data-authenticated="true"] .clean-table thead th,
 body[data-authenticated="true"] table thead th {
-  font-size: 12px !important;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  color: #4B5563;
+  font-size: 13px !important; /* 13px Table Headers */
+  font-weight: 600 !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #4B5563 !important;
+  padding: 12px 16px !important;
+  vertical-align: middle !important;
 }
 body[data-authenticated="true"] .hig-table tbody td,
+body[data-authenticated="true"] .clean-table tbody td,
 body[data-authenticated="true"] table tbody td {
-  font-size: 14px !important;
+  font-size: 14px !important; /* 14px Primary Body / Table Cell Data */
   line-height: 1.45;
   color: #111827;
+  padding: 12px 16px !important;
+  vertical-align: middle !important;
 }
 
 /* Form controls & inputs across all modules */
@@ -223,21 +234,29 @@ body[data-authenticated="true"] input[type="date"],
 body[data-authenticated="true"] select,
 body[data-authenticated="true"] textarea {
   font-size: 14px !important;
+  min-height: 40px !important;
 }
 body[data-authenticated="true"] .form-label,
 body[data-authenticated="true"] label {
-  font-size: 12px !important;
-  font-weight: 600;
-  color: #4B5563;
+  font-size: 13px !important; /* 13px Form Labels */
+  font-weight: 600 !important;
+  color: #4B5563 !important;
 }
 
-/* Buttons */
+/* Buttons (Min 40px interactive target for standard controls, 34px compact) */
 body[data-authenticated="true"] .btn,
 body[data-authenticated="true"] .hig-btn {
-  font-size: 13.5px !important;
+  font-size: 14px !important;
+  min-height: 40px !important;
+  white-space: nowrap !important;
+  text-overflow: clip !important;
 }
-body[data-authenticated="true"] .btn-sm {
-  font-size: 12.5px !important;
+body[data-authenticated="true"] .btn-sm,
+body[data-authenticated="true"] .hig-btn-sm,
+body[data-authenticated="true"] .hig-btn-compact {
+  min-height: 34px !important;
+  font-size: 13px !important;
+  padding: 0 12px !important;
 }
 
 /* Cards & Content */
@@ -246,19 +265,21 @@ body[data-authenticated="true"] .hig-card {
   font-size: 14px;
 }
 body[data-authenticated="true"] .card-title,
-body[data-authenticated="true"] h2 {
-  font-size: 1.15rem !important;
-  color: #111827;
-}
+body[data-authenticated="true"] .section-title,
+body[data-authenticated="true"] .hig-card-title,
+body[data-authenticated="true"] h2,
 body[data-authenticated="true"] h3 {
-  font-size: 1rem !important;
-  color: #111827;
+  font-size: 1rem !important; /* 16px / medium Section/Card Titles */
+  font-weight: 500 !important;
+  color: #111827 !important;
 }
 
 /* Badges & Meta */
 body[data-authenticated="true"] .badge,
-body[data-authenticated="true"] .hig-badge {
-  font-size: 11.5px !important;
+body[data-authenticated="true"] .hig-badge,
+body[data-authenticated="true"] .status-chip {
+  font-size: 12px !important;
+  font-weight: 600 !important;
 }
 
 /* Home / Feed module specific */

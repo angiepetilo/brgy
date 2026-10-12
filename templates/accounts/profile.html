@@ -1,144 +1,184 @@
 {% extends 'base.html' %}
 
-{% block title %}Manage Profile & Avatar - Barangay e-Portal{% endblock %}
+{% block title %}Manage Profile & Settings - Barangay e-Portal{% endblock %}
 
 {% block content %}
-<div class="profile-management-container" style="max-width: 720px; margin: 0 auto;">
+<div class="profile-management-container" style="max-width: 1080px; margin: 0 auto; padding: 0.5rem 0 2rem 0;">
 
-    <!-- Page Header -->
-    <div class="page-header" style="margin-bottom: 1.25rem;">
-        <h1 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin: 0; text-transform: uppercase;">
-            Profile & Avatar Management
+    <!-- Window/View Header -->
+    <div class="page-header" style="margin-bottom: 1.5rem;">
+        <h1 style="font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 22px; font-weight: 700; color: #1D1D1F; letter-spacing: -0.26px; margin: 0;">
+            Account & Profile Settings
         </h1>
-        <p style="color: #6B7280; font-size: 0.875rem; margin: 0.25rem 0 0 0;">
-            Update your public profile, avatar image, and live duty status message
+        <p style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif; color: #86868B; font-size: 13px; margin: 4px 0 0 0;">
+            Manage your personal profile, duty message, avatar photo, and account security credentials
         </p>
     </div>
 
-    <!-- Avatar Management Card -->
-    <div class="card" style="margin-bottom: 1.5rem; border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: none; background: #FFFFFF;">
-        <div class="card-header" style="background: #FFFFFF; color: #111827; border-bottom: 1px solid #E5E7EB; padding: 0.75rem 1rem;">
-            <span style="font-weight: 700; font-size: 0.875rem; letter-spacing: 0.05em; text-transform: uppercase;">
-                OFFICIAL AVATAR BADGE
-            </span>
-        </div>
-        <div class="card-body" style="padding: 1.25rem;">
-            <div style="display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap;">
-                
-                <!-- Avatar Visual Display -->
-                <div style="width: 80px; height: 80px; background: #1F2937; color: #FFFFFF; font-weight: 800; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; border: 2px solid #374151; flex-shrink: 0;">
-                    {% if user_obj.avatar %}
-                        <img src="{{ user_obj.avatar.url }}" alt="{{ user_obj.username }}" style="width: 100%; height: 100%; object-fit: cover;">
-                    {% else %}
-                        [{{ user_obj.initials }}]
+    <!-- Two Balanced Clean Side-by-Side or Stacked Cards -->
+    <div class="profile-cards-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.5rem; align-items: start;">
+
+        <!-- CARD 1: PROFILE & AVATAR DETAILS -->
+        <div class="card" style="background: #FFFFFF; border: 1px solid #E5E5E7; border-radius: 6px; box-shadow: none; overflow: hidden;">
+            <div class="card-header" style="background: #F5F5F7; border-bottom: 1px solid #E5E5E7; padding: 0.65rem 1rem; display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif; font-size: 11px; font-weight: 500; color: #86868B; text-transform: uppercase; letter-spacing: 0.06px;">
+                    Profile &amp; Avatar Details
+                </span>
+                <span style="font-size: 11px; font-weight: 500; color: #86868B;">@{{ user_obj.username }}</span>
+            </div>
+            
+            <div class="card-body" style="padding: 1.25rem;">
+                <form action="{% url 'accounts:profile' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <!-- Avatar & Upload Row: Circular photo neatly on left with selector beside it -->
+                    <div class="avatar-upload-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; background: #F9FAFB; border: 1px solid #E5E5E7; border-radius: 6px; margin-bottom: 1.25rem;">
+                        <!-- Circular Profile Photo -->
+                        <div style="width: 56px; height: 56px; border-radius: 50%; border: 1px solid #E5E5E7; overflow: hidden; background: #E5E5E7; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            {% if user_obj.avatar %}
+                                <img src="{{ user_obj.avatar.url }}" alt="{{ user_obj.username }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            {% else %}
+                                <span style="font-weight: 700; font-size: 1.15rem; color: #1D1D1F;">{{ user_obj.initials }}</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Upload Selector Vertically Centered Beside Avatar -->
+                        <div style="flex: 1; min-width: 0;">
+                            <label for="id_avatar" style="display: block; font-size: 11px; font-weight: 500; color: #86868B; text-transform: uppercase; letter-spacing: 0.06px; margin-bottom: 0.35rem;">
+                                Avatar Image
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                                <div style="flex: 1; min-width: 160px;">
+                                    {{ form.avatar }}
+                                </div>
+                                {% if user_obj.avatar %}
+                                <button type="submit" formaction="{% url 'accounts:remove_avatar' %}" formmethod="post" class="btn btn-sm btn-danger" style="height: 32px; padding: 0 10px; font-size: 12px; border-radius: 6px; white-space: nowrap;">
+                                    Remove
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personal Status Message -->
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label for="id_status_message" style="display: block; font-size: 11px; font-weight: 500; color: #86868B; text-transform: uppercase; letter-spacing: 0.06px; margin-bottom: 0.35rem;">
+                            Live Duty Status Message
+                        </label>
+                        {{ form.status_message }}
+                        <small style="color: #86868B; font-size: 11px; display: block; margin-top: 3px;">Visible across quick drawer &amp; roster (e.g., "Available at Barangay Hall until 4 PM")</small>
+                    </div>
+
+                    <!-- Names Row -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="id_first_name" style="display: block; font-size: 11px; font-weight: 500; color: #86868B; text-transform: uppercase; letter-spacing: 0.06px; margin-bottom: 0.35rem;">
+                                First Name
+                            </label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="id_last_name" style="display: block; font-size: 11px; font-weight: 500; color: #86868B; text-transform: uppercase; letter-spacing: 0.06px; margin-bottom: 0.35rem;">
+                                Last Name
+                            </label>
+                            {{ form.last_name }}
+                        </div>
+                    </div>
+
+                    <!-- Contact Details Row -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="id_email" style="display: block; font-size: 11px; font-weight: 500; color: #86868B; text-transform: uppercase; letter-spacing: 0.06px; margin-bottom: 0.35rem;">
+                                Email Address
+                            </label>
+                            {{ form.email }}
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="id_phone_number" style="display: block; font-size: 11px; font-weight: 500; color: #86868B; text-transform: uppercase; letter-spacing: 0.06px; margin-bottom: 0.35rem;">
+                                Mobile Number
+                            </label>
+                            {{ form.phone_number }}
+                        </div>
+                    </div>
+
+                    <!-- Staff & Admin Duty Controls -->
+                    {% if user_obj.is_admin_user or user_obj.is_kapitan_user or user_obj.is_staff %}
+                    <div style="border-top: 1px solid #E5E5E7; padding-top: 1rem; margin-top: 1rem; margin-bottom: 1rem;">
+                        <div style="font-size: 11px; font-weight: 500; color: #86868B; text-transform: uppercase; letter-spacing: 0.06px; margin-bottom: 0.65rem;">
+                            Officer Duty Roster Settings
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="id_duty_status" style="display: block; font-size: 11px; font-weight: 500; color: #86868B; text-transform: uppercase; letter-spacing: 0.06px; margin-bottom: 0.35rem;">
+                                    Duty Status
+                                </label>
+                                {{ form.duty_status }}
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="id_duty_return_date" style="display: block; font-size: 11px; font-weight: 500; color: #86868B; text-transform: uppercase; letter-spacing: 0.06px; margin-bottom: 0.35rem;">
+                                    Expected Return Date
+                                </label>
+                                {{ form.duty_return_date }}
+                            </div>
+                        </div>
+                    </div>
                     {% endif %}
-                </div>
 
-                <div style="flex: 1; min-width: 200px;">
-                    <div style="font-weight: 700; font-size: 1rem; color: #111827;">
-                        {{ user_obj.get_full_name|default:user_obj.username }}
+                    <!-- Primary Action Button with solid accent fill #0071E3 -->
+                    <div style="margin-top: 1.25rem;">
+                        <button type="submit" class="btn btn-primary" style="background: #0071E3 !important; border-color: #0071E3 !important; color: #FFFFFF !important; height: 32px; width: 100%; border-radius: 6px; font-size: 13px; font-weight: 500; letter-spacing: -0.08px;">
+                            Update Profile
+                        </button>
                     </div>
-                    <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.2rem;">
-                        Role: <strong>{{ user_obj.get_role_display|upper }}</strong> • @{{ user_obj.username }}
-                    </div>
-                    
-                    <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                        {% if user_obj.avatar %}
-                        <form action="{% url 'accounts:remove_avatar' %}" method="post" style="display: inline; margin: 0;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-sm btn-danger" style="font-weight: 700; min-height: 40px;">
-                                [REMOVE AVATAR (REVERT TO INITIALS)]
-                            </button>
-                        </form>
-                        {% else %}
-                        <span class="badge badge-secondary" style="font-size: 0.875rem; padding: 0.35rem 0.65rem;">
-                            ACTIVE: FLAT INITIAL TEXT BADGE [{{ user_obj.initials }}]
-                        </span>
-                        {% endif %}
-                    </div>
-                </div>
-
+                </form>
             </div>
         </div>
-    </div>
 
-    <!-- Profile Details & Status Message Form -->
-    <div class="card" style="border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: none; background: #FFFFFF;">
-        <div class="card-header" style="background: #FFFFFF; color: #111827; border-bottom: 1px solid #E5E7EB; padding: 0.75rem 1rem;">
-            <span style="font-weight: 700; font-size: 0.875rem; letter-spacing: 0.05em; text-transform: uppercase;">
-                UPDATE PROFILE DETAILS & STATUS
-            </span>
+        <!-- CARD 2: SECURITY & PASSWORD SETTINGS -->
+        <div class="card" style="background: #FFFFFF; border: 1px solid #E5E5E7; border-radius: 6px; box-shadow: none; overflow: hidden;">
+            <div class="card-header" style="background: #F5F5F7; border-bottom: 1px solid #E5E5E7; padding: 0.65rem 1rem; display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif; font-size: 11px; font-weight: 500; color: #86868B; text-transform: uppercase; letter-spacing: 0.06px;">
+                    Security &amp; Password
+                </span>
+                <span style="font-size: 11px; font-weight: 500; color: #86868B;">Authentication</span>
+            </div>
+
+            <div class="card-body" style="padding: 1.25rem;">
+                <form action="{% url 'accounts:profile' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="change_password">
+
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label for="old_password_input" style="display: block; font-size: 11px; font-weight: 500; color: #86868B; text-transform: uppercase; letter-spacing: 0.06px; margin-bottom: 0.35rem;">
+                            Current Password
+                        </label>
+                        <input type="password" name="old_password" id="old_password_input" class="form-control" required placeholder="Enter current password" style="height: 32px; border-radius: 6px; border: 1px solid #E5E5E7; font-size: 13px;">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label for="new_password1_input" style="display: block; font-size: 11px; font-weight: 500; color: #86868B; text-transform: uppercase; letter-spacing: 0.06px; margin-bottom: 0.35rem;">
+                            New Password
+                        </label>
+                        <input type="password" name="new_password1" id="new_password1_input" class="form-control" required placeholder="At least 8 characters" style="height: 32px; border-radius: 6px; border: 1px solid #E5E5E7; font-size: 13px;">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label for="new_password2_input" style="display: block; font-size: 11px; font-weight: 500; color: #86868B; text-transform: uppercase; letter-spacing: 0.06px; margin-bottom: 0.35rem;">
+                            Confirm New Password
+                        </label>
+                        <input type="password" name="new_password2" id="new_password2_input" class="form-control" required placeholder="Re-enter new password" style="height: 32px; border-radius: 6px; border: 1px solid #E5E5E7; font-size: 13px;">
+                    </div>
+
+                    <!-- Primary Action Button with solid accent fill #0071E3 -->
+                    <div style="margin-top: 1.5rem;">
+                        <button type="submit" class="btn btn-primary" style="background: #0071E3 !important; border-color: #0071E3 !important; color: #FFFFFF !important; height: 32px; width: 100%; border-radius: 6px; font-size: 13px; font-weight: 500; letter-spacing: -0.08px;">
+                            Update Password
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="card-body" style="padding: 1.25rem;">
-            <form action="{% url 'accounts:profile' %}" method="post" enctype="multipart/form-data">
-                {% csrf_token %}
 
-                <!-- Avatar Upload / Replace Input -->
-                <div class="form-group" style="margin-bottom: 1.25rem;">
-                    <label style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #4B5563;">
-                        Upload New Avatar Image (Replaces current avatar)
-                    </label>
-                    {{ form.avatar }}
-                    <small style="color: #6B7280; font-size: 0.875rem;">Square JPG or PNG recommended.</small>
-                </div>
-
-                <!-- Status Message Input -->
-                <div class="form-group" style="margin-bottom: 1.25rem;">
-                    <label style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #4B5563;">
-                        Personal Status Message (Visible in quick drawer & roster)
-                    </label>
-                    {{ form.status_message }}
-                    <small style="color: #6B7280; font-size: 0.875rem;">e.g., "Available at Barangay Hall until 4 PM" or "On Field Inspection in Purok 3"</small>
-                </div>
-
-                <!-- Names Row -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #4B5563;">First Name</label>
-                        {{ form.first_name }}
-                    </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #4B5563;">Last Name</label>
-                        {{ form.last_name }}
-                    </div>
-                </div>
-
-                <!-- Contact Row -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #4B5563;">Email Address</label>
-                        {{ form.email }}
-                    </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #4B5563;">Mobile Number</label>
-                        {{ form.phone_number }}
-                    </div>
-                </div>
-
-                <!-- Staff / Admin Duty Controls -->
-                {% if user_obj.is_admin_user or user_obj.is_kapitan_user or user_obj.is_staff %}
-                <div style="border-top: 2px solid #E5E7EB; padding-top: 1rem; margin-top: 1rem; margin-bottom: 1.25rem;">
-                    <div style="font-size: 0.875rem; font-weight: 700; color: #1E3A8A; text-transform: uppercase; margin-bottom: 0.75rem;">
-                        OFFICER DUTY ROSTER SETTINGS
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #4B5563;">Duty Status</label>
-                            {{ form.duty_status }}
-                        </div>
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #4B5563;">Expected Return Date (If on leave)</label>
-                            {{ form.duty_return_date }}
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-
-                <button type="submit" class="btn btn-primary" style="width: 100%; font-weight: 700; min-height: 48px; letter-spacing: 0.05em;">
-                    [SAVE PROFILE CHANGES]
-                </button>
-            </form>
-        </div>
     </div>
 
 </div>

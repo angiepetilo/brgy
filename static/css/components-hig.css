@@ -707,36 +707,43 @@ body {
 
 .hig-search-input {
   width: 100%;
-  height: var(--button-height);
-  padding: 0 32px 0 32px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-family: var(--font-family-base);
-  font-size: var(--text-body);
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-primary);
+  height: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+  padding: 0 12px 0 32px !important;
+  border: 1px solid #E5E5E7 !important;
+  border-radius: 6px !important;
+  font-family: var(--font-family-base) !important;
+  font-size: 13px !important;
+  background: #FFFFFF !important;
+  color: #1D1D1F !important;
+  box-sizing: border-box !important;
+  box-shadow: none !important;
   transition: all var(--transition-base);
 }
 
 .hig-search-input:focus {
-  outline: none;
-  border-color: var(--color-accent-blue);
-  background: var(--color-bg-primary);
-  box-shadow: var(--shadow-focus);
+  outline: none !important;
+  border-color: #0071E3 !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15) !important;
 }
 
 .hig-search-input::placeholder {
-  color: var(--color-text-tertiary);
+  color: #86868B !important;
+  font-style: normal !important;
+  opacity: 1 !important;
 }
 
-.hig-search-field svg {
+.hig-search-field svg,
+.hig-search-field .icon {
   position: absolute;
   left: 10px;
   top: 50%;
   transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  color: var(--color-text-tertiary);
+  width: 14px;
+  height: 14px;
+  color: #86868B;
   pointer-events: none;
 }
 
@@ -1031,9 +1038,6 @@ body {
     padding: 0 16px;
   }
 }
-  color: var(--color-text-primary);
-  margin: 0;
-}
 
 .hig-alert-success {
   background: var(--color-success-green-subtle);
@@ -1114,3 +1118,130 @@ body {
   margin-left: auto;
   margin-right: auto;
 }
+
+/* ==========================================================================
+   GovTech Accessible Status Badges & Component Affordances
+   - Low-saturation pastel backgrounds with high-contrast deep text
+   - Fully pill-shaped or min 6px radius
+   - Interactive targets min 40px
+   - Table action compact icon bounding box 32px-36px
+   ========================================================================== */
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+  text-transform: lowercase;
+  border: 1px solid transparent;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.status-chip .status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* 1. Pending / Under Review / Low Stock */
+.status-chip-pending,
+.status-chip-low_stock,
+.status-chip-warning {
+  background-color: #FEF3C7 !important;
+  color: #92400E !important;
+  border-color: #FDE68A !important;
+}
+.status-chip-pending .status-dot,
+.status-chip-low_stock .status-dot {
+  background-color: #D97706 !important;
+}
+
+/* 2. Operational / Active / Approved / Settled */
+.status-chip-approved,
+.status-chip-active,
+.status-chip-operational,
+.status-chip-settled,
+.status-chip-success {
+  background-color: #D1FAE5 !important;
+  color: #065F46 !important;
+  border-color: #A7F3D0 !important;
+}
+.status-chip-approved .status-dot,
+.status-chip-active .status-dot,
+.status-chip-operational .status-dot,
+.status-chip-settled .status-dot {
+  background-color: #059669 !important;
+}
+
+/* 3. Under Mediation / In Progress */
+.status-chip-mediation,
+.status-chip-under_mediation,
+.status-chip-info {
+  background-color: #EEF2FF !important;
+  color: #3730A3 !important;
+  border-color: #C7D2FE !important;
+}
+.status-chip-mediation .status-dot,
+.status-chip-under_mediation .status-dot {
+  background-color: #4F46E5 !important;
+}
+
+/* 4. Declined / Rejected / Escalated / Out of Stock */
+.status-chip-declined,
+.status-chip-rejected,
+.status-chip-escalated,
+.status-chip-out_of_stock,
+.status-chip-danger {
+  background-color: #FEE2E2 !important;
+  color: #991B1B !important;
+  border-color: #FECACA !important;
+}
+.status-chip-declined .status-dot,
+.status-chip-rejected .status-dot,
+.status-chip-escalated .status-dot,
+.status-chip-out_of_stock .status-dot {
+  background-color: #DC2626 !important;
+}
+
+/* 5. Neutral / Dismissed / Withdrawn / Closed */
+.status-chip-dismissed,
+.status-chip-withdrawn,
+.status-chip-neutral,
+.status-chip-closed,
+.status-chip-gray {
+  background-color: #F1F5F9 !important;
+  color: #334155 !important;
+  border-color: #CBD5E1 !important;
+}
+.status-chip-dismissed .status-dot,
+.status-chip-withdrawn .status-dot,
+.status-chip-neutral .status-dot,
+.status-chip-closed .status-dot {
+  background-color: #64748B !important;
+}
+
+/* Table action button bounding box */
+.table-action-icon-btn,
+.clean-table td.col-actions a.btn,
+.clean-table td.col-actions button.btn {
+  width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  min-width: 34px !important;
+  max-width: 34px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 6px !important;
+  box-sizing: border-box !important;
+}
+

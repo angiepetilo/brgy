@@ -21,10 +21,19 @@ urlpatterns = [
     path('residents/register/', views.staff_register_resident_view, name='staff_register_resident'),
     path('residents/<int:resident_id>/needs/', views.update_resident_needs_view, name='update_resident_needs'),
     path('residents/assign/', views.assign_resident_officer_view, name='assign_resident_officer'),
+    path('households/', views.household_list_view, name='household_list'),
+    path('households/create/', views.household_create_view, name='household_create'),
+    path('households/<int:pk>/edit/', views.household_edit_view, name='household_edit'),
+    path('households/<int:pk>/delete/', views.household_delete_view, name='household_delete'),
+    path('resident-accounts/', views.resident_accounts_list_view, name='resident_accounts_list'),
+    path('user-id-proof/<int:user_id>/', views.serve_user_id_proof_view, name='serve_user_id_proof'),
+    path('staff/toggle-duty/', views.toggle_duty_status_view, name='toggle_duty_status'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('officers/permissions/', views.officers_permissions_view, name='officers_permissions'),
     path('profile/', views.profile_view, name='profile'),
     path('profile/avatar/remove/', views.remove_avatar_view, name='remove_avatar'),
+    path('departments/', views.departments_directory_view, name='departments_directory'),
+    path('directory/', views.departments_directory_view, name='directory'),
 
     # Password reset (Django built-in; generic response regardless of email existence)
     path(
@@ -64,6 +73,7 @@ urlpatterns = [
     # System Module (Part G - Admin Only)
     path('system/', system_views.system_dashboard_view, name='system_dashboard'),
     path('system/barangay-info/update/', system_views.update_barangay_info_view, name='system_barangay_info_update'),
+    path('system/appointment-windows/update/', system_views.update_appointment_windows_view, name='system_appointment_windows_update'),
     path('system/categories/create/', system_views.post_category_save_view, name='system_post_category_create'),
     path('system/categories/<int:category_id>/edit/', system_views.post_category_save_view, name='system_post_category_edit'),
     path('system/categories/<int:category_id>/delete/', system_views.post_category_delete_view, name='system_post_category_delete'),
@@ -80,4 +90,7 @@ urlpatterns = [
     path('system/staff/<int:user_id>/disable/', system_views.staff_account_disable_view, name='system_staff_account_disable'),
     path('system/emails/<str:template_name>/preview/', system_views.email_template_preview_api_view, name='system_email_preview'),
     path('system/emails/<str:template_name>/edit/', system_views.email_template_edit_view, name='system_email_edit'),
+    path('system/puroks/create/', system_views.purok_create_view, name='system_purok_create'),
+    path('system/puroks/<int:purok_id>/edit/', system_views.purok_edit_view, name='system_purok_edit'),
+    path('system/puroks/<int:purok_id>/delete/', system_views.purok_delete_view, name='system_purok_delete'),
 ]

@@ -17,7 +17,6 @@
         max-width: 68%;
         padding: 0.65rem 1rem;
         border-radius: 16px;
-        font-size: 0.9375rem;
         line-height: 1.4;
         word-break: break-word;
     }
@@ -26,23 +25,54 @@
         color: #FFFFFF;
         border-bottom-right-radius: 4px;
     }
+    .message-row.outgoing .message-text {
+        color: #FFFFFF !important;
+        font-size: 14px !important;
+        font-weight: 400 !important;
+        line-height: 1.4;
+        margin: 0;
+    }
     .message-row.incoming .message-bubble {
-        background: #FFFFFF;
+        background: #F3F4F6;
         color: #111827;
         border: 1px solid #E5E7EB;
         border-bottom-left-radius: 4px;
     }
+    .message-row.incoming .message-text {
+        color: #111827 !important;
+        font-size: 14px !important;
+        font-weight: 400 !important;
+        line-height: 1.4;
+        margin: 0;
+    }
     .message-time {
-        display: block;
-        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
         margin-top: 4px;
+        line-height: 1;
     }
     .message-row.outgoing .message-time {
-        color: rgba(255, 255, 255, 0.8);
-        text-align: right;
+        color: #FFFFFF;
+        opacity: 0.7;
+        justify-content: flex-end;
+        font-size: 11px;
+    }
+    .message-row.outgoing .message-time .icon-labelled,
+    .message-row.outgoing .message-time .icon,
+    .message-row.outgoing .message-time svg {
+        width: 11px !important;
+        height: 11px !important;
+        color: #FFFFFF !important;
+        opacity: 0.7 !important;
+        display: inline-flex;
+        align-items: center;
     }
     .message-row.incoming .message-time {
         color: #6B7280;
+        justify-content: flex-start;
+        font-size: 11px;
     }
 </style>
 
@@ -67,7 +97,7 @@
                 <div class="status-indicator" style="font-size: 0.875rem; color: #111827; display: flex; align-items: center; gap: 0.35rem; margin-top: 0.15rem;">
                     <span style="width: 8px; height: 8px; border-radius: 50%; background: #16A34A; display: inline-block;"></span>
                     {% if other_user.duty_status == 'on_duty' %}
-                        On Duty / Active
+                        On Duty
                     {% elif other_user.duty_status == 'on_leave' %}
                         On Leave
                     {% else %}
@@ -100,14 +130,14 @@
                     {% endif %}
                     
                     <div class="message-bubble">
-                        <p class="message-text" style="margin: 0; white-space: pre-wrap;">{{ msg.content }}</p>
+                        <p class="message-text" style="margin: 0; white-space: pre-wrap; font-size: 14px; font-weight: 400; color: {% if msg.sender == request.user %}#FFFFFF{% else %}#111827{% endif %};">{{ msg.content }}</p>
                         <span class="message-time">
-                            {{ msg.created_at|date:"g:i A" }}
+                            <span>{{ msg.created_at|date:"g:i A" }}</span>
                             {% if msg.sender == request.user %}
                                 {% if msg.is_read %}
-                                    <span class="icon-labelled" title="Read">{% icon 'check-check' %}<span class="sr-only">Read</span></span>
+                                    <span class="icon-labelled" title="Read" style="display: inline-flex; align-items: center; opacity: 0.7;">{% icon 'check-check' style="width: 11px; height: 11px;" %}<span class="sr-only">Read</span></span>
                                 {% else %}
-                                    <span class="icon-labelled" title="Delivered">{% icon 'check' %}<span class="sr-only">Delivered</span></span>
+                                    <span class="icon-labelled" title="Delivered" style="display: inline-flex; align-items: center; opacity: 0.7;">{% icon 'check' style="width: 11px; height: 11px;" %}<span class="sr-only">Delivered</span></span>
                                 {% endif %}
                             {% endif %}
                         </span>

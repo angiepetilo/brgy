@@ -39,3 +39,17 @@ document.addEventListener('change', function (event) {
         el.parentElement.style.opacity = el.checked ? '1' : '0.5';
     }
 });
+
+function initPinState() {
+    var pinEl = document.getElementById('standaloneIsPinned');
+    if (pinEl && pinEl.parentElement) {
+        pinEl.parentElement.style.opacity = pinEl.checked ? '1' : '0.5';
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPinState);
+} else {
+    initPinState();
+}
+

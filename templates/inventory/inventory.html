@@ -1,0 +1,666 @@
+{% extends 'base.html' %}
+{% load static core_tags %}
+
+{% block title %}Inventory & Asset Tracking - Barangay.ph{% endblock %}
+
+{% block extra_css %}
+<style>
+.inv-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+.btn-row-stock-move {
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.btn-row-stock-move:hover {
+    background-color: #F3F4F6 !important;
+    border-color: #9CA3AF !important;
+    color: #111827 !important;
+}
+.btn-row-stock-move:active {
+    transform: scale(0.96);
+}
+.storage-location-block {
+    transition: border-color 0.15s ease;
+}
+.storage-location-block:hover {
+    border-color: #9CA3AF;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hig-content-area" style="padding: 1.5rem; width: 100%; max-width: 1300px; margin: 0 auto;">
+    <!-- Module Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="font-size: 1.45rem; font-weight: 800; color: #111827; margin: 0; letter-spacing: -0.01em; display: flex; align-items: center; gap: 0.5rem;">
+                {% icon 'box' %} Inventory and Asset Tracking
+            </h1>
+            <p style="font-size: 0.875rem; color: #6B7280; margin: 0.25rem 0 0 0;">
+                Multi-Department Warehouse Isolation: Barangay Hall Assets, Disaster Relief Goods, Health Station, and Tanod Gear.
+            </p>
+        </div>
+        <div class="module-header-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-left: auto; justify-content: flex-end;">
+            <button type="button" id="btn-open-create-wh" class="btn btn-outline-secondary btn-sm" style="font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 8px;">
+                {% icon 'building' %} New Storage Location
+            </button>
+            <button type="button" id="btn-open-stock-movement" class="btn btn-outline-primary btn-sm" style="font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 8px;">
+                {% icon 'refresh-cw' %} Stock Movement
+            </button>
+            <button type="button" id="btn-open-create-item" class="btn btn-primary btn-sm" style="font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 8px;">
+                {% icon 'plus' %} Add Item
+            </button>
+        </div>
+    </div>
+
+    <!-- 4 Department Stat Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+        <div class="inv-card">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: #EFF6FF; color: #1E3A8A; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
+                {% icon 'building' %}
+            </div>
+            <div>
+                <div style="font-size: 0.75rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">Barangay Hall Assets</div>
+                <div style="font-size: 1.4rem; font-weight: 800; color: #1E3A8A; line-height: 1.2;">{{ hall_count }} Items</div>
+                <div style="font-size: 0.75rem; color: #9CA3AF;">Computers, printers, and furniture</div>
+            </div>
+        </div>
+
+        <div class="inv-card">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: #FEF3C7; color: #B45309; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
+                {% icon 'archive' %}
+            </div>
+            <div>
+                <div style="font-size: 0.75rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">Disaster Relief Goods</div>
+                <div style="font-size: 1.4rem; font-weight: 800; color: #B45309; line-height: 1.2;">{{ bdrrmc_count }} Items</div>
+                <div style="font-size: 0.75rem; color: #9CA3AF;">Food packs, hygiene kits, and rescue gear</div>
+            </div>
+        </div>
+
+        <div class="inv-card">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: #ECFDF5; color: #059669; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
+                {% icon 'stethoscope' %}
+            </div>
+            <div>
+                <div style="font-size: 0.75rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">Health Station Supplies</div>
+                <div style="font-size: 1.4rem; font-weight: 800; color: #059669; line-height: 1.2;">{{ bhs_count }} Items</div>
+                <div style="font-size: 0.75rem; color: #9CA3AF;">Medicines, vaccines, and trauma kits</div>
+            </div>
+        </div>
+
+        <div class="inv-card">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: #EEF2FF; color: #4F46E5; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
+                {% icon 'shield' %}
+            </div>
+            <div>
+                <div style="font-size: 0.75rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">Tanod Gear</div>
+                <div style="font-size: 1.4rem; font-weight: 800; color: #4F46E5; line-height: 1.2;">{{ tanod_count }} Items</div>
+                <div style="font-size: 0.75rem; color: #9CA3AF;">Flashlights, radios, and batons</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Filter Bar & Search -->
+    <div class="card" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 14px; overflow: hidden; margin-bottom: 1.5rem;">
+        <div style="padding: 1rem 1.25rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; background: #F9FAFB;">
+            <!-- Storage Location Dropdown Filter -->
+            <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                <label for="inv-warehouse-filter" style="font-weight: 700; font-size: 0.875rem; color: #1F2937; margin: 0; white-space: nowrap;">
+                    Storage Location:
+                </label>
+                <select id="inv-warehouse-filter" class="form-control" style="width: auto; min-width: 280px; font-weight: 600; border-radius: 8px;">
+                    <option value="all" {% if not active_warehouse_id %}selected{% endif %}>All Storage Locations</option>
+                    {% for wh in warehouses %}
+                    <option value="{{ wh.id }}" {% if active_warehouse_id == wh.id %}selected{% endif %}>
+                        {{ wh.code }} &mdash; {{ wh.name }} ({{ wh.items.count }} items)
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <form method="get" action="" style="display: flex; gap: 0.5rem; margin: 0;">
+                {% if active_warehouse_id %}<input type="hidden" name="warehouse" value="{{ active_warehouse_id }}">{% endif %}
+                <input type="text" name="q" value="{{ search_query }}" placeholder="Search inventory..." class="form-control" style="font-size: 0.85rem; padding: 0.4rem 0.75rem; width: 240px; border-radius: 8px;">
+                <button type="submit" class="btn btn-secondary btn-sm" style="font-weight: 700;" aria-label="Search inventory">
+                    {% icon 'search' %}
+                </button>
+                {% if search_query %}
+                <a href="?{% if active_warehouse_id %}warehouse={{ active_warehouse_id }}{% endif %}" class="btn btn-light btn-sm" title="Clear search">
+                    &times;
+                </a>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Inventory Items Table Container -->
+        <div class="table-container-wrap" style="padding: 1.25rem; width: 100%; max-width: 100%; box-sizing: border-box;">
+            <div class="table-responsive lg-overflow-visible w-full overflow-x-auto lg:overflow-visible" style="width: 100%; max-width: 100%; max-height: calc(100vh - 280px); overflow-y: auto;">
+                <table class="clean-table inventory-data-table table-fluid-auto" style="width: 100%; max-width: 100%; table-layout: auto;">
+                    <thead>
+                        <tr>
+                            <!-- 1. Asset Code: Tightest content width -->
+                            <th class="col-tight col-tight-asset" style="padding: 0.75rem 1rem; width: 1%; white-space: nowrap; text-align: left;">
+                                <a href="?{% if active_warehouse_id %}warehouse={{ active_warehouse_id }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}sort=code&dir={% if current_sort == 'code' and current_dir == 'asc' %}desc{% else %}asc{% endif %}" class="th-sort-link{% if current_sort == 'code' %} active{% endif %}" title="Sort by Asset Code">
+                                    <span>Asset Code</span>
+                                    {% if current_sort == 'code' %}
+                                        {% if current_dir == 'desc' %}
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0071E3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                                        {% else %}
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0071E3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>
+                                        {% endif %}
+                                    {% else %}
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
+                                    {% endif %}
+                                </a>
+                            </th>
+
+                            <!-- 2. Item Name: Absorbs all remaining structural whitespace -->
+                            <th class="col-absorb-title" style="padding: 0.75rem 1rem; width: auto; text-align: left;">
+                                <a href="?{% if active_warehouse_id %}warehouse={{ active_warehouse_id }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}sort=name&dir={% if current_sort == 'name' and current_dir == 'asc' %}desc{% else %}asc{% endif %}" class="th-sort-link{% if current_sort == 'name' %} active{% endif %}" title="Sort by Item Name">
+                                    <span>Item Name</span>
+                                    {% if current_sort == 'name' %}
+                                        {% if current_dir == 'desc' %}
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0071E3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                                        {% else %}
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0071E3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>
+                                        {% endif %}
+                                    {% else %}
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
+                                    {% endif %}
+                                </a>
+                            </th>
+
+                            <!-- 3. Storage Location: Structured, non-overlapping block -->
+                            <th class="col-location" style="padding: 0.75rem 1rem; width: 16%; max-width: 220px; text-align: left;">
+                                <a href="?{% if active_warehouse_id %}warehouse={{ active_warehouse_id }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}sort=location&dir={% if current_sort == 'location' and current_dir == 'asc' %}desc{% else %}asc{% endif %}" class="th-sort-link{% if current_sort == 'location' %} active{% endif %}" title="Sort by Location">
+                                    <span>Storage Location</span>
+                                    {% if current_sort == 'location' %}
+                                        {% if current_dir == 'desc' %}
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0071E3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                                        {% else %}
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0071E3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>
+                                        {% endif %}
+                                    {% else %}
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
+                                    {% endif %}
+                                </a>
+                            </th>
+
+                            <!-- 4. Quantity: Tightest content width, right-aligned -->
+                            <th class="col-numeric col-tight col-tight-qty" style="padding: 0.75rem 1rem; width: 1%; white-space: nowrap; text-align: right;">
+                                <a href="?{% if active_warehouse_id %}warehouse={{ active_warehouse_id }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}sort=quantity&dir={% if current_sort == 'quantity' and current_dir == 'desc' %}asc{% else %}desc{% endif %}" class="th-sort-link{% if current_sort == 'quantity' %} active{% endif %}" style="justify-content: flex-end;" title="Sort by Quantity">
+                                    <span>Quantity</span>
+                                    {% if current_sort == 'quantity' %}
+                                        {% if current_dir == 'asc' %}
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0071E3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>
+                                        {% else %}
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0071E3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                                        {% endif %}
+                                    {% else %}
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
+                                    {% endif %}
+                                </a>
+                            </th>
+
+                            <!-- 5. Custodian: Compact content width -->
+                            <th class="col-custodian" style="padding: 0.75rem 1rem; width: 1%; white-space: nowrap; text-align: left;">Custodian</th>
+
+                            <!-- 6. Status: Tightest content width -->
+                            <th class="col-tight col-tight-status" style="padding: 0.75rem 1rem; width: 1%; white-space: nowrap; text-align: left;">
+                                <a href="?{% if active_warehouse_id %}warehouse={{ active_warehouse_id }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}sort=status&dir={% if current_sort == 'status' and current_dir == 'asc' %}desc{% else %}asc{% endif %}" class="th-sort-link{% if current_sort == 'status' %} active{% endif %}" title="Sort by Status">
+                                    <span>Status</span>
+                                    {% if current_sort == 'status' %}
+                                        {% if current_dir == 'desc' %}
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0071E3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                                        {% else %}
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0071E3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>
+                                        {% endif %}
+                                    {% else %}
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
+                                    {% endif %}
+                                </a>
+                            </th>
+
+                            <!-- 7. Action: Tightest content width, right-aligned -->
+                            <th class="col-actions col-tight col-tight-action" style="padding: 0.75rem 1rem; width: 1%; white-space: nowrap; text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <!-- Asset Code -->
+                            <td class="col-tight col-tight-asset" style="padding: 0.75rem 1rem; width: 1%; white-space: nowrap; vertical-align: middle; text-align: left;">
+                                <strong class="tabular-nums" style="color: #1E3A8A; font-size: 0.8125rem; font-family: monospace; letter-spacing: 0.02em;">{{ item.item_code|default:"AST-LOG" }}</strong>
+                                {% if item.tag_no %}
+                                <div class="tabular-nums secondary-record-subtext" style="font-family: monospace; font-size: 0.75rem; color: #6B7280; margin-top: 2px;">Tag: {{ item.tag_no }}</div>
+                                {% endif %}
+                            </td>
+
+                            <!-- Item Name (Absorbs remaining whitespace, 2-3 line wrap) -->
+                            <td class="col-absorb-title" style="padding: 0.75rem 1rem; width: auto; vertical-align: middle; text-align: left;">
+                                <div class="primary-record-name title-line-clamp" style="font-size: 0.875rem; font-weight: 600; color: #111827; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; overflow-wrap: break-word;">{{ item.name }}</div>
+                                <div class="secondary-record-subtext" style="display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; margin-top: 3px; font-size: 0.75rem; color: #6B7280; line-height: 1.3;">
+                                    {% if item.estimated_value > 0 %}
+                                    <span class="tabular-nums">Est. Value: ₱{{ item.estimated_value|floatformat:2 }}</span>
+                                    {% endif %}
+                                    {% if item.estimated_value > 0 and item.storage_bay %}
+                                    <span style="color: #D1D5DB;">&bull;</span>
+                                    {% endif %}
+                                    {% if item.storage_bay %}
+                                    <span>Shelf: {{ item.storage_bay }}</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+
+                            <!-- Storage Location -->
+                            <td class="col-location" style="padding: 0.75rem 1rem; width: 16%; max-width: 220px; vertical-align: middle; text-align: left;">
+                                <div class="storage-location-block" style="display: inline-flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 6px 10px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; line-height: 1.4; max-width: 100%;">
+                                    <span style="font-size: 0.8125rem; font-weight: 600; color: #1E3A8A; line-height: 1.3;">
+                                        {{ item.warehouse.name }}
+                                    </span>
+                                    {% if item.warehouse.location_address %}
+                                    <span style="font-size: 0.75rem; color: #6B7280; line-height: 1.3;">
+                                        {{ item.warehouse.location_address }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </td>
+
+                            <!-- Quantity -->
+                            <td class="col-numeric col-tight col-tight-qty" style="padding: 0.75rem 1rem; width: 1%; white-space: nowrap; text-align: right; vertical-align: middle;">
+                                <span class="tabular-nums" style="font-weight: 700; font-size: 0.9375rem; color: #111827;">{{ item.quantity }}</span>
+                                <span style="font-size: 0.75rem; font-weight: 500; color: #6B7280; margin-left: 2px;">{{ item.unit }}</span>
+                            </td>
+
+                            <!-- Custodian -->
+                            <td class="col-custodian" style="padding: 0.75rem 1rem; width: 1%; white-space: nowrap; vertical-align: middle; text-align: left; font-size: 0.8125rem; color: #374151; font-weight: 500;">
+                                {{ item.custodian|default:item.warehouse.custodian_name|default:"General Services" }}
+                            </td>
+
+                            <!-- Status -->
+                            <td class="col-tight col-tight-status" style="padding: 0.75rem 1rem; width: 1%; white-space: nowrap; vertical-align: middle; text-align: left;">
+                                {% if item.condition == 'operational' or item.condition == 'in_stock' %}
+                                <span class="status-chip status-chip-approved" style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; line-height: 1;">
+                                    <span class="status-dot"></span>
+                                    {{ item.get_condition_display }}
+                                </span>
+                                {% elif item.condition == 'low_stock' or item.condition == 'for_repair' %}
+                                <span class="status-chip status-chip-pending" style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; line-height: 1;">
+                                    <span class="status-dot"></span>
+                                    {{ item.get_condition_display }}
+                                </span>
+                                {% else %}
+                                <span class="status-chip status-chip-declined" style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; line-height: 1;">
+                                    <span class="status-dot"></span>
+                                    {{ item.get_condition_display }}
+                                </span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Action -->
+                            <td class="col-actions col-tight col-tight-action" style="padding: 0.75rem 1rem; width: 1%; white-space: nowrap; text-align: right; vertical-align: middle;">
+                                <button type="button" class="btn btn-outline-primary btn-sm btn-row-stock-move btn-icon-only"
+                                        data-item-id="{{ item.id }}"
+                                        data-item-name="{{ item.name }}"
+                                        data-item-qty="{{ item.quantity }}"
+                                        data-item-unit="{{ item.unit }}"
+                                        data-wh-name="{{ item.warehouse.name }}"
+                                        title="Move Stock Location"
+                                        aria-label="Move Stock Location"
+                                        data-tooltip="Move Stock Location"
+                                        style="width: 34px; height: 34px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid #D1D5DB; background: #FFFFFF; color: #1E3A8A; cursor: pointer;">
+                                    {% icon 'move-right' style='width: 16px; height: 16px;' %}
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: #6B7280; padding: 3.5rem 1.5rem; font-size: 0.875rem;">
+                                No items found in this storage location. Click "Add Item" above to stock supplies.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Stock Movement History Audit Trail -->
+    {% if recent_movements %}
+    <div class="card" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);">
+        <div style="padding: 0.9rem 1.25rem; border-bottom: 1px solid #E5E7EB; background: #FAFAFA; display: flex; align-items: center; justify-content: space-between;">
+            <h3 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #111827; display: flex; align-items: center; gap: 0.4rem;">
+                {% icon 'history' %} Recent Stock Activity Logs
+            </h3>
+            <span style="font-size: 0.75rem; color: #6B7280; font-weight: 500;">Department stock updates</span>
+        </div>
+        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+            <table class="clean-table" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th style="padding: 0.75rem 1rem; width: 18%;">Timestamp</th>
+                        <th style="padding: 0.75rem 1rem; width: 14%;">Action</th>
+                        <th style="padding: 0.75rem 1rem; width: 22%;">Item Name</th>
+                        <th style="padding: 0.75rem 1rem; width: 16%;">Storage Location</th>
+                        <th class="col-numeric" style="padding: 0.75rem 1rem; width: 12%; text-align: right;">Quantity Delta</th>
+                        <th class="col-numeric" style="padding: 0.75rem 1rem; width: 10%; text-align: right;">New Stock</th>
+                        <th style="padding: 0.75rem 1rem; width: 18%;">Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in recent_movements %}
+                    <tr>
+                        <td class="tabular-nums" style="padding: 0.75rem 1rem; color: #6B7280; font-size: 0.75rem; vertical-align: middle;">{{ m.date|date:"M d, Y h:i A" }}</td>
+                        <td style="padding: 0.75rem 1rem; vertical-align: middle;">
+                            {% if m.movement_type == 'stock_in' %}
+                            <span class="status-chip status-chip-approved">
+                                <span class="status-dot"></span>
+                                stock in
+                            </span>
+                            {% elif m.movement_type == 'stock_out' %}
+                            <span class="status-chip status-chip-declined">
+                                <span class="status-dot"></span>
+                                stock out
+                            </span>
+                            {% else %}
+                            <span class="status-chip status-chip-pending">
+                                <span class="status-dot"></span>
+                                adjustment
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 0.75rem 1rem; vertical-align: middle;">
+                            <span class="primary-record-name">{{ m.item.name }}</span>
+                        </td>
+                        <td style="padding: 0.75rem 1rem; color: #4B5563; vertical-align: middle; font-size: 0.8125rem;">{{ m.item.warehouse.name }}</td>
+                        {% if m.movement_type == 'stock_in' %}
+                        <td class="col-numeric tabular-nums" style="padding: 0.75rem 1rem; text-align: right; font-weight: 700; color: #059669; vertical-align: middle;">
+                            +{{ m.quantity }} <span style="font-size: 0.75rem; font-weight: 500; color: #6B7280;">{{ m.item.unit }}</span>
+                        </td>
+                        {% elif m.movement_type == 'stock_out' %}
+                        <td class="col-numeric tabular-nums" style="padding: 0.75rem 1rem; text-align: right; font-weight: 700; color: #DC2626; vertical-align: middle;">
+                            -{{ m.quantity }} <span style="font-size: 0.75rem; font-weight: 500; color: #6B7280;">{{ m.item.unit }}</span>
+                        </td>
+                        {% else %}
+                        <td class="col-numeric tabular-nums" style="padding: 0.75rem 1rem; text-align: right; font-weight: 700; color: #4B5563; vertical-align: middle;">
+                            {{ m.quantity }} <span style="font-size: 0.75rem; font-weight: 500; color: #6B7280;">{{ m.item.unit }}</span>
+                        </td>
+                        {% endif %}
+                        <td class="col-numeric tabular-nums" style="padding: 0.75rem 1rem; text-align: right; font-weight: 700; color: #111827; vertical-align: middle;">
+                            {{ m.new_quantity }} <span style="font-size: 0.75rem; font-weight: 500; color: #6B7280;">{{ m.item.unit }}</span>
+                        </td>
+                        <td style="padding: 0.75rem 1rem; color: #6B7280; vertical-align: middle; font-size: 0.8125rem;">{{ m.purpose|default:"Stock movement recorded" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL 1: STOCK MOVEMENT -->
+<!-- ========================================== -->
+<div id="stockMovementModal" class="modal-overlay" style="display: none;">
+    <div style="background: #FFFFFF; border-radius: 16px; width: 100%; max-width: 600px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; background: #F9FAFB;">
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: #EFF6FF; color: #1E3A8A; display: flex; align-items: center; justify-content: center;">
+                    {% icon 'refresh-cw' %}
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #111827;">Process Stock Movement</h3>
+                    <p style="margin: 0; font-size: 0.75rem; color: #6B7280;">Isolated stock updates strictly affect the selected location.</p>
+                </div>
+            </div>
+            <button type="button" id="btn-close-stock-movement" style="border: none; background: #F3F4F6; color: #4B5563; width: 30px; height: 30px; border-radius: 50%; font-size: 1.25rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+        </div>
+
+        <form method="post" action="{% url 'inventory:inventory' %}" style="margin: 0; overflow-y: auto; padding: 1.5rem;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="stock_movement">
+
+            <div id="stock-movement-item-info" style="background: #EFF6FF; color: #1E3A8A; font-weight: 700; font-size: 0.8rem; padding: 0.5rem 0.75rem; border-radius: 8px; margin-bottom: 1rem;">
+                Select target item to process stock in or out:
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="stock-movement-item-select" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">
+                    Target Item <span style="color: #DC2626;">*</span>
+                </label>
+                <select name="item_id" id="stock-movement-item-select" class="form-control" required style="font-weight: 600;">
+                    <option value="" disabled selected>-- Select Inventory Item --</option>
+                    {% for item in items %}
+                    <option value="{{ item.id }}">
+                        [{{ item.warehouse.code }}] {{ item.name }} &mdash; Current: {{ item.quantity }} {{ item.unit }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                    <label for="move-type" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Action Type <span style="color: #DC2626;">*</span></label>
+                    <select name="movement_type" id="move-type" class="form-control" required style="font-weight: 600;">
+                        <option value="stock_in">Stock In</option>
+                        <option value="stock_out">Stock Out</option>
+                        <option value="adjustment">Count Adjustment</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="move-qty" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Quantity <span style="color: #DC2626;">*</span></label>
+                    <input type="number" name="quantity" id="move-qty" min="1" value="1" class="form-control" required style="font-weight: 700;">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="move-ref" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Reference No.</label>
+                <input type="text" name="reference_no" id="move-ref" class="form-control" placeholder="e.g. RIS-2026-088">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="move-purpose" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Purpose</label>
+                <textarea name="purpose" id="move-purpose" rows="2" class="form-control" placeholder="e.g. Distributed to flood evacuees in Purok 3"></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; padding-top: 1rem; border-top: 1px solid #E5E7EB;">
+                <button type="button" id="btn-close-stock-movement-footer" class="btn btn-secondary btn-sm" style="font-weight: 600;">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-sm" style="font-weight: 700;">Save Movement</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL 2: ADD INVENTORY ITEM -->
+<!-- ========================================== -->
+<div id="createItemModal" class="modal-overlay" style="display: none;">
+    <div style="background: #FFFFFF; border-radius: 16px; width: 100%; max-width: 650px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; background: #F9FAFB;">
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: #EFF6FF; color: #1E3A8A; display: flex; align-items: center; justify-content: center;">
+                    {% icon 'box' %}
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #111827;">Add New Inventory Item</h3>
+                    <p style="margin: 0; font-size: 0.75rem; color: #6B7280;">Register an asset or supply item into a specific department warehouse.</p>
+                </div>
+            </div>
+            <button type="button" id="btn-close-create-item" style="border: none; background: #F3F4F6; color: #4B5563; width: 30px; height: 30px; border-radius: 50%; font-size: 1.25rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+        </div>
+
+        <form method="post" action="{% url 'inventory:inventory' %}" style="margin: 0; overflow-y: auto; padding: 1.5rem;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create_item">
+
+            <!-- WAREHOUSE ASSIGNMENT -->
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label for="item-warehouse" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">
+                    Storage Location <span style="color: #DC2626;">*</span>
+                </label>
+                <select name="warehouse_id" id="item-warehouse" class="form-control" required style="font-weight: 600; border: 2px solid #BFDBFE;">
+                    <option value="" disabled selected>-- Select Storage Location --</option>
+                    {% for wh in warehouses %}
+                    <option value="{{ wh.id }}" {% if active_warehouse_id == wh.id %}selected{% endif %}>
+                        {{ wh.code }} &mdash; {{ wh.name }} ({{ wh.location_address|default:"General Storage" }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="item-name" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Item Name <span style="color: #DC2626;">*</span></label>
+                <input type="text" name="name" id="item-name" class="form-control" placeholder="e.g. Digital Blood Pressure Monitor with Pediatric Cuff" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                    <label for="item-code" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Item Code</label>
+                    <input type="text" name="item_code" id="item-code" class="form-control" placeholder="e.g. AST-MED-010" style="font-family: monospace;">
+                </div>
+                <div class="form-group">
+                    <label for="item-tag" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Property Tag</label>
+                    <input type="text" name="tag_no" id="item-tag" class="form-control" placeholder="e.g. BHC-BP-022">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                    <label for="item-type" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Category</label>
+                    <select name="item_type" id="item-type" class="form-control" style="font-weight: 600;">
+                        {% for code, label in item_type_choices %}
+                        <option value="{{ code }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="item-condition" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Condition</label>
+                    <select name="condition" id="item-condition" class="form-control" style="font-weight: 600;">
+                        {% for code, label in condition_choices %}
+                        <option value="{{ code }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                    <label for="item-qty" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Quantity</label>
+                    <input type="number" name="quantity" id="item-qty" min="0" value="1" class="form-control" style="font-weight: 700;">
+                </div>
+                <div class="form-group">
+                    <label for="item-unit" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Unit</label>
+                    <input type="text" name="unit" id="item-unit" class="form-control" value="Units" placeholder="Units">
+                </div>
+                <div class="form-group">
+                    <label for="item-val" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Est. Value (₱)</label>
+                    <input type="number" step="0.01" min="0" name="estimated_value" id="item-val" class="form-control" placeholder="0.00">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                    <label for="item-bay" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Storage Bay</label>
+                    <input type="text" name="storage_bay" id="item-bay" class="form-control" placeholder="e.g. Cabinet 3, Tier A">
+                </div>
+                <div class="form-group">
+                    <label for="item-cust" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Custodian</label>
+                    <input type="text" name="custodian" id="item-cust" class="form-control" placeholder="e.g. Head Nurse Althea Cruz">
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; padding-top: 1rem; border-top: 1px solid #E5E7EB;">
+                <button type="button" id="btn-close-create-item-footer" class="btn btn-secondary btn-sm" style="font-weight: 600;">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-sm" style="font-weight: 700;">Save Item</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL 3: CREATE CUSTOM STORAGE LOCATION -->
+<!-- ========================================== -->
+<div id="createWarehouseModal" class="modal-overlay" style="display: none;">
+    <div style="background: #FFFFFF; border-radius: 16px; width: 100%; max-width: 600px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; background: #F9FAFB;">
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: #EFF6FF; color: #1E3A8A; display: flex; align-items: center; justify-content: center;">
+                    {% icon 'building' %}
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #111827;">Add Custom Storage Location</h3>
+                    <p style="margin: 0; font-size: 0.75rem; color: #6B7280;">Isolate supplies for specific departments or facilities.</p>
+                </div>
+            </div>
+            <button type="button" id="btn-close-create-wh" style="border: none; background: #F3F4F6; color: #4B5563; width: 30px; height: 30px; border-radius: 50%; font-size: 1.25rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+        </div>
+
+        <form method="post" action="{% url 'inventory:inventory' %}" style="margin: 0; overflow-y: auto; padding: 1.5rem;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create_warehouse">
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="wh-name" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Storage Location Name <span style="color: #DC2626;">*</span></label>
+                <input type="text" name="name" id="wh-name" class="form-control" placeholder="e.g. Senior Citizen Community Center" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                    <label for="wh-code" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Unique Code <span style="color: #DC2626;">*</span></label>
+                    <input type="text" name="code" id="wh-code" class="form-control" placeholder="e.g. WH-SENIOR" required style="font-family: monospace; text-transform: uppercase;">
+                </div>
+                <div class="form-group">
+                    <label for="wh-dept" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Department</label>
+                    <input type="text" name="department" id="wh-dept" class="form-control" placeholder="e.g. Social Welfare">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="wh-loc" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Room Location</label>
+                <input type="text" name="location_address" id="wh-loc" class="form-control" placeholder="e.g. Multi-Purpose Annex, Room 102">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="wh-cust" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Custodian Name</label>
+                <input type="text" name="custodian_name" id="wh-cust" class="form-control" placeholder="e.g. Socorro Valderama">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="wh-desc" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Description</label>
+                <textarea name="description" id="wh-desc" rows="2" class="form-control" placeholder="Scope and purpose of this storage facility..."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; padding-top: 1rem; border-top: 1px solid #E5E7EB;">
+                <button type="button" id="btn-close-create-wh-footer" class="btn btn-secondary btn-sm" style="font-weight: 600;">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-sm" style="font-weight: 700;">Save Location</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/inventory.js' %}" defer></script>
+{% endblock %}

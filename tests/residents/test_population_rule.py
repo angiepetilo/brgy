@@ -47,13 +47,6 @@ class PopulationRuleTests(BaseTestCase):
         # Only the households of NoUser and Active still have a counted member.
         self.assertEqual(hh_row['households'], 2)
 
-    def test_records_rbi_table_lists_only_counted_residents(self):
-        self.login(make_admin())
-        resp = self.client.get(reverse('records:hub'), {'tab': 'inhabitants'})
-        self.assertEqual(resp.status_code, 200)
-        self.assertEqual({r.pk for r in resp.context['rbi_page']}, self.counted)
-        self.assertEqual(resp.context['total_inhabitants'], 2)
-
     def test_statistics_demographics_population_matches(self):
         self.login(make_admin())
         resp = self.client.get(reverse('statistics:api_demographics'))

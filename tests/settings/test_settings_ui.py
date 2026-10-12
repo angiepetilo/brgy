@@ -160,7 +160,7 @@ class TabRenderingTests(SystemUITestCase):
             name='Stray Animals', slug='stray-animals', routing_target_type='committee',
             routing_target_value='Peace and Order',
         )
-        response = self.page('user_management', 'concerns')
+        response = self.page('post_categories', 'concerns')
         self.assertRenders(response)
         self.assertContains(response, 'Stray Animals')
         self.assertContains(response, 'Committee')
@@ -177,10 +177,10 @@ class TabRenderingTests(SystemUITestCase):
         self.assertContains(response, 'aria-live="polite"')
 
     def test_active_tab_and_subtab_highlighted(self):
-        response = self.page('user_management', 'concerns')
+        response = self.page('post_categories', 'concerns')
         html = response.content.decode()
         self.assertEqual(len(re.findall(r'aria-current="page"', html)), 2)
-        self.assertEqual(response.context['active_tab'], 'user_management')
+        self.assertEqual(response.context['active_tab'], 'post_categories')
         self.assertEqual(response.context['active_subtab'], 'concerns')
 
     def test_legacy_tab_names_still_resolve(self):
@@ -192,7 +192,7 @@ class TabRenderingTests(SystemUITestCase):
 class WiringTests(SystemUITestCase):
     TABS = [
         ('barangay_info', None), ('post_categories', None), ('document_health', 'documents'),
-        ('document_health', 'health'), ('user_management', 'staff'), ('user_management', 'concerns'),
+        ('document_health', 'health'), ('user_management', 'staff'), ('post_categories', 'concerns'),
         ('email_templates', None),
     ]
 
@@ -248,7 +248,7 @@ class WiringTests(SystemUITestCase):
                 reverse('accounts:system_staff_account_create'),
                 reverse('accounts:system_staff_account_disable', args=[staff.id]),
             ],
-            ('user_management', 'concerns'): [
+            ('post_categories', 'concerns'): [
                 reverse('accounts:system_concern_category_create'),
                 reverse('accounts:system_concern_category_delete', args=[concern.id]),
             ],
@@ -523,7 +523,7 @@ class FormFlowTests(SystemUITestCase):
             'name': 'Noise Complaint', 'routing_target_type': 'committee',
             'routing_target_value': 'Peace and Order', 'is_active': ['0', '1'],
         })
-        self.assertEqual(_target(response), (self.url, {'tab': 'user_management', 'subtab': 'concerns'}))
+        self.assertEqual(_target(response), (self.url, {'tab': 'post_categories', 'subtab': 'concerns'}))
         cat = ConcernCategory.objects.get(name='Noise Complaint')
         self.assertEqual(cat.routing_target_type, 'committee')
         page = self.follow(response)
@@ -538,7 +538,7 @@ class FormFlowTests(SystemUITestCase):
         self.assertEqual((cat.name, cat.routing_target_value, cat.is_active), ('Noise Complaints', 'Security', False))
 
         response = self.client.post(reverse('accounts:system_concern_category_delete', args=[cat.id]))
-        self.assertEqual(_target(response)[1], {'tab': 'user_management', 'subtab': 'concerns'})
+        self.assertEqual(_target(response)[1], {'tab': 'post_categories', 'subtab': 'concerns'})
         self.assertFalse(ConcernCategory.objects.filter(id=cat.id).exists())
 
     def test_staff_create_and_disable_return_to_staff_subtab(self):

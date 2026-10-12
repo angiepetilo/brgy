@@ -237,13 +237,25 @@ def check_user_perm(user, module, action):
             ).first()
             return rule.allowed if rule else False
 
-    # 3. Staff user rights computed as the union of rules across all their StaffAssignments.
+    # 3. Direct module permissions granted on user account
+    allowed_mods = getattr(user, 'allowed_modules', None) or []
+    if allowed_mods:
+        if module in allowed_mods or '*' in allowed_mods:
+            return True
+        if module == 'health_center' and 'appointments' in allowed_mods:
+            return True
+        if module == 'records' and ('records' in allowed_mods or 'appointments' in allowed_mods):
+            return True
+
+    # 4. Staff user rights computed as the union of rules across all their StaffAssignments.
     # No assignment = deny by default.
     assignments = StaffAssignment.objects.filter(user=user)
-    if not assignments.exists():
+    if not assignments.exists() and not allowed_mods:
         return False
 
-    assigned_officer_ids = list(assignments.values_list('officer_id', flat=True))
+    assigned_officer_ids = [oid for oid in assignments.values_list('officer_id', flat=True) if oid]
+    if not assigned_officer_ids:
+        return False
 
     # Check if ANY assigned officer has allowed=True for module and action (union of permissions)
     has_allowed_rule = PermissionRule.objects.filter(

@@ -1,0 +1,900 @@
+{% extends 'base.html' %}
+{% load static core_tags %}
+
+{% block title %}Budget & Multi-Account Financial Management - Barangay.ph{% endblock %}
+
+{% block extra_css %}
+<style>
+.fin-tab-active {
+    background: #1E3A8A !important;
+    color: #FFFFFF !important;
+    border-color: #1E3A8A !important;
+}
+.fin-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+.account-profile-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 14px;
+    padding: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.account-profile-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+}
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hig-content-area" style="padding: 1.5rem; width: 100%; max-width: 1300px; margin: 0 auto;">
+    <!-- Module Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="font-size: 1.45rem; font-weight: 800; color: #111827; margin: 0; letter-spacing: -0.01em; display: flex; align-items: center; gap: 0.5rem;">
+                {% icon 'landmark' %} Budget and Financial Management
+            </h1>
+            <p style="font-size: 0.875rem; color: #6B7280; margin: 0.25rem 0 0 0;">
+                Multi-Account Ledger: Track and reconcile General Fund, SK Fund, Calamity Fund, Development Fund, and Barangay Collections.
+            </p>
+        </div>
+        <div class="module-header-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-left: auto; justify-content: flex-end; align-items: center; position: relative; z-index: 10;">
+            <button type="button" id="btn-open-create-acc" data-action="open-create-acc" class="btn btn-outline-primary btn-sm" style="font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 8px; cursor: pointer;">
+                {% icon 'folder-open' %} New Account Profile
+            </button>
+            <button type="button" id="btn-open-record-tx" data-action="open-record-tx" class="btn btn-outline-secondary btn-sm" style="font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 8px; cursor: pointer;">
+                {% icon 'plus' %} Record Transaction
+            </button>
+        </div>
+    </div>
+
+    <!-- 4 Key Aggregate Stat Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+        <div class="fin-card">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: #EFF6FF; color: #1E3A8A; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
+                {% icon 'coins' %}
+            </div>
+            <div>
+                <div style="font-size: 0.75rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">Total Appropriations</div>
+                <div class="tabular-nums" style="font-size: 1.35rem; font-weight: 800; color: #1E3A8A; line-height: 1.2; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;">{{ total_budget }}</div>
+                <div style="font-size: 0.75rem; color: #9CA3AF;">Across {{ accounts|length }} independent accounts</div>
+            </div>
+        </div>
+
+        <div class="fin-card">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: #ECFDF5; color: #059669; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
+                {% icon 'file-check' %}
+            </div>
+            <div>
+                <div style="font-size: 0.75rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">Total Disbursed</div>
+                <div class="tabular-nums" style="font-size: 1.35rem; font-weight: 800; color: #059669; line-height: 1.2; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;">{{ total_disbursed }}</div>
+                <div style="font-size: 0.75rem; color: #9CA3AF;">{{ utilization_rate }}% Overall utilization</div>
+            </div>
+        </div>
+
+        <div class="fin-card">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: #FEF3C7; color: #B45309; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
+                {% icon 'scale' %}
+            </div>
+            <div>
+                <div style="font-size: 0.75rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">Unobligated Balances</div>
+                <div class="tabular-nums" style="font-size: 1.35rem; font-weight: 800; color: #B45309; line-height: 1.2; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;">{{ total_balance }}</div>
+                <div style="font-size: 0.75rem; color: #9CA3AF;">Current combined funds on-hand</div>
+            </div>
+        </div>
+
+        <div class="fin-card">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: #EEF2FF; color: #4F46E5; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
+                {% icon 'history' %}
+            </div>
+            <div>
+                <div style="font-size: 0.75rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">Income Collections</div>
+                <div class="tabular-nums" style="font-size: 1.35rem; font-weight: 800; color: #4F46E5; line-height: 1.2; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;">{{ total_income }}</div>
+                <div style="font-size: 0.75rem; color: #9CA3AF;">Remitted clearance and local revenues</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs & Search Controls -->
+    <div class="card" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 14px; overflow: hidden;">
+        <div style="padding: 1rem 1.25rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; background: #F9FAFB;">
+            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                <a href="?tab=accounts{% if search_query %}&amp;q={{ search_query }}{% endif %}" class="btn btn-sm {% if active_tab == 'accounts' %}btn-primary fin-tab-active{% else %}btn-light{% endif %}" style="font-weight: 700; border-radius: 8px;">
+                    {% icon 'landmark' %} Fund Accounts and Ledgers ({{ accounts|length }})
+                </a>
+                <a href="?tab=transactions{% if account_filter %}&amp;account={{ account_filter }}{% endif %}{% if search_query %}&amp;q={{ search_query }}{% endif %}" class="btn btn-sm {% if active_tab == 'transactions' %}btn-primary fin-tab-active{% else %}btn-light{% endif %}" style="font-weight: 700; border-radius: 8px;">
+                    {% icon 'file-text' %} Transactions and Vouchers
+                </a>
+                <a href="?tab=uacs{% if search_query %}&amp;q={{ search_query }}{% endif %}" class="btn btn-sm {% if active_tab == 'uacs' %}btn-primary fin-tab-active{% else %}btn-light{% endif %}" style="font-weight: 700; border-radius: 8px;">
+                    {% icon 'barcode' %} UACS Codes
+                </a>
+                <a href="?tab=suppliers{% if search_query %}&amp;q={{ search_query }}{% endif %}" class="btn btn-sm {% if active_tab == 'suppliers' %}btn-primary fin-tab-active{% else %}btn-light{% endif %}" style="font-weight: 700; border-radius: 8px;">
+                    {% icon 'building' %} Suppliers
+                </a>
+                <a href="?tab=liquidations{% if search_query %}&amp;q={{ search_query }}{% endif %}" class="btn btn-sm {% if active_tab == 'liquidations' %}btn-primary fin-tab-active{% else %}btn-light{% endif %}" style="font-weight: 700; border-radius: 8px;">
+                    {% icon 'clipboard-list' %} Cash Advances and Liquidation
+                </a>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-left: auto; flex-wrap: wrap;">
+                <form method="get" action="" style="display: flex; gap: 0.5rem; margin: 0;">
+                    <input type="hidden" name="tab" value="{{ active_tab }}">
+                    {% if account_filter %}<input type="hidden" name="account" value="{{ account_filter }}">{% endif %}
+                    <input type="text" name="q" value="{{ search_query }}" placeholder="Search financial records..." class="form-control" style="font-size: 0.85rem; padding: 0.4rem 0.75rem; width: 220px; border-radius: 8px;">
+                    <button type="submit" class="btn btn-secondary btn-sm" style="font-weight: 700;" aria-label="Search finance">
+                        {% icon 'search' %}
+                    </button>
+                    {% if search_query %}
+                    <a href="?tab={{ active_tab }}{% if account_filter %}&amp;account={{ account_filter }}{% endif %}" class="btn btn-light btn-sm" title="Clear search">
+                        &times;
+                    </a>
+                    {% endif %}
+                </form>
+
+                {% if active_tab == 'liquidations' %}
+                <button type="button" data-action="open-grant-ca" class="btn btn-primary btn-sm" style="font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 8px; white-space: nowrap; cursor: pointer;">
+                    {% icon 'hand-coins' %} Grant Cash Advance
+                </button>
+                {% elif active_tab == 'suppliers' %}
+                <button type="button" data-action="open-supplier" class="btn btn-primary btn-sm" style="font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 8px; white-space: nowrap; cursor: pointer;">
+                    {% icon 'plus' %} New Supplier
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="padding: 1.25rem;">
+            <!-- TAB: MULTI-ACCOUNT PROFILES & LEDGERS -->
+            {% if active_tab == 'accounts' %}
+            <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                <p style="margin: 0; font-size: 0.875rem; color: #4B5563;">
+                    Separate fund profiles prevent mixing of appropriations. Each transaction is strictly tied to its respective pipeline.
+                </p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.25rem;">
+                {% for acc in accounts %}
+                <div class="account-profile-card">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                            <div>
+                                <span class="badge" style="background: #EFF6FF; color: #1E3A8A; font-weight: 800; font-family: monospace; font-size: 0.8rem; padding: 3px 8px; border-radius: 6px;">
+                                    {{ acc.code }}
+                                </span>
+                                <h3 style="margin: 0.4rem 0 0 0; font-size: 1.05rem; font-weight: 800; color: #111827;">
+                                    {{ acc.name }}
+                                </h3>
+                            </div>
+                            <span class="badge badge-info" style="font-size: 0.7rem; font-weight: 700;">
+                                {{ acc.get_account_type_display|truncatechars:26 }}
+                            </span>
+                        </div>
+
+                        <p style="font-size: 0.8125rem; color: #4B5563; line-height: 1.4; margin-bottom: 1rem;">
+                            {{ acc.description|default:"Standard local government fund pipeline." }}
+                        </p>
+
+                        <div style="background: #F9FAFB; border: 1px solid #F3F4F6; border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem; font-size: 0.8rem;">
+                                <span style="color: #6B7280; font-weight: 600;">Appropriation:</span>
+                                <span class="tabular-nums" style="font-weight: 700; color: #111827; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;">{{ acc.initial_allocation|peso }}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                                <span style="color: #6B7280; font-weight: 700;">Current Balance:</span>
+                                <span class="tabular-nums" style="font-weight: 800; color: #059669; font-size: 1.05rem; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;">{{ acc.current_balance|peso }}</span>
+                            </div>
+                            {% if acc.accountable_officer %}
+                            <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #4B5563; border-top: 1px dashed #E5E7EB; padding-top: 0.4rem;">
+                                <strong>Custodian:</strong> {{ acc.accountable_officer }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 0.5rem; border-top: 1px solid #F3F4F6; padding-top: 0.85rem;">
+                        <a href="?tab=transactions&amp;account={{ acc.id }}" class="btn btn-outline-primary btn-sm" style="flex: 1; font-weight: 700; font-size: 0.8rem; text-align: center; border-radius: 6px;">
+                            {% icon 'file-text' %} View Ledger
+                        </a>
+                        <button type="button" class="btn btn-primary btn-sm btn-add-tx-for-acc" data-acc-id="{{ acc.id }}" style="flex: 1; font-weight: 700; font-size: 0.8rem; border-radius: 6px;">
+                            {% icon 'plus' %} Transact
+                        </button>
+                    </div>
+                </div>
+                {% empty %}
+                <div style="text-align: center; padding: 3rem; color: #6B7280;">No financial accounts found.</div>
+                {% endfor %}
+            </div>
+
+            <!-- TAB: TRANSACTIONS WITH MANDATORY SOURCE ACCOUNT FILTER -->
+            {% elif active_tab == 'transactions' %}
+            <!-- Account Dropdown Filter Bar -->
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem; background: #F3F4F6; padding: 0.75rem 1rem; border-radius: 10px;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <label for="fin-account-filter" style="font-weight: 700; font-size: 0.875rem; color: #1F2937; margin: 0; white-space: nowrap;">
+                        Filter by Source Account:
+                    </label>
+                    <select id="fin-account-filter" class="form-control" style="width: auto; min-width: 260px; font-weight: 600; border-radius: 8px;">
+                        <option value="all" {% if not account_filter or account_filter == 'all' %}selected{% endif %}>All Accounts (Consolidated Ledger)</option>
+                        {% for acc in accounts %}
+                        <option value="{{ acc.id }}" {% if account_filter == acc.id|stringformat:'s' %}selected{% endif %}>
+                            {{ acc.code }} - {{ acc.name }} ({{ acc.current_balance|peso }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div style="font-size: 0.8rem; color: #6B7280; font-weight: 600;">
+                    Showing {{ transactions|length }} transactions
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="clean-table" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #E5E7EB; text-align: left; font-size: 0.8125rem; color: #4B5563; text-transform: uppercase;">
+                            <th style="padding: 0.75rem 1rem;">Date and Reference</th>
+                            <th style="padding: 0.75rem 1rem;">Source Account</th>
+                            <th style="padding: 0.75rem 1rem;">Title &amp; Received By</th>
+                            <th style="padding: 0.75rem 1rem;">UACS Code</th>
+                            <th style="padding: 0.75rem 1rem;">Type</th>
+                            <th class="col-numeric" style="padding: 0.75rem 1rem; text-align: right;">Amount</th>
+                            <th style="padding: 0.75rem 1rem;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tx in transactions %}
+                        <tr style="border-bottom: 1px solid #F3F4F6;">
+                            <td style="padding: 0.75rem 1rem;">
+                                <strong style="color: #1E3A8A; font-size: 0.875rem; font-family: monospace;">{{ tx.reference_no|default:"TX-LOG" }}</strong>
+                                <div style="font-size: 0.75rem; color: #6B7280;">{{ tx.date|date:"M d, Y" }}</div>
+                            </td>
+                            <td style="padding: 0.75rem 1rem;">
+                                <span class="badge" style="background: #EFF6FF; color: #1E3A8A; font-weight: 700; font-family: monospace; font-size: 0.78rem;">
+                                    {{ tx.account.code }}
+                                </span>
+                                <div style="font-size: 0.75rem; color: #4B5563; font-weight: 600;">{{ tx.account.name|truncatechars:28 }}</div>
+                            </td>
+                            <td style="padding: 0.75rem 1rem;">
+                                <div style="font-weight: 700; color: #111827; font-size: 0.875rem;">{{ tx.title }}</div>
+                                {% if tx.payee_or_source %}
+                                <div style="font-size: 0.75rem; color: #6B7280;">{% if tx.transaction_type == 'income' %}From:{% else %}Received By:{% endif %} {{ tx.payee_or_source }}</div>
+                                {% endif %}
+                                {% if tx.particulars %}
+                                <div style="font-size: 0.75rem; color: #9CA3AF; font-style: italic;">{{ tx.particulars|truncatechars:45 }}</div>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 0.75rem 1rem; font-family: monospace; font-size: 0.8rem; color: #4B5563;">
+                                {{ tx.uacs_code|default:"--" }}
+                            </td>
+                            <td style="padding: 0.75rem 1rem;">
+                                {% if tx.transaction_type == 'income' %}
+                                <span class="badge badge-success" style="font-weight: 700; font-size: 0.72rem;">INCOME</span>
+                                {% else %}
+                                <span class="badge badge-danger" style="font-weight: 700; font-size: 0.72rem;">DISBURSEMENT</span>
+                                {% endif %}
+                            </td>
+                            {% if tx.transaction_type == 'income' %}
+                            <td class="col-numeric tabular-nums" style="padding: 0.75rem 1rem; text-align: right; font-weight: 700; font-size: 0.875rem; color: #059669; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;">
+                                +{{ tx.amount|peso }}
+                            </td>
+                            {% else %}
+                            <td class="col-numeric tabular-nums" style="padding: 0.75rem 1rem; text-align: right; font-weight: 700; font-size: 0.875rem; color: #DC2626; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;">
+                                -{{ tx.amount|peso }}
+                            </td>
+                            {% endif %}
+                            <td style="padding: 0.75rem 1rem;">
+                                <span class="badge badge-success" style="font-weight: 700; font-size: 0.72rem;">{{ tx.status|upper }}</span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: #6B7280; padding: 2.5rem;">
+                                No transactions recorded for this account filter. Use "Record Transaction" above to add entries.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- TAB: UACS CODES -->
+            {% elif active_tab == 'uacs' %}
+            <div class="table-responsive">
+                <table class="clean-table" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #E5E7EB; text-align: left; font-size: 0.75rem; color: #6B7280; text-transform: uppercase;">
+                            <th style="padding: 0.75rem 0.5rem;">UACS Code</th>
+                            <th style="padding: 0.75rem 0.5rem;">Account Description</th>
+                            <th style="padding: 0.75rem 0.5rem;">Classification</th>
+                            <th style="padding: 0.75rem 0.5rem;">Budget Allotment</th>
+                            <th style="padding: 0.75rem 0.5rem;">Obligated</th>
+                            <th style="padding: 0.75rem 0.5rem;">Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in uacs_items %}
+                        <tr style="border-bottom: 1px solid #F3F4F6;">
+                            <td style="padding: 0.75rem 0.5rem;"><strong style="font-family: monospace; color: #1E3A8A;">{{ u.code }}</strong></td>
+                            <td style="padding: 0.75rem 0.5rem; font-weight: 600;">{{ u.name }}</td>
+                            <td style="padding: 0.75rem 0.5rem;"><span class="badge badge-info" style="font-size: 0.72rem;">{{ u.category }}</span></td>
+                            <td style="padding: 0.75rem 0.5rem; font-weight: 700;">{{ u.budget }}</td>
+                            <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: #059669;">{{ u.spent }}</td>
+                            <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: #B45309;">{{ u.balance }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #6B7280; padding: 2.5rem; font-size: 0.875rem;">
+                                No UACS code line items recorded.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- TAB: SUPPLIER RECORDS -->
+            {% elif active_tab == 'suppliers' %}
+            <div class="table-responsive">
+                <table class="clean-table" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #E5E7EB; text-align: left; font-size: 0.75rem; color: #6B7280; text-transform: uppercase;">
+                            <th style="padding: 0.75rem 0.5rem;">Supplier Name</th>
+                            <th style="padding: 0.75rem 0.5rem;">TIN Number</th>
+                            <th style="padding: 0.75rem 0.5rem;">Category</th>
+                            <th style="padding: 0.75rem 0.5rem;">Contact and Office Address</th>
+                            <th style="padding: 0.75rem 0.5rem;">Payment Terms</th>
+                            <th style="padding: 0.75rem 0.5rem;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in suppliers %}
+                        <tr style="border-bottom: 1px solid #F3F4F6;">
+                            <td style="padding: 0.75rem 0.5rem; font-weight: 700;">{{ s.name }}</td>
+                            <td style="padding: 0.75rem 0.5rem; font-family: monospace; color: #4B5563;">{{ s.tin }}</td>
+                            <td style="padding: 0.75rem 0.5rem; font-weight: 600; color: #1E3A8A;">{{ s.category }}</td>
+                            <td style="padding: 0.75rem 0.5rem; font-size: 0.8rem; color: #4B5563;">
+                                <div>{{ s.contact_person }} &bull; {{ s.phone }}</div>
+                                <div style="color: #6B7280;">{{ s.address }}</div>
+                            </td>
+                            <td style="padding: 0.75rem 0.5rem; font-size: 0.85rem;">{{ s.terms }}</td>
+                            <td style="padding: 0.75rem 0.5rem;"><span class="badge badge-success" style="font-size: 0.72rem;">{{ s.status }}</span></td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #6B7280; padding: 2.5rem; font-size: 0.875rem;">
+                                <div>No accredited supplier records found.</div>
+                                <button type="button" class="btn btn-primary btn-sm btn-open-create-supplier-inline" style="margin-top: 0.75rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.4rem;">
+                                    {% icon 'plus' %} Add New Supplier
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- TAB: CASH ADVANCES & LIQUIDATION -->
+            {% elif active_tab == 'liquidations' %}
+            <div class="table-container-wrap" style="width: 100%; max-width: 100%; box-sizing: border-box;">
+                <div class="table-responsive lg-overflow-visible" style="width: 100%; max-width: 100%; overflow-x: auto;">
+                    <table class="clean-table" style="width: 100%; max-width: 100%; border-collapse: collapse; table-layout: fixed;">
+                        <colgroup>
+                            <col style="width: 7%;">
+                            <col style="width: 23%;">
+                            <col style="width: 38%;">
+                            <col style="width: 16%;">
+                            <col style="width: 16%;">
+                        </colgroup>
+                        <thead>
+                            <tr style="border-bottom: 2px solid #E5E7EB; font-size: 0.75rem; color: #4B5563; text-transform: uppercase; letter-spacing: 0.04em;">
+                                <th style="padding: 0.65rem 0.85rem; text-align: left; width: 7%; white-space: nowrap;">ID</th>
+                                <th style="padding: 0.65rem 0.85rem; text-align: left; width: 23%;">ACCOUNTABLE OFFICER</th>
+                                <th style="padding: 0.65rem 0.85rem; text-align: left; width: 38%;">PURPOSE</th>
+                                <th style="padding: 0.65rem 0.85rem; text-align: left; width: 16%; white-space: nowrap;">TIMELINE</th>
+                                <th class="col-numeric" style="padding: 0.65rem 0.85rem; text-align: right; width: 16%; white-space: nowrap;">AMOUNT &amp; STATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ca in cash_advances %}
+                            <tr style="border-bottom: 1px solid #F3F4F6; transition: background-color 0.15s ease;">
+                                <!-- 1. ID (Suffix Sequence #010, #009) -->
+                                <td style="padding: 0.65rem 0.85rem; text-align: left; vertical-align: middle; white-space: nowrap;">
+                                    <strong class="tabular-nums" style="font-family: monospace; color: #1E3A8A; font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.02em;" title="{{ ca.ref_no }}">{{ ca.short_ref }}</strong>
+                                </td>
+
+                                <!-- 2. ACCOUNTABLE OFFICER (23% Width) -->
+                                <td style="padding: 0.65rem 0.85rem; text-align: left; vertical-align: middle;">
+                                    <div style="font-weight: 600; font-size: 0.875rem; color: #111827; line-height: 1.35;">{{ ca.officer }}</div>
+                                    <div style="font-size: 0.75rem; font-weight: 400; color: #6B7280; line-height: 1.3; margin-top: 2px;">{{ ca.role }}</div>
+                                </td>
+
+                                <!-- 3. PURPOSE (38% Width, Leading-Normal) -->
+                                <td style="padding: 0.65rem 0.85rem; text-align: left; vertical-align: middle;">
+                                    <div style="font-size: 0.8125rem; color: #374151; line-height: 1.45; word-break: normal; overflow-wrap: break-word; margin: 0;">{{ ca.purpose }}</div>
+                                </td>
+
+                                <!-- 4. TIMELINE (Vertical dates: Granted over Due/Liq) -->
+                                <td style="padding: 0.65rem 0.85rem; text-align: left; vertical-align: middle;">
+                                    <div style="font-size: 0.75rem; line-height: 1.4; white-space: nowrap;">
+                                        <div>
+                                            <span style="color: #6B7280; font-weight: 600;">Granted:</span>
+                                            <span style="color: #1F2937; font-weight: 500;">{{ ca.granted_date_str }}</span>
+                                        </div>
+                                        <div style="margin-top: 2px;">
+                                            <span style="color: #6B7280; font-weight: 600;">{{ ca.target_date_type }}:</span>
+                                            <span style="color: #1F2937; font-weight: 500;">{{ ca.target_date_str }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- 5. AMOUNT & STATUS (Right-Aligned Currency on top, compact status & action below) -->
+                                <td class="col-numeric" style="padding: 0.65rem 0.85rem; text-align: right; vertical-align: middle; white-space: nowrap;">
+                                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                                        <span class="tabular-nums" style="font-family: monospace; font-size: 0.875rem; font-weight: 700; color: #111827;">{{ ca.amount }}</span>
+                                        {% if ca.is_pending %}
+                                        <div style="display: inline-flex; align-items: center; gap: 5px; flex-wrap: nowrap;">
+                                            <span class="status-chip status-chip-pending rounded-full" style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 9999px; background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; font-size: 0.72rem; font-weight: 600; line-height: 1; white-space: nowrap;">
+                                                <span class="status-dot" style="background-color: #92400E; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;"></span>
+                                                Pending
+                                            </span>
+                                            <button type="button" class="btn btn-primary btn-sm btn-liquidate-ca" data-ca-id="{{ ca.id }}" data-ref="{{ ca.ref_no }}" data-officer="{{ ca.officer }}" data-amount="{{ ca.raw_amount }}" data-formatted-amount="{{ ca.amount }}" data-purpose="{{ ca.purpose }}" data-account="{{ ca.account_name }}" style="padding: 2px 8px; font-size: 0.72rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 3px; white-space: nowrap;" title="Settle and liquidate cash advance">
+                                                {% icon 'check-check' style="width: 11px; height: 11px;" %} Settle
+                                            </button>
+                                        </div>
+                                        {% else %}
+                                        <span class="status-chip status-chip-approved rounded-full" style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 9999px; background: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0; font-size: 0.72rem; font-weight: 600; line-height: 1; white-space: nowrap;">
+                                            <span class="status-dot" style="background-color: #065F46; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;"></span>
+                                            Liquidated
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #6B7280; padding: 2.5rem; font-size: 0.875rem;">
+                                    <div>No cash advances or liquidation records found.</div>
+                                    <button type="button" class="btn btn-primary btn-sm btn-open-grant-ca-inline" style="margin-top: 0.75rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.4rem;">
+                                        {% icon 'hand-coins' %} Grant New Cash Advance
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL 1: RECORD TRANSACTION -->
+<!-- ========================================== -->
+<div id="recordTxModal" class="modal-overlay" style="display: none;">
+    <div style="background: #FFFFFF; border-radius: 16px; width: 100%; max-width: 650px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; background: #F9FAFB;">
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: #EFF6FF; color: #1E3A8A; display: flex; align-items: center; justify-content: center;">
+                    {% icon 'file-plus' %}
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #111827;">Record Financial Transaction</h3>
+                    <p style="margin: 0; font-size: 0.75rem; color: #6B7280;">Requires selecting a specific fund source to prevent mixing account balances.</p>
+                </div>
+            </div>
+            <button type="button" id="btn-close-record-tx" style="border: none; background: #F3F4F6; color: #4B5563; width: 30px; height: 30px; border-radius: 50%; font-size: 1.25rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+        </div>
+
+        <form method="post" action="{% url 'finance:financial_management' %}" style="margin: 0; overflow-y: auto; padding: 1.5rem;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create_transaction">
+
+            <!-- MANDATORY SOURCE ACCOUNT SELECTION -->
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label for="tx-source-account" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.35rem;">
+                    Source Account <span style="color: #DC2626;">*</span>
+                </label>
+                <select name="account_id" id="tx-source-account" class="form-control" required style="font-weight: 600; font-size: 0.9rem; padding: 0.5rem 0.75rem; border: 2px solid #BFDBFE;">
+                    <option value="" disabled selected>-- Select Source Account (Mandatory to isolate funds) --</option>
+                    {% for acc in accounts %}
+                    <option value="{{ acc.id }}">
+                        {{ acc.code }} &mdash; {{ acc.name }} [Balance: {{ acc.current_balance|peso }}]
+                    </option>
+                    {% endfor %}
+                </select>
+                <small style="color: #6B7280; font-size: 0.75rem;">Transactions will post and adjust balances strictly for the selected account.</small>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                    <label for="tx-type" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Transaction Type <span style="color: #DC2626;">*</span></label>
+                    <select name="transaction_type" id="tx-type" class="form-control" required style="font-weight: 600;">
+                        <option value="expense">Disbursement</option>
+                        <option value="income">Income</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="tx-amount" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Amount (₱) <span style="color: #DC2626;">*</span></label>
+                    <input type="number" step="0.01" min="0.01" name="amount" id="tx-amount" class="form-control" placeholder="0.00" required style="font-weight: 700; font-size: 0.95rem;">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="tx-title" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Transaction Title <span style="color: #DC2626;">*</span></label>
+                <input type="text" name="title" id="tx-title" class="form-control" placeholder="e.g. Procurement of Disaster Medicine Kits" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                    <label for="tx-ref" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Reference No.</label>
+                    <input type="text" name="reference_no" id="tx-ref" class="form-control" placeholder="e.g. DV-2026-0099">
+                </div>
+                <div class="form-group">
+                    <label for="tx-uacs" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">UACS Code</label>
+                    <input type="text" name="uacs_code" id="tx-uacs" class="form-control" placeholder="e.g. 5-02-03-080">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="tx-payee" id="tx-payee-label" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Received By</label>
+                <input type="text" name="payee_or_source" id="tx-payee" class="form-control" placeholder="e.g. Officer Name, Supplier, or Recipient">
+                <small id="tx-payee-help" style="color: #6B7280; font-size: 0.75rem;">The person, company, or entity receiving the funds or goods.</small>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="tx-particulars" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Particulars</label>
+                <textarea name="particulars" id="tx-particulars" rows="2" class="form-control" placeholder="Detailed description of goods, services, or revenue source..."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; padding-top: 1rem; border-top: 1px solid #E5E7EB;">
+                <button type="button" id="btn-close-record-tx-footer" class="btn btn-secondary btn-sm" style="font-weight: 600;">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-sm" style="font-weight: 700;">Submit Transaction</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL 2: CREATE NEW ACCOUNT PROFILE -->
+<!-- ========================================== -->
+<div id="createAccountModal" class="modal-overlay" style="display: none;">
+    <div style="background: #FFFFFF; border-radius: 16px; width: 100%; max-width: 600px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; background: #F9FAFB;">
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: #EFF6FF; color: #1E3A8A; display: flex; align-items: center; justify-content: center;">
+                    {% icon 'landmark' %}
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #111827;">Create Financial Account Profile</h3>
+                    <p style="margin: 0; font-size: 0.75rem; color: #6B7280;">Add an isolated fund profile (e.g. GF, SK, BDRRMF, Development Fund, Collections).</p>
+                </div>
+            </div>
+            <button type="button" id="btn-close-create-acc" style="border: none; background: #F3F4F6; color: #4B5563; width: 30px; height: 30px; border-radius: 50%; font-size: 1.25rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+        </div>
+
+        <form method="post" action="{% url 'finance:financial_management' %}" style="margin: 0; overflow-y: auto; padding: 1.5rem;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create_account">
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="acc-name" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Account Name <span style="color: #DC2626;">*</span></label>
+                <input type="text" name="name" id="acc-name" class="form-control" placeholder="e.g. Sangguniang Kabataan (SK) Fund" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                    <label for="acc-code" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Account Code <span style="color: #DC2626;">*</span></label>
+                    <input type="text" name="code" id="acc-code" class="form-control" placeholder="e.g. SK-201" required style="font-family: monospace; text-transform: uppercase;">
+                </div>
+
+                <div class="form-group">
+                    <label for="acc-type" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Fund Source Type <span style="color: #DC2626;">*</span></label>
+                    <select name="account_type" id="acc-type" class="form-control" required style="font-weight: 600;">
+                        {% for code, label in account_type_choices %}
+                        <option value="{{ code }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                    <label for="acc-alloc" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Initial Annual Budget (₱)</label>
+                    <input type="number" step="0.01" min="0" name="initial_allocation" id="acc-alloc" class="form-control" placeholder="0.00">
+                </div>
+
+                <div class="form-group">
+                    <label for="acc-officer" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Accountable Officer</label>
+                    <input type="text" name="accountable_officer" id="acc-officer" class="form-control" placeholder="e.g. SK Treasurer">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="acc-desc" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Description</label>
+                <textarea name="description" id="acc-desc" rows="2" class="form-control" placeholder="Statutory scope and allowable expenditures for this fund..."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; padding-top: 1rem; border-top: 1px solid #E5E7EB;">
+                <button type="button" id="btn-close-create-acc-footer" class="btn btn-secondary btn-sm" style="font-weight: 600;">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-sm" style="font-weight: 700;">Save Account Profile</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL 3: LIQUIDATE CASH ADVANCE -->
+<!-- ========================================== -->
+<div id="liquidateCaModal" class="modal-overlay" style="display: none;">
+    <div style="background: #FFFFFF; border-radius: 16px; width: 100%; max-width: 620px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; background: #F9FAFB;">
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: #EFF6FF; color: #1E3A8A; display: flex; align-items: center; justify-content: center;">
+                    {% icon 'file-check' %}
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #111827;">Liquidate Cash Advance</h3>
+                    <p style="margin: 0; font-size: 0.75rem; color: #6B7280;">Settle expenditures with official receipts and credit unspent cash back to fund.</p>
+                </div>
+            </div>
+            <button type="button" id="btn-close-liq-ca" style="border: none; background: #F3F4F6; color: #4B5563; width: 30px; height: 30px; border-radius: 50%; font-size: 1.25rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+        </div>
+
+        <form method="post" action="{% url 'finance:financial_management' %}" style="margin: 0; overflow-y: auto; padding: 1.5rem;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="liquidate_cash_advance">
+            <input type="hidden" name="ca_id" id="liq-ca-id" value="">
+
+            <!-- Advance Information Card -->
+            <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; padding: 1rem; margin-bottom: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                    <div>
+                        <span id="liq-ca-ref" style="font-family: monospace; font-weight: 800; color: #1E3A8A; font-size: 0.85rem;"></span>
+                        <div id="liq-ca-officer" style="font-weight: 700; color: #111827; font-size: 0.95rem; margin-top: 2px;"></div>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="font-size: 0.75rem; color: #6B7280; font-weight: 600;">Granted Cash:</span>
+                        <div id="liq-ca-granted-display" style="font-size: 1.1rem; font-weight: 800; color: #1E3A8A; font-family: monospace;"></div>
+                    </div>
+                </div>
+                <div style="font-size: 0.8rem; color: #4B5563; line-height: 1.35;" id="liq-ca-purpose"></div>
+                <div style="font-size: 0.75rem; color: #6B7280; margin-top: 0.4rem;" id="liq-ca-account"></div>
+            </div>
+
+            <!-- Settlement Inputs -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                    <label for="liq-actual-spent" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">
+                        Actual Disbursed (₱) <span style="color: #DC2626;">*</span>
+                    </label>
+                    <input type="number" step="0.01" min="0" name="actual_spent" id="liq-actual-spent" class="form-control" required style="font-weight: 700; font-size: 0.95rem;">
+                    <small style="color: #6B7280; font-size: 0.72rem;">Total receipts and verified invoices.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="liq-refund-amount" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">
+                        Excess Cash Refund (₱)
+                    </label>
+                    <input type="number" step="0.01" min="0" name="refund_amount" id="liq-refund-amount" class="form-control" style="font-weight: 700; font-size: 0.95rem; background: #F3F4F6;">
+                    <small style="color: #4B5563; font-size: 0.72rem; font-weight: 600;">Auto-credited back to fund balance.</small>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="liq-or-number" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">
+                    Liquidation Report (LR) / OR Number <span style="color: #DC2626;">*</span>
+                </label>
+                <input type="text" name="or_number" id="liq-or-number" class="form-control" placeholder="e.g. LR-2026-010 or Official Receipt No." required>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label for="liq-remarks" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">
+                    Treasurer Audit & Remarks
+                </label>
+                <textarea name="remarks" id="liq-remarks" rows="2" class="form-control" placeholder="e.g. All receipts verified and certified by Barangay Treasurer & Punong Barangay."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; padding-top: 1rem; border-top: 1px solid #E5E7EB;">
+                <button type="button" id="btn-close-liq-ca-footer" class="btn btn-secondary btn-sm" style="font-weight: 600;">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-sm" style="font-weight: 700;">
+                    {% icon 'check-check' %} Mark as Fully Liquidated
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL 4: GRANT CASH ADVANCE -->
+<!-- ========================================== -->
+<div id="grantCaModal" class="modal-overlay" style="display: none;">
+    <div style="background: #FFFFFF; border-radius: 16px; width: 100%; max-width: 620px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; background: #F9FAFB;">
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: #EFF6FF; color: #1E3A8A; display: flex; align-items: center; justify-content: center;">
+                    {% icon 'hand-coins' %}
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #111827;">Grant Cash Advance</h3>
+                    <p style="margin: 0; font-size: 0.75rem; color: #6B7280;">Release advances to bonded accountable officers for field operations.</p>
+                </div>
+            </div>
+            <button type="button" id="btn-close-grant-ca" style="border: none; background: #F3F4F6; color: #4B5563; width: 30px; height: 30px; border-radius: 50%; font-size: 1.25rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+        </div>
+
+        <form method="post" action="{% url 'finance:financial_management' %}" style="margin: 0; overflow-y: auto; padding: 1.5rem;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create_cash_advance">
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label for="ca-source-account" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">
+                    Source Fund Account <span style="color: #DC2626;">*</span>
+                </label>
+                <select name="account_id" id="ca-source-account" class="form-control" required style="font-weight: 600; font-size: 0.9rem; padding: 0.5rem 0.75rem; border: 2px solid #BFDBFE;">
+                    <option value="" disabled selected>-- Select Source Fund Account --</option>
+                    {% for acc in accounts %}
+                    <option value="{{ acc.id }}">
+                        {{ acc.code }} &mdash; {{ acc.name }} [Balance: {{ acc.current_balance|peso }}]
+                    </option>
+                    {% endfor %}
+                </select>
+                <small style="color: #6B7280; font-size: 0.75rem;">Funds will be drawn from this account.</small>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                    <label for="ca-officer" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Accountable Officer <span style="color: #DC2626;">*</span></label>
+                    <input type="text" name="officer" id="ca-officer" class="form-control" placeholder="e.g. Sgt. Fernando Morales" required>
+                </div>
+                <div class="form-group">
+                    <label for="ca-role" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Officer Role / Title</label>
+                    <input type="text" name="role" id="ca-role" class="form-control" placeholder="e.g. Disaster Risk Reduction Officer">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="ca-purpose" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Purpose &amp; Mission <span style="color: #DC2626;">*</span></label>
+                <textarea name="purpose" id="ca-purpose" rows="2" class="form-control" placeholder="e.g. Disaster Drill Simulation &amp; Trainee Logistics" required></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                    <label for="ca-amount" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Granted Amount (₱) <span style="color: #DC2626;">*</span></label>
+                    <input type="number" step="0.01" min="0.01" name="amount" id="ca-amount" class="form-control" placeholder="0.00" required style="font-weight: 700; font-size: 0.95rem;">
+                </div>
+                <div class="form-group">
+                    <label for="ca-deadline" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Liquidation Deadline</label>
+                    <input type="text" name="liquidation_deadline" id="ca-deadline" class="form-control" placeholder="e.g. 30 days from grant date">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="ca-ref-no" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">CA Reference No. (Optional)</label>
+                <input type="text" name="ref_no" id="ca-ref-no" class="form-control" placeholder="e.g. CA-2026-011 (leave blank to auto-generate)">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.25rem; background: #F3F4F6; padding: 0.75rem 1rem; border-radius: 8px;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.85rem; color: #1F2937; margin: 0; cursor: pointer;">
+                    <input type="checkbox" name="post_disbursement" checked style="width: 16px; height: 16px; accent-color: #1E3A8A;">
+                    Automatically post a Disbursement Voucher to record cash out on ledger
+                </label>
+                <small style="display: block; margin-top: 3px; color: #6B7280; font-size: 0.75rem; margin-left: 24px;">Recommended: Keeps the source account balance synchronized with actual cash on-hand.</small>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; padding-top: 1rem; border-top: 1px solid #E5E7EB;">
+                <button type="button" id="btn-close-grant-ca-footer" class="btn btn-secondary btn-sm" style="font-weight: 600;">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-sm" style="font-weight: 700;">Grant Cash Advance</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL 5: NEW SUPPLIER -->
+<!-- ========================================== -->
+<div id="createSupplierModal" class="modal-overlay" style="display: none;">
+    <div style="background: #FFFFFF; border-radius: 16px; width: 100%; max-width: 620px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; background: #F9FAFB;">
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: #EFF6FF; color: #1E3A8A; display: flex; align-items: center; justify-content: center;">
+                    {% icon 'building' %}
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #111827;">Add Accredited Supplier</h3>
+                    <p style="margin: 0; font-size: 0.75rem; color: #6B7280;">Register accredited local vendors and commercial service providers.</p>
+                </div>
+            </div>
+            <button type="button" id="btn-close-create-supplier" style="border: none; background: #F3F4F6; color: #4B5563; width: 30px; height: 30px; border-radius: 50%; font-size: 1.25rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+        </div>
+
+        <form method="post" action="{% url 'finance:financial_management' %}" style="margin: 0; overflow-y: auto; padding: 1.5rem;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create_supplier">
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="supp-name" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Supplier / Company Name <span style="color: #DC2626;">*</span></label>
+                <input type="text" name="name" id="supp-name" class="form-control" placeholder="e.g. PhilPharma Medical Distributors" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                    <label for="supp-tin" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">TIN Number</label>
+                    <input type="text" name="tin" id="supp-tin" class="form-control" placeholder="e.g. 204-581-992-000" style="font-family: monospace;">
+                </div>
+                <div class="form-group">
+                    <label for="supp-category" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Supply / Industry Category</label>
+                    <input type="text" name="category" id="supp-category" class="form-control" placeholder="e.g. Pharmaceuticals &amp; Health Supplies">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                    <label for="supp-contact" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Contact Person</label>
+                    <input type="text" name="contact_person" id="supp-contact" class="form-control" placeholder="e.g. Marilou Dizon">
+                </div>
+                <div class="form-group">
+                    <label for="supp-phone" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Phone Number</label>
+                    <input type="text" name="phone" id="supp-phone" class="form-control" placeholder="e.g. (02) 8832-1100 / 0917-123-4567">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="supp-address" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Office / Store Address</label>
+                <input type="text" name="address" id="supp-address" class="form-control" placeholder="e.g. Unit 3B Healthway Tower, Quezon City">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                <div class="form-group">
+                    <label for="supp-terms" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Payment Terms</label>
+                    <input type="text" name="terms" id="supp-terms" class="form-control" value="Net 30 Days">
+                </div>
+                <div class="form-group">
+                    <label for="supp-status" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Accreditation Status</label>
+                    <select name="status" id="supp-status" class="form-control" style="font-weight: 600;">
+                        <option value="Accredited Active" selected>Accredited Active</option>
+                        <option value="Under Review">Under Review</option>
+                        <option value="Conditional">Conditional</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; padding-top: 1rem; border-top: 1px solid #E5E7EB;">
+                <button type="button" id="btn-close-create-supplier-footer" class="btn btn-secondary btn-sm" style="font-weight: 600;">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-sm" style="font-weight: 700;">Save Supplier</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/financial_management.js' %}?v=2.2" defer></script>
+{% endblock %}

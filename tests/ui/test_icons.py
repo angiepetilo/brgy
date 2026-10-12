@@ -63,7 +63,7 @@ class IconTagTests(SimpleTestCase):
         self.assertEqual(problems, [])
 
     def test_records_department_icons_are_lucide_names(self):
-        from apps.records.views import DEPARTMENTS
+        from apps.accounts.departments import DEPARTMENTS
         for dept in DEPARTMENTS:
             self.assertIsNotNone(icons.resolve(dept['icon']), dept['icon'])
 

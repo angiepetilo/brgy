@@ -1,31 +1,45 @@
 {% load static core_tags perm_tags %}
-<!-- HIG Sidebar (macOS Style) -->
-<aside class="hig-sidebar fb-left-sidebar" id="fb-left-sidebar">
+<!-- Integrated Left Sidebar Panel -->
+<aside class="hig-sidebar fb-left-sidebar" id="fb-left-sidebar" aria-label="Main Navigation">
+    <!-- Top-Left Branding & Collapse Toggle Header -->
+    <div class="sidebar-brand-header">
+        <a href="{% if request.user.is_authenticated %}{% url 'home' %}{% else %}/{% endif %}" class="sidebar-brand-link" title="Barangay.ph - Back to Home">
+            <img src="{% static 'images/barangay_logo.png' %}" alt="Barangay.ph Logo" class="sidebar-brand-logo">
+            <span class="sidebar-brand-text">BARANGAY.PH</span>
+        </a>
+        <button type="button" class="sidebar-toggle-btn" id="sidebar-toggle-btn" title="Toggle Sidebar" aria-label="Toggle Sidebar">
+            <span class="sidebar-toggle-icon-collapse" title="Collapse Sidebar">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect width="18" height="18" x="3" y="3" rx="2.5"></rect>
+                    <path d="M9 3v18"></path>
+                    <path d="m14 9-3 3 3 3"></path>
+                </svg>
+            </span>
+            <span class="sidebar-toggle-icon-expand" title="Expand Sidebar">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect width="18" height="18" x="3" y="3" rx="2.5"></rect>
+                    <path d="M9 3v18"></path>
+                    <path d="m13 15 3-3-3-3"></path>
+                </svg>
+            </span>
+        </button>
+    </div>
+
     <!-- Sidebar Header -->
     <div class="hig-sidebar-header">
         <span class="hig-sidebar-menu-heading">Menu</span>
-        <button class="btn-sidebar-collapse" id="sidebar-collapse-btn" type="button" title="Toggle Sidebar Collapsed/Expanded" aria-label="Toggle Sidebar">
-            <span class="collapse-label-expanded">
-                {% icon 'chevron-left' %}
-                <span class="collapse-text sr-only">Collapse</span>
-            </span>
-            <span class="collapse-label-collapsed" style="display: none;">
-                {% icon 'chevron-right' %}
-                <span class="collapse-text sr-only">Expand</span>
-            </span>
-        </button>
     </div>
 
     <!-- Sidebar Navigation -->
     <nav class="hig-sidebar-nav">
         <!-- Appointment (All roles) -->
-        <a href="{% url 'appointments:list' %}" class="hig-nav-item {% if 'appointment' in request.path %}hig-nav-item-active{% endif %}" title="Appointments">
+        <a href="{% url 'appointments:list' %}" class="hig-nav-item {% if 'appointment' in request.path %}hig-nav-item-active active{% endif %}">
             {% icon 'calendar-check' cls='hig-nav-icon' %}
             <span class="hig-nav-label">Appointments</span>
         </a>
 
         <!-- Messages (All roles) -->
-        <a href="{% url 'chat:inbox' %}" class="hig-nav-item {% if 'chat' in request.path or 'messages' in request.path %}hig-nav-item-active{% endif %}" title="Messages">
+        <a href="{% url 'chat:inbox' %}" class="hig-nav-item {% if 'chat' in request.path or 'messages' in request.path %}hig-nav-item-active active{% endif %}">
             {% icon 'messages-square' cls='hig-nav-icon' %}
             <span class="hig-nav-label">Messages</span>
             {% if unread_messages_count > 0 %}
@@ -40,38 +54,62 @@
         </div>
         {% endif %}
         
-        <!-- Residents (Admin, Kapitan, & Staff Only) -->
+        <!-- Households (Admin, Kapitan, & Staff Only) -->
         {% if request.user.is_admin_user or request.user.is_kapitan_user or request.user.is_staff %}
-        <a href="{% url 'accounts:residents_tabbed' %}" class="hig-nav-item {% if 'residents' in request.path or 'approval' in request.path %}hig-nav-item-active{% endif %}" title="Residents">
+        <a href="{% url 'accounts:household_list' %}" class="hig-nav-item {% if 'household' in request.path %}hig-nav-item-active active{% endif %}">
+            {% icon 'home' cls='hig-nav-icon' %}
+            <span class="hig-nav-label">Households</span>
+        </a>
+        {% endif %}
+
+        <!-- Resident Account (Centralized Profiles of Constituents & Demographics) -->
+        {% if request.user.is_admin_user or request.user.is_kapitan_user or request.user.is_staff %}
+        <a href="{% url 'accounts:residents_tabbed' %}" class="hig-nav-item {% if 'residents' in request.path or 'resident-accounts' in request.path %}hig-nav-item-active active{% endif %}">
             {% icon 'users' cls='hig-nav-icon' %}
-            <span class="hig-nav-label">Residents</span>
+            <span class="hig-nav-label">Resident Account</span>
             {% if dashboard_metrics.pending_registrations_count > 0 or pending_approvals_count > 0 %}
             <span class="hig-nav-badge">{{ dashboard_metrics.pending_registrations_count|default:pending_approvals_count }}</span>
             {% endif %}
         </a>
         {% endif %}
 
-        <!-- Records (Admin, Kapitan, & Staff Only) -->
+        <!-- Officers and Directory (Barangay Officers & Department Directory) -->
         {% if request.user.is_admin_user or request.user.is_kapitan_user or request.user.is_staff %}
-        <a href="{% url 'records:hub' %}" class="hig-nav-item {% if 'records' in request.path %}hig-nav-item-active{% endif %}" title="Records">
-            {% icon 'folder-open' cls='hig-nav-icon' %}
-            <span class="hig-nav-label">Records</span>
+        <a href="{% url 'accounts:departments_directory' %}" class="hig-nav-item {% if 'departments' in request.path or 'directory' in request.path or 'officers' in request.path %}hig-nav-item-active active{% endif %}">
+            {% icon 'building' cls='hig-nav-icon' %}
+            <span class="hig-nav-label">Officers and Directory</span>
         </a>
         {% endif %}
 
         <!-- Blotter -->
         {% if not request.user.is_resident_user %}{% user_can request.user 'blotter' 'view' as can_view_blotter %}{% endif %}
         {% if can_view_blotter %}
-        <a href="{% url 'blotter:case_list' %}" class="hig-nav-item {% if '/blotter/' in request.path %}hig-nav-item-active{% endif %}" title="Blotter">
+        <a href="{% url 'blotter:case_list' %}" class="hig-nav-item {% if 'blotter' in request.path %}hig-nav-item-active active{% endif %}">
             {% icon 'scale' cls='hig-nav-icon' %}
             <span class="hig-nav-label">Blotter</span>
+        </a>
+        {% endif %}
+
+        <!-- Inventory (Physical properties, medical kits, relief goods, event attendance) -->
+        {% if request.user.is_admin_user or request.user.is_kapitan_user or request.user.is_staff %}
+        <a href="{% url 'inventory:inventory' %}" class="hig-nav-item {% if 'inventory' in request.path %}hig-nav-item-active active{% endif %}" title="Inventory and Asset Tracking: Monitors physical barangay properties, emergency medical kits, relief goods, and community event attendance.">
+            {% icon 'box' cls='hig-nav-icon' %}
+            <span class="hig-nav-label">Inventory</span>
+        </a>
+        {% endif %}
+
+        <!-- Financial Management (Fund tracking, disbursement vouchers, supplier records, cash advances, liquidation reports, UACS) -->
+        {% if request.user.is_admin_user or request.user.is_kapitan_user or request.user.is_staff %}
+        <a href="{% url 'finance:financial_management' %}" class="hig-nav-item {% if 'financial-management' in request.path or 'finance' in request.path %}hig-nav-item-active active{% endif %}" title="Budget and Financial Management: Handles local fund tracking, disbursement vouchers, supplier records, cash advances, liquidation reports, and UACS (Unified Accounts Code Structure) line items">
+            {% icon 'landmark' cls='hig-nav-icon' %}
+            <span class="hig-nav-label">Financial Management</span>
         </a>
         {% endif %}
 
         <!-- Statistics -->
         {% user_can request.user 'statistics' 'view' as can_view_statistics %}
         {% if can_view_statistics %}
-        <a href="{% url 'statistics:overview' %}" class="hig-nav-item {% if 'statistics' in request.path %}hig-nav-item-active{% endif %}" title="Statistics">
+        <a href="{% url 'statistics:overview' %}" class="hig-nav-item {% if 'statistics' in request.path or 'stats_overview' in request.path %}hig-nav-item-active active{% endif %}">
             {% icon 'chart-pie' cls='hig-nav-icon' %}
             <span class="hig-nav-label">Statistics</span>
         </a>
@@ -86,7 +124,7 @@
 
         <!-- System Settings (Admin & Superuser Only) -->
         {% if request.user.is_admin_user or request.user.is_superuser %}
-        <a href="{% url 'accounts:system_dashboard' %}" class="hig-nav-item {% if 'system' in request.path %}hig-nav-item-active{% endif %}" title="Settings">
+        <a href="{% url 'accounts:system_dashboard' %}" class="hig-nav-item {% if 'system' in request.path or 'settings' in request.path or '/accounts/profile/' in request.path %}hig-nav-item-active active{% endif %}">
             {% icon 'settings' cls='hig-nav-icon' %}
             <span class="hig-nav-label">Settings</span>
         </a>

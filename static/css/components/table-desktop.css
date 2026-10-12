@@ -50,35 +50,61 @@
     z-index: 10;
   }
   
-  .hig-table thead tr {
-    height: var(--table-header-height);
-    background: var(--color-sidebar);
-    border-bottom: 1px solid var(--color-border);
+  .hig-table thead tr,
+  .clean-table thead tr,
+  .modern-table thead tr {
+    height: var(--table-header-height, 32px) !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+    background: var(--color-sidebar, #F5F5F7) !important;
+    border-bottom: 1px solid var(--color-border, #E5E5E7) !important;
+    box-sizing: border-box !important;
   }
   
-  .hig-table thead th {
-    font-size: var(--text-label);
-    font-weight: var(--weight-semibold);
-    color: var(--color-text-secondary);
-    text-transform: uppercase;
-    letter-spacing: var(--tracking-wide);
-    padding: 0 12px;
-    white-space: nowrap;
-    vertical-align: middle;
-    user-select: none;
+  .hig-table thead th,
+  .clean-table thead th,
+  .modern-table thead th {
+    font-family: var(--font-family-base) !important;
+    font-size: var(--text-label, 11px) !important; /* 11 pt */
+    font-weight: var(--weight-medium, 500) !important; /* Medium */
+    color: var(--color-text-secondary, #86868B) !important;
+    text-transform: uppercase !important;
+    letter-spacing: var(--tracking-wide, 0.06px) !important;
+    padding: 0 12px !important;
+    height: 32px !important;
+    white-space: nowrap !important;
+    vertical-align: middle !important;
+    user-select: none !important;
+    box-sizing: border-box !important;
+    border-bottom: 1px solid var(--color-border, #E5E5E7) !important;
   }
   
   /* Column Alignment Classes */
-  .hig-table-col-left {
-    text-align: left;
+  .hig-table-col-left,
+  .col-text,
+  .col-name,
+  .col-desc {
+    text-align: left !important;
   }
   
-  .hig-table-col-right {
-    text-align: right;
+  .hig-table-col-right,
+  .col-numeric,
+  .col-amount,
+  .col-fee,
+  .col-price,
+  .col-quantity,
+  .col-code,
+  .tabular-nums {
+    text-align: right !important;
+    font-variant-numeric: tabular-nums !important;
+    font-feature-settings: "tnum" 1 !important;
   }
   
-  .hig-table-col-center {
-    text-align: center;
+  .hig-table-col-center,
+  .col-status,
+  .col-badge,
+  .col-category {
+    text-align: center !important;
   }
   
   /* Sortable Column Header */
@@ -86,7 +112,7 @@
     cursor: pointer;
     transition: color var(--transition-fast);
     position: relative;
-    padding-right: 24px;
+    padding-right: 24px !important;
   }
   
   .hig-table thead th.sortable:hover {
@@ -126,39 +152,108 @@
   }
   
   /* ============================================
-     TABLE BODY (40-42px Rows)
+     TABLE BODY (Fixed 42px High-Density Rows)
      ============================================ */
   
-  .hig-table tbody tr {
-    height: var(--table-row-height);
-    border-bottom: 1px solid var(--color-hover);
-    transition: background var(--transition-fast);
+  .hig-table tbody tr,
+  .clean-table tbody tr,
+  .modern-table tbody tr,
+  .table tbody tr,
+  table tbody tr {
+    height: var(--table-row-height, 42px) !important;
+    min-height: 42px !important;
+    max-height: 52px !important;
+    border-bottom: 1px solid var(--color-border, #E5E5E7) !important;
+    transition: background 0.12s ease !important;
+    box-sizing: border-box !important;
   }
   
-  .hig-table tbody tr:last-child {
+  .hig-table tbody tr:last-child,
+  .clean-table tbody tr:last-child,
+  .modern-table tbody tr:last-child,
+  .table tbody tr:last-child,
+  table tbody tr:last-child {
     border-bottom: none;
   }
   
-  .hig-table tbody tr:hover {
-    background: var(--color-hover);
+  .hig-table tbody tr:hover,
+  .clean-table tbody tr:hover,
+  .modern-table tbody tr:hover,
+  .table tbody tr:hover,
+  table tbody tr:hover {
+    background: #F8FAFC !important;
   }
   
   .hig-table tbody tr.selected {
-    background: var(--color-accent-blue-subtle);
+    background: var(--color-accent-blue-subtle) !important;
   }
   
   .hig-table tbody tr.selected:hover {
-    background: var(--color-accent-blue-subtle);
+    background: var(--color-accent-blue-subtle) !important;
   }
   
-  .hig-table tbody td {
-    padding: 0 12px;
-    font-size: var(--text-body);
-    color: var(--color-text-primary);
-    vertical-align: middle;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .hig-table tbody td,
+  .clean-table tbody td,
+  .modern-table tbody td,
+  .table tbody td,
+  table tbody td {
+    padding: 0 12px !important;
+    height: var(--table-row-height, 42px) !important;
+    max-height: 52px !important;
+    font-family: var(--font-family-base) !important;
+    font-size: var(--text-body, 13px) !important; /* 13 pt */
+    font-weight: var(--weight-regular, 400) !important; /* Regular */
+    letter-spacing: var(--tracking-normal, -0.08px) !important;
+    color: var(--color-text-primary, #1D1D1F) !important;
+    vertical-align: middle !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Prevent multi-line bulleted lists from stretching table rows; truncate into concise single line */
+  .hig-table tbody td ul,
+  .clean-table tbody td ul,
+  .modern-table tbody td ul,
+  .table tbody td ul,
+  table tbody td ul,
+  .hig-table tbody td ol,
+  .clean-table tbody td ol,
+  .table tbody td ol,
+  table tbody td ol {
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 260px !important;
+    vertical-align: middle !important;
+    line-height: normal !important;
+  }
+
+  .hig-table tbody td ul li,
+  .clean-table tbody td ul li,
+  .modern-table tbody td ul li,
+  .table tbody td ul li,
+  table tbody td ul li {
+    display: inline !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .hig-table tbody td ul li:not(:last-child)::after,
+  .clean-table tbody td ul li:not(:last-child)::after,
+  .modern-table tbody td ul li:not(:last-child)::after,
+  .table tbody td ul li:not(:last-child)::after,
+  table tbody td ul li:not(:last-child)::after {
+    content: " • " !important;
+    color: #9CA3AF !important;
   }
   
   /* Wrap Text in Cell */
@@ -191,21 +286,34 @@
   }
   
   /* ============================================
-     STATUS BADGES
+     STATUS BADGES (Height 20px, 10pt Semibold)
      ============================================ */
   
-  .hig-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 20px;
-    padding: 0 8px;
-    border-radius: 4px;
-    font-size: var(--text-caption);
-    font-weight: var(--weight-semibold);
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    white-space: nowrap;
+  .hig-badge,
+  .status-chip,
+  .badge:not(.action-count-pill) {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 20px !important;
+    min-height: 20px !important;
+    max-height: 20px !important;
+    padding: 0 8px !important;
+    border-radius: 4px !important;
+    font-family: var(--font-family-base) !important;
+    font-size: var(--text-caption, 10px) !important; /* 10 pt */
+    font-weight: var(--weight-semibold, 600) !important; /* Semibold */
+    letter-spacing: var(--tracking-wider, 0.12px) !important;
+    line-height: 20px !important;
+    white-space: nowrap !important;
+    vertical-align: middle !important;
+    box-sizing: border-box !important;
+  }
+  
+  .hig-badge-pill,
+  .status-chip,
+  .badge-pill {
+    border-radius: 999px !important;
   }
   
   /* Badge Color Variants */
@@ -311,40 +419,50 @@
     position: relative;
     flex: 1;
     max-width: 320px;
+    display: flex;
+    align-items: center;
   }
   
   .hig-search-input {
     width: 100%;
-    height: var(--input-height);
-    padding: 0 32px 0 12px;
-    font-size: var(--text-body);
-    font-family: var(--font-family-base);
-    color: var(--color-text-primary);
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    transition: all var(--transition-base);
+    height: 32px !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+    padding: 0 12px 0 32px !important; /* Left padding for magnifying glass icon */
+    font-size: 13px !important;
+    font-family: var(--font-family-base) !important;
+    color: #1D1D1F !important;
+    background: #FFFFFF !important;
+    border: 1px solid #E5E5E7 !important;
+    border-radius: 6px !important;
+    box-sizing: border-box !important;
+    box-shadow: none !important;
+    transition: all 0.15s ease;
   }
   
   .hig-search-input:focus {
-    outline: none;
-    border-color: var(--color-accent-blue);
-    background: var(--color-canvas);
-    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+    outline: none !important;
+    border-color: #0071E3 !important;
+    background: #FFFFFF !important;
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15) !important;
   }
   
   .hig-search-input::placeholder {
-    color: var(--color-text-tertiary);
+    color: #86868B !important;
+    font-style: normal !important;
+    opacity: 1 !important;
   }
   
-  .hig-search-field svg {
+  .hig-search-field svg,
+  .hig-search-field .icon {
     position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 16px;
-    height: 16px;
-    color: var(--color-text-tertiary);
+    left: 10px !important;
+    right: auto !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 14px !important;
+    height: 14px !important;
+    color: #86868B !important;
     pointer-events: none;
   }
   
@@ -539,5 +657,36 @@
     padding: 0;
     text-align: center;
   }
-  
+
+  /* Action Columns & Buttons (Strict Right Alignment) */
+  .hig-table thead th.col-actions,
+  .hig-table tbody td.col-actions,
+  .clean-table thead th.col-actions,
+  .clean-table tbody td.col-actions,
+  th.col-actions,
+  td.col-actions,
+  .action-column {
+    text-align: right !important;
+  }
+
+  .col-actions .btn-group,
+  .col-actions .action-group,
+  td.col-actions > div,
+  td.col-actions > span {
+    display: inline-flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .hig-toolbar-actions,
+  .page-header-actions,
+  .module-header-actions,
+  .table-toolbar-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-left: auto;
+  }
 }

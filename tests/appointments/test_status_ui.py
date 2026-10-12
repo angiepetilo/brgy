@@ -177,7 +177,7 @@ class LegacyStatusScanTests(BaseTestCase):
 
     def test_no_legacy_status_literals(self):
         base = Path(settings.BASE_DIR)
-        roots = [base / 'templates' / 'appointments', base / 'templates' / 'records', base / 'static' / 'js',
+        roots = [base / 'templates' / 'appointments', base / 'static' / 'js',
                  base / 'apps' / 'appointments']
         pattern = re.compile(r"""['"](%s)['"]""" % '|'.join(LEGACY_IDS))
         hits = []

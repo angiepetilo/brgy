@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% load static core_tags %}
+
+{% block title %}Officers and Directory | Barangay Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+.dept-card-interactive {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 14px;
+    padding: 1.35rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1rem;
+    cursor: pointer;
+    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s;
+}
+.dept-card-interactive:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+    border-color: #93C5FD;
+}
+.dept-card-interactive:active {
+    transform: translateY(-1px);
+}
+.dept-search-input:focus {
+    outline: none;
+    border-color: #1E3A8A;
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.12);
+}
+.dir-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+.dir-tab-btn.active {
+    background: #1E3A8A;
+    color: #FFFFFF;
+}
+.dir-tab-btn:not(.active) {
+    background: #FFFFFF;
+    color: #4B5563;
+    border: 1px solid #E5E7EB;
+}
+.dir-tab-btn:not(.active):hover {
+    background: #F9FAFB;
+    color: #111827;
+}
+[class*="dept-badge-"] { background: rgba(30, 58, 138, 0.12); color: #1E3A8A; }
+.dept-badge-health { background: rgba(22, 163, 74, 0.12); color: #16A34A; }
+.dept-badge-security { background: rgba(30, 58, 138, 0.12); color: #1E3A8A; }
+.dept-badge-records { background: rgba(30, 58, 138, 0.12); color: #1E3A8A; }
+.dept-badge-treasury { background: rgba(55, 65, 81, 0.12); color: #374151; }
+.dept-badge-social_welfare { background: rgba(55, 65, 81, 0.12); color: #374151; }
+.dept-badge-youth_sports { background: rgba(30, 58, 138, 0.12); color: #1E3A8A; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-container" style="max-width: 1200px; margin: 0 auto; padding: 1.5rem 1rem;">
+    
+    <!-- Toolbar Controls: Subtabs on left, Search Action on right -->
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <a href="?tab=departments" class="dir-tab-btn {% if active_tab != 'officers' %}active{% endif %}">
+                {% icon 'building' %} Departments ({{ departments|length }})
+            </a>
+            <a href="?tab=officers" class="dir-tab-btn {% if active_tab == 'officers' %}active{% endif %}">
+                {% icon 'shield-half' %} Barangay Officers ({{ officers|length }})
+            </a>
+        </div>
+
+        <!-- Search Input on Right Side -->
+        <div style="max-width: 400px; width: 100%; position: relative; margin-left: auto;">
+            <div style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #9CA3AF; pointer-events: none; display: flex; align-items: center;">
+                {% icon 'search' %}
+            </div>
+            <input type="text" id="dept-directory-search" class="dept-search-input" placeholder="Search departments, officers, staff, or services..." style="width: 100%; padding: 0.65rem 1rem 0.65rem 2.5rem; border-radius: 8px; border: 1px solid #D1D5DB; background: #FFFFFF; color: #111827; font-size: 0.875rem; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);">
+        </div>
+    </div>
+
+    {% if active_tab == 'officers' %}
+    <!-- Officers Grid -->
+    <div id="officers-cards-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+        {% for off in officers %}
+        <div class="card dept-card-interactive" style="cursor: default;"
+             data-dept-name="{{ off.position }}"
+             data-dept-head="{% if off.user %}{{ off.user.get_full_name|default:off.user.username }}{% else %}Vacant{% endif %}"
+             data-dept-desc="{{ off.committee|default:'' }}">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="width: 56px; height: 56px; border-radius: 12px; background: #EFF6FF; border: 1px solid #BFDBFE; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+                    {% if off.user and off.user.avatar %}
+                    <img src="{{ off.user.avatar.url }}" alt="{{ off.user.username }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% elif off.user %}
+                    <span style="font-weight: 800; font-size: 1.15rem; color: #1E3A8A;">{{ off.user.initials }}</span>
+                    {% else %}
+                    {% icon 'user' style='color: #9CA3AF;' %}
+                    {% endif %}
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #111827;">
+                        {{ off.position }}
+                    </h3>
+                    <div style="font-size: 0.875rem; font-weight: 600; color: #1E3A8A; margin-top: 2px;">
+                        {% if off.user %}
+                        {{ off.user.get_full_name|default:off.user.username }}
+                        {% else %}
+                        Vacant
+                        {% endif %}
+                    </div>
+                    {% if off.committee %}
+                    <div style="font-size: 0.75rem; color: #6B7280; margin-top: 2px;">
+                        Committee: {{ off.committee }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #F3F4F6; display: flex; justify-content: space-between; align-items: center; font-size: 0.8125rem;">
+                <span style="color: #6B7280;">{% if off.user and off.user.email %}{{ off.user.email }}{% else %}Official Council{% endif %}</span>
+                {% if off.user %}
+                <a href="{% url 'chat:inbox' %}?user={{ off.user.id }}" class="btn btn-sm btn-outline-primary" style="font-weight: 700; font-size: 0.75rem;">
+                    {% icon 'message-square' %} Message
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div style="grid-column: 1 / -1; padding: 3rem 1rem; text-align: center; color: #6B7280;">
+            No official officers configured yet.
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Department Cards Grid -->
+    <div id="dept-cards-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.25rem;">
+        {% for dept in departments %}
+        <div class="dept-card-interactive" 
+             data-dept-id="{{ dept.id }}"
+             data-dept-name="{{ dept.name }}"
+             data-dept-code="{{ dept.code }}"
+             data-dept-color="{{ dept.color }}"
+             data-dept-desc="{{ dept.description }}"
+             data-dept-head="{{ dept.head }}"
+             data-dept-location="{{ dept.location }}"
+             data-dept-hours="{{ dept.operating_hours }}"
+             data-dept-contact="{{ dept.contact }}"
+             data-dept-services='{{ dept.services_json|safe }}'
+             data-dept-staff='{{ dept.staff_json|safe }}'
+             title="Click to view staff roster and contacts">
+            
+            <div>
+                <!-- Card Header -->
+                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.75rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div class="dept-badge-{{ dept.id }}" style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.25rem;">
+                            {% icon dept.icon %}
+                        </div>
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 0.45rem;">
+                                <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #111827; line-height: 1.2;">{{ dept.name }}</h3>
+                            </div>
+                            <span class="dept-badge-{{ dept.id }}" style="font-size: 0.72rem; font-weight: 800; padding: 2px 7px; border-radius: 5px; display: inline-block; margin-top: 0.2rem;">{{ dept.code }}</span>
+                        </div>
+                    </div>
+                    <span style="font-size: 0.72rem; font-weight: 700; background: #EFF6FF; color: #1E3A8A; padding: 3px 8px; border-radius: 12px; border: 1px solid #BFDBFE; white-space: nowrap;">
+                        {{ dept.staff_count }} Staff
+                    </span>
+                </div>
+
+                <!-- Description -->
+                <p style="font-size: 0.85rem; color: #4B5563; margin: 0 0 0.85rem 0; line-height: 1.45;">
+                    {{ dept.description }}
+                </p>
+
+                <!-- Office Quick Info -->
+                <div style="background: #F9FAFB; border-radius: 8px; padding: 0.65rem 0.85rem; font-size: 0.8rem; color: #374151; display: flex; flex-direction: column; gap: 0.3rem; border: 1px solid #F3F4F6;">
+                    <div style="display: flex; gap: 0.4rem;">
+                        <span style="color: #6B7280; font-weight: 600; min-width: 55px;">Head:</span>
+                        <strong style="color: #111827;">{{ dept.head }}</strong>
+                    </div>
+                    <div style="display: flex; gap: 0.4rem;">
+                        <span style="color: #6B7280; font-weight: 600; min-width: 55px;">Office:</span>
+                        <span>{{ dept.location }}</span>
+                    </div>
+                    <div style="display: flex; gap: 0.4rem;">
+                        <span style="color: #6B7280; font-weight: 600; min-width: 55px;">Hours:</span>
+                        <span>{{ dept.operating_hours }}</span>
+                    </div>
+                </div>
+
+                <!-- Services Tags -->
+                <div style="margin-top: 0.75rem; display: flex; flex-wrap: wrap; gap: 0.35rem;">
+                    {% for srv in dept.services|slice:":3" %}
+                    <span style="font-size: 0.72rem; background: #F3F4F6; color: #4B5563; padding: 2px 7px; border-radius: 5px; font-weight: 500;">
+                        {{ srv }}
+                    </span>
+                    {% endfor %}
+                    {% if dept.services|length > 3 %}
+                    <span style="font-size: 0.72rem; background: #F3F4F6; color: #6B7280; padding: 2px 6px; border-radius: 5px; font-weight: 600;">
+                        +{{ dept.services|length|add:"-3" }} more
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Card Bottom Action Prompt -->
+            <div style="border-top: 1px solid #F3F4F6; padding-top: 0.75rem; display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 0.78rem; font-weight: 700; color: #1E3A8A; display: flex; align-items: center; gap: 0.35rem;">
+                    View Assigned Staff & Contact &rarr;
+                </span>
+                <span style="font-size: 0.75rem; color: #9CA3AF;">Click to open</span>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Empty Search State -->
+    <div id="dept-search-empty" style="display: none; text-align: center; padding: 3rem 1rem; background: #FFFFFF; border-radius: 12px; border: 1px dashed #D1D5DB; margin-top: 1.5rem;">
+        <div style="font-size: 2.5rem; color: #9CA3AF; margin-bottom: 0.5rem;">{% icon 'search' %}</div>
+        <h4 style="font-size: 1.1rem; font-weight: 700; color: #111827; margin: 0 0 0.25rem 0;">No matching departments or services found</h4>
+        <p style="font-size: 0.85rem; color: #6B7280; margin: 0;">Try searching with different terms like "Health", "Tanod", "Records", or "SK".</p>
+    </div>
+
+</div>
+
+<!-- Department Staff Modal Component -->
+{% include 'accounts/components/department_modal.html' %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/departments_directory.js' %}" defer></script>
+{% endblock %}

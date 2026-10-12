@@ -17,6 +17,19 @@
         {% endif %}
     </div>
 
+    <!-- Quick Status Dropdown Filter -->
+    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
+        <label for="blotter-status-dropdown" style="font-weight: 700; font-size: 0.875rem; color: #374151; margin: 0; white-space: nowrap;">
+            Dispute Status:
+        </label>
+        <select id="blotter-status-dropdown" class="form-control" style="width: auto; min-width: 220px; font-weight: 600; border-radius: 8px;">
+            <option value="{% url 'blotter:case_list' %}" {% if not filters.status %}selected{% endif %}>All Disputes</option>
+            <option value="{% url 'blotter:case_list' %}?status=filed" {% if filters.status == 'filed' %}selected{% endif %}>Pending</option>
+            <option value="{% url 'blotter:case_list' %}?status=under_mediation" {% if filters.status == 'under_mediation' %}selected{% endif %}>Mediation</option>
+            <option value="{% url 'blotter:case_list' %}?status=settled" {% if filters.status == 'settled' %}selected{% endif %}>Resolved (Settled)</option>
+        </select>
+    </div>
+
     <form class="card blotter-filters" method="get" action="{% url 'blotter:case_list' %}" aria-label="Filter cases">
         <div class="form-group">
             <label for="f-q">Search</label>
@@ -25,8 +38,15 @@
         <div class="form-group">
             <label for="f-status">Status</label>
             <select class="form-control" id="f-status" name="status">
-                <option value="">All statuses</option>
-                {% for code, label in status_choices %}<option value="{{ code }}" {% if filters.status == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                <option value="">All Disputes</option>
+                <option value="filed" {% if filters.status == 'filed' %}selected{% endif %}>Pending</option>
+                <option value="under_mediation" {% if filters.status == 'under_mediation' %}selected{% endif %}>Mediation</option>
+                <option value="settled" {% if filters.status == 'settled' %}selected{% endif %}>Resolved (Settled)</option>
+                {% for code, label in status_choices %}
+                    {% if code != 'filed' and code != 'under_mediation' and code != 'settled' %}
+                    <option value="{{ code }}" {% if filters.status == code %}selected{% endif %}>{{ label }}</option>
+                    {% endif %}
+                {% endfor %}
             </select>
         </div>
         <div class="form-group">
@@ -42,14 +62,6 @@
                 <option value="">All puroks</option>
                 {% for purok in puroks %}<option value="{{ purok.pk }}" {% if filters.purok == purok.pk %}selected{% endif %}>{{ purok.name }}</option>{% endfor %}
             </select>
-        </div>
-        <div class="form-group">
-            <label for="f-from">Incident from</label>
-            <input class="form-control" type="date" id="f-from" name="date_from" value="{{ filters.date_from|date:'Y-m-d' }}">
-        </div>
-        <div class="form-group">
-            <label for="f-to">Incident to</label>
-            <input class="form-control" type="date" id="f-to" name="date_to" value="{{ filters.date_to|date:'Y-m-d' }}">
         </div>
         <div class="blotter-filter-actions">
             <button type="submit" class="btn btn-primary">Apply</button>
@@ -68,23 +80,42 @@
                     <tr>
                         <th scope="col">Case no.</th>
                         <th scope="col">Type</th>
-                        <th scope="col">Parties</th>
+                        <th scope="col">Involved Parties</th>
                         <th scope="col">Purok</th>
                         <th scope="col">Incident date</th>
                         <th scope="col">Status</th>
+                        <th scope="col" style="text-align: right;">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for case in page_obj.object_list %}
                     <tr>
-                        <td><a href="{% url 'blotter:case_detail' case.pk %}">{{ case.case_no }}</a>{% if case.is_confidential %} <span class="badge badge-danger">Confidential</span>{% endif %}</td>
+                        <td><a href="{% url 'blotter:case_detail' case.pk %}" style="font-weight: 700; color: #1E3A8A;">{{ case.case_no }}</a>{% if case.is_confidential %} <span class="badge badge-danger">Confidential</span>{% endif %}</td>
                         <td>{{ case.get_incident_type_display }}</td>
                         <td>
-                            {% for party in case.parties.all %}{% if party.role != 'witness' %}<span class="blotter-party-chip">{{ party.full_name }} <small>({{ party.get_role_display }})</small></span>{% endif %}{% endfor %}
+                            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                                {% for party in case.parties.all %}
+                                {% if party.role == 'complainant' %}
+                                <span class="blotter-party-chip" style="background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE;"><strong>C:</strong> {{ party.full_name }}</span>
+                                {% elif party.role == 'respondent' %}
+                                <span class="blotter-party-chip" style="background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA;"><strong>R:</strong> {{ party.full_name }}</span>
+                                {% elif party.role != 'witness' %}
+                                <span class="blotter-party-chip">{{ party.full_name }} <small>({{ party.get_role_display }})</small></span>
+                                {% endif %}
+                                {% empty %}
+                                <span style="color: #9CA3AF;">None recorded</span>
+                                {% endfor %}
+                            </div>
                         </td>
                         <td>{{ case.purok.name|default:"-" }}</td>
                         <td>{{ case.incident_date|date:"M d, Y" }}</td>
                         <td><span class="blotter-status blotter-status-{{ case.status }}">{{ case.get_status_display }}</span></td>
+                        <td style="text-align: right; white-space: nowrap;">
+                            <a href="{% url 'blotter:case_detail' case.pk %}" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-weight: 600;">Manage</a>
+                            <a href="{% url 'blotter:case_print' case.pk %}" target="_blank" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-weight: 600;" title="Print formal report">
+                                {% icon 'printer' %}
+                            </a>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -104,3 +135,5 @@
     {% endif %}
 </div>
 {% endblock %}
+
+{% block extra_js %}<script src="{% static 'js/blotter.js' %}" defer></script>{% endblock %}

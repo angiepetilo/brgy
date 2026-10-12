@@ -366,11 +366,13 @@ function updateSchedulePreview() {
 // -----------------------------------------------------------------------------
 function openBookAppointmentModal() {
     var modal = document.getElementById('bookAppointmentModal');
+    var form = document.getElementById('public-booking-form');
     var bodyContainer = document.getElementById('modal-body-container');
     var successContainer = document.getElementById('modal-success-container');
 
     if (bodyContainer) bodyContainer.style.display = 'block';
     if (successContainer) successContainer.style.display = 'none';
+    if (form) form.reset();
     if (modal) modal.style.display = 'flex';
 
     // Initialize calendar and time picker
@@ -383,6 +385,8 @@ function openBookAppointmentModal() {
 
 function closeBookAppointmentModal() {
     var modal = document.getElementById('bookAppointmentModal');
+    var form = document.getElementById('public-booking-form');
+    if (form) form.reset();
     if (modal) modal.style.display = 'none';
 }
 

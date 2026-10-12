@@ -17,6 +17,8 @@
     --gray-900: #111827;
     --gray-700: #374151;
     --gray-500: #6B7280;
+    --gray-450: #9CA3AF;
+    --gray-400: #9CA3AF;
     --gray-300: #D1D5DB;
     --gray-200: #E5E7EB;
     --gray-100: #F3F4F6;
@@ -204,7 +206,7 @@ button:disabled, .btn:disabled, .btn[aria-disabled="true"] { opacity: 0.6; curso
 
 /* ---------- Cards ---------- */
 .card, .civic-card, .stat-card, .post-card, .hub-category-card, .drawer-section-card,
-.staff-roster-card, .fb-left-sidebar, .post-trigger-card, .post-standalone-card-container {
+.staff-roster-card, .post-trigger-card, .post-standalone-card-container {
     background: var(--color-card);
     border: var(--border) !important;
     border-radius: var(--radius) !important;
@@ -259,9 +261,39 @@ input[type="url"], select, textarea {
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
     transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
-.form-control::placeholder, input::placeholder, textarea::placeholder {
-    color: var(--gray-400);
-    font-weight: 400;
+/* Distinct placeholder indicator styling (clearly distinguishes hints from entered values) */
+::placeholder,
+.form-control::placeholder,
+.form-control-modern::placeholder,
+input::placeholder,
+textarea::placeholder {
+    color: #9CA3AF !important;
+    font-style: italic !important;
+    font-weight: 400 !important;
+    opacity: 0.85 !important;
+    letter-spacing: 0.01em;
+}
+
+::-webkit-input-placeholder {
+    color: #9CA3AF !important;
+    font-style: italic !important;
+    font-weight: 400 !important;
+    opacity: 0.85 !important;
+}
+
+::-moz-placeholder {
+    color: #9CA3AF !important;
+    font-style: italic !important;
+    font-weight: 400 !important;
+    opacity: 0.85 !important;
+}
+
+.form-control:focus::placeholder,
+.form-control-modern:focus::placeholder,
+input:focus::placeholder,
+textarea:focus::placeholder {
+    color: #D1D5DB !important;
+    opacity: 0.65 !important;
 }
 .form-control:hover, input:hover:not(:disabled), select:hover:not(:disabled), textarea:hover:not(:disabled) {
     border-color: var(--gray-400);
@@ -288,6 +320,227 @@ table, .table, .modern-table, .clean-table { border-collapse: collapse; width: 1
     text-align: left;
 }
 .table td, .modern-table td, .clean-table td, table td { border-bottom: var(--border); color: var(--gray-900); }
+
+/* ---------- Ideal Table UI/UX Guidelines ---------- */
+.tabular-nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.clean-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: var(--font-size-sm);
+    text-align: left;
+}
+
+.clean-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: #F9FAFB;
+    color: #4B5563;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #E5E7EB;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.clean-table thead th a.th-sort-link {
+    color: inherit;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: color 0.15s ease;
+}
+
+.clean-table thead th a.th-sort-link:hover,
+.clean-table thead th a.th-sort-link.active {
+    color: var(--color-primary);
+}
+
+.clean-table tbody tr {
+    transition: background-color 0.15s ease;
+    border-bottom: 1px solid #F3F4F6;
+}
+
+.clean-table tbody tr:hover {
+    background-color: #F9FAFB;
+}
+
+/* Regular row density (48px) */
+.clean-table tbody td {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: #111827;
+    border-bottom: 1px solid #F3F4F6;
+    vertical-align: middle;
+    height: 48px;
+    box-sizing: border-box;
+}
+
+/* Primary record bold anchoring */
+.clean-table .primary-record-name {
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.35;
+}
+
+.clean-table .secondary-record-subtext {
+    font-size: 0.75rem;
+    color: #6B7280;
+    line-height: 1.35;
+}
+
+/* Numeric columns right alignment */
+.clean-table th.col-numeric,
+.clean-table td.col-numeric {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Action column right alignment (avoid center alignment on table cells) */
+.clean-table th.col-actions,
+.clean-table td.col-actions {
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* Sticky left identifying column during horizontal scrolling */
+.clean-table th.col-sticky-left,
+.clean-table td.col-sticky-left {
+    position: sticky;
+    left: 0;
+    background: inherit;
+    z-index: 3;
+}
+.clean-table thead th.col-sticky-left {
+    z-index: 6;
+    background: #F9FAFB;
+}
+
+/* Visual Status Badges / Chips */
+.status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1.25;
+    text-transform: lowercase;
+    box-sizing: border-box;
+}
+
+.status-chip .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* 1. Pending / Under Review / Low Stock (Soft amber bg, dark brown text) */
+.status-chip-pending,
+.status-chip-low_stock {
+    background-color: #F3F4F6;
+    color: #374151;
+    border: 1px solid #D1D5DB;
+}
+.status-chip-pending .status-dot,
+.status-chip-low_stock .status-dot {
+    background-color: #374151;
+}
+
+/* 2. Operational / Active / Approved / Settled (Soft mint bg, dark forest green text) */
+.status-chip-approved,
+.status-chip-active,
+.status-chip-operational,
+.status-chip-settled {
+    background-color: #F3F4F6;
+    color: #16A34A;
+    border: 1px solid #E5E7EB;
+}
+.status-chip-approved .status-dot,
+.status-chip-active .status-dot,
+.status-chip-operational .status-dot,
+.status-chip-settled .status-dot {
+    background-color: #16A34A;
+}
+
+/* 3. Under Mediation / In Progress (Soft pastel indigo bg, deep indigo text) */
+.status-chip-mediation,
+.status-chip-under_mediation {
+    background-color: #F3F4F6;
+    color: #1E3A8A;
+    border: 1px solid #D1D5DB;
+}
+.status-chip-mediation .status-dot,
+.status-chip-under_mediation .status-dot {
+    background-color: #1E3A8A;
+}
+
+/* 4. Declined / Rejected / Escalated / Out of Stock (Soft rose bg, deep crimson text) */
+.status-chip-declined,
+.status-chip-rejected,
+.status-chip-escalated,
+.status-chip-out_of_stock {
+    background-color: #F3F4F6;
+    color: #DC2626;
+    border: 1px solid #E5E7EB;
+}
+.status-chip-declined .status-dot,
+.status-chip-rejected .status-dot,
+.status-chip-escalated .status-dot,
+.status-chip-out_of_stock .status-dot {
+    background-color: #DC2626;
+}
+
+/* 5. Neutral / Dismissed / Withdrawn / Closed (Soft cool slate bg, deep slate text) */
+.status-chip-dismissed,
+.status-chip-withdrawn,
+.status-chip-neutral,
+.status-chip-closed {
+    background-color: #F3F4F6;
+    color: #4B5563;
+    border: 1px solid #D1D5DB;
+}
+.status-chip-dismissed .status-dot,
+.status-chip-withdrawn .status-dot,
+.status-chip-neutral .status-dot,
+.status-chip-closed .status-dot {
+    background-color: #6B7280;
+}
+
+/* Bulk Selection Bar */
+.bulk-selection-bar {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 1rem;
+    background: #F3F4F6;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    font-size: 0.8125rem;
+    color: #1E3A8A;
+}
+.bulk-selection-bar.active {
+    display: flex;
+}
 
 /* ---------- Top bar ---------- */
 .fb-topbar {
@@ -634,6 +887,36 @@ table, .table, .modern-table, .clean-table { border-collapse: collapse; width: 1
 .empty-state, .fb-empty-state, .empty-state-text { color: var(--gray-500); font-size: var(--font-size-base); text-align: center; }
 
 /* ---------- Feed Post Trigger & Modals (Elevated, Non-Flat) ---------- */
+.feed-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 12px !important;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.feed-card:hover {
+    border-color: #D1D5DB !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+.feed-card-media {
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
+    max-height: 440px;
+    overflow: hidden;
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+}
+.feed-card-media img {
+    width: 100%;
+    height: auto;
+    max-height: 440px;
+    object-fit: contain;
+    display: block;
+    border-radius: 10px;
+}
+
 .post-trigger-card {
     background: #FFFFFF;
     border: 1px solid #E5E7EB;
@@ -874,7 +1157,7 @@ table, .table, .modern-table, .clean-table { border-collapse: collapse; width: 1
 .image-preview-container {
     position: relative;
     margin-top: 0.75rem;
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
     border: 1px solid #E5E7EB;
     background: #F9FAFB;
@@ -885,6 +1168,7 @@ table, .table, .modern-table, .clean-table { border-collapse: collapse; width: 1
     max-height: 220px;
     object-fit: cover;
     display: block;
+    border-radius: 10px;
 }
 .btn-remove-preview {
     position: absolute;
@@ -1073,3 +1357,1631 @@ table, .table, .modern-table, .clean-table { border-collapse: collapse; width: 1
     .fb-topbar, .fb-left-sidebar, .fb-right-sidebar, .bottom-nav-bar, .slide-drawer, .drawer-backdrop, .skip-link { display: none !important; }
     body { background: #FFFFFF; }
 }
+
+/* ==========================================================================
+   Appointment Booking Modal & Interactive Calendar / Time Drum (Screenshot 2)
+   ========================================================================== */
+.modal-container-side-by-side {
+    max-width: 1120px !important;
+    width: 100% !important;
+}
+.modal-header-bar {
+    padding: 1.25rem 1.75rem;
+    border-bottom: 1px solid #F3F4F6;
+    background: #FFFFFF;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+}
+.modal-close-btn {
+    background: #F3F4F6;
+    border: 1px solid #E5E7EB;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    font-size: 1rem;
+    color: #6B7280;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+.modal-close-btn:hover {
+    background: #E5E7EB;
+    color: #111827;
+}
+
+/* Category toggle pills */
+.category-pill-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+.cat-pill {
+    padding: 0.85rem 1rem;
+    text-align: center;
+    border: 2px solid #E5E7EB;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    cursor: pointer;
+    background: #FFFFFF;
+    color: #4B5563;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.cat-pill:hover {
+    border-color: #D1D5DB;
+}
+.cat-pill.active {
+    border-color: #1E3A8A;
+    background: #F3F4F6;
+    color: #1E3A8A;
+}
+
+/* Modern input styling */
+.form-label-modern {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #374151;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.35rem;
+}
+.input-group-modern {
+    position: relative;
+}
+.form-control-modern {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    color: #111827;
+    background: #FFFFFF;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    font-style: normal;
+    font-weight: 500;
+}
+.form-control-modern::placeholder {
+    color: #9CA3AF !important;
+    font-style: italic !important;
+    font-weight: 400 !important;
+    opacity: 0.85 !important;
+}
+.form-control-modern:focus::placeholder {
+    color: #D1D5DB !important;
+    opacity: 0.65 !important;
+}
+.form-control-modern:focus {
+    outline: none;
+    border-color: #1E3A8A;
+}
+.form-control-modern.input-error {
+    border-color: #DC2626;
+}
+
+/* Calendar Card */
+.cal-box-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 14px;
+    padding: 1.15rem;
+    margin-bottom: 1.25rem;
+}
+.cal-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.cal-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.cal-select {
+    padding: 0.4rem 0.65rem;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #111827;
+    background: #FFFFFF;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+.cal-select:focus {
+    border-color: #1E3A8A;
+}
+.cal-header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.cal-today-btn {
+    background: #FFFFFF;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: all 0.15s ease;
+}
+.cal-today-btn:hover {
+    background: #F3F4F6;
+    color: #111827;
+}
+.cal-nav-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #D1D5DB;
+    background: #FFFFFF;
+    color: #4B5563;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.cal-nav-btn:hover {
+    background: #F3F4F6;
+    color: #111827;
+}
+.cal-nav-btn.primary {
+    background: #1E3A8A;
+    border-color: #1E3A8A;
+    color: #FFFFFF;
+}
+.cal-nav-btn.primary:hover {
+    background: #0F4C81;
+}
+.cal-weekdays-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+.cal-weekday-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #6B7280;
+    padding: 4px 0;
+}
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+.cal-day-cell {
+    min-height: 44px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1.5px solid transparent;
+    background: #FFFFFF;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s ease;
+    user-select: none;
+    padding: 4px;
+    color: #111827;
+}
+.cal-day-cell:hover {
+    background: #F3F4F6;
+    border-color: #D1D5DB;
+}
+.cal-day-cell.other-month {
+    color: #9CA3AF;
+}
+.cal-day-cell.other-month .cal-day-num {
+    color: #9CA3AF;
+    font-weight: 500;
+}
+.cal-day-cell.current-month {
+    color: #111827;
+}
+.cal-day-cell.current-month .cal-day-num {
+    color: #111827;
+    font-weight: 700;
+}
+.cal-day-cell.past {
+    color: #9CA3AF;
+}
+.cal-day-cell.past .cal-day-num {
+    color: #9CA3AF;
+}
+.cal-day-cell.has-services {
+    background: #F9FAFB;
+    border-color: #E5E7EB;
+}
+.cal-day-cell.selected {
+    background: #1E3A8A !important;
+    border-color: #1E3A8A !important;
+    font-weight: 800;
+    color: #FFFFFF !important;
+}
+.cal-day-cell.selected .cal-day-num {
+    color: #FFFFFF !important;
+    font-weight: 800;
+}
+.cal-day-cell.selected .cal-day-dot {
+    background: #FFFFFF !important;
+}
+.cal-day-num {
+    font-size: 0.9375rem;
+    line-height: 1;
+    font-weight: 700;
+    color: inherit;
+}
+.cal-day-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    margin-top: 4px;
+}
+.cal-day-dot.dot-blue { background: #1E3A8A; }
+.cal-day-dot.dot-navy { background: #0F4C81; }
+.cal-day-dot.dot-red { background: #DC2626; }
+.cal-day-dot.dot-green { background: #16A34A; }
+.cal-day-dot.dot-gray { background: #374151; }
+
+/* Available Health Services Container (Below Calendar) */
+.cal-services-container {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 14px;
+    padding: 1.15rem;
+    margin-bottom: 1.25rem;
+}
+.cal-services-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 0.65rem;
+    max-height: 240px;
+    overflow-y: auto;
+    margin-top: 0.75rem;
+    padding-right: 4px;
+}
+.cal-service-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: left;
+}
+.cal-service-card:hover {
+    border-color: #1E3A8A;
+    background: #F9FAFB;
+}
+.cal-service-card.selected {
+    border-color: #1E3A8A;
+    background: #F3F4F6;
+}
+.service-card-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.service-card-datetime {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 2px;
+}
+.service-card-name {
+    font-size: 0.8125rem;
+    color: #6B7280;
+    line-height: 1.3;
+}
+
+/* Time Picker Component */
+.time-picker-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+}
+.time-picker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.85rem;
+}
+.time-picker-badge {
+    background: #F3F4F6;
+    color: #0F4C81;
+    font-weight: 800;
+    font-size: 1.15rem;
+    padding: 4px 14px;
+    border-radius: 6px;
+    border: 1px solid #E5E7EB;
+    letter-spacing: 0.02em;
+}
+.time-drum-wrapper {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+    height: 110px;
+    background: #FFFFFF;
+    user-select: none;
+}
+.time-drum-highlight-bar {
+    position: absolute;
+    top: 36px;
+    left: 6px;
+    right: 6px;
+    height: 38px;
+    background: #F3F4F6;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 1;
+}
+.time-drum-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    z-index: 2;
+}
+.time-drum-val-prev,
+.time-drum-val-next {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #9CA3AF;
+    cursor: pointer;
+    padding: 4px 10px;
+    transition: color 0.15s ease;
+}
+.time-drum-val-prev:hover,
+.time-drum-val-next:hover {
+    color: #111827;
+}
+.time-drum-val-curr {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #111827;
+    padding: 2px 10px;
+    line-height: 1;
+}
+
+@media (max-width: 860px) {
+    .modal-side-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ==========================================================================
+   Households Module Master-Detail Layout (Screenshot 1 Reference)
+   ========================================================================== */
+.hh-main-grid {
+    display: grid;
+    grid-template-columns: 460px 1fr;
+    gap: 1.25rem;
+    align-items: start;
+}
+
+@media (max-width: 1040px) {
+    .hh-main-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+.hh-row-item:hover {
+    background-color: #F9FAFB !important;
+}
+
+.hh-row-item.selected-hh-row {
+    background-color: #F3F4F6 !important;
+}
+
+.hh-row-item.selected-hh-row td:first-child {
+    border-left: 3px solid #111827 !important;
+}
+
+.btn-hh-pill:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+}
+
+.btn-hh-pill:active {
+    transform: translateY(0);
+}
+
+/* ==========================================================================
+   Global In-App Confirmation Modal Dialog (Replaces native browser window.confirm)
+   ========================================================================== */
+.app-confirm-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 1rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.18s ease, visibility 0.18s ease;
+}
+
+.app-confirm-backdrop.is-active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.app-confirm-dialog {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.18), 0 10px 15px -5px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transform: scale(0.95) translateY(6px);
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.app-confirm-backdrop.is-active .app-confirm-dialog {
+    transform: scale(1) translateY(0);
+}
+
+.app-confirm-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.15rem 1.25rem 0.5rem 1.25rem;
+}
+
+.app-confirm-icon-box {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.app-confirm-icon-box.variant-primary {
+    background: #F3F4F6;
+    color: #1E3A8A;
+    border: 1px solid #D1D5DB;
+}
+
+.app-confirm-icon-box.variant-success {
+    background: #F3F4F6;
+    color: #16A34A;
+    border: 1px solid #E5E7EB;
+}
+
+.app-confirm-icon-box.variant-danger {
+    background: #F3F4F6;
+    color: #DC2626;
+    border: 1px solid #E5E7EB;
+}
+
+.app-confirm-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #111827;
+    margin: 0;
+    line-height: 1.25;
+}
+
+.app-confirm-body {
+    padding: 0.65rem 1.25rem 1.25rem 1.25rem;
+}
+
+.app-confirm-message {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #4B5563;
+    margin: 0;
+}
+
+.app-confirm-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.65rem;
+    padding: 0.85rem 1.25rem;
+    background: #F9FAFB;
+    border-top: 1px solid #E5E7EB;
+}
+
+.app-confirm-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    height: 36px;
+    transition: all 0.15s ease;
+    box-sizing: border-box;
+}
+
+.app-confirm-btn-cancel {
+    background: #FFFFFF;
+    color: #4B5563;
+    border: 1px solid #D1D5DB;
+}
+
+.app-confirm-btn-cancel:hover {
+    background: #F3F4F6;
+    color: #111827;
+    border-color: #9CA3AF;
+}
+
+.app-confirm-btn-confirm.variant-primary {
+    background: #1E3A8A;
+    color: #FFFFFF;
+}
+
+.app-confirm-btn-confirm.variant-primary:hover {
+    background: #172F70;
+}
+
+.app-confirm-btn-confirm.variant-success {
+    background: #16A34A;
+    color: #FFFFFF;
+}
+
+.app-confirm-btn-confirm.variant-success:hover {
+    background: #16A34A;
+}
+
+.app-confirm-btn-confirm.variant-danger {
+    background: #DC2626;
+    color: #FFFFFF;
+}
+
+.app-confirm-btn-confirm.variant-danger:hover {
+    background: #B42020;
+}
+
+/* ==========================================================================
+   GOVTECH ENTERPRISE SYSTEM-WIDE UI/UX REFINEMENT
+   Enforces strict typography token scale, table engineering alignment,
+   metric card normalization (24px-28px max), accessible status chips,
+   40px interactive targets, and subtle hover affordances.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Typography & Hierarchy (Fixing "Too Big" Text)
+   -------------------------------------------------------------------------- */
+
+/* Main Dashboard Page Titles: 24px / semibold */
+h1:not(.hero-title),
+.page-title,
+.dashboard-title,
+.hig-title-1,
+.hub-header h1,
+.blotter-header .page-title {
+    font-size: 1.5rem !important; /* 24px */
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+    color: var(--gray-900) !important; /* Dark Slate #111827 */
+    letter-spacing: -0.015em;
+}
+
+/* Section/Card Titles: 16px / medium */
+h2,
+h3,
+.card-title,
+.section-title,
+.hig-title-2,
+.hig-title-3,
+.hig-card-title {
+    font-size: 1rem !important; /* 16px */
+    font-weight: 500 !important;
+    line-height: 1.4 !important;
+    color: var(--gray-900) !important;
+}
+
+/* Table Headers & Form Labels: 13px / semibold / uppercase or muted color tracking */
+label,
+.form-label,
+.form-label-modern,
+.table th,
+.clean-table th,
+.hig-table thead th,
+.blotter-table th,
+table thead th {
+    font-size: 0.8125rem !important; /* 13px */
+    font-weight: 600 !important;
+    color: #4B5563 !important; /* Muted gray */
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+/* Primary Body & Table Cell Data: 14px / regular or medium for focus fields */
+p,
+body,
+td,
+.table td,
+.clean-table td,
+.hig-table tbody td,
+.blotter-table td,
+table tbody td,
+.form-control,
+.form-select,
+select,
+input,
+textarea {
+    font-size: 0.875rem !important; /* 14px */
+    line-height: 1.45;
+    color: var(--gray-900);
+}
+
+/* Focus fields / primary data identifiers */
+.clean-table .primary-record-name,
+table .primary-record-name,
+.primary-cell-data,
+strong.table-focus {
+    font-weight: 600 !important;
+    color: #111827 !important;
+}
+
+/* Secondary Metadata / Subtext: 12px / regular / muted gray (#6B7280) */
+.stat-sub,
+.text-muted,
+.subtext,
+.secondary-subtext,
+.clean-table .secondary-record-subtext,
+.page-subtitle,
+.helptext,
+.form-text,
+.hig-caption-1,
+small,
+.meta-text,
+.blotter-party-chip small {
+    font-size: 0.75rem !important; /* 12px */
+    font-weight: 400 !important;
+    color: #6B7280 !important; /* Muted Gray #6B7280 */
+    line-height: 1.4;
+}
+
+/* Contrast Hierarchy: Explicit label vs data value separation */
+.meta-label,
+.field-label,
+.info-label {
+    color: #6B7280 !important;
+    font-weight: 500;
+}
+.meta-value,
+.field-value,
+.info-value {
+    color: #111827 !important;
+    font-weight: 600;
+}
+
+/* No Text Truncation in Actions: Action buttons must never truncate with ellipses (...) */
+.btn,
+.btn-flat,
+.hig-btn,
+button.btn,
+.table-action-btn,
+.app-confirm-btn {
+    white-space: nowrap !important;
+    text-overflow: clip !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. Table Engineering & Layout Alignment
+   -------------------------------------------------------------------------- */
+
+/* System-wide Table Cells: explicit min 12px vertical padding (0.75rem / py-3) & vertical-align middle */
+table th,
+table td,
+.table th,
+.table td,
+.clean-table th,
+.clean-table td,
+.hig-table thead th,
+.hig-table tbody td,
+.blotter-table th,
+.blotter-table td {
+    padding-top: 0.75rem !important; /* 12px min */
+    padding-bottom: 0.75rem !important; /* 12px min */
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    vertical-align: middle !important;
+    box-sizing: border-box;
+}
+
+/* Perfect Header-Data Alignment Parity:
+   - Left-aligned text & qualitative columns (default)
+   - Right-aligned numeric values, currency, counts (.col-numeric)
+   - Avoid centered body column strings */
+table th,
+table td,
+.table th,
+.table td,
+.clean-table th,
+.clean-table td,
+.hig-table thead th,
+.hig-table tbody td,
+.blotter-table th,
+.blotter-table td {
+    text-align: left;
+}
+
+th.col-numeric,
+td.col-numeric,
+th.text-right,
+td.text-right,
+th.text-end,
+td.text-end,
+th.hig-table-col-right,
+td.hig-table-col-right,
+.clean-table th.col-numeric,
+.clean-table td.col-numeric {
+    text-align: right !important;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+}
+
+/* Action column alignment */
+th.col-actions,
+td.col-actions,
+th.table-actions,
+td.table-actions,
+.clean-table th.col-actions,
+.clean-table td.col-actions {
+    text-align: right !important;
+    white-space: nowrap;
+}
+
+/* Action Column Integrity: 32px to 36px bounding box for icon buttons or crisp micro-copy */
+.btn-action-icon,
+.clean-table td.col-actions a.btn,
+.clean-table td.col-actions button.btn,
+td.col-actions a.btn-sm,
+td.col-actions button.btn-sm,
+td .btn-icon,
+.hig-table-actions .hig-btn-icon,
+.table-action-icon-btn {
+    width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
+    box-sizing: border-box !important;
+}
+
+/* Crisp micro-copy action buttons */
+td.col-actions a.btn-sm:not(.btn-icon):not(:has(.icon:only-child)),
+td.col-actions button.btn-sm:not(.btn-icon):not(:has(.icon:only-child)),
+.clean-table td.col-actions a.btn-text-action {
+    min-height: 32px !important;
+    max-height: 36px !important;
+    padding: 0 10px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+    white-space: nowrap !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. Metric & Informational Cards
+   -------------------------------------------------------------------------- */
+
+/* Count & Value Normalization: Limited to a maximum font size of 24px to 28px bold */
+.stat-value,
+.hig-card-value,
+.metric-value,
+.metric-number,
+.stat-card-value,
+.stat-count,
+.kpi-value,
+.fin-card > div > div:nth-child(2) {
+    font-size: 1.625rem !important; /* 26px (strictly within 24px-28px max) */
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+    letter-spacing: -0.015em;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+}
+
+/* Layout Safety: Labels formatted cleanly so they never wrap awkwardly into single-letter drops */
+.stat-card-item,
+.hig-card,
+.fin-card,
+.metric-card,
+.stats-cards-grid > div {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 0;
+}
+
+.stat-label,
+.metric-label,
+.hig-card-header > span,
+.kpi-label,
+.fin-card > div > div:first-child {
+    line-height: 1.35 !important;
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    hyphens: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. Color, Status Chips, & Affordances
+   -------------------------------------------------------------------------- */
+
+/* Accessible Status Badges: Low-saturation, high-contrast pastel backgrounds with deep-colored text */
+.status-chip,
+.badge,
+.hig-badge,
+.blotter-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 9999px; /* Fully pill-shaped (exceeds min 6px) */
+    font-size: 0.75rem !important; /* 12px */
+    font-weight: 600 !important;
+    letter-spacing: 0.02em;
+    line-height: 1.25;
+    border: 1px solid transparent;
+    box-sizing: border-box;
+    white-space: nowrap;
+}
+
+/* 1. Pending / Under Review / Low Stock: Soft amber bg with dark brown text */
+.status-chip-pending,
+.status-chip-low_stock,
+.status-chip-warning,
+.badge-warning,
+.hig-badge-orange,
+.blotter-status-filed {
+    background-color: #F3F4F6 !important;
+    color: #374151 !important;
+    border-color: #D1D5DB !important;
+}
+
+/* 2. Operational / Active / Approved / Settled: Soft mint bg with dark forest green text */
+.status-chip-approved,
+.status-chip-active,
+.status-chip-operational,
+.status-chip-settled,
+.status-chip-success,
+.badge-success,
+.hig-badge-green,
+.blotter-status-settled {
+    background-color: #F3F4F6 !important;
+    color: #16A34A !important;
+    border-color: #E5E7EB !important;
+}
+
+/* 3. Under Mediation / In Progress: Soft pastel indigo bg with deep indigo text */
+.status-chip-mediation,
+.status-chip-under_mediation,
+.status-chip-info,
+.badge-primary,
+.badge-info,
+.hig-badge-blue,
+.hig-badge-purple,
+.blotter-status-under_mediation {
+    background-color: #F3F4F6 !important;
+    color: #1E3A8A !important;
+    border-color: #D1D5DB !important;
+}
+
+/* 4. Declined / Rejected / Escalated / Out of Stock: Soft rose bg with deep crimson text */
+.status-chip-declined,
+.status-chip-rejected,
+.status-chip-escalated,
+.status-chip-out_of_stock,
+.status-chip-danger,
+.badge-danger,
+.hig-badge-red,
+.blotter-status-escalated {
+    background-color: #F3F4F6 !important;
+    color: #DC2626 !important;
+    border-color: #E5E7EB !important;
+}
+
+/* 5. Neutral / Dismissed / Withdrawn / Closed: Soft cool slate bg with deep slate text */
+.status-chip-dismissed,
+.status-chip-withdrawn,
+.status-chip-neutral,
+.status-chip-closed,
+.status-chip-gray,
+.badge-secondary,
+.hig-badge-gray,
+.blotter-status-dismissed,
+.blotter-status-withdrawn {
+    background-color: #F3F4F6 !important;
+    color: #4B5563 !important;
+    border-color: #D1D5DB !important;
+}
+
+/* Interactive Target Sizing: Min 40px physical layout target for clickable interface elements */
+.btn:not(.btn-action-icon):not(.table-action-icon-btn),
+.btn-flat:not(.btn-action-icon),
+.hig-btn:not(.hig-btn-icon):not(.hig-btn-compact),
+button:not(.btn-action-icon):not(.hig-btn-icon):not(.close-btn):not(.btn-close):not(.app-confirm-icon-box),
+.form-control,
+.form-select,
+input[type="text"],
+input[type="search"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+select,
+.sidebar-link-item,
+.fb-menu-item,
+.fb-nav-tab,
+.settings-nav-item,
+.dropdown-item {
+    min-height: 40px;
+    box-sizing: border-box;
+}
+
+.filter-tag,
+.filter-chip {
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 12px;
+}
+
+/* System-Wide Hover Affordances: Subtle 5% opacity background shift upon cursor hover */
+table tbody tr,
+.table tbody tr,
+.clean-table tbody tr,
+.hig-table tbody tr,
+.blotter-table tbody tr,
+.sidebar-link-item,
+.fb-menu-item,
+.settings-nav-item,
+.dropdown-item,
+.conversation-item,
+.account-profile-card,
+.fin-card {
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
+}
+
+table tbody tr:hover,
+.table tbody tr:hover,
+.clean-table tbody tr:hover,
+.hig-table tbody tr:hover,
+.blotter-table tbody tr:hover {
+    background-color: #F9FAFB !important; /* Subtle 5% cool tint */
+}
+
+.sidebar-link-item:hover,
+.fb-menu-item:hover,
+.settings-nav-item:hover,
+.dropdown-item:hover,
+.conversation-item:hover {
+    background-color: #F3F4F6 !important;
+}
+
+/* System-Wide Action Button Alignment to Right Side */
+.header-actions,
+.page-header-actions,
+.module-header-actions,
+.toolbar-actions,
+.hig-toolbar-actions,
+.card-actions,
+.form-actions {
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    margin-left: auto !important;
+    text-align: right !important;
+}
+
+th.col-actions,
+td.col-actions,
+.table th.col-actions,
+.table td.col-actions,
+.clean-table th.col-actions,
+.clean-table td.col-actions,
+.action-column {
+    text-align: right !important;
+}
+
+.col-actions .btn,
+.col-actions .btn-sm,
+td.col-actions .btn,
+td.col-actions .btn-sm {
+    margin-left: auto;
+}
+
+/* Fluid Enterprise Table Layout & Horizontal Scroll Elimination */
+.table-container-wrap {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.table-responsive.lg-overflow-visible,
+.table-responsive.w-full.overflow-x-auto {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 1024px) {
+    .table-responsive.lg-overflow-visible,
+    .table-responsive.lg\:overflow-visible,
+    .lg-overflow-visible {
+        overflow-x: visible !important;
+    }
+}
+
+.table-fluid-auto {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: auto !important;
+}
+
+/* Tightest respective content widths */
+.col-tight-asset,
+.col-tight-qty,
+.col-tight-status,
+.col-tight-action,
+th.col-tight,
+td.col-tight {
+    width: 1% !important;
+    white-space: nowrap !important;
+}
+
+/* Fluid text wrap column absorbing remaining structural whitespace */
+.col-absorb-title {
+    width: auto !important;
+    min-width: 180px;
+    white-space: normal !important;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+.title-line-clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.35;
+    word-break: break-word;
+}
+
+/* Text truncation & layout utilities */
+.text-ellipsis {
+    text-overflow: ellipsis;
+}
+
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.whitespace-nowrap {
+    white-space: nowrap;
+}
+
+/* ==========================================================================
+   Enterprise Minimalist Dashboard Design System
+   ========================================================================== */
+
+/* 1. Flat Surfaces & 1px Solid Neutral Borders */
+.card,
+.hig-card,
+.fin-card,
+.stats-card,
+.stat-card,
+.workflow-card,
+.drawer-section-card {
+    background: #FFFFFF !important;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+}
+
+/* 2. Uniform Form Controls & Inputs */
+.form-control,
+.form-select,
+.hig-input,
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="password"],
+input[type="date"],
+select.form-control,
+textarea.form-control {
+    background-color: #FFFFFF !important;
+    border: 1px solid #D1D5DB !important;
+    border-radius: 6px !important;
+    color: #111827 !important;
+    font-size: 0.875rem !important;
+    padding: 0.5rem 0.75rem !important;
+    box-shadow: none !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.form-control:focus,
+.form-select:focus,
+.hig-input:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="tel"]:focus,
+input[type="password"]:focus,
+input[type="date"]:focus,
+select.form-control:focus,
+textarea.form-control:focus {
+    border-color: #2563EB !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
+    background-color: #FFFFFF !important;
+}
+
+/* Placeholder styling: #86868B crisp and legible */
+::placeholder,
+.form-control::placeholder,
+.hig-input::placeholder,
+input::placeholder,
+textarea::placeholder {
+    color: #86868B !important;
+    font-style: normal !important;
+    font-weight: 400 !important;
+    opacity: 1 !important;
+}
+
+/* ==========================================================================
+   macOS Desktop HIG Refactoring: High-Density, Minimal Native Desktop
+   ========================================================================== */
+
+/* 1. Flat Minimalist Surface (Eliminate Nested Cards & Glassmorphism) */
+.card, .civic-card, .stat-card, .drawer-section-card, .hig-card, .panel {
+    background: #FFFFFF !important;
+    border: 1px solid #E5E5E7 !important;
+    border-radius: 6px !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+.card .card,
+.hig-card .hig-card,
+.card .stat-card,
+.card .civic-card,
+.panel .card {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: 1px solid #E5E5E7 !important;
+}
+
+/* 2. SF Pro Desktop Typography Scale & Controls */
+@media (min-width: 768px) {
+    /* Window/View Title: SF Pro Display | 22 pt | Bold | -0.26 px tracking */
+    .page-title,
+    .module-title,
+    .window-title,
+    .hig-title-1,
+    .view-title,
+    h1:not(.hero-title):not(.display-title):not(.landing-title) {
+        font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+        font-size: 22px !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.26px !important;
+        line-height: 1.25 !important;
+        color: #1D1D1F !important;
+    }
+
+    /* Section Header: SF Pro Text | 18 pt | Semibold | 0.00 px tracking */
+    .section-title,
+    .hig-title-2,
+    .card-title,
+    .hig-card-title,
+    .panel-title,
+    h2:not(.hero-title):not(.landing-subtitle) {
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+        font-size: 18px !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.00px !important;
+        line-height: 1.3 !important;
+        color: #1D1D1F !important;
+    }
+
+    /* Table Cell / Body: SF Pro Text | 13 pt | Regular | -0.08 px tracking */
+    body,
+    p,
+    td,
+    .hig-body,
+    .body-text,
+    .clean-table tbody td,
+    .hig-table tbody td,
+    table tbody td {
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+        font-size: 13px !important;
+        font-weight: 400 !important;
+        letter-spacing: -0.08px !important;
+        color: #1D1D1F !important;
+    }
+
+    /* Column Header / Label: SF Pro Text | 11 pt | Medium | 0.06 px tracking */
+    th,
+    .clean-table thead th,
+    .hig-table thead th,
+    table thead th,
+    label,
+    .form-label,
+    .hig-label,
+    .col-header {
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+        font-size: 11px !important;
+        font-weight: 500 !important;
+        letter-spacing: 0.06px !important;
+        color: #86868B !important;
+    }
+
+    /* Badge / Caption: SF Pro Text | 10 pt | Semibold | 0.12 px tracking */
+    .badge:not(.action-count-pill),
+    .status-chip,
+    .hig-badge,
+    .caption,
+    .helptext,
+    .form-text {
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+        font-size: 10px !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.12px !important;
+    }
+
+    /* 3. High-Density Data Tables (Header 32px, Rows 42px) */
+    table thead tr,
+    .clean-table thead tr,
+    .hig-table thead tr,
+    .stats-table thead tr {
+        height: 32px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        background: #F5F5F7 !important;
+        border-bottom: 1px solid #E5E5E7 !important;
+        box-sizing: border-box !important;
+    }
+
+    table thead th,
+    .clean-table thead th,
+    .hig-table thead th,
+    .stats-table thead th {
+        height: 32px !important;
+        line-height: 32px !important;
+        padding: 0 12px !important;
+        font-size: 11px !important;
+        font-weight: 500 !important;
+        color: #86868B !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.06px !important;
+        border-bottom: 1px solid #E5E5E7 !important;
+        border-top: none !important;
+        border-left: none !important;
+        border-right: none !important;
+        white-space: nowrap !important;
+        vertical-align: middle !important;
+        box-sizing: border-box !important;
+    }
+
+    table tbody tr,
+    .clean-table tbody tr,
+    .hig-table tbody tr,
+    .stats-table tbody tr {
+        height: 42px !important;
+        min-height: 42px !important;
+        max-height: 52px !important;
+        border-bottom: 1px solid #E5E5E7 !important;
+        box-sizing: border-box !important;
+    }
+
+    table tbody td,
+    .clean-table tbody td,
+    .hig-table tbody td,
+    .stats-table tbody td,
+    .table tbody td {
+        height: 42px !important;
+        max-height: 52px !important;
+        padding: 0 12px !important;
+        font-size: 13px !important;
+        font-weight: 400 !important;
+        letter-spacing: -0.08px !important;
+        color: #1D1D1F !important;
+        border-bottom: 1px solid #E5E5E7 !important;
+        border-top: none !important;
+        border-left: none !important;
+        border-right: none !important;
+        vertical-align: middle !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        box-sizing: border-box !important;
+    }
+
+    table tbody td ul,
+    .clean-table tbody td ul,
+    .hig-table tbody td ul,
+    .table tbody td ul,
+    table tbody td ol,
+    .clean-table tbody td ol,
+    .hig-table tbody td ol,
+    .table tbody td ol {
+        margin: 0 !important;
+        padding: 0 !important;
+        list-style: none !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        max-width: 260px !important;
+        vertical-align: middle !important;
+    }
+
+    table tbody td ul li,
+    .clean-table tbody td ul li,
+    .hig-table tbody td ul li,
+    .table tbody td ul li,
+    table tbody td ol li,
+    .table tbody td ol li {
+        display: inline !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    table tbody td ul li:not(:last-child)::after,
+    .clean-table tbody td ul li:not(:last-child)::after,
+    .hig-table tbody td ul li:not(:last-child)::after,
+    .table tbody td ul li:not(:last-child)::after,
+    table tbody td ol li:not(:last-child)::after {
+        content: " • " !important;
+        color: #9CA3AF !important;
+    }
+
+    table tbody tr:hover td,
+    .clean-table tbody tr:hover td,
+    .hig-table tbody tr:hover td,
+    .stats-table tbody tr:hover td {
+        background-color: #F8FAFC !important;
+    }
+
+    /* Native File Input (32px Container & Clean Button Alignment) */
+    input[type="file"],
+    input[type="file"].form-control,
+    .form-control[type="file"] {
+        display: inline-flex !important;
+        align-items: center !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        line-height: 30px !important;
+        padding: 0 10px 0 0 !important;
+        margin: 0 !important;
+        font-size: 12px !important;
+        color: #6B7280 !important;
+        background-color: #FFFFFF !important;
+        border: 1px solid #E5E5E7 !important;
+        border-radius: 6px !important;
+        cursor: pointer !important;
+        box-sizing: border-box !important;
+        vertical-align: middle !important;
+        overflow: hidden !important;
+        white-space: nowrap !important;
+        box-shadow: none !important;
+    }
+
+    input[type="file"]::-webkit-file-upload-button,
+    input[type="file"]::file-selector-button {
+        height: 30px !important;
+        min-height: 30px !important;
+        max-height: 30px !important;
+        line-height: 30px !important;
+        padding: 0 12px !important;
+        margin: 0 10px 0 0 !important;
+        font-size: 12px !important;
+        font-weight: 500 !important;
+        font-family: inherit !important;
+        color: #1D1D1F !important;
+        background: #F5F5F7 !important;
+        border: none !important;
+        border-right: 1px solid #E5E5E7 !important;
+        border-radius: 5px 0 0 5px !important;
+        cursor: pointer !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+        transition: background 0.15s ease, color 0.15s ease !important;
+        outline: none !important;
+        vertical-align: middle !important;
+    }
+
+    input[type="file"]::-webkit-file-upload-button:hover,
+    input[type="file"]::file-selector-button:hover {
+        background: #E8E8ED !important;
+        color: #000000 !important;
+    }
+
+    /* Semantic Alignment Rules */
+    .col-numeric,
+    .col-amount,
+    .col-fee,
+    .col-price,
+    .col-quantity,
+    .col-code,
+    .tabular-nums,
+    td.col-numeric,
+    th.col-numeric {
+        text-align: right !important;
+        font-variant-numeric: tabular-nums !important;
+        font-feature-settings: "tnum" 1 !important;
+    }
+
+    .col-status,
+    .col-badge,
+    .col-category,
+    td.col-status,
+    th.col-status {
+        text-align: center !important;
+    }
+
+    .col-actions,
+    td.col-actions,
+    th.col-actions,
+    .action-column {
+        text-align: right !important;
+    }
+
+    /* Status Badges */
+    .status-chip,
+    .hig-badge,
+    .badge:not(.action-count-pill) {
+        height: 20px !important;
+        min-height: 20px !important;
+        max-height: 20px !important;
+        padding: 0 8px !important;
+        border-radius: 4px !important;
+        font-size: 10px !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.12px !important;
+        line-height: 20px !important;
+        box-sizing: border-box !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .badge-pill,
+    .status-chip,
+    .hig-badge-pill {
+        border-radius: 999px !important;
+    }
+
+    /* 4. Native Desktop Push Buttons */
+    .btn,
+    .btn-flat,
+    .hig-btn {
+        height: 32px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        padding: 0 14px !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        letter-spacing: -0.08px !important;
+        line-height: 32px !important;
+        border-radius: 6px !important;
+        box-sizing: border-box !important;
+        box-shadow: none !important;
+    }
+
+    .btn-sm,
+    .btn-flat-sm,
+    .hig-btn-sm,
+    .btn-compact {
+        height: 28px !important;
+        min-height: 28px !important;
+        max-height: 28px !important;
+        padding: 0 10px !important;
+        font-size: 12px !important;
+        line-height: 28px !important;
+        border-radius: 6px !important;
+    }
+
+    .btn svg,
+    .btn-flat svg,
+    .hig-btn svg,
+    .btn .icon,
+    .btn-flat .icon,
+    .hig-btn .icon {
+        width: 15px !important;
+        height: 15px !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* 5. Desktop Compact Form Controls */
+    .form-control,
+    .hig-input,
+    input[type="text"]:not(.form-range),
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="date"],
+    input[type="time"],
+    input[type="search"],
+    input[type="url"],
+    select.form-control,
+    .hig-select {
+        height: 32px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        padding: 0 10px !important;
+        font-size: 13px !important;
+        font-weight: 400 !important;
+        border: 1px solid #E5E5E7 !important;
+        border-radius: 6px !important;
+        background: #FFFFFF !important;
+        color: #1D1D1F !important;
+        box-sizing: border-box !important;
+        box-shadow: none !important;
+    }
+}
+
+
+

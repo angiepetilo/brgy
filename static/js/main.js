@@ -106,39 +106,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 5000);
     });
 
-    // 4. Facebook-Style Left Sidebar Collapse Controls
-    const sidebarCollapseBtn = document.getElementById('sidebar-collapse-btn');
+    // 4. Smooth Sidebar Collapse / Expand Toggle
     const leftSidebar = document.getElementById('fb-left-sidebar');
     const mainContainer = document.getElementById('fb-main-container');
+    const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn') || document.getElementById('sidebar-collapse-btn');
 
-    function setSidebarState(collapsed) {
-        if (!leftSidebar || !mainContainer) return;
-        if (collapsed) {
-            leftSidebar.classList.add('collapsed');
-            mainContainer.classList.add('sidebar-collapsed');
-            localStorage.setItem('fb_sidebar_collapsed', '1');
+    function applySidebarState(isCollapsed) {
+        if (isCollapsed) {
+            document.body.classList.add('sidebar-collapsed');
+            if (leftSidebar) leftSidebar.classList.add('collapsed');
+            if (mainContainer) mainContainer.classList.add('sidebar-collapsed');
         } else {
-            leftSidebar.classList.remove('collapsed');
-            mainContainer.classList.remove('sidebar-collapsed');
-            localStorage.setItem('fb_sidebar_collapsed', '0');
-        }
-        if (sidebarCollapseBtn) {
-            const exp = sidebarCollapseBtn.querySelector('.collapse-label-expanded');
-            const col = sidebarCollapseBtn.querySelector('.collapse-label-collapsed');
-            if (exp) exp.style.display = collapsed ? 'none' : 'inline-flex';
-            if (col) col.style.display = collapsed ? 'inline-flex' : 'none';
+            document.body.classList.remove('sidebar-collapsed');
+            if (leftSidebar) leftSidebar.classList.remove('collapsed');
+            if (mainContainer) mainContainer.classList.remove('sidebar-collapsed');
         }
     }
 
-    if (sidebarCollapseBtn && leftSidebar && mainContainer) {
-        // Initialize from saved state on wide viewports (default expanded)
-        const isCollapsedSaved = localStorage.getItem('fb_sidebar_collapsed') === '1';
-        setSidebarState(isCollapsedSaved && window.innerWidth >= 1024);
+    try {
+        const savedState = localStorage.getItem('fb_sidebar_collapsed');
+        if (savedState === 'true') {
+            applySidebarState(true);
+        }
+    } catch (e) {}
 
-        sidebarCollapseBtn.addEventListener('click', (e) => {
+    if (sidebarToggleBtn) {
+        sidebarToggleBtn.addEventListener('click', function (e) {
             e.preventDefault();
-            const isCurrentlyCollapsed = leftSidebar.classList.contains('collapsed');
-            setSidebarState(!isCurrentlyCollapsed);
+            const shouldCollapse = !document.body.classList.contains('sidebar-collapsed');
+            applySidebarState(shouldCollapse);
+            try {
+                localStorage.setItem('fb_sidebar_collapsed', shouldCollapse ? 'true' : 'false');
+            } catch (err) {}
         });
     }
 
@@ -240,12 +239,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             const newComment = document.createElement('div');
                             newComment.className = 'comment-item';
-                            newComment.style.cssText = 'padding: 0.65rem 0.75rem; background: #F9FAFB; border: 1px solid #E5E7EB;';
+                            newComment.style.cssText = 'padding: 0.65rem 0.85rem; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px;';
                             newComment.innerHTML = `
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
                                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                        <span style="font-weight: 700; font-size: 0.75rem; color: #1F2937; background: #E5E7EB; padding: 2px 5px;">
-                                            [${data.initials || 'RD'}]
+                                        <span style="font-weight: 700; font-size: 0.75rem; color: #1F2937; background: #E5E7EB; padding: 2px 5px; border-radius: 4px;">
+                                            ${data.initials || 'RD'}
                                         </span>
                                         <span style="font-weight: 700; font-size: 0.8125rem; color: #111827;">
                                             ${escapeHtml(data.author)}
@@ -412,6 +411,150 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
+// Global In-App Confirmation Modal Dialog
+// (Replaces native browser window.confirm / localhost popup)
+// ==========================================
+(function () {
+    'use strict';
+
+    var activeConfirm = null;
+    var modalBackdrop = null;
+    var titleEl, messageEl, iconBoxEl, cancelBtn, confirmBtn;
+
+    function getIconSvg(name) {
+        if (window.BrgyUI && typeof window.BrgyUI.icon === 'function') {
+            return window.BrgyUI.icon(name);
+        }
+        var sprite = (document.body && document.body.dataset && document.body.dataset.iconSprite) || '/static/vendor/lucide/sprite.svg';
+        return '<svg class="icon icon-' + name + '" width="22" height="22" aria-hidden="true"><use href="' + sprite + '#lucide-' + name + '"></use></svg>';
+    }
+
+    function initModal() {
+        if (modalBackdrop) return true;
+        modalBackdrop = document.getElementById('app-confirm-modal');
+        if (!modalBackdrop) return false;
+
+        titleEl = document.getElementById('app-confirm-title');
+        messageEl = document.getElementById('app-confirm-message');
+        iconBoxEl = document.getElementById('app-confirm-icon-box');
+        cancelBtn = document.getElementById('app-confirm-btn-cancel');
+        confirmBtn = document.getElementById('app-confirm-btn-confirm');
+
+        cancelBtn.addEventListener('click', function () {
+            closeModal(false);
+        });
+
+        confirmBtn.addEventListener('click', function () {
+            closeModal(true);
+        });
+
+        modalBackdrop.addEventListener('click', function (e) {
+            if (e.target === modalBackdrop) {
+                closeModal(false);
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (!modalBackdrop || modalBackdrop.style.display === 'none') return;
+            if (e.key === 'Escape' || e.key === 'Esc') {
+                e.preventDefault();
+                closeModal(false);
+            } else if (e.key === 'Enter') {
+                if (document.activeElement === cancelBtn) {
+                    e.preventDefault();
+                    closeModal(false);
+                } else {
+                    e.preventDefault();
+                    closeModal(true);
+                }
+            }
+        });
+
+        return true;
+    }
+
+    function closeModal(confirmed) {
+        if (!modalBackdrop) return;
+        modalBackdrop.style.display = 'none';
+        modalBackdrop.classList.remove('is-active');
+        if (activeConfirm) {
+            var cb = confirmed ? activeConfirm.onConfirm : activeConfirm.onCancel;
+            activeConfirm = null;
+            if (typeof cb === 'function') {
+                cb();
+            }
+        }
+    }
+
+    window.showConfirmModal = function (opts) {
+        if (!initModal()) {
+            var fallbackMsg = (typeof opts === 'string' ? opts : (opts && opts.message)) || 'Are you sure?';
+            if (window.confirm(fallbackMsg)) {
+                if (opts && typeof opts.onConfirm === 'function') opts.onConfirm();
+            } else {
+                if (opts && typeof opts.onCancel === 'function') opts.onCancel();
+            }
+            return;
+        }
+
+        if (typeof opts === 'string') {
+            opts = { message: opts };
+        }
+        opts = opts || {};
+        var message = opts.message || 'Are you sure you want to proceed?';
+        var lowerMsg = message.toLowerCase();
+
+        var variant = opts.variant;
+        var iconName = 'circle-alert';
+        var title = opts.title || 'Confirm Action';
+
+        if (!variant) {
+            if (lowerMsg.indexOf('delete') !== -1 || lowerMsg.indexOf('reject') !== -1 || lowerMsg.indexOf('disable') !== -1 || lowerMsg.indexOf('discard') !== -1 || lowerMsg.indexOf('remove') !== -1 || lowerMsg.indexOf('no-show') !== -1) {
+                variant = 'danger';
+                iconName = 'triangle-alert';
+                if (!opts.title) title = 'Confirm Action';
+            } else if (lowerMsg.indexOf('complete') !== -1 || lowerMsg.indexOf('approve') !== -1 || lowerMsg.indexOf('issue') !== -1) {
+                variant = 'success';
+                iconName = 'circle-check';
+                if (!opts.title) title = 'Confirm Action';
+            } else {
+                variant = 'primary';
+                iconName = 'circle-alert';
+            }
+        }
+
+        iconBoxEl.className = 'app-confirm-icon-box variant-' + variant;
+        iconBoxEl.innerHTML = getIconSvg(iconName);
+
+        titleEl.textContent = title;
+        messageEl.textContent = message;
+
+        cancelBtn.textContent = opts.cancelText || 'Cancel';
+        confirmBtn.textContent = opts.confirmText || (variant === 'danger' ? 'Proceed' : (variant === 'success' ? 'Confirm' : 'OK'));
+        confirmBtn.className = 'app-confirm-btn app-confirm-btn-confirm variant-' + variant;
+
+        activeConfirm = opts;
+        modalBackdrop.style.display = 'flex';
+        void modalBackdrop.offsetWidth;
+        modalBackdrop.classList.add('is-active');
+
+        setTimeout(function () {
+            if (confirmBtn) confirmBtn.focus();
+        }, 50);
+    };
+
+    window.confirmModal = function (message, opts) {
+        return new Promise(function (resolve) {
+            var options = typeof opts === 'object' ? Object.assign({}, opts) : {};
+            options.message = message;
+            options.onConfirm = function () { resolve(true); };
+            options.onCancel = function () { resolve(false); };
+            window.showConfirmModal(options);
+        });
+    };
+})();
+
+// ==========================================
 // Delegated page actions (CSP: no inline handlers in templates)
 //   data-confirm="Message"   on a button/link (click) or a <form> (submit)
 //   data-action="dismiss"    removes the closest [data-dismiss-target] or the parent element
@@ -422,13 +565,64 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==========================================
 (function () {
     document.addEventListener('click', function (event) {
-        var confirmEl = event.target.closest('[data-confirm]');
+        // 1. Direct [data-confirm] or [data-confirm-button] on clicked element or parent
+        var confirmEl = event.target.closest('[data-confirm], [data-confirm-button]');
         if (confirmEl && confirmEl.tagName !== 'FORM') {
-            if (!window.confirm(confirmEl.getAttribute('data-confirm'))) {
-                event.preventDefault();
-                event.stopImmediatePropagation();
+            if (confirmEl.__isConfirmed) {
+                confirmEl.__isConfirmed = false;
                 return;
             }
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+            var message = confirmEl.getAttribute('data-confirm') || confirmEl.getAttribute('data-confirm-button');
+            window.showConfirmModal({
+                message: message,
+                onConfirm: function () {
+                    confirmEl.__isConfirmed = true;
+                    if (confirmEl.form) {
+                        confirmEl.form.__isConfirmed = true;
+                    }
+                    if (confirmEl.tagName === 'A' && confirmEl.href) {
+                        window.location.assign(confirmEl.href);
+                    } else if (confirmEl.type === 'submit' && confirmEl.form) {
+                        if (typeof confirmEl.form.requestSubmit === 'function') {
+                            confirmEl.form.requestSubmit(confirmEl);
+                        } else {
+                            confirmEl.form.submit();
+                        }
+                    } else {
+                        confirmEl.click();
+                    }
+                }
+            });
+            return;
+        }
+
+        // 2. Submit button clicked inside a form[data-confirm]
+        var submitBtn = event.target.closest('button, input[type="submit"]');
+        if (submitBtn && submitBtn.form && submitBtn.form.hasAttribute('data-confirm')) {
+            var parentForm = submitBtn.form;
+            if (parentForm.__isConfirmed) {
+                parentForm.__isConfirmed = false;
+                return;
+            }
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+            var formMsg = parentForm.getAttribute('data-confirm');
+            window.showConfirmModal({
+                message: formMsg,
+                onConfirm: function () {
+                    parentForm.__isConfirmed = true;
+                    if (typeof parentForm.requestSubmit === 'function') {
+                        parentForm.requestSubmit(submitBtn);
+                    } else {
+                        parentForm.submit();
+                    }
+                }
+            });
+            return;
         }
 
         var actionEl = event.target.closest('[data-action]');
@@ -478,15 +672,39 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('submit', function (event) {
         var form = event.target;
         if (form && form.hasAttribute && form.hasAttribute('data-confirm')) {
-            if (!window.confirm(form.getAttribute('data-confirm'))) {
-                event.preventDefault();
-                event.stopImmediatePropagation();
+            if (form.__isConfirmed) {
+                form.__isConfirmed = false;
+                return;
             }
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+            var submitter = event.submitter;
+            var message = form.getAttribute('data-confirm');
+            window.showConfirmModal({
+                message: message,
+                onConfirm: function () {
+                    form.__isConfirmed = true;
+                    if (typeof form.requestSubmit === 'function') {
+                        if (submitter) {
+                            form.requestSubmit(submitter);
+                        } else {
+                            form.requestSubmit();
+                        }
+                    } else {
+                        form.submit();
+                    }
+                }
+            });
         }
     }, true);
 
     document.addEventListener('change', function (event) {
         var el = event.target;
+        if (el && el.id === 'inv-category-filter' && el.value) {
+            window.location.href = el.value;
+            return;
+        }
         if (el && el.hasAttribute && el.hasAttribute('data-auto-submit') && el.form) {
             if (typeof el.form.requestSubmit === 'function') {
                 el.form.requestSubmit();

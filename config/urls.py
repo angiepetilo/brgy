@@ -16,6 +16,7 @@ urlpatterns = [
 
     # Module 1: Accounts and Login
     path('accounts/', include('apps.accounts.urls', namespace='accounts')),
+    path('system/', lambda request: redirect('/accounts/system/?' + request.META.get('QUERY_STRING', ''))),
     path('dashboard/', lambda request: redirect('home')),
 
     # Module 2: Home
@@ -38,9 +39,15 @@ urlpatterns = [
     path('communications/<path:subpath>', lambda request, subpath: redirect(f'/home/{subpath}')),
     path('communications/', lambda request: redirect('home')),
 
-    # Module 10: Records (Issued Documents & Health Records)
-    path('records/', include('apps.records.urls', namespace='records')),
-    path('records_hub/', lambda request: redirect('records:hub'), name='records_hub'),
+    # Directory (Officers and Department Directory)
+    path('directory/', lambda request: redirect('accounts:departments_directory'), name='directory_hub'),
+
+    # Inventory and Asset Tracking
+    path('inventory/', include('apps.inventory.urls', namespace='inventory')),
+
+    # Financial Management
+    path('financial-management/', include('apps.finance.urls', namespace='finance')),
+    path('finance/', lambda request: redirect('finance:financial_management'), name='finance_hub'),
     # Blotter (Katarungang Pambarangay)
     path('blotter/', include('apps.blotter.urls', namespace='blotter')),
 

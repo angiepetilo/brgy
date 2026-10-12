@@ -14,6 +14,12 @@ PARTY_PREFIX = 'parties'
 
 
 class BlotterCaseForm(forms.ModelForm):
+    other_incident_type = forms.CharField(
+        required=False,
+        label='Specify Other Incident Type',
+        widget=forms.TextInput(attrs={'placeholder': 'Specify incident type...', 'class': 'form-control'}),
+    )
+
     class Meta:
         model = BlotterCase
         fields = [
@@ -42,6 +48,35 @@ class BlotterCaseForm(forms.ModelForm):
         for name, field in self.fields.items():
             if not isinstance(field.widget, forms.CheckboxInput):
                 field.widget.attrs.setdefault('class', 'form-control')
+
+        if self.instance and self.instance.pk and self.instance.incident_type == BlotterCase.TYPE_OTHER:
+            narrative = self.instance.narrative or ''
+            if narrative.startswith('[Specific Incident Type: '):
+                end_idx = narrative.find(']')
+                if end_idx != -1:
+                    extracted = narrative[len('[Specific Incident Type: '):end_idx].strip()
+                    self.fields['other_incident_type'].initial = extracted
+
+    def clean(self):
+        cleaned_data = super().clean()
+        incident_type = cleaned_data.get('incident_type')
+        other_type = cleaned_data.get('other_incident_type', '').strip()
+        if incident_type == BlotterCase.TYPE_OTHER:
+            if not other_type:
+                self.add_error('other_incident_type', 'Please specify the other incident type.')
+            else:
+                narrative = cleaned_data.get('narrative', '')
+                prefix = f"[Specific Incident Type: {other_type}]\n"
+                if narrative.startswith('[Specific Incident Type: '):
+                    end_idx = narrative.find(']\n')
+                    if end_idx != -1:
+                        narrative = narrative[end_idx + 2:]
+                    else:
+                        end_idx = narrative.find(']')
+                        if end_idx != -1:
+                            narrative = narrative[end_idx + 1:].strip()
+                cleaned_data['narrative'] = f"{prefix}{narrative}".strip()
+        return cleaned_data
 
 
 class BlotterPartyForm(forms.ModelForm):

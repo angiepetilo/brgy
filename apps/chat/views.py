@@ -430,7 +430,7 @@ def open_notification_view(request, notif_id):
     target_url = notif.url or notif.link_url or reverse('chat:notifications_list')
 
     # Guard: check if resident is trying to open a restricted staff/admin area
-    restricted_staff_prefixes = ['/accounts/system/', '/system/', '/history/', '/records/', '/statistics/']
+    restricted_staff_prefixes = ['/accounts/system/', '/system/', '/history/', '/inventory/', '/financial-management/', '/finance/', '/statistics/']
     is_resident = request.user.role == User.ROLE_RESIDENT
     if is_resident and any(target_url.startswith(prefix) for prefix in restricted_staff_prefixes):
         messages.error(request, "You do not have permission to view that administrative page.")

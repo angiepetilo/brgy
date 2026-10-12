@@ -435,7 +435,7 @@ def create_announcement_view(request):
 
     return render(request, 'communications/announcement_form.html', {
         'form': form,
-        'title': 'Publish New Post / Advisory',
+        'title': 'Publish Announcement',
         'next_url': next_url,
         'dynamic_categories': dynamic_categories,
     })
@@ -507,7 +507,7 @@ def edit_announcement_view(request, pk):
 
     return render(request, 'communications/announcement_form.html', {
         'form': form,
-        'title': 'Edit Post / Advisory',
+        'title': 'Edit Announcement',
         'is_edit': True,
         'announcement': announcement,
         'next_url': next_url,

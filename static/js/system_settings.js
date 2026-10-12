@@ -110,6 +110,13 @@
         // Document types
         'new-document-type': function (el) {
             resetForm('docTypeForm');
+            setValue('doc-salutation-input', 'TO WHOM IT MAY CONCERN:');
+            setValue('doc-header-input', '');
+            setValue('doc-letter-title-input', '');
+            setValue('doc-letter-body-input', '');
+            setValue('doc-footer-input', '');
+            setValue('doc-sig1-title-input', 'Barangay Records Officer');
+            setValue('doc-sig2-title-input', 'Punong Barangay / Kapitan');
             openForm({
                 formId: 'docTypeForm', modalId: 'docTypeModal', titleId: 'doc-modal-title',
                 title: 'New Document Type', action: url('document-type-create-url')
@@ -125,6 +132,13 @@
             setValue('doc-desc-input', sourceValue(d.descriptionSource));
             setValue('doc-req-input', sourceValue(d.requirementsSource).replace(/\s+$/, ''));
             setChecked('doc-active-input', d.active);
+            setValue('doc-salutation-input', d.salutation || 'TO WHOM IT MAY CONCERN:');
+            setValue('doc-header-input', sourceValue(d.headerSource));
+            setValue('doc-letter-title-input', d.letterTitle || '');
+            setValue('doc-letter-body-input', sourceValue(d.letterBodySource));
+            setValue('doc-footer-input', sourceValue(d.footerSource));
+            setValue('doc-sig1-title-input', d.sig1Title || 'Barangay Records Officer');
+            setValue('doc-sig2-title-input', d.sig2Title || 'Punong Barangay / Kapitan');
             openForm({
                 formId: 'docTypeForm', modalId: 'docTypeModal', titleId: 'doc-modal-title',
                 title: 'Edit Document Type: ' + d.name, action: url('document-type-edit-url', d.id)
@@ -290,6 +304,43 @@
             HANDLERS[actionEl.getAttribute('data-action')](actionEl);
             return;
         }
+
+        // Purok Modals
+        var openPurok = event.target.closest('#btn-open-create-purok');
+        if (openPurok) {
+            event.preventDefault();
+            var cm = byId('createPurokModal');
+            if (cm) cm.style.display = 'flex';
+            return;
+        }
+
+        var closePurok = event.target.closest('.btn-close-purok-modal');
+        if (closePurok) {
+            event.preventDefault();
+            var cm2 = byId('createPurokModal');
+            var em2 = byId('editPurokModal');
+            if (cm2) cm2.style.display = 'none';
+            if (em2) em2.style.display = 'none';
+            return;
+        }
+
+        var editPurok = event.target.closest('.btn-edit-purok');
+        if (editPurok) {
+            event.preventDefault();
+            var d = editPurok.dataset;
+            var nameEl = byId('edit_purok_name');
+            var descEl = byId('edit_purok_desc');
+            var leaderEl = byId('edit_purok_leader');
+            var form = byId('editPurokForm');
+            var em = byId('editPurokModal');
+            if (nameEl) nameEl.value = d.name || '';
+            if (descEl) descEl.value = d.desc || '';
+            if (leaderEl) leaderEl.value = d.leader || '';
+            if (form) form.action = '/accounts/system/puroks/' + d.id + '/edit/';
+            if (em) em.style.display = 'flex';
+            return;
+        }
+
         // Backdrop click closes the modal (only when the backdrop itself is the target).
         if (event.target.hasAttribute && event.target.hasAttribute('data-modal')) {
             closeModal(event.target);
@@ -342,8 +393,37 @@
         reader.onload = function () {
             preview.src = reader.result;
             preview.hidden = false;
-            if (empty) { empty.hidden = true; }
+            preview.style.display = 'block';
+            if (empty) {
+                empty.hidden = true;
+                empty.style.display = 'none';
+            }
         };
         reader.readAsDataURL(file);
+    });
+
+    // Track last focused input in doc template modal
+    var lastFocusedTemplateInput = null;
+    var templateInputIds = ['doc-header-input', 'doc-letter-title-input', 'doc-letter-body-input', 'doc-footer-input'];
+    document.addEventListener('focusin', function (event) {
+        if (event.target && templateInputIds.indexOf(event.target.id) !== -1) {
+            lastFocusedTemplateInput = event.target;
+        }
+    });
+
+    // Tag helper click: insert tag into active input or default to doc-letter-body-input
+    document.addEventListener('click', function (event) {
+        var btn = event.target.closest('.doc-tag-insert-btn');
+        if (!btn) { return; }
+        event.preventDefault();
+        var tag = btn.getAttribute('data-tag');
+        var targetInput = lastFocusedTemplateInput || byId('doc-letter-body-input');
+        if (!targetInput || !tag) { return; }
+        var start = targetInput.selectionStart || 0;
+        var end = targetInput.selectionEnd || 0;
+        var val = targetInput.value;
+        targetInput.value = val.substring(0, start) + tag + val.substring(end);
+        targetInput.selectionStart = targetInput.selectionEnd = start + tag.length;
+        targetInput.focus();
     });
 })();

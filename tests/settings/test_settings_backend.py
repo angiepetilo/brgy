@@ -341,9 +341,9 @@ class RedirectTargetTests(SettingsTestCase):
         self.expect(post(reverse('accounts:system_health_service_create'), {'name': 'New H'}), 'document_health', 'health')
         self.expect(post(reverse('accounts:system_health_service_edit', kwargs={'svc_id': svc.id}), {'name': svc.name}), 'document_health', 'health')
         self.expect(post(reverse('accounts:system_health_service_delete', kwargs={'svc_id': svc.id})), 'document_health', 'health')
-        self.expect(post(reverse('accounts:system_concern_category_create'), {'name': 'New C'}), 'user_management', 'concerns')
-        self.expect(post(reverse('accounts:system_concern_category_edit', kwargs={'cat_id': concern.id}), {'name': 'Redirect concern'}), 'user_management', 'concerns')
-        self.expect(post(reverse('accounts:system_concern_category_delete', kwargs={'cat_id': concern.id})), 'user_management', 'concerns')
+        self.expect(post(reverse('accounts:system_concern_category_create'), {'name': 'New C'}), 'post_categories', 'concerns')
+        self.expect(post(reverse('accounts:system_concern_category_edit', kwargs={'cat_id': concern.id}), {'name': 'Redirect concern'}), 'post_categories', 'concerns')
+        self.expect(post(reverse('accounts:system_concern_category_delete', kwargs={'cat_id': concern.id})), 'post_categories', 'concerns')
         self.expect(post(reverse('accounts:system_staff_account_create'), {'email': 'r@barangay.test'}), 'user_management', 'staff')
         self.expect(post(reverse('accounts:system_staff_account_disable', kwargs={'user_id': staff.id})), 'user_management', 'staff')
         self.expect(post(reverse('accounts:system_email_edit', kwargs={'template_name': 'nope'}), {'content': 'x'}), 'email_templates')
@@ -352,12 +352,12 @@ class RedirectTargetTests(SettingsTestCase):
         response = self.client.post(reverse('accounts:system_document_type_create'), {'name': '', 'fee': '1'})
         self.expect(response, 'document_health', 'documents')
         response = self.client.post(reverse('accounts:system_concern_category_create'), {'name': ''})
-        self.expect(response, 'user_management', 'concerns')
+        self.expect(response, 'post_categories', 'concerns')
 
     def test_redirect_targets_render_the_matching_tab(self):
         for url, tab, subtab in [
             (reverse('accounts:system_dashboard') + '?tab=document_health&subtab=health', 'document_health', 'health'),
-            (reverse('accounts:system_dashboard') + '?tab=user_management&subtab=concerns', 'user_management', 'concerns'),
+            (reverse('accounts:system_dashboard') + '?tab=post_categories&subtab=concerns', 'post_categories', 'concerns'),
             (reverse('accounts:system_dashboard') + '?tab=email_templates', 'email_templates', ''),
         ]:
             response = self.client.get(url)
@@ -371,7 +371,7 @@ class RedirectTargetTests(SettingsTestCase):
             '?tab=documents': ('document_health', 'documents'),
             '?tab=health_services': ('document_health', 'health'),
             '?tab=staff_accounts': ('user_management', 'staff'),
-            '?tab=concern_categories': ('user_management', 'concerns'),
+            '?tab=concern_categories': ('post_categories', 'concerns'),
             '?tab=bogus': ('barangay_info', ''),
             '?tab=document_health&subtab=bogus': ('document_health', 'documents'),
             '': ('barangay_info', ''),

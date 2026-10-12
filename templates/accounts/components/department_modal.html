@@ -1,0 +1,83 @@
+{% load core_tags %}
+<!-- ======================================================== -->
+<!-- DEPARTMENT DETAILS & ASSIGNED STAFF ROSTER MODAL          -->
+<!-- ======================================================== -->
+<div id="departmentStaffModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.65); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: #FFFFFF; border-radius: 16px; width: 100%; max-width: 720px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; max-height: 88vh;">
+        
+        <!-- Modal Header -->
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between; background: #FAFAFA;">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+                <div id="dept-modal-icon-box" style="width: 44px; height: 44px; border-radius: 12px; background: #EFF6FF; color: #1E3A8A; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                    {% icon 'building' %}
+                </div>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <h3 id="dept-modal-title" style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #111827;">Department Name</h3>
+                        <span id="dept-modal-code" class="badge" style="background: #E5E7EB; color: #374151; font-weight: 800; font-size: 0.75rem; padding: 3px 8px; border-radius: 6px;">BHC</span>
+                    </div>
+                    <p id="dept-modal-head-line" style="margin: 0.2rem 0 0 0; font-size: 0.8125rem; color: #6B7280; font-weight: 500;">Head: Department Head</p>
+                </div>
+            </div>
+            <button type="button" id="btn-close-dept-modal" style="border: none; background: #F3F4F6; color: #4B5563; width: 32px; height: 32px; border-radius: 50%; font-size: 1.25rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1;">&times;</button>
+        </div>
+
+        <!-- Modal Body (Scrollable) -->
+        <div style="padding: 1.25rem 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem;">
+            
+            <!-- Description -->
+            <p id="dept-modal-desc" style="margin: 0; font-size: 0.875rem; color: #4B5563; line-height: 1.5; background: #F9FAFB; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #F3F4F6;">
+                Department description text.
+            </p>
+
+            <!-- Department Info Cards (Office, Hours, Contact) -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.65rem;">
+                <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 10px; padding: 0.65rem 0.85rem;">
+                    <span style="display: block; font-size: 0.72rem; font-weight: 700; color: #9CA3AF; text-transform: uppercase;">Office Location</span>
+                    <span id="dept-modal-location" style="display: block; font-size: 0.8125rem; font-weight: 600; color: #111827; margin-top: 0.2rem;">--</span>
+                </div>
+                <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 10px; padding: 0.65rem 0.85rem;">
+                    <span style="display: block; font-size: 0.72rem; font-weight: 700; color: #9CA3AF; text-transform: uppercase;">Operating Hours</span>
+                    <span id="dept-modal-hours" style="display: block; font-size: 0.8125rem; font-weight: 600; color: #111827; margin-top: 0.2rem;">--</span>
+                </div>
+                <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 10px; padding: 0.65rem 0.85rem;">
+                    <span style="display: block; font-size: 0.72rem; font-weight: 700; color: #9CA3AF; text-transform: uppercase;">Direct Contact</span>
+                    <span id="dept-modal-contact" style="display: block; font-size: 0.8125rem; font-weight: 600; color: #111827; margin-top: 0.2rem;">--</span>
+                </div>
+            </div>
+
+            <!-- Services Section -->
+            <div id="dept-modal-services-section">
+                <span style="display: block; font-size: 0.75rem; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.4rem;">Services Offered</span>
+                <div id="dept-modal-services-chips" style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Assigned Staff Directory -->
+            <div style="border-top: 1px solid #E5E7EB; padding-top: 1rem; margin-top: 0.25rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <div>
+                        <span style="font-size: 0.875rem; font-weight: 800; color: #111827; text-transform: uppercase; letter-spacing: 0.03em;">Assigned Personnel & Staff</span>
+                        <p style="margin: 0.15rem 0 0 0; font-size: 0.78rem; color: #6B7280;">Contact or message staff assigned to this department.</p>
+                    </div>
+                    <span id="dept-modal-staff-count" style="font-size: 0.75rem; font-weight: 700; background: #EFF6FF; color: #1E3A8A; padding: 3px 8px; border-radius: 12px; border: 1px solid #BFDBFE;">0 Staff</span>
+                </div>
+
+                <!-- Staff Cards Container -->
+                <div id="dept-modal-staff-list" style="display: flex; flex-direction: column; gap: 0.65rem;">
+                    <!-- Populated dynamically by JS -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Modal Footer -->
+        <div style="padding: 0.85rem 1.5rem; background: #FAFAFA; border-top: 1px solid #E5E7EB; display: flex; justify-content: flex-end;">
+            <button type="button" id="btn-close-dept-modal-footer" class="btn btn-secondary" style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1.25rem; border-radius: 6px;">
+                Close Directory
+            </button>
+        </div>
+
+    </div>
+</div>

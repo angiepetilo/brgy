@@ -201,6 +201,7 @@
 .contact-meta {
     flex: 1;
     min-width: 0;
+    overflow: hidden;
 }
 
 .contact-name {
@@ -220,12 +221,26 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    max-width: 100%;
+    display: block;
     line-height: 1.25;
 }
 
 .contact-snippet.unread-bold {
     font-weight: 700;
     color: #111827;
+}
+
+.text-ellipsis {
+    text-overflow: ellipsis;
+}
+
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.whitespace-nowrap {
+    white-space: nowrap;
 }
 
 .contact-unread-dot {
@@ -333,7 +348,7 @@
 
 .chat-bubble-pill {
     padding: 0.65rem 1rem;
-    font-size: 0.9375rem;
+    font-size: 14px;
     line-height: 1.4;
     word-break: break-word;
 }
@@ -344,20 +359,58 @@
     border-radius: 18px 18px 4px 18px;
 }
 
+.chat-message-row.sent .chat-bubble-pill p,
+.chat-message-row.sent .message-text {
+    color: #FFFFFF !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    margin: 0;
+    line-height: 1.4;
+}
+
 .chat-message-row.received .chat-bubble-pill {
     background: #F3F4F6;
     color: #111827;
     border-radius: 18px 18px 18px 4px;
+    border: 1px solid #E5E7EB;
+}
+
+.chat-message-row.received .chat-bubble-pill p,
+.chat-message-row.received .message-text {
+    color: #111827 !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    margin: 0;
+    line-height: 1.4;
 }
 
 /* SENT, DELIVERED, SEEN WITH DATE AND TIME */
 .chat-receipt-meta {
-    font-size: 0.875rem;
-    color: #6B7280;
+    font-size: 11px;
     margin-top: 0.25rem;
     display: flex;
     align-items: center;
     gap: 0.3rem;
+}
+
+.chat-message-row.sent .chat-receipt-meta {
+    color: #FFFFFF;
+    opacity: 0.7;
+    font-size: 11px;
+    justify-content: flex-end;
+}
+
+.chat-message-row.sent .chat-receipt-meta .icon,
+.chat-message-row.sent .chat-receipt-meta svg {
+    width: 11px !important;
+    height: 11px !important;
+    opacity: 0.7;
+}
+
+.chat-message-row.received .chat-receipt-meta {
+    color: #6B7280;
+    font-size: 11px;
+    justify-content: flex-start;
 }
 
 .chat-receipt-meta.seen {
@@ -511,15 +564,15 @@
                                 <div class="contact-avatar-initials">{{ c.user.initials }}</div>
                             {% endif %}
                             {% if c.is_online %}
-                                <div class="contact-online-dot" title="Online / On Duty"></div>
+                                <div class="contact-online-dot" title="On Duty"></div>
                             {% endif %}
                         </div>
 
                         <div class="contact-meta">
-                            <div class="contact-name">{{ c.user.get_full_name|default:c.user.username }}</div>
-                            <div class="contact-snippet {% if c.unread_count > 0 %}unread-bold{% endif %}">
+                            <div class="contact-name text-ellipsis overflow-hidden whitespace-nowrap">{{ c.user.get_full_name|default:c.user.username }}</div>
+                            <div class="contact-snippet text-ellipsis overflow-hidden whitespace-nowrap {% if c.unread_count > 0 %}unread-bold{% endif %}" title="{% if c.last_message %}{% if c.last_message.sender == request.user %}You: {% endif %}{{ c.last_message.content }}{% endif %}">
                                 {% if c.last_message %}
-                                    {% if c.last_message.sender == request.user %}You: {% endif %}{{ c.last_message.content|truncatechars:26 }} &bull; {{ c.last_message.created_at|timesince }}
+                                    {% if c.last_message.sender == request.user %}You: {% endif %}{{ c.last_message.content }} &bull; {{ c.last_message.created_at|timesince }}
                                 {% else %}
                                     Start a conversation
                                 {% endif %}

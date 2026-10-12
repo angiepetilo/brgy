@@ -48,10 +48,12 @@
 
   function currentFilters() {
     var params = new URLSearchParams();
-    FILTER_KEYS.forEach(function (key) {
-      var field = form.elements[key];
-      if (field && field.value) { params.set(key, field.value); }
-    });
+    if (form && form.elements) {
+      FILTER_KEYS.forEach(function (key) {
+        var field = form.elements[key];
+        if (field && field.value) { params.set(key, field.value); }
+      });
+    }
     return params;
   }
 
@@ -459,6 +461,7 @@
   }
 
   function fillFormFromUrl() {
+    if (!form || !form.elements) return;
     var params = new URLSearchParams(window.location.search);
     FILTER_KEYS.forEach(function (key) {
       var field = form.elements[key];
@@ -466,19 +469,26 @@
     });
   }
 
-  form.addEventListener('submit', function (event) {
-    event.preventDefault();
-    pushUrl();
-    load();
-  });
+  if (form) {
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      pushUrl();
+      load();
+    });
+  }
 
-  document.getElementById('stats-reset').addEventListener('click', function (event) {
-    event.preventDefault();
-    form.reset();
-    FILTER_KEYS.forEach(function (key) { if (form.elements[key]) { form.elements[key].value = ''; } });
-    pushUrl();
-    load();
-  });
+  var resetBtn = document.getElementById('stats-reset');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function (event) {
+      event.preventDefault();
+      if (form) {
+        form.reset();
+        FILTER_KEYS.forEach(function (key) { if (form.elements[key]) { form.elements[key].value = ''; } });
+      }
+      pushUrl();
+      load();
+    });
+  }
 
   window.addEventListener('popstate', function () {
     fillFormFromUrl();

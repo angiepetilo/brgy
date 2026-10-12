@@ -59,8 +59,8 @@ def _clean_name(data, label, max_length):
 CONTACT_NO_RE = re.compile(r'^[0-9 ()\-]{7,15}$')
 LOGO_MAX_BYTES = 2 * 1024 * 1024
 LOGO_FORMATS = {'PNG', 'JPEG', 'GIF', 'WEBP'}
-BARANGAY_INFO_FIELDS = ('name', 'address', 'city', 'province', 'contact_no', 'office_hours', 'venue')
-BARANGAY_INFO_OPTIONAL = ('address', 'city', 'province', 'contact_no', 'office_hours', 'venue')
+BARANGAY_INFO_FIELDS = ('name', 'address', 'city', 'province', 'contact_no', 'emergency_hotline', 'office_hours', 'venue')
+BARANGAY_INFO_OPTIONAL = ('address', 'city', 'province', 'contact_no', 'emergency_hotline', 'office_hours', 'venue')
 
 
 def _validate_logo(logo_file):
@@ -87,6 +87,7 @@ def _validate_logo(logo_file):
 def _barangay_snapshot(info):
     snap = {field: getattr(info, field) for field in BARANGAY_INFO_FIELDS}
     snap['has_logo'] = bool(info.logo)
+    snap['show_available_services'] = bool(info.show_available_services)
     return snap
 
 
@@ -97,6 +98,7 @@ def update_barangay_info_service(actor, data, logo_file=None):
     - Optional fields are assigned from the submitted value, so an empty string CLEARS them.
       A key that is absent from ``data`` (partial programmatic payload) is left unchanged.
     - contact_no is empty, or a mobile/landline number (digits, spaces, dashes, parentheses; 7-15 chars).
+    - emergency_hotline and show_available_services are updated.
     - The logo is replaced only when a file is uploaded, or removed when ``clear_logo`` is truthy.
     Logs before and after values in ActivityLog.
     """
@@ -114,7 +116,7 @@ def update_barangay_info_service(actor, data, logo_file=None):
         if field in data:
             values[field] = str(data.get(field) or '').strip()
 
-    for field, limit in (('city', 100), ('province', 100), ('office_hours', 120), ('venue', 150)):
+    for field, limit in (('city', 100), ('province', 100), ('emergency_hotline', 100), ('office_hours', 120), ('venue', 150)):
         if len(values.get(field, '')) > limit:
             raise ValueError(f"{field.replace('_', ' ').capitalize()} must be {limit} characters or fewer.")
 
@@ -134,6 +136,8 @@ def update_barangay_info_service(actor, data, logo_file=None):
         info.name = name
         for field, value in values.items():
             setattr(info, field, value)
+        if 'show_available_services' in data:
+            info.show_available_services = parse_bool(data, 'show_available_services', True)
         if logo_file:
             info.logo = logo_file
         elif parse_bool(data, 'clear_logo', False):
@@ -297,6 +301,15 @@ def create_or_update_document_type_service(actor, data, doc_id=None):
     code = str(data.get('code') or '').strip()[:50]
     description = str(data.get('description') or '').strip()
     requirements_text = str(data.get('requirements_needed') or '').strip()
+    letter_header = str(data.get('letter_header') or '').strip()
+    letter_title = str(data.get('letter_title') or '').strip()[:150]
+    letter_salutation = str(data.get('letter_salutation') or 'TO WHOM IT MAY CONCERN:').strip()
+    letter_body = str(data.get('letter_body') or '').strip()
+    letter_footer = str(data.get('letter_footer') or '').strip()
+    signatory_1_name = str(data.get('signatory_1_name') or '').strip()[:150]
+    signatory_1_title = str(data.get('signatory_1_title') or 'Barangay Records Officer').strip()[:150]
+    signatory_2_name = str(data.get('signatory_2_name') or '').strip()[:150]
+    signatory_2_title = str(data.get('signatory_2_title') or 'Punong Barangay / Kapitan').strip()[:150]
 
     with transaction.atomic():
         if doc:
@@ -308,6 +321,15 @@ def create_or_update_document_type_service(actor, data, doc_id=None):
             doc.order = order
             doc.is_active = parse_bool(data, 'is_active', doc.is_active)
             doc.requirements_needed = requirements_text
+            doc.letter_header = letter_header
+            doc.letter_title = letter_title
+            doc.letter_salutation = letter_salutation
+            doc.letter_body = letter_body
+            doc.letter_footer = letter_footer
+            doc.signatory_1_name = signatory_1_name
+            doc.signatory_1_title = signatory_1_title
+            doc.signatory_2_name = signatory_2_name
+            doc.signatory_2_title = signatory_2_title
             doc.save()
 
             log_activity(
@@ -326,7 +348,16 @@ def create_or_update_document_type_service(actor, data, doc_id=None):
                 fee=fee,
                 order=order,
                 is_active=parse_bool(data, 'is_active', True),
-                requirements_needed=requirements_text
+                requirements_needed=requirements_text,
+                letter_header=letter_header,
+                letter_title=letter_title,
+                letter_salutation=letter_salutation,
+                letter_body=letter_body,
+                letter_footer=letter_footer,
+                signatory_1_name=signatory_1_name,
+                signatory_1_title=signatory_1_title,
+                signatory_2_name=signatory_2_name,
+                signatory_2_title=signatory_2_title
             )
             log_activity(
                 actor=actor,
@@ -576,6 +607,10 @@ def create_staff_account_service(actor, data):
     username = data.get('username', '').strip() or email.split('@')[0]
     first_name = data.get('first_name', '').strip()
     last_name = data.get('last_name', '').strip()
+    department = data.get('department', '').strip()
+    role = data.get('role', User.ROLE_STAFF)
+    if role not in [User.ROLE_STAFF, User.ROLE_ADMIN]:
+        role = User.ROLE_STAFF
 
     if not email:
         raise ValueError("Email address is required.")
@@ -604,7 +639,8 @@ def create_staff_account_service(actor, data):
             password=temp_pw,
             first_name=first_name,
             last_name=last_name,
-            role=User.ROLE_STAFF,
+            department=department,
+            role=role,
             status=User.STATUS_ACTIVE,
             is_staff=True,
             is_approved=True,
@@ -613,19 +649,34 @@ def create_staff_account_service(actor, data):
             term_end=term_end
         )
 
-        # Assign officer position if provided
+        # Direct module permissions
+        allowed_modules = []
+        if hasattr(data, 'getlist'):
+            allowed_modules = data.getlist('permissions')
+        elif isinstance(data.get('permissions'), list):
+            allowed_modules = data.get('permissions')
+        elif data.get('permissions'):
+            allowed_modules = [p.strip() for p in str(data.get('permissions')).split(',') if p.strip()]
+        
+        if allowed_modules:
+            user.allowed_modules = allowed_modules
+            user.save(update_fields=['allowed_modules'])
+
+        # Optional Barangay Officer assignment (not every staff member is an officer)
         officer_id = data.get('officer_id')
-        officer = Officer.objects.filter(id=officer_id).first() if officer_id else Officer.objects.first()
-        if officer:
-            scope_type = data.get('scope_type', StaffAssignment.SCOPE_SERVICE_AREA)
-            scope_value = data.get('scope_value', 'general')
-            StaffAssignment.objects.create(
-                user=user,
-                officer=officer,
-                scope_type=scope_type,
-                scope_value=scope_value,
-                term_end=term_end
-            )
+        officer = None
+        if officer_id and str(officer_id).isdigit():
+            officer = Officer.objects.filter(id=int(officer_id)).first()
+
+        scope_type = data.get('scope_type', StaffAssignment.SCOPE_SERVICE_AREA)
+        scope_value = department or data.get('scope_value', 'general')
+        StaffAssignment.objects.create(
+            user=user,
+            officer=officer,
+            scope_type=scope_type,
+            scope_value=scope_value,
+            term_end=term_end
+        )
 
         log_activity(
             actor=actor,
@@ -633,11 +684,11 @@ def create_staff_account_service(actor, data):
             action_type='StaffAccount',
             target_id=str(user.id),
             target_name=user.get_full_name() or user.username,
-            details=f"Created staff account '{user.email}' (term_end={term_end}). Dispatched temporary password."
+            details=f"Created staff account '{user.email}' (department={department}, officer={officer}, term_end={term_end}). Dispatched temporary password."
         )
 
         # Dispatch staff_created email with temp password inside on_commit
-        position_title = officer.position if (officer and hasattr(officer, 'position')) else (getattr(officer, 'name', 'Staff') if officer else 'Staff')
+        position_title = officer.position if (officer and hasattr(officer, 'position')) else (department or 'Staff')
         transaction.on_commit(
             lambda: send_templated_email(
                 template_name='staff_created',
@@ -653,8 +704,40 @@ def create_staff_account_service(actor, data):
                 ref_id=str(user.id),
             )
         )
-
     return user
+
+
+def update_appointment_windows_service(actor, data):
+    """
+    Updates appointment Standard Operating Windows in BarangayInfo:
+    - morning_window_start, morning_window_end
+    - afternoon_window_start, afternoon_window_end
+    - operating_days
+    - slot_capacity_per_window
+    Logs activity.
+    """
+    info = BarangayInfo.get_solo()
+    info.morning_window_start = str(data.get('morning_window_start') or '8:00 AM').strip()
+    info.morning_window_end = str(data.get('morning_window_end') or '11:30 AM').strip()
+    info.afternoon_window_start = str(data.get('afternoon_window_start') or '1:00 PM').strip()
+    info.afternoon_window_end = str(data.get('afternoon_window_end') or '4:30 PM').strip()
+    info.operating_days = str(data.get('operating_days') or 'Monday to Friday (excluding official holidays)').strip()
+    try:
+        capacity = int(data.get('slot_capacity_per_window', 20))
+    except (ValueError, TypeError):
+        capacity = 20
+    info.slot_capacity_per_window = max(1, capacity)
+    info.save()
+
+    log_activity(
+        actor=actor,
+        action='update',
+        action_type='SystemConfig',
+        target_id=str(info.id),
+        target_name="Appointment Operating Windows",
+        details=f"Updated Standard Operating Windows: {info.morning_window_start}-{info.morning_window_end}, {info.afternoon_window_start}-{info.afternoon_window_end}, {info.operating_days}, cap={info.slot_capacity_per_window}"
+    )
+    return info
 
 
 def disable_staff_account_service(actor, staff_user_id):

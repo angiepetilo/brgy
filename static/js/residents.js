@@ -317,4 +317,56 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
+
+    // Bulk selection logic
+    var selectAll = document.getElementById('selectAllResidents');
+    var rowChecks = document.querySelectorAll('.resident-select-chk');
+    var bulkBar = document.getElementById('bulkSelectionBar');
+    var bulkCount = document.getElementById('bulkSelectedCount');
+    var clearBtn = document.getElementById('clearSelectionBtn');
+
+    function updateBulkBar() {
+        var checked = document.querySelectorAll('.resident-select-chk:checked');
+        if (bulkCount) {
+            bulkCount.textContent = checked.length;
+        }
+        if (bulkBar) {
+            if (checked.length > 0) {
+                bulkBar.classList.add('active');
+            } else {
+                bulkBar.classList.remove('active');
+            }
+        }
+        if (selectAll && rowChecks.length > 0) {
+            selectAll.checked = (checked.length === rowChecks.length);
+            selectAll.indeterminate = (checked.length > 0 && checked.length < rowChecks.length);
+        }
+    }
+
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            var isChecked = this.checked;
+            rowChecks.forEach(function(chk) {
+                chk.checked = isChecked;
+            });
+            updateBulkBar();
+        });
+    }
+
+    rowChecks.forEach(function(chk) {
+        chk.addEventListener('change', updateBulkBar);
+    });
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            if (selectAll) {
+                selectAll.checked = false;
+                selectAll.indeterminate = false;
+            }
+            rowChecks.forEach(function(chk) {
+                chk.checked = false;
+            });
+            updateBulkBar();
+        });
+    }
 });

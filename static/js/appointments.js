@@ -192,47 +192,448 @@
             });
         }
     });
+    var calState = {
+        year: new Date().getFullYear(),
+        month: new Date().getMonth(),
+        selectedDate: null,
+        hour: 8,
+        minute: 0,
+        ampm: 'AM'
+    };
+
+    var HEALTH_SERVICES = [
+        {
+            id: 6,
+            name: 'Child Immunization / Vaccination',
+            days: [3, 5],
+            daysText: 'Every Wednesday & Friday',
+            timeText: '8:00 AM - 11:30 AM',
+            startHour: 8,
+            startMin: 0,
+            startAmpm: 'AM',
+            dotClass: 'dot-blue'
+        },
+        {
+            id: 1,
+            name: 'Dental Cleaning',
+            days: [2, 4],
+            daysText: 'Every Tuesday & Thursday',
+            timeText: '9:00 AM - 3:00 PM',
+            startHour: 9,
+            startMin: 0,
+            startAmpm: 'AM',
+            dotClass: 'dot-navy'
+        },
+        {
+            id: 4,
+            name: 'General Consultation',
+            days: [1, 2, 3, 4, 5],
+            daysText: 'Monday - Friday',
+            timeText: '8:00 AM - 4:00 PM',
+            startHour: 8,
+            startMin: 0,
+            startAmpm: 'AM',
+            dotClass: 'dot-gray'
+        },
+        {
+            id: 2,
+            name: 'Health Check-up',
+            days: [1, 2, 3, 4, 5],
+            daysText: 'Monday - Friday',
+            timeText: '8:00 AM - 12:00 PM',
+            startHour: 8,
+            startMin: 0,
+            startAmpm: 'AM',
+            dotClass: 'dot-gray'
+        },
+        {
+            id: 5,
+            name: 'Prenatal Check-up',
+            days: [1, 4],
+            daysText: 'Every Monday & Thursday',
+            timeText: '8:30 AM - 2:00 PM',
+            startHour: 8,
+            startMin: 30,
+            startAmpm: 'AM',
+            dotClass: 'dot-red'
+        },
+        {
+            id: 3,
+            name: 'Tooth Extraction',
+            days: [2, 5],
+            daysText: 'Every Tuesday & Friday',
+            timeText: '1:00 PM - 4:30 PM',
+            startHour: 1,
+            startMin: 0,
+            startAmpm: 'PM',
+            dotClass: 'dot-green'
+        }
+    ];
+
+    var MONTH_NAMES = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
+    function padZero(n) {
+        return n < 10 ? '0' + n : '' + n;
+    }
+
+    function formatDateISO(d) {
+        return d.getFullYear() + '-' + padZero(d.getMonth() + 1) + '-' + padZero(d.getDate());
+    }
+
+    function formatDisplayDate(dateStr) {
+        if (!dateStr) return '';
+        var parts = dateStr.split('-');
+        if (parts.length !== 3) return dateStr;
+        var d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        return days[d.getDay()] + ', ' + MONTH_NAMES[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+    }
+
+    function renderCustomCalendar() {
+        var monthSelect = document.getElementById('cal-month-select');
+        var yearSelect = document.getElementById('cal-year-select');
+        var grid = document.getElementById('custom-cal-grid');
+        if (!grid) return;
+
+        if (monthSelect) monthSelect.value = calState.month;
+        if (yearSelect) yearSelect.value = calState.year;
+
+        grid.innerHTML = '';
+
+        var firstDayIndex = new Date(calState.year, calState.month, 1).getDay();
+        var daysInMonth = new Date(calState.year, calState.month + 1, 0).getDate();
+        var daysInPrevMonth = new Date(calState.year, calState.month, 0).getDate();
+
+        // Default selectedDate to tomorrow if not set
+        if (!calState.selectedDate) {
+            var defaultDate = new Date();
+            defaultDate.setDate(defaultDate.getDate() + 1);
+            if (defaultDate.getDay() === 0) defaultDate.setDate(defaultDate.getDate() + 1);
+            calState.selectedDate = formatDateISO(defaultDate);
+            var dateInput = document.getElementById('modal-date-input');
+            if (dateInput) dateInput.value = calState.selectedDate;
+        }
+
+        // 1. Prev month trailing days
+        for (var i = firstDayIndex - 1; i >= 0; i--) {
+            var prevNum = daysInPrevMonth - i;
+            var prevCell = document.createElement('div');
+            prevCell.className = 'cal-day-cell other-month';
+            prevCell.innerHTML = '<span class="cal-day-num">' + padZero(prevNum) + '</span>';
+            grid.appendChild(prevCell);
+        }
+
+        // 2. Current month days
+        for (var d = 1; d <= daysInMonth; d++) {
+            var cellDate = new Date(calState.year, calState.month, d);
+            var cellISO = formatDateISO(cellDate);
+            var dayOfWeek = cellDate.getDay();
+
+            var cell = document.createElement('div');
+            cell.className = 'cal-day-cell current-month';
+            cell.setAttribute('data-date', cellISO);
+
+            if (cellISO === calState.selectedDate) {
+                cell.classList.add('selected');
+            }
+
+            var servicesForDay = HEALTH_SERVICES.filter(function(s) {
+                return s.days.indexOf(dayOfWeek) !== -1;
+            });
+
+            if (servicesForDay.length > 0) {
+                cell.classList.add('has-services');
+            }
+
+            var dotHtml = '';
+            if (servicesForDay.length > 0) {
+                var dotClass = servicesForDay[0].dotClass;
+                dotHtml = '<span class="cal-day-dot ' + dotClass + '"></span>';
+            }
+
+            cell.innerHTML = '<span class="cal-day-num">' + padZero(d) + '</span>' + dotHtml;
+
+            cell.addEventListener('click', (function(iso, dow) {
+                return function() {
+                    calState.selectedDate = iso;
+                    var dateInput = document.getElementById('modal-date-input');
+                    if (dateInput) dateInput.value = iso;
+                    renderCustomCalendar();
+                    renderHealthServicesList(iso, dow);
+                    updateSchedulePreview();
+                    fetchFreeHealthServices();
+                };
+            })(cellISO, dayOfWeek));
+
+            grid.appendChild(cell);
+        }
+
+        // 3. Next month leading days
+        var totalRendered = firstDayIndex + daysInMonth;
+        var totalCells = totalRendered > 35 ? 42 : 35;
+        var remaining = totalCells - totalRendered;
+        for (var n = 1; n <= remaining; n++) {
+            var nextCell = document.createElement('div');
+            nextCell.className = 'cal-day-cell other-month';
+            nextCell.innerHTML = '<span class="cal-day-num">' + padZero(n) + '</span>';
+            grid.appendChild(nextCell);
+        }
+
+        if (calState.selectedDate) {
+            var parts = calState.selectedDate.split('-');
+            var selD = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+            renderHealthServicesList(calState.selectedDate, selD.getDay());
+        }
+    }
+
+    function renderHealthServicesList(selectedDateISO, dayOfWeek) {
+        var container = document.getElementById('cal-services-list');
+        var counter = document.getElementById('cal-services-counter');
+        if (!container) return;
+
+        var openSvcs = HEALTH_SERVICES.filter(function(s) {
+            return s.days.indexOf(dayOfWeek) !== -1;
+        });
+
+        var displayList = openSvcs.length > 0 ? openSvcs : HEALTH_SERVICES;
+
+        if (counter) {
+            counter.textContent = openSvcs.length > 0 ? openSvcs.length + ' Open Today' : 'All Clinics';
+        }
+
+        container.innerHTML = '';
+
+        displayList.forEach(function(svc) {
+            var card = document.createElement('div');
+            card.className = 'cal-service-card';
+            card.setAttribute('data-service-id', svc.id);
+
+            var dateLabel = selectedDateISO ? formatDisplayDate(selectedDateISO) : svc.daysText;
+
+            card.innerHTML =
+                '<div class="service-card-dot ' + svc.dotClass + '"></div>' +
+                '<div style="flex: 1;">' +
+                    '<div class="service-card-datetime">' + dateLabel + ' • ' + svc.timeText + '</div>' +
+                    '<div class="service-card-name">' + svc.name + ' <span style="font-weight: 700; color: #111827;">(Free)</span></div>' +
+                '</div>';
+
+            card.addEventListener('click', function() {
+                var healthSelect = document.getElementById('modal-healthcare-select');
+                if (healthSelect) {
+                    healthSelect.value = svc.id;
+                }
+                switchModalCategory('healthcare');
+                setTimePicker(svc.startHour, svc.startMin, svc.startAmpm);
+                var allCards = container.querySelectorAll('.cal-service-card');
+                allCards.forEach(function(c) { c.classList.remove('selected'); });
+                card.classList.add('selected');
+                updateSchedulePreview();
+            });
+
+            container.appendChild(card);
+        });
+    }
+
+    function renderTimePicker() {
+        var badge = document.getElementById('time-picker-badge');
+        var hourPrev = document.getElementById('time-hour-prev');
+        var hourCurr = document.getElementById('time-hour-curr');
+        var hourNext = document.getElementById('time-hour-next');
+
+        var minPrev = document.getElementById('time-min-prev');
+        var minCurr = document.getElementById('time-min-curr');
+        var minNext = document.getElementById('time-min-next');
+
+        var ampmPrev = document.getElementById('time-ampm-prev');
+        var ampmCurr = document.getElementById('time-ampm-curr');
+        var ampmNext = document.getElementById('time-ampm-next');
+
+        var minStr = padZero(calState.minute);
+        var timeStr = calState.hour + ':' + minStr + ' ' + calState.ampm;
+
+        if (badge) badge.textContent = timeStr;
+
+        var prevH = calState.hour === 1 ? 12 : calState.hour - 1;
+        var nextH = calState.hour === 12 ? 1 : calState.hour + 1;
+        if (hourPrev) hourPrev.textContent = prevH;
+        if (hourCurr) hourCurr.textContent = calState.hour;
+        if (hourNext) hourNext.textContent = nextH;
+
+        var prevM = (calState.minute - 5 + 60) % 60;
+        var nextM = (calState.minute + 5) % 60;
+        if (minPrev) minPrev.textContent = padZero(prevM);
+        if (minCurr) minCurr.textContent = minStr;
+        if (minNext) minNext.textContent = padZero(nextM);
+
+        var altAmpm = calState.ampm === 'PM' ? 'AM' : 'PM';
+        if (ampmPrev) ampmPrev.textContent = altAmpm;
+        if (ampmCurr) ampmCurr.textContent = calState.ampm;
+        if (ampmNext) ampmNext.innerHTML = '&nbsp;';
+
+        var timeSlotInput = document.getElementById('modal-time-slot');
+        if (timeSlotInput) {
+            var isMorning = (calState.ampm === 'AM' && calState.hour < 12) || (calState.ampm === 'PM' && calState.hour === 12);
+            timeSlotInput.value = isMorning ? 'morning' : 'afternoon';
+        }
+
+        var exactInput = document.getElementById('modal-time-exact-value');
+        if (exactInput) exactInput.value = timeStr;
+
+        updateSchedulePreview();
+    }
+
+    function setTimePicker(h, m, ampm) {
+        calState.hour = h;
+        calState.minute = m;
+        calState.ampm = ampm;
+        renderTimePicker();
+    }
+
+    function stepHour(delta) {
+        var newH = calState.hour + delta;
+        if (newH < 1) newH = 12;
+        if (newH > 12) newH = 1;
+        calState.hour = newH;
+        renderTimePicker();
+    }
+
+    function stepMinute(delta) {
+        var newM = (calState.minute + delta * 5 + 60) % 60;
+        calState.minute = newM;
+        renderTimePicker();
+    }
+
+    function toggleAmpm() {
+        calState.ampm = calState.ampm === 'PM' ? 'AM' : 'PM';
+        renderTimePicker();
+    }
+
+    function updateSchedulePreview() {
+        var preview = document.getElementById('selected-schedule-preview');
+        if (!preview) return;
+        var minStr = padZero(calState.minute);
+        var timeStr = calState.hour + ':' + minStr + ' ' + calState.ampm;
+        var dateLabel = formatDisplayDate(calState.selectedDate) || 'No date selected';
+        preview.textContent = dateLabel + ' at ' + timeStr;
+    }
+
+    function fetchFreeHealthServices() {
+        var dateVal = document.getElementById('modal-date-input') ? document.getElementById('modal-date-input').value : '';
+        var timeSlotSelect = document.getElementById('modal-time-slot');
+        var windowVal = timeSlotSelect ? timeSlotSelect.value : 'morning';
+        var selectEl = document.getElementById('modal-healthcare-select');
+        if (!selectEl) return;
+
+        fetch('/appointments/api/services/?category=healthcare&date=' + encodeURIComponent(dateVal) + '&window=' + encodeURIComponent(windowVal), {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.status === 'ok' && data.health_services && data.health_services.length > 0) {
+                selectEl.innerHTML = '';
+                data.health_services.forEach(function(svc) {
+                    var opt = document.createElement('option');
+                    opt.value = svc.id;
+                    opt.textContent = svc.name + ' (Free)';
+                    selectEl.appendChild(opt);
+                });
+            }
+        })
+        .catch(function(err) {
+            console.warn('Could not fetch free health services:', err);
+        });
+    }
+
     function openAddAppointmentModal(docPreset, isHealth, serviceId) {
         var modal = document.getElementById('moduleAddAppointmentModal');
-        document.getElementById('modal-form-wrapper').style.display = 'block';
-        document.getElementById('modal-success-wrapper').style.display = 'none';
+        var form = document.getElementById('module-appointment-form');
+        var formWrapper = document.getElementById('modal-form-wrapper');
+        var successWrapper = document.getElementById('modal-success-wrapper');
+        if (formWrapper) formWrapper.style.display = 'block';
+        if (successWrapper) successWrapper.style.display = 'none';
 
-        var dateInput = document.getElementById('modal-pref-date');
+        if (form && (!form.dataset.dirty || form.dataset.dirty === 'false')) {
+            form.reset();
+        }
+
+        var dateInput = document.getElementById('modal-date-input');
         if (dateInput && !dateInput.value) {
             var tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
-            dateInput.value = tomorrow.toISOString().split('T')[0];
-            dateInput.min = new Date().toISOString().split('T')[0];
+            if (tomorrow.getDay() === 0) tomorrow.setDate(tomorrow.getDate() + 1);
+            calState.selectedDate = formatDateISO(tomorrow);
+            dateInput.value = calState.selectedDate;
         }
+
+        renderCustomCalendar();
+        renderTimePicker();
 
         if (isHealth) {
             switchModalCategory('healthcare');
             if (serviceId) {
-                document.getElementById('modal-healthcare-select').value = serviceId;
+                var healthSel = document.getElementById('modal-healthcare-select');
+                if (healthSel) healthSel.value = serviceId;
             }
         } else {
             switchModalCategory('document');
             if (docPreset) {
-                document.getElementById('modal-document-select').value = docPreset;
+                var docSel = document.getElementById('modal-document-select');
+                if (docSel) docSel.value = docPreset;
             }
         }
 
-        modal.style.display = 'flex';
+        if (modal) modal.style.display = 'flex';
     }
 
-    function closeAddAppointmentModal() {
-        document.getElementById('moduleAddAppointmentModal').style.display = 'none';
+    function closeAddAppointmentModal(force) {
+        var form = document.getElementById('module-appointment-form');
+        var modal = document.getElementById('moduleAddAppointmentModal');
+        function doClose() {
+            if (form) {
+                form.dataset.dirty = 'false';
+                form.reset();
+            }
+            if (modal) modal.style.display = 'none';
+        }
+        if (!force && form && form.dataset.dirty === 'true') {
+            if (typeof window.showConfirmModal === 'function') {
+                window.showConfirmModal({
+                    title: 'Discard Changes?',
+                    message: 'You have unsaved changes in your appointment form. Discard changes?',
+                    variant: 'danger',
+                    confirmText: 'Discard',
+                    cancelText: 'Keep Editing',
+                    onConfirm: doClose
+                });
+                return;
+            } else if (!window.confirm("You have unsaved changes in your appointment form. Discard changes?")) {
+                return;
+            }
+        }
+        doClose();
     }
 
     function closeAndReload() {
-        closeAddAppointmentModal();
+        closeAddAppointmentModal(true);
         window.location.reload();
     }
 
     function resetModalForm() {
-        document.getElementById('module-appointment-form').reset();
-        document.getElementById('modal-form-wrapper').style.display = 'block';
-        document.getElementById('modal-success-wrapper').style.display = 'none';
+        var form = document.getElementById('module-appointment-form');
+        if (form) {
+            form.dataset.dirty = 'false';
+            form.reset();
+        }
+        var formWrapper = document.getElementById('modal-form-wrapper');
+        var successWrapper = document.getElementById('modal-success-wrapper');
+        if (formWrapper) formWrapper.style.display = 'block';
+        if (successWrapper) successWrapper.style.display = 'none';
+        renderCustomCalendar();
+        renderTimePicker();
+        switchModalCategory('document');
     }
 
     function switchModalCategory(cat) {
@@ -243,26 +644,30 @@
         var healthBox = document.getElementById('modal-health-type-box');
         var purposeBox = document.getElementById('module-purpose-group');
         var purposeInput = document.getElementById('module_input_purpose');
+        var healthServicesSection = document.getElementById('health-services-section');
 
         if (cat === 'document') {
-            pillDoc.classList.add('active');
-            pillHealth.classList.remove('active');
-            catInput.value = 'document';
-            docBox.style.display = 'block';
-            healthBox.style.display = 'none';
+            if (pillDoc) pillDoc.classList.add('active');
+            if (pillHealth) pillHealth.classList.remove('active');
+            if (catInput) catInput.value = 'document';
+            if (docBox) docBox.style.display = 'block';
+            if (healthBox) healthBox.style.display = 'none';
             if (purposeBox) purposeBox.style.display = 'block';
             if (purposeInput) purposeInput.required = true;
+            if (healthServicesSection) healthServicesSection.style.display = 'none';
         } else {
-            pillHealth.classList.add('active');
-            pillDoc.classList.remove('active');
-            catInput.value = 'healthcare';
-            docBox.style.display = 'none';
-            healthBox.style.display = 'block';
+            if (pillHealth) pillHealth.classList.add('active');
+            if (pillDoc) pillDoc.classList.remove('active');
+            if (catInput) catInput.value = 'healthcare';
+            if (docBox) docBox.style.display = 'none';
+            if (healthBox) healthBox.style.display = 'block';
             if (purposeBox) purposeBox.style.display = 'none';
             if (purposeInput) {
                 purposeInput.required = false;
                 purposeInput.value = '';
             }
+            if (healthServicesSection) healthServicesSection.style.display = 'block';
+            fetchFreeHealthServices();
         }
     }
 
@@ -274,6 +679,8 @@
         input.value = val;
 
         var feedback = document.getElementById('modal-phone-feedback');
+        if (!feedback) return;
+
         if (val.length === 11) {
             if (val.startsWith('09')) {
                 feedback.innerHTML = '<span style="color: #111827;">' + BrgyUI.icon('check', 'icon-success') + ' Valid 11-digit mobile number</span>';
@@ -294,6 +701,8 @@
         var feedback = document.getElementById('modal-email-feedback');
         var emailInput = document.getElementById('modal_input_email');
         email = (email || '').trim();
+
+        if (!feedback || !emailInput) return;
 
         if (!email) {
             feedback.innerHTML = '';
@@ -319,16 +728,17 @@
         var errBanner = document.getElementById('modal-error-banner');
         var errText = document.getElementById('modal-error-text');
 
-        var phoneVal = document.getElementById('modal_input_phone').value;
+        var phoneInput = document.getElementById('modal_input_phone');
+        var phoneVal = phoneInput ? phoneInput.value : '';
         if (!/^09\d{9}$/.test(phoneVal)) {
-            errBanner.style.display = 'block';
-            errText.innerText = "Enter an 11-digit mobile number starting with 09 (digits only, e.g. 09171234567).";
+            if (errBanner) errBanner.style.display = 'block';
+            if (errText) errText.innerText = "Enter an 11-digit mobile number starting with 09 (digits only, e.g. 09171234567).";
             return;
         }
 
         btn.disabled = true;
-        btn.innerHTML = BrgyUI.icon('loader-circle', 'icon-spin') + ' Submitting & Verifying...';
-        errBanner.style.display = 'none';
+        btn.innerHTML = BrgyUI.icon('loader-circle', 'icon-spin') + ' Submitting Request...';
+        if (errBanner) errBanner.style.display = 'none';
 
         var formData = new FormData(form);
 
@@ -342,30 +752,140 @@
             })
             .then(function (res) {
                 btn.disabled = false;
-                btn.innerHTML = BrgyUI.icon('send') + ' Book Appointment Now';
+                btn.innerHTML = BrgyUI.icon('send') + ' Submit Appointment Request';
 
                 if (res.ok && res.data.status === 'ok') {
-                    document.getElementById('modal-success-ref').innerText = res.data.ref_number || 'REF #APT-NEW';
-                    document.getElementById('modal-form-wrapper').style.display = 'none';
-                    document.getElementById('modal-success-wrapper').style.display = 'block';
+                    var refEl = document.getElementById('modal-success-ref');
+                    if (refEl) refEl.innerText = res.data.ref_number || 'REF #APT-NEW';
+                    var nameEl = document.getElementById('modal-summary-applicant-name');
+                    if (nameEl) nameEl.innerText = res.data.applicant_name;
+                    var titleEl = document.getElementById('modal-summary-service-title');
+                    if (titleEl) titleEl.innerText = res.data.service_title;
+                    var schedEl = document.getElementById('modal-summary-schedule');
+                    if (schedEl) schedEl.innerText = res.data.scheduled_date + ' (' + res.data.time_slot + ')';
+                    var contactEl = document.getElementById('modal-summary-contact');
+                    if (contactEl) contactEl.innerText = res.data.applicant_email + ' | ' + res.data.applicant_phone;
+
+                    var formWrap = document.getElementById('modal-form-wrapper');
+                    var succWrap = document.getElementById('modal-success-wrapper');
+                    if (formWrap) formWrap.style.display = 'none';
+                    if (succWrap) succWrap.style.display = 'block';
                     form.reset();
+                    form.dataset.dirty = 'false';
                 } else {
-                    errBanner.style.display = 'block';
+                    if (errBanner) errBanner.style.display = 'block';
                     if (res.data.errors) {
                         var firstKey = Object.keys(res.data.errors)[0];
-                        errText.innerText = res.data.errors[firstKey];
+                        if (errText) errText.innerText = res.data.errors[firstKey];
                     } else {
-                        errText.innerText = res.data.message || 'Error saving appointment.';
+                        if (errText) errText.innerText = res.data.message || 'Error saving appointment.';
                     }
                 }
             })
             .catch(function () {
                 btn.disabled = false;
-                btn.innerHTML = BrgyUI.icon('send') + ' Book Appointment Now';
-                errBanner.style.display = 'block';
-                errText.innerText = 'Network error. Please try again.';
+                btn.innerHTML = BrgyUI.icon('send') + ' Submit Appointment Request';
+                if (errBanner) errBanner.style.display = 'block';
+                if (errText) errText.innerText = 'Network error. Please try again.';
             });
     }
+
+    // Initialize calendar & time drum event controls
+    document.addEventListener('DOMContentLoaded', function() {
+        var monthSelect = document.getElementById('cal-month-select');
+        if (monthSelect) {
+            monthSelect.addEventListener('change', function() {
+                calState.month = parseInt(this.value, 10);
+                renderCustomCalendar();
+            });
+        }
+        var yearSelect = document.getElementById('cal-year-select');
+        if (yearSelect) {
+            yearSelect.addEventListener('change', function() {
+                calState.year = parseInt(this.value, 10);
+                renderCustomCalendar();
+            });
+        }
+        var todayBtn = document.getElementById('cal-today-btn');
+        if (todayBtn) {
+            todayBtn.addEventListener('click', function() {
+                var now = new Date();
+                calState.year = now.getFullYear();
+                calState.month = now.getMonth();
+                calState.selectedDate = formatDateISO(now);
+                var dateInput = document.getElementById('modal-date-input');
+                if (dateInput) dateInput.value = calState.selectedDate;
+                renderCustomCalendar();
+            });
+        }
+        var prevBtn = document.getElementById('cal-prev-btn');
+        if (prevBtn) {
+            prevBtn.addEventListener('click', function() {
+                if (calState.month === 0) {
+                    calState.month = 11;
+                    calState.year -= 1;
+                } else {
+                    calState.month -= 1;
+                }
+                renderCustomCalendar();
+            });
+        }
+        var nextBtn = document.getElementById('cal-next-btn');
+        if (nextBtn) {
+            nextBtn.addEventListener('click', function() {
+                if (calState.month === 11) {
+                    calState.month = 0;
+                    calState.year += 1;
+                } else {
+                    calState.month += 1;
+                }
+                renderCustomCalendar();
+            });
+        }
+
+        // Time picker steppers
+        var hourPrev = document.getElementById('time-hour-prev');
+        if (hourPrev) hourPrev.addEventListener('click', function() { stepHour(-1); });
+        var hourNext = document.getElementById('time-hour-next');
+        if (hourNext) hourNext.addEventListener('click', function() { stepHour(1); });
+        var hourCurr = document.getElementById('time-hour-curr');
+        if (hourCurr) hourCurr.addEventListener('click', function() { stepHour(1); });
+
+        var minPrev = document.getElementById('time-min-prev');
+        if (minPrev) minPrev.addEventListener('click', function() { stepMinute(-1); });
+        var minNext = document.getElementById('time-min-next');
+        if (minNext) minNext.addEventListener('click', function() { stepMinute(1); });
+        var minCurr = document.getElementById('time-min-curr');
+        if (minCurr) minCurr.addEventListener('click', function() { stepMinute(1); });
+
+        var ampmPrev = document.getElementById('time-ampm-prev');
+        if (ampmPrev) ampmPrev.addEventListener('click', toggleAmpm);
+        var ampmCurr = document.getElementById('time-ampm-curr');
+        if (ampmCurr) ampmCurr.addEventListener('click', toggleAmpm);
+
+        // Time picker wheel support
+        var colHour = document.getElementById('drum-col-hour');
+        if (colHour) {
+            colHour.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                stepHour(e.deltaY < 0 ? -1 : 1);
+            });
+        }
+        var colMin = document.getElementById('drum-col-min');
+        if (colMin) {
+            colMin.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                stepMinute(e.deltaY < 0 ? -1 : 1);
+            });
+        }
+        var colAmpm = document.getElementById('drum-col-ampm');
+        if (colAmpm) {
+            colAmpm.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                toggleAmpm();
+            });
+        }
+    });
 
     document.addEventListener('click', function (e) {
         var modal = document.getElementById('moduleAddAppointmentModal');
@@ -380,6 +900,8 @@
     var CALLABLE = {
         openAddAppointmentModal: openAddAppointmentModal,
         closeAddAppointmentModal: closeAddAppointmentModal,
+        openBookAppointmentModal: openAddAppointmentModal,
+        closeBookAppointmentModal: closeAddAppointmentModal,
         openAddDocumentModal: openAddDocumentModal,
         closeAddDocumentModal: closeAddDocumentModal,
         openAddHealthServiceModal: openAddHealthServiceModal,
@@ -390,8 +912,10 @@
         closeEditHealthServiceModal: closeEditHealthServiceModal,
         closeDeleteHealthServiceModal: closeDeleteHealthServiceModal,
         switchModalCategory: switchModalCategory,
+        switchCategory: switchModalCategory,
         toggleCustomDocMode: toggleCustomDocMode,
         resetModalForm: resetModalForm,
+        resetAndBookAnother: resetModalForm,
         closeAndReload: closeAndReload
     };
 
@@ -433,21 +957,35 @@
         } else if (action === 'delete-service') {
             openDeleteHealthServiceModal(rowEl.dataset.id, rowEl.dataset.name || '');
         }
+    });
+
     function openReviewAppointmentModal(btn) {
         var d = btn.dataset;
         var catEl = document.getElementById('rev-category');
         var titleEl = document.getElementById('rev-title');
         var appEl = document.getElementById('rev-applicant');
+        var ageEl = document.getElementById('rev-age');
+        var addressEl = document.getElementById('rev-address');
+        var phoneEl = document.getElementById('rev-phone');
+        var emailEl = document.getElementById('rev-email');
         var timeEl = document.getElementById('rev-time');
+        var purposeEl = document.getElementById('rev-purpose');
+        var refEl = document.getElementById('rev-ref');
         var statusPill = document.getElementById('rev-status-pill');
         var rejectForm = document.getElementById('rev-reject-form');
         var approveForm = document.getElementById('rev-approve-form');
         var detailLink = document.getElementById('rev-detail-link');
 
-        if (catEl) catEl.textContent = 'Category: ' + (d.category || 'Appointment') + ' / ' + (d.service || '');
-        if (titleEl) titleEl.textContent = d.title || d.service || '-';
+        if (refEl) refEl.textContent = d.ref ? ('#' + d.ref) : '';
+        if (catEl) catEl.textContent = 'Category: ' + (d.category || 'Appointment') + (d.service ? (' / ' + d.service) : '');
+        if (titleEl) titleEl.textContent = d.service || d.title || '-';
         if (appEl) appEl.textContent = d.applicant || '-';
+        if (ageEl) ageEl.textContent = d.age ? (d.age + ' years old') : 'Not specified';
+        if (addressEl) addressEl.textContent = d.address || 'Barangay Address';
+        if (phoneEl) phoneEl.textContent = d.phone || '-';
+        if (emailEl) emailEl.textContent = d.email || '-';
         if (timeEl) timeEl.textContent = d.time || '-';
+        if (purposeEl) purposeEl.textContent = d.purpose || 'Standard Request';
 
         if (statusPill) {
             var badgeBg = '#FEF3C7';
@@ -458,10 +996,17 @@
             statusPill.innerHTML = '<span class="badge" style="background:' + badgeBg + '; color:' + badgeCol + '; font-size:0.75rem; padding:2px 8px; border-radius:9999px; font-weight:500;">' + (d.statusDisplay || d.status) + '</span>';
         }
 
-        if (rejectForm) rejectForm.action = '/appointments/' + d.id + '/reject/';
+        var isPending = (d.status === 'pending');
+        var allowApprove = isPending && (d.canApprove !== 'false');
+        var allowReject = isPending && (d.canReject !== 'false');
+
+        if (rejectForm) {
+            rejectForm.action = '/appointments/' + d.id + '/reject/';
+            rejectForm.style.display = allowReject ? 'inline-block' : 'none';
+        }
         if (approveForm) {
             approveForm.action = '/appointments/' + d.id + '/approve/';
-            approveForm.style.display = (d.canApprove === 'true') ? 'inline-block' : 'none';
+            approveForm.style.display = allowApprove ? 'inline-block' : 'none';
         }
         if (detailLink) detailLink.href = '/appointments/' + d.id + '/';
 
@@ -474,6 +1019,7 @@
         if (modal) modal.style.display = 'none';
     }
 
+    // Modal action listener & backdrop dismissal with dirty changes guard
     document.addEventListener('click', function(e) {
         var revBtn = e.target.closest('[data-appt-action="review"]');
         if (revBtn) {
@@ -492,6 +1038,38 @@
         var revModal = document.getElementById('reviewAppointmentModal');
         if (revModal && e.target === revModal) {
             closeReviewAppointmentModal();
+            return;
+        }
+        var addModal = document.getElementById('moduleAddAppointmentModal');
+        if (addModal && e.target === addModal) {
+            closeAddAppointmentModal();
+            return;
+        }
+        var delModal = document.getElementById('deleteAppointmentModal');
+        if (delModal && e.target === delModal) {
+            closeDeleteAppointmentModal();
+            return;
+        }
+    });
+
+    // Track dirty changes on the booking form
+    document.addEventListener('input', function (e) {
+        if (e.target && e.target.closest('#module-appointment-form')) {
+            var form = document.getElementById('module-appointment-form');
+            if (form) form.dataset.dirty = 'true';
+        }
+        if (e.target && e.target.id === 'modal_input_phone') {
+            enforceModalPhone11Digits(e.target);
+        }
+    });
+
+    document.addEventListener('change', function (e) {
+        if (e.target && e.target.closest('#module-appointment-form')) {
+            var form = document.getElementById('module-appointment-form');
+            if (form) form.dataset.dirty = 'true';
+        }
+        if (e.target && e.target.id === 'doc_type_select') {
+            handleDocSelectChange(e.target.value);
         }
     });
 
@@ -507,14 +1085,20 @@
         }
     });
 
-    document.addEventListener('input', function (e) {
-        if (e.target && e.target.id === 'modal_input_phone') {
-            enforceModalPhone11Digits(e.target);
-        }
-    });
-
-    document.addEventListener('change', function (e) {
-        if (e.target && e.target.id === 'doc_type_select') {
-            handleDocSelectChange(e.target.value);
+    // Escape key handling with dirty confirmation
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' || e.key === 'Esc') {
+            var addModal = document.getElementById('moduleAddAppointmentModal');
+            if (addModal && addModal.style.display === 'flex') {
+                closeAddAppointmentModal();
+            }
+            var revModal = document.getElementById('reviewAppointmentModal');
+            if (revModal && revModal.style.display === 'flex') {
+                closeReviewAppointmentModal();
+            }
+            var delModal = document.getElementById('deleteAppointmentModal');
+            if (delModal && delModal.style.display === 'flex') {
+                closeDeleteAppointmentModal();
+            }
         }
     });

@@ -241,7 +241,7 @@ class ProfileUpdateForm(forms.ModelForm):
             'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email Address'}),
-            'phone_number': forms.TextInput(attrs=ph_mobile_widget_attrs(**{'class': 'form-control'})),
+            'phone_number': forms.TextInput(attrs=ph_mobile_widget_attrs(**{'class': 'form-control', 'placeholder': '09171234567'})),
             'status_message': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Available at Barangay Hall until 4 PM'}),
             'avatar': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
             'duty_status': forms.Select(attrs={'class': 'form-control'}),
@@ -258,3 +258,96 @@ class ProfileUpdateForm(forms.ModelForm):
         self.fields['avatar'].required = False
         # The model column allows 20 characters; the input itself takes 11 digits.
         self.fields['phone_number'].widget.attrs['maxlength'] = '11'
+
+
+class HouseholdForm(forms.ModelForm):
+    RELATIONSHIP_CHOICES = [
+        ('Head', 'Head of Household'),
+        ('Spouse', 'Spouse'),
+        ('Son', 'Son'),
+        ('Daughter', 'Daughter'),
+        ('Parent', 'Parent'),
+        ('Sibling', 'Sibling'),
+        ('Grandparent', 'Grandparent'),
+        ('Grandchild', 'Grandchild'),
+        ('Relative', 'Relative'),
+        ('Other', 'Other Member'),
+    ]
+
+    OWNERSHIP_CHOICES = [
+        ('Owned', 'Owned'),
+        ('Rented', 'Rented'),
+        ('Living with Relatives', 'Living with Relatives'),
+        ('Informal Settler', 'Informal Settler'),
+        ('Caretaker', 'Caretaker'),
+    ]
+
+    relationship = forms.ChoiceField(
+        choices=RELATIONSHIP_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control', 'id': 'hh_relationship'}),
+        required=False,
+        initial='Head'
+    )
+    birthdate = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date',
+            'id': 'hh_birthdate',
+            'min': '1900-01-01',
+            'max': '9999-12-31'
+        })
+    )
+    date_of_visit = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date',
+            'id': 'hh_date_of_visit',
+        })
+    )
+    ownership_status = forms.ChoiceField(
+        choices=OWNERSHIP_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control', 'id': 'hh_ownership_status'}),
+        required=False,
+        initial='Owned'
+    )
+
+    class Meta:
+        from apps.accounts.models import Household
+        model = Household
+        fields = [
+            'household_number',
+            'household_family_name',
+            'first_name',
+            'last_name',
+            'middle_name',
+            'relationship',
+            'birthdate',
+            'purok',
+            'street',
+            'ownership_status',
+            'interviewed_by',
+            'reviewed_by',
+            'date_of_visit',
+        ]
+        widgets = {
+            'household_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. HM-2025-001', 'id': 'hh_household_number'}),
+            'household_family_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Petilo Family', 'id': 'hh_family_name'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name', 'id': 'hh_first_name'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name', 'id': 'hh_last_name'}),
+            'middle_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Middle Name', 'id': 'hh_middle_name'}),
+            'purok': forms.Select(attrs={'class': 'form-control', 'id': 'hh_purok'}),
+            'street': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Street Name or House #', 'id': 'hh_street'}),
+            'interviewed_by': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Interviewer Name', 'id': 'hh_interviewed_by'}),
+            'reviewed_by': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Reviewer Name', 'id': 'hh_reviewed_by'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name in self.fields:
+            self.fields[field_name].required = False
+        if 'purok' in self.fields:
+            self.fields['purok'].empty_label = "-- Select Purok --"
+
+

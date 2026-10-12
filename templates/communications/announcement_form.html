@@ -13,7 +13,7 @@
     <div class="post-modal-content" style="max-width: 100%; border: 1px solid #E5E7EB; box-shadow: none !important;">
         
         <div class="post-modal-header">
-            <h3 class="modal-title">{% if is_edit %}Edit Announcement / Post{% else %}Create Announcement / Post{% endif %}</h3>
+            <h3 class="modal-title">{% if is_edit %}Edit Announcement{% else %}Create Announcement{% endif %}</h3>
         </div>
 
         <form method="post" enctype="multipart/form-data">
@@ -60,12 +60,12 @@
             </div>
 
             <div class="post-body-area">
-                <input type="text" name="title" id="standaloneTitleInput" class="post-title-input" placeholder="Title / Headline (optional)" value="{{ form.title.value|default:'' }}">
+                <input type="text" name="title" id="standaloneTitleInput" class="post-title-input" placeholder="Title (optional)" value="{{ form.title.value|default:'' }}">
                 
                 <textarea name="content" id="standaloneContentInput" rows="5" placeholder="What is the latest announcement or update for the barangay?" required>{{ form.content.value|default:'' }}</textarea>
                 
                 <!-- Live Image Preview Container -->
-                <div id="standaloneImagePreviewWrapper" class="image-preview-container" style="{% if not announcement or not announcement.image %}display: none;{% endif %}">
+                <div id="standaloneImagePreviewWrapper" class="image-preview-container"{% if not announcement or not announcement.image %} style="display: none;"{% endif %}>
                     <img id="standaloneImagePreviewElement" src="{% if announcement and announcement.image %}{{ announcement.image.url }}{% endif %}" alt="Attached media preview">
                     <button type="button" class="btn-remove-preview" data-form-action="clear-image" title="Remove photo" aria-label="Remove image">
                         {% icon 'x' %}
@@ -79,10 +79,14 @@
             <div class="add-to-post-card">
                 <span class="add-label">Update post media</span>
                 <div class="attachment-icons">
-                    <button type="button" class="icon-btn media" title="Attach / Replace Photo" data-action="click-target" data-target="#standaloneImageFileInput" aria-label="Attach Photo">
+                    <button type="button" class="icon-btn media" title="Attach Photo" data-action="click-target" data-target="#standaloneImageFileInput" aria-label="Attach Photo">
                         {% icon 'images' %}
                     </button>
-                    <label class="icon-btn pin" title="Pin to top of feed" style="cursor: pointer; margin: 0; opacity: {% if form.is_pinned.value %}1{% else %}0.5{% endif %};" aria-label="Pin to top">
+                    {% if form.is_pinned.value %}
+                    <label class="icon-btn pin" title="Pin to top of feed" style="cursor: pointer; margin: 0; opacity: 1;" aria-label="Pin to top">
+                    {% else %}
+                    <label class="icon-btn pin" title="Pin to top of feed" style="cursor: pointer; margin: 0; opacity: 0.5;" aria-label="Pin to top">
+                    {% endif %}
                         <input type="checkbox" name="is_pinned" id="standaloneIsPinned" value="1" {% if form.is_pinned.value %}checked{% endif %} style="display: none;" data-pin-toggle>
                         {% icon 'pin' %}
                     </label>

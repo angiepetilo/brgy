@@ -219,17 +219,20 @@ def households_per_purok(purok_id=None):
 # ---------------------------------------------------------------------------
 # System Settings dashboard
 # ---------------------------------------------------------------------------
-SYSTEM_TABS = ('barangay_info', 'post_categories', 'document_health', 'user_management', 'appointment_setup', 'account', 'email_templates')
+SYSTEM_TABS = ('barangay_info', 'post_categories', 'document_health', 'user_management', 'appointment_setup', 'account', 'email_templates', 'puroks')
 SYSTEM_SUBTABS = {
     'document_health': ('documents', 'health'),
-    'user_management': ('staff', 'concerns'),
+    'post_categories': ('posts', 'concerns'),
+    'user_management': ('staff',),
 }
 # Old tab names still accepted on incoming links; normalised to (tab, subtab).
 SYSTEM_LEGACY_TABS = {
     'documents': ('document_health', 'documents'),
     'health_services': ('document_health', 'health'),
     'staff_accounts': ('user_management', 'staff'),
-    'concern_categories': ('user_management', 'concerns'),
+    'concern_categories': ('post_categories', 'concerns'),
+    'concerns': ('post_categories', 'concerns'),
+    'purok_management': ('puroks', ''),
 }
 
 
@@ -263,10 +266,12 @@ def staff_terms_ending_soon(days=30):
 
 def system_dashboard_data():
     """All database reads for the System Settings page, in one place."""
-    from apps.accounts.models import BarangayInfo, User, Officer
+    from apps.accounts.models import BarangayInfo, User, Officer, Purok
     from apps.appointments.models import DocumentType, HealthCareService
     from apps.chat.models import ConcernCategory
     from apps.communications.models import PostCategory
+    from apps.accounts.departments import DEPARTMENTS
+    from django.db.models import Count
 
     return {
         'info': BarangayInfo.get_solo(),
@@ -279,4 +284,6 @@ def system_dashboard_data():
         ).prefetch_related('staff_assignments__officer').order_by('last_name', 'first_name'),
         'terms_ending_soon': staff_terms_ending_soon(30),
         'officers': Officer.objects.all().order_by('position'),
+        'departments': DEPARTMENTS,
+        'puroks': Purok.objects.annotate(household_count=Count('households')).all().order_by('name'),
     }

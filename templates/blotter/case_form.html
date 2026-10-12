@@ -22,17 +22,73 @@
         <section class="card">
             <div class="card-header"><h2 class="card-title">Incident</h2></div>
             <div class="card-body blotter-grid">
-                {% for field in form %}
-                <div class="form-group{% if field.name == 'narrative' or field.name == 'location' %} blotter-span-2{% endif %}">
-                    {% if field.field.widget.input_type == 'checkbox' %}
-                    <label class="blotter-check">{{ field }} {{ field.label }}</label>
-                    {% else %}
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% endif %}
-                    {% for error in field.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+                <!-- Incident Type -->
+                <div class="form-group">
+                    <label for="{{ form.incident_type.id_for_label }}">{{ form.incident_type.label }}</label>
+                    {{ form.incident_type }}
+                    {% for error in form.incident_type.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
                 </div>
-                {% endfor %}
+
+                <!-- Incident Date -->
+                <div class="form-group">
+                    <label for="{{ form.incident_date.id_for_label }}">{{ form.incident_date.label }}</label>
+                    {{ form.incident_date }}
+                    {% for error in form.incident_date.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+                </div>
+
+                <!-- Incident Time (Optional) -->
+                <div class="form-group">
+                    <label for="{{ form.incident_time.id_for_label }}">{{ form.incident_time.label }}</label>
+                    {{ form.incident_time }}
+                    {% for error in form.incident_time.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+                </div>
+
+                <!-- When other was selected: show input what other it would be -->
+                <div class="form-group blotter-span-2" id="other-type-wrapper" style="display: none; background: #F8FAFC; padding: 0.85rem 1rem; border-radius: 8px; border: 1.5px dashed #93C5FD;">
+                    <label for="{{ form.other_incident_type.id_for_label }}" style="font-weight: 700; color: #1E3A8A; display: block; margin-bottom: 0.35rem;">
+                        Specify Other Incident Type <span style="color: #DC2626;">*</span>
+                    </label>
+                    {{ form.other_incident_type }}
+                    {% for error in form.other_incident_type.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+                </div>
+
+                <!-- Location and Purok Side-by-Side Design -->
+                <div class="blotter-span-2" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; align-items: start;">
+                    <div class="form-group" style="margin: 0;">
+                        <label for="{{ form.location.id_for_label }}">{{ form.location.label }}</label>
+                        {{ form.location }}
+                        {% for error in form.location.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="form-group" style="margin: 0;">
+                        <label for="{{ form.purok.id_for_label }}">{{ form.purok.label }}</label>
+                        {{ form.purok }}
+                        {% for error in form.purok.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+                    </div>
+                </div>
+
+                <!-- Narrative -->
+                <div class="form-group blotter-span-2">
+                    <label for="{{ form.narrative.id_for_label }}">{{ form.narrative.label }}</label>
+                    {{ form.narrative }}
+                    {% for error in form.narrative.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+                </div>
+
+                {% if form.handled_by %}
+                <div class="form-group">
+                    <label for="{{ form.handled_by.id_for_label }}">{{ form.handled_by.label }}</label>
+                    {{ form.handled_by }}
+                    {% for error in form.handled_by.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+                </div>
+                {% endif %}
+
+                {% if form.is_confidential %}
+                <div class="form-group" style="align-self: center;">
+                    <label class="blotter-check">
+                        {{ form.is_confidential }} {{ form.is_confidential.label }}
+                    </label>
+                    {% for error in form.is_confidential.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+                </div>
+                {% endif %}
             </div>
         </section>
 

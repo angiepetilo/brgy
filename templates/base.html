@@ -29,7 +29,7 @@
     <!-- 1. Top Bar Navigation System (Facebook Style Clean Header) -->
     <header class="fb-topbar">
         <div class="fb-topbar-left">
-            <a href="{% if request.user.is_authenticated %}{% url 'home' %}{% else %}/{% endif %}" class="fb-brand-title" title="Barangay.ph - Back to Home" data-tooltip="Barangay.ph" style="display: flex; align-items: center; gap: 0.65rem;">
+            <a href="{% if request.user.is_authenticated %}{% url 'home' %}{% else %}/{% endif %}" class="fb-brand-title mobile-brand-only" title="Barangay.ph - Back to Home" data-tooltip="Barangay.ph" style="display: flex; align-items: center; gap: 0.65rem;">
                 <img src="{% static 'images/barangay_logo.png' %}" alt="Barangay.ph Logo" style="height: 38px; width: auto; object-fit: contain;">
                 <span style="font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em; color: #111827;">BARANGAY.PH</span>
             </a>
@@ -456,7 +456,7 @@
         {% if request.user.is_admin_user or request.user.is_kapitan_user %}
         <a href="{% url 'accounts:residents_tabbed' %}" class="bottom-nav-item {% if 'residents' in request.path or 'approval' in request.path %}active{% endif %}">
             {% icon 'users' %}
-            <span class="bnav-label">RESIDENTS</span>
+            <span class="bnav-label">RESIDENT ACCOUNT</span>
         </a>
         {% else %}
         <a href="{% url 'accounts:profile' %}" class="bottom-nav-item {% if 'profile' in request.path %}active{% endif %}">
@@ -465,9 +465,9 @@
         </a>
         {% endif %}
         {% if not request.user.is_resident_user %}
-        <a href="{% url 'records_hub' %}" class="bottom-nav-item {% if 'records' in request.path or 'blotter' in request.path or 'finance' in request.path %}active{% endif %}">
-            {% icon 'folder-open' %}
-            <span class="bnav-label">RECORDS</span>
+        <a href="{% url 'inventory:inventory' %}" class="bottom-nav-item {% if 'inventory' in request.path %}active{% endif %}">
+            {% icon 'box' %}
+            <span class="bnav-label">INVENTORY</span>
         </a>
         {% endif %}
     </nav>
@@ -476,12 +476,34 @@
     <!-- Global Toast Container for Real-Time Push Events -->
     <div id="global-toast-container" class="toast-container"></div>
 
+    <!-- Global In-App Confirmation Modal Dialog (replaces native browser window.confirm) -->
+    <div id="app-confirm-modal" class="app-confirm-backdrop" role="dialog" aria-modal="true" style="display: none;">
+        <div class="app-confirm-dialog">
+            <div class="app-confirm-header">
+                <div class="app-confirm-icon-box variant-primary" id="app-confirm-icon-box">
+                    {% icon 'circle-alert' %}
+                </div>
+                <div>
+                    <h4 class="app-confirm-title" id="app-confirm-title">Confirm Action</h4>
+                </div>
+            </div>
+            <div class="app-confirm-body">
+                <p class="app-confirm-message" id="app-confirm-message"></p>
+            </div>
+            <div class="app-confirm-footer">
+                <button type="button" class="app-confirm-btn app-confirm-btn-cancel" id="app-confirm-btn-cancel">Cancel</button>
+                <button type="button" class="app-confirm-btn app-confirm-btn-confirm variant-primary" id="app-confirm-btn-confirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript Handlers -->
     <script src="{% static 'js/icons.js' %}"></script>
     <script src="{% static 'js/main.js' %}"></script>
     <script src="{% static 'js/phone_input.js' %}"></script>
     {% if request.user.is_authenticated %}
     <script src="{% static 'js/websocket.js' %}"></script>
+    <script src="{% static 'js/staff_roster.js' %}" defer></script>
     {% endif %}
     {% block extra_js %}{% endblock %}
 </body>

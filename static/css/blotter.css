@@ -11,18 +11,18 @@
 .blotter-error { background: #FFFFFF; border: 1px solid #DC2626; color: #DC2626; padding: 0.75rem 1rem; border-radius: 8px; }
 .blotter-empty { padding: 1.5rem; text-align: center; color: #6B7280; }
 
-.blotter-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
-.blotter-table th, .blotter-table td { padding: 0.6rem 0.75rem; border-bottom: 1px solid #E5E7EB; text-align: left; vertical-align: top; }
-.blotter-table th { background: #F9FAFB; font-weight: 700; color: #374151; }
-.blotter-party-chip { display: inline-block; margin: 0 0.4rem 0.2rem 0; }
+.blotter-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.blotter-table th, .blotter-table td { padding: 0.75rem 1rem; border-bottom: 1px solid #E5E7EB; text-align: left; vertical-align: middle; }
+.blotter-table th { background: #F9FAFB; font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: #4B5563; }
+.blotter-party-chip { display: inline-block; margin: 0 0.4rem 0.2rem 0; font-size: 0.8125rem; }
 .blotter-party-chip small { color: #6B7280; }
 
-.blotter-status { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 999px; font-size: 0.875rem; font-weight: 700; background: #E5E7EB; color: #374151; vertical-align: middle; }
-.blotter-status-filed { background: #F3F4F6; color: #1E3A8A; }
-.blotter-status-under_mediation { background: #F3F4F6; color: #374151; }
-.blotter-status-settled { background: #FFFFFF; color: #111827; }
-.blotter-status-escalated { background: #FFFFFF; color: #DC2626; }
-.blotter-status-dismissed, .blotter-status-withdrawn { background: #F3F4F6; color: #4B5563; }
+.blotter-status { display: inline-flex; align-items: center; padding: 0.2rem 0.65rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em; border: 1px solid transparent; vertical-align: middle; }
+.blotter-status-filed { background-color: #F3F4F6; color: #374151; border-color: #D1D5DB; }
+.blotter-status-under_mediation { background-color: #F3F4F6; color: #1E3A8A; border-color: #D1D5DB; }
+.blotter-status-settled { background-color: #F3F4F6; color: #16A34A; border-color: #E5E7EB; }
+.blotter-status-escalated { background-color: #F3F4F6; color: #DC2626; border-color: #E5E7EB; }
+.blotter-status-dismissed, .blotter-status-withdrawn { background-color: #F3F4F6; color: #4B5563; border-color: #E5E7EB; }
 
 .blotter-pagination { display: flex; gap: 0.75rem; align-items: center; justify-content: center; }
 

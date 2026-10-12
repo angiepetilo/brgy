@@ -48,28 +48,46 @@ button.hig-btn:disabled {
    ============================================ */
 
 @media (min-width: 768px) {
-  /* Default Size */
-  .hig-btn {
-    height: var(--button-height);
-    padding: 0 16px;
-    font-size: var(--text-body);
-    border-radius: var(--radius-md);
+  /* Default Desktop Size: 32px height, 6px radius, 13pt Medium font, 14px h-padding */
+  .hig-btn,
+  .btn,
+  button.btn,
+  .btn-flat {
+    height: var(--button-height, 32px) !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+    padding: 0 14px !important;
+    font-family: var(--font-family-base) !important;
+    font-size: var(--text-body, 13px) !important; /* 13 pt */
+    font-weight: var(--weight-medium, 500) !important; /* Medium */
+    letter-spacing: var(--tracking-normal, -0.08px) !important;
+    line-height: 32px !important;
+    border-radius: 6px !important;
+    box-sizing: border-box !important;
   }
   
-  /* Compact Size */
+  /* Compact Desktop Size: 28px height, 6px radius */
   .hig-btn-compact,
-  .hig-btn-sm {
-    height: var(--button-height-compact);
-    padding: 0 12px;
-    font-size: 12px;
+  .hig-btn-sm,
+  .btn-sm,
+  .btn-compact {
+    height: var(--button-height-compact, 28px) !important;
+    min-height: 28px !important;
+    max-height: 28px !important;
+    padding: 0 10px !important;
+    font-size: 12px !important;
+    line-height: 28px !important;
+    border-radius: 6px !important;
+    box-sizing: border-box !important;
   }
   
   /* Large Size */
   .hig-btn-large,
   .hig-btn-lg {
-    height: 40px;
-    padding: 0 20px;
-    font-size: var(--text-body);
+    height: 36px !important;
+    padding: 0 16px !important;
+    font-size: var(--text-body, 13px) !important;
+    border-radius: 6px !important;
   }
 }
 
@@ -200,37 +218,57 @@ button.hig-btn:disabled {
    ============================================ */
 
 @media (min-width: 768px) {
-  .hig-btn-icon {
-    width: var(--button-height);
-    height: var(--button-height);
-    padding: 0;
+  .hig-btn-icon,
+  .btn-icon {
+    width: var(--button-height, 32px) !important;
+    height: var(--button-height, 32px) !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    padding: 0 !important;
     background: transparent;
     color: var(--color-text-secondary);
-    border-radius: var(--radius-md);
+    border-radius: 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
   }
   
-  .hig-btn-icon:hover {
+  .hig-btn-icon:hover,
+  .btn-icon:hover {
     background: var(--color-hover);
     color: var(--color-text-primary);
   }
   
-  .hig-btn-icon:active {
+  .hig-btn-icon:active,
+  .btn-icon:active {
     background: var(--color-hover-secondary);
   }
   
-  .hig-btn-icon svg {
-    width: 18px;
-    height: 18px;
+  .hig-btn-icon svg,
+  .btn-icon svg,
+  .hig-btn-icon .icon,
+  .btn-icon .icon {
+    width: 15px !important;
+    height: 15px !important;
   }
   
-  .hig-btn-icon.hig-btn-compact {
-    width: var(--button-height-compact);
-    height: var(--button-height-compact);
+  .hig-btn-icon.hig-btn-compact,
+  .hig-btn-icon.btn-sm,
+  .btn-icon.btn-sm {
+    width: var(--button-height-compact, 28px) !important;
+    height: var(--button-height-compact, 28px) !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    border-radius: 6px !important;
   }
   
-  .hig-btn-icon.hig-btn-compact svg {
-    width: 16px;
-    height: 16px;
+  .hig-btn-icon.hig-btn-compact svg,
+  .hig-btn-icon.btn-sm svg,
+  .btn-icon.btn-sm svg,
+  .btn-icon.btn-sm .icon {
+    width: 14px !important;
+    height: 14px !important;
   }
 }
 

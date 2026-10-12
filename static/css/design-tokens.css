@@ -19,13 +19,13 @@
   --font-family-display: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --font-family-mono: "SF Mono", "Menlo", "Consolas", "Courier New", monospace;
   
-  /* Desktop Typography Scale (macOS HIG) */
-  --text-display: 24px;         /* KPI numbers, big metrics */
-  --text-title: 22px;           /* Window/page titles */
-  --text-section: 18px;         /* Section headers */
-  --text-body: 13px;            /* Table cells, body text, standard inputs */
-  --text-label: 11px;           /* Column headers, field labels */
-  --text-caption: 10px;         /* Badges, timestamps, metadata */
+  /* Desktop Typography Scale (macOS Desktop HIG) */
+  --text-display: 22px;         /* Window/View Title: SF Pro Display | 22 pt | Bold */
+  --text-title: 22px;           /* Window/View Title: SF Pro Display | 22 pt | Bold | -0.26 px tracking */
+  --text-section: 18px;         /* Section Header: SF Pro Text | 18 pt | Semibold | 0.00 px tracking */
+  --text-body: 13px;            /* Table Cell / Body: SF Pro Text | 13 pt | Regular | -0.08 px tracking */
+  --text-label: 11px;           /* Column Header / Label: SF Pro Text | 11 pt | Medium | 0.06 px tracking */
+  --text-caption: 10px;         /* Badge / Caption: SF Pro Text | 10 pt | Semibold | 0.12 px tracking */
   
   /* Mobile Typography Scale (iOS HIG) */
   --text-mobile-large-title: 34px;    /* Large title (collapses on scroll) */
@@ -133,16 +133,16 @@
      LAYOUT DIMENSIONS
      ============================================ */
   
-  /* Desktop Dimensions (macOS HIG) */
+  /* Desktop Dimensions (macOS Desktop HIG) */
   --toolbar-height: 52px;
   --toolbar-height-compact: 48px;
   --sidebar-width: 240px;
-  --sidebar-width-collapsed: 64px;
+  --sidebar-width-collapsed: 68px;
   --content-padding: 24px;
   --content-padding-compact: 16px;
   --table-header-height: 32px;
   --table-row-height: 42px;
-  --table-row-height-compact: 40px;
+  --table-row-height-compact: 36px;
   --button-height: 32px;
   --button-height-compact: 28px;
   --input-height: 32px;

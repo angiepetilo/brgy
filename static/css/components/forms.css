@@ -52,54 +52,117 @@
    ============================================ */
 
 @media (min-width: 768px) {
-  .hig-input {
+  .hig-input,
+  .form-control,
+  input[type="text"]:not(.form-range),
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  input[type="search"],
+  input[type="url"],
+  select.form-control,
+  .hig-select {
     width: 100%;
-    height: var(--input-height);
-    padding: 0 12px;
-    font-size: var(--text-body);
-    font-family: var(--font-family-base);
-    color: var(--color-text-primary);
-    background: var(--color-canvas);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
+    height: var(--input-height, 32px) !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+    padding: 0 10px !important;
+    font-size: var(--text-body, 13px) !important; /* 13 pt */
+    font-family: var(--font-family-base) !important;
+    color: var(--color-text-primary, #1D1D1F) !important;
+    background: var(--color-canvas, #FFFFFF) !important;
+    border: 1px solid var(--color-border, #E5E5E7) !important;
+    border-radius: 6px !important;
     transition: all var(--transition-base);
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
+    box-sizing: border-box !important;
+    box-shadow: none !important;
   }
   
-  .hig-input:hover {
-    border-color: var(--color-border-strong);
+  .hig-input:hover,
+  .form-control:hover {
+    border-color: var(--color-border-strong, #D1D1D6) !important;
   }
   
-  .hig-input:focus {
-    outline: none;
-    border-color: var(--color-accent-blue);
-    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
-    background: var(--color-canvas);
+  .hig-input:focus,
+  .form-control:focus {
+    outline: none !important;
+    border-color: var(--color-accent-blue, #0071E3) !important;
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15) !important;
+    background: #FFFFFF !important;
   }
   
-  .hig-input::placeholder {
-    color: var(--color-text-tertiary);
+  .hig-input::placeholder,
+  .form-control::placeholder,
+  input::placeholder {
+    color: #86868B !important;
+    font-style: normal !important;
+    opacity: 1 !important;
   }
   
-  .hig-input:disabled {
+  .hig-input:disabled,
+  .form-control:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-    background: var(--color-sidebar);
+    background: var(--color-sidebar, #F5F5F7) !important;
   }
   
+  /* Search input layout with leading icon */
+  .search-input-container,
+  .search-input-wrap,
+  .hig-search-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .search-input-container input,
+  .search-input-wrap input,
+  .hig-search-field input,
+  .hig-search-input,
+  .search-input-field,
+  input.has-search-icon {
+    padding-left: 38px !important;
+  }
+
+  .search-input-container .search-input-icon,
+  .search-input-container > svg,
+  .search-input-wrap .search-icon,
+  .search-input-wrap svg,
+  .hig-search-field .icon,
+  .hig-search-field svg {
+    position: absolute !important;
+    left: 12px !important;
+    right: auto !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 16px !important;
+    height: 16px !important;
+    color: #9CA3AF !important;
+    pointer-events: none;
+    z-index: 2;
+  }
+
   /* Large Input */
   .hig-input-large {
-    height: var(--input-height-large);
-    font-size: var(--text-large);
+    height: 36px !important;
+    min-height: 36px !important;
+    font-size: 14px !important;
+    border-radius: 6px !important;
   }
   
   /* Compact Input */
   .hig-input-compact {
-    height: 28px;
-    padding: 0 8px;
-    font-size: 12px;
+    height: 28px !important;
+    min-height: 28px !important;
+    padding: 0 8px !important;
+    font-size: 12px !important;
+    border-radius: 6px !important;
   }
 }
 
@@ -587,6 +650,76 @@
 .hig-file-label svg {
   width: 16px;
   height: 16px;
+}
+
+/* ============================================
+   NATIVE FILE INPUT (Compact 32px Container)
+   ============================================ */
+
+input[type="file"],
+input[type="file"].form-control,
+.form-control[type="file"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+  line-height: 30px !important;
+  padding: 0 10px 0 0 !important;
+  margin: 0 !important;
+  font-size: 12px !important;
+  font-family: var(--font-family-base, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif) !important;
+  color: var(--color-text-secondary, #6B7280) !important;
+  background-color: var(--color-canvas, #FFFFFF) !important;
+  border: 1px solid var(--color-border, #E5E5E7) !important;
+  border-radius: var(--radius-md, 6px) !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  vertical-align: middle !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  box-shadow: none !important;
+}
+
+input[type="file"]:focus,
+input[type="file"].form-control:focus,
+.form-control[type="file"]:focus {
+  border-color: var(--color-accent-blue, #0071E3) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15) !important;
+}
+
+/* File Selector Button (WebKit, Blink, Gecko) */
+input[type="file"]::-webkit-file-upload-button,
+input[type="file"]::file-selector-button {
+  height: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+  line-height: 30px !important;
+  padding: 0 12px !important;
+  margin: 0 10px 0 0 !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  font-family: inherit !important;
+  color: var(--color-text-primary, #1D1D1F) !important;
+  background: var(--color-sidebar, #F5F5F7) !important;
+  border: none !important;
+  border-right: 1px solid var(--color-border, #E5E5E7) !important;
+  border-radius: 5px 0 0 5px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  transition: background 0.15s ease, color 0.15s ease !important;
+  outline: none !important;
+  vertical-align: middle !important;
+}
+
+input[type="file"]::-webkit-file-upload-button:hover,
+input[type="file"]::file-selector-button:hover {
+  background: var(--color-hover, #E8E8ED) !important;
+  color: #000000 !important;
 }
 
 /* ============================================

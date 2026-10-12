@@ -1,0 +1,527 @@
+{% extends 'base.html' %}
+{% load static core_tags %}
+
+{% block title %}Households - Barangay.ph{% endblock %}
+
+{% block content %}
+<div class="households-page-container" style="width: 100%; padding: 0.25rem 0 1.5rem 0;">
+
+    <!-- TWO-COLUMN MASTER-DETAIL LAYOUT (Matching Screenshot 1) -->
+    <div style="display: grid; grid-template-columns: 460px 1fr; gap: 1.25rem; align-items: start;" class="hh-main-grid">
+
+        <!-- ======================================================== -->
+        <!-- LEFT COLUMN: LIST OF REGISTERED HOUSEHOLD               -->
+        <!-- ======================================================== -->
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <div style="background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <!-- Header Banner -->
+                <div style="background: #111827; color: #FFFFFF; padding: 0.85rem 1rem; text-align: center; font-weight: 800; font-size: 0.95rem; letter-spacing: 0.04em; text-transform: uppercase;">
+                    LIST OF REGISTERED HOUSEHOLD
+                </div>
+
+                <!-- Search Input Bar -->
+                <form id="hh-search-form" method="get" action="{% url 'accounts:household_list' %}" style="margin: 0; padding: 0.75rem; border-bottom: 1px solid #E5E7EB; background: #FFFFFF; display: flex; gap: 0.5rem; align-items: center;">
+                    <div style="flex: 1; position: relative;">
+                        <input type="text" name="q" id="hh-search-input" value="{{ search_query }}" placeholder="Search Household ID" style="width: 100%; height: 38px; border-radius: 6px; border: 1px solid #D1D5DB; padding: 0 0.85rem; font-size: 0.875rem; color: #111827; box-sizing: border-box;">
+                    </div>
+                    <button type="submit" style="width: 42px; height: 38px; border-radius: 6px; background: #111827; border: none; color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;" title="Search" aria-label="Search">
+                        {% icon 'search' cls='icon-sm' %}
+                    </button>
+                    {% if search_query %}
+                    <a href="{% url 'accounts:household_list' %}" style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; color: #6B7280; text-decoration: none;" title="Clear search" aria-label="Clear search">
+                        {% icon 'x' cls='icon-sm' %}
+                    </a>
+                    {% endif %}
+                </form>
+
+                <!-- Registered Households Table -->
+                <div style="overflow-x: auto; max-height: calc(100vh - 250px); overflow-y: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem;">
+                        <thead>
+                            <tr style="background: #D8D5F2; color: #1E1B4B; border-bottom: 1px solid #C4B5FD;">
+                                <th style="padding: 0.65rem 0.6rem; text-align: left; font-weight: 700; border-right: 1px solid #C4B5FD;">FAMILY NAME</th>
+                                <th style="padding: 0.65rem 0.6rem; text-align: center; font-weight: 700; width: 72px; border-right: 1px solid #C4B5FD;">MEMBERS</th>
+                                <th style="padding: 0.65rem 0.6rem; text-align: left; font-weight: 700;">DATE ENCODED</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hh-master-tbody">
+                            {% for hh in households %}
+                            <tr class="hh-row-item {% if selected_hh and selected_hh.id == hh.id %}selected-hh-row{% elif not selected_hh and forloop.first %}selected-hh-row{% endif %}"
+                                data-id="{{ hh.id }}"
+                                data-household-id="{{ hh.household_id|default:hh.id }}"
+                                data-household-number="{{ hh.display_household_number }}"
+                                data-street="{{ hh.street }}"
+                                data-ownership-status="{{ hh.ownership_status|default:'Owned' }}"
+                                data-interviewed-by="{{ hh.interviewed_by }}"
+                                data-reviewed-by="{{ hh.reviewed_by }}"
+                                data-date-of-visit="{{ hh.date_of_visit|date:'F d, Y' }}"
+                                data-date-of-visit-raw="{{ hh.date_of_visit|date:'Y-m-d' }}"
+                                data-first-name="{{ hh.first_name }}"
+                                data-middle-name="{{ hh.middle_name }}"
+                                data-last-name="{{ hh.last_name }}"
+                                data-relationship="{{ hh.relationship|default:'Head' }}"
+                                data-birthdate="{{ hh.birthdate|date:'Y-m-d' }}"
+                                data-purok-id="{{ hh.purok_id }}"
+                                data-family-name="{{ hh.household_family_name }}"
+                                data-encoded-date="{{ hh.display_date_encoded }}"
+                                data-encoded-by="{{ hh.encoded_by_name }}"
+                                data-updated-date="{{ hh.display_date_updated }}"
+                                data-updated-by="{{ hh.updated_by_name }}"
+                                data-members="{{ hh.members_json|escape }}"
+                                style="border-bottom: 1px solid #E5E7EB; cursor: pointer; transition: background 0.15s ease;">
+                                <td style="padding: 0.6rem 0.6rem; border-right: 1px solid #E5E7EB;">
+                                    <div style="font-weight: 700; color: #111827; font-size: 0.84rem; line-height: 1.3;">{{ hh.household_family_name|default:hh.last_name }}</div>
+                                    <div style="font-size: 0.72rem; color: #6B7280; font-family: monospace;">{{ hh.household_id }}</div>
+                                </td>
+                                <td style="padding: 0.6rem 0.6rem; color: #374151; border-right: 1px solid #E5E7EB; font-weight: 700; text-align: center;">{{ hh.total_members_count }}</td>
+                                <td style="padding: 0.6rem 0.6rem; color: #4B5563; font-size: 0.8125rem;">{{ hh.display_date_encoded }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" style="text-align: center; padding: 2.5rem 1rem; color: #6B7280;">
+                                    No registered households found.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if page_obj.has_other_pages %}
+                <div style="padding: 0.5rem 0.75rem; background: #FAFAFA; border-top: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
+                    <span style="color: #6B7280;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                    <div style="display: flex; gap: 0.35rem;">
+                        {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 2px 8px;">Prev</a>
+                        {% endif %}
+                        {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 2px 8px;">Next</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- RIGHT COLUMN: ACTION BUTTONS & DETAILED PROFILE CARD    -->
+        <!-- ======================================================== -->
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+
+            <!-- Top Action Buttons (Exact Screenshot 1 Layout & Colors) -->
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem; flex-wrap: wrap;">
+                <!-- 1. Register Household (Green) -->
+                <button type="button" id="btn-top-register-hh" class="btn-hh-pill" style="background: #16A34A; color: #FFFFFF; border: none; border-radius: 9999px; padding: 0.55rem 1.25rem; font-size: 0.8125rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer; text-transform: uppercase; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                    {% icon 'circle-plus' cls='icon-sm' %} REGISTER HOUSEH.
+                </button>
+
+                <!-- 2. Update Household (Dark Gray / Slate) -->
+                <button type="button" id="btn-top-update-hh" class="btn-hh-pill" style="background: #4B5563; color: #FFFFFF; border: none; border-radius: 9999px; padding: 0.55rem 1.25rem; font-size: 0.8125rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer; text-transform: uppercase; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                    {% icon 'square-pen' cls='icon-sm' %} UPDATE HOUSEH.
+                </button>
+
+                <!-- 3. Remove Household (Red) -->
+                <button type="button" id="btn-top-remove-hh" class="btn-hh-pill" style="background: #DC2626; color: #FFFFFF; border: none; border-radius: 9999px; padding: 0.55rem 1.25rem; font-size: 0.8125rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer; text-transform: uppercase; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                    {% icon 'trash-2' cls='icon-sm' %} REMOVE HOUSEH.
+                </button>
+            </div>
+
+            <!-- Main Profile Container (Card with rounded border) -->
+            <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 14px; padding: 1.15rem; display: flex; flex-direction: column; gap: 1rem;">
+
+                <!-- ROW 1: Household ID/Number Card & Field Visit Card -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <!-- Subcard 1: Household Identification -->
+                    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 0.85rem 1.15rem; display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.84rem;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #4B5563; font-weight: 700;">Household ID:</span>
+                            <span id="view-hh-id" style="color: #111827; font-weight: 700;">{{ selected_hh.id|default:'--' }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #4B5563; font-weight: 700;">Household Number:</span>
+                            <span id="view-hh-number" style="color: #111827; font-weight: 600;">{{ selected_hh.display_household_number|default:'--' }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #4B5563; font-weight: 700;">Ownership Status:</span>
+                            <span id="view-hh-ownership" style="color: #111827; font-weight: 600;">{{ selected_hh.ownership_status|default:'Owned' }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Subcard 2: Field Visit Reviewers -->
+                    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 0.85rem 1.15rem; display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.84rem;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #4B5563; font-weight: 700;">Interviewed By:</span>
+                            <span id="view-hh-interviewed" style="color: #111827; font-weight: 600;">{{ selected_hh.interviewed_by|default:'--' }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #4B5563; font-weight: 700;">Reviewed By:</span>
+                            <span id="view-hh-reviewed" style="color: #111827; font-weight: 600;">{{ selected_hh.reviewed_by|default:'--' }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #4B5563; font-weight: 700;">Date of Visit:</span>
+                            <span id="view-hh-visit" style="color: #111827; font-weight: 600;">{{ selected_hh.date_of_visit|date:'F d, Y'|default:'--' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Household Members Table -->
+                <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem;">
+                        <thead>
+                            <tr style="background: #D8D5F2; color: #1E1B4B; border-bottom: 1px solid #C4B5FD;">
+                                <th style="padding: 0.65rem 0.75rem; text-align: left; font-weight: 700; width: 20%; border-right: 1px solid #C4B5FD;">First Name</th>
+                                <th style="padding: 0.65rem 0.75rem; text-align: left; font-weight: 700; width: 20%; border-right: 1px solid #C4B5FD;">Last Name</th>
+                                <th style="padding: 0.65rem 0.75rem; text-align: left; font-weight: 700; width: 15%; border-right: 1px solid #C4B5FD;">Relationship</th>
+                                <th style="padding: 0.65rem 0.75rem; text-align: left; font-weight: 700; width: 17%; border-right: 1px solid #C4B5FD;">Birthdate</th>
+                                <th style="padding: 0.65rem 0.5rem; text-align: center; font-weight: 700; width: 8%; border-right: 1px solid #C4B5FD;">Age</th>
+                                <th style="padding: 0.65rem 0.75rem; text-align: left; font-weight: 700; width: 20%;">Sector</th>
+                            </tr>
+                        </thead>
+                        <tbody id="view-members-tbody">
+                            {% if selected_hh and selected_hh.get_members_list %}
+                                {% for m in selected_hh.get_members_list %}
+                                <tr style="border-bottom: 1px solid #F3F4F6;">
+                                    <td style="padding: 0.65rem 0.75rem; color: #111827; font-weight: 500; border-right: 1px solid #F3F4F6;">{{ m.first_name }}</td>
+                                    <td style="padding: 0.65rem 0.75rem; color: #111827; font-weight: 500; border-right: 1px solid #F3F4F6;">{{ m.last_name }}</td>
+                                    <td style="padding: 0.65rem 0.75rem; color: #4B5563; font-weight: 600; border-right: 1px solid #F3F4F6;">{{ m.relationship }}</td>
+                                    <td style="padding: 0.65rem 0.75rem; color: #4B5563; font-weight: 500; border-right: 1px solid #F3F4F6;">{{ m.birthdate|default:'--' }}</td>
+                                    <td style="padding: 0.65rem 0.5rem; color: #111827; font-weight: 700; text-align: center; border-right: 1px solid #F3F4F6;">{{ m.age|default:'--' }}</td>
+                                    <td style="padding: 0.65rem 0.75rem;">
+                                        <div style="display: flex; gap: 0.3rem; flex-wrap: wrap; align-items: center;">
+                                            {% if m.is_senior %}
+                                            <span style="background: #FEF3C7; color: #92400E; font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; font-weight: 700;">Senior</span>
+                                            {% endif %}
+                                            {% if m.is_pwd %}
+                                            <span style="background: #FCE7F3; color: #9D174D; font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; font-weight: 700;">PWD</span>
+                                            {% endif %}
+                                            {% if m.is_solo_parent %}
+                                            <span style="background: #E0E7FF; color: #3730A3; font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; font-weight: 700;">Solo Parent</span>
+                                            {% endif %}
+                                            {% if m.is_4ps %}
+                                            <span style="background: #D1FAE5; color: #065F46; font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; font-weight: 700;">4Ps</span>
+                                            {% endif %}
+                                            {% if not m.is_senior and not m.is_pwd and not m.is_solo_parent and not m.is_4ps %}
+                                            <span style="color: #9CA3AF; font-size: 0.75rem;">--</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" style="text-align: center; padding: 2rem 1rem; color: #9CA3AF;">
+                                        No members registered for this household.
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+            <!-- Audit Tracking Footer Cards (Below Main Container) -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <!-- Left Audit Card -->
+                <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.8125rem;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #6B7280; font-weight: 600;">Date Encoded:</span>
+                        <span id="view-encoded-date" style="color: #111827; font-weight: 500;">
+                            {{ selected_hh.display_date_encoded|default:'--' }}
+                        </span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #6B7280; font-weight: 600;">Encoded By:</span>
+                        <span id="view-encoded-by" style="color: #111827; font-weight: 600;">
+                            {{ selected_hh.encoded_by_name|default:'Staff Encoder' }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Right Audit Card -->
+                <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.8125rem;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #6B7280; font-weight: 600;">Date Updated:</span>
+                        <span id="view-updated-date" style="color: #111827; font-weight: 500;">
+                            {{ selected_hh.display_date_updated|default:'--' }}
+                        </span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #6B7280; font-weight: 600;">Updated By:</span>
+                        <span id="view-updated-by" style="color: #111827; font-weight: 600;">
+                            {{ selected_hh.updated_by_name|default:'Staff Encoder' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ======================================================== -->
+<!-- 1. REGISTER HOUSEHOLD MODAL                              -->
+<!-- ======================================================== -->
+<div id="registerHouseholdModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: #FFFFFF; border-radius: 14px; width: 100%; max-width: 920px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05); overflow: hidden; animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div style="padding: 1.15rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between; background: #FAFAFA;">
+            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: #16A34A; color: #FFFFFF; display: flex; align-items: center; justify-content: center;">
+                    {% icon 'circle-plus' cls='icon-sm' %}
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #111827;">Register Household</h3>
+                    <p style="margin: 0.15rem 0 0 0; font-size: 0.8125rem; color: #6B7280;">Encode barangay household profile, utilities, and respondent info.</p>
+                </div>
+            </div>
+            <button type="button" id="btn-close-register-household" style="border: none; background: transparent; color: #6B7280; font-size: 0.8125rem; font-weight: 700; cursor: pointer; text-transform: uppercase;">CLOSE</button>
+        </div>
+
+        <form id="registerHouseholdForm" method="post" action="{% url 'accounts:household_create' %}" style="margin: 0;">
+            {% csrf_token %}
+            <div style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 0.85rem; max-height: 72vh; overflow-y: auto;">
+                
+                <!-- Household Identification -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                    <div>
+                        <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Household Number</label>
+                        {{ form.household_number }}
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Household Family Name</label>
+                        {{ form.household_family_name }}
+                    </div>
+                </div>
+
+                <!-- Location & Ownership -->
+                <div style="display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 0.75rem;">
+                    <div>
+                        <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Purok</label>
+                        {{ form.purok }}
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Street Address</label>
+                        {{ form.street }}
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Ownership Status</label>
+                        {{ form.ownership_status }}
+                    </div>
+                </div>
+
+                <!-- Interview Visit & Audit Details -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem;">
+                    <div>
+                        <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Interviewed By</label>
+                        {{ form.interviewed_by }}
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Reviewed By</label>
+                        {{ form.reviewed_by }}
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Date of Visit</label>
+                        {{ form.date_of_visit }}
+                    </div>
+                </div>
+
+                <!-- Dynamic Household Members Section -->
+                <div style="border-top: 1px solid #E5E7EB; padding-top: 0.85rem; margin-top: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <div>
+                            <span style="font-size: 0.8125rem; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.03em;">Household Members</span>
+                            <p style="margin: 0.15rem 0 0 0; font-size: 0.75rem; color: #6B7280;">Add family members with birthdate, auto-age, and sector tags (PWD, Solo Parent, 4Ps).</p>
+                        </div>
+                        <button type="button" id="btn-add-member-reg" style="background: #ECFDF5; color: #047857; border: 1px solid #A7F3D0; font-weight: 700; font-size: 0.75rem; padding: 0.35rem 0.75rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+                            + Add Member
+                        </button>
+                    </div>
+
+                    <div style="border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden; background: #FFFFFF;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 0.8125rem;">
+                            <thead>
+                                <tr style="background: #F9FAFB; color: #374151; border-bottom: 1px solid #E5E7EB;">
+                                    <th style="padding: 0.5rem 0.5rem; text-align: left; font-weight: 600; width: 21%;">First Name</th>
+                                    <th style="padding: 0.5rem 0.5rem; text-align: left; font-weight: 600; width: 21%;">Last Name</th>
+                                    <th style="padding: 0.5rem 0.5rem; text-align: left; font-weight: 600; width: 14%;">Relationship</th>
+                                    <th style="padding: 0.5rem 0.5rem; text-align: left; font-weight: 600; width: 16%;">Birthdate</th>
+                                    <th style="padding: 0.5rem 0.25rem; text-align: center; font-weight: 600; width: 6%;">Age</th>
+                                    <th style="padding: 0.5rem 0.5rem; text-align: left; font-weight: 600; width: 18%;">Sector (PWD, Solo Parent, 4Ps)</th>
+                                    <th style="padding: 0.5rem 0.35rem; text-align: center; width: 4%;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="reg-members-table-body">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <div style="padding: 1rem 1.5rem; background: #FAFAFA; border-top: 1px solid #E5E7EB; display: flex; justify-content: flex-end; gap: 0.75rem;">
+                <button type="button" id="btn-cancel-register-household" class="btn btn-secondary" style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1rem; border-radius: 6px;">
+                    Cancel
+                </button>
+                <button type="submit" class="btn" style="font-size: 0.8125rem; font-weight: 700; padding: 0.45rem 1.25rem; border-radius: 6px; background: #16A34A; color: #FFFFFF; border: none; cursor: pointer;">
+                    Save Household
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ======================================================== -->
+<!-- 2. UPDATE HOUSEHOLD MODAL                                -->
+<!-- ======================================================== -->
+<div id="editHouseholdModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: #FFFFFF; border-radius: 14px; width: 100%; max-width: 920px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05); overflow: hidden; animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div style="padding: 1.15rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between; background: #FAFAFA;">
+            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: #4B5563; color: #FFFFFF; display: flex; align-items: center; justify-content: center;">
+                    {% icon 'square-pen' cls='icon-sm' %}
+                </div>
+                <div>
+                    <h3 id="edit-hh-header-title" style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #111827;">Update Household</h3>
+                    <p style="margin: 0.15rem 0 0 0; font-size: 0.8125rem; color: #6B7280;">Modify household details, address, and family members.</p>
+                </div>
+            </div>
+            <button type="button" id="btn-close-edit-household" style="border: none; background: transparent; color: #6B7280; font-size: 0.8125rem; font-weight: 700; cursor: pointer; text-transform: uppercase;">CLOSE</button>
+        </div>
+
+        <form id="editHouseholdForm" method="post" action="" style="margin: 0;">
+            {% csrf_token %}
+            <div style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 0.85rem; max-height: 72vh; overflow-y: auto;">
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                    <div>
+                        <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Household Number</label>
+                        <input type="text" name="household_number" id="edit_household_number" class="form-control" style="width: 100%; height: 38px; border-radius: 6px; border: 1px solid #D1D5DB;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Household Family Name</label>
+                        <input type="text" name="household_family_name" id="edit_family_name" class="form-control" style="width: 100%; height: 38px; border-radius: 6px; border: 1px solid #D1D5DB;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 0.75rem;">
+                    <div>
+                        <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Purok</label>
+                        <select name="purok" id="edit_purok" class="form-control" style="width: 100%; height: 38px; border-radius: 6px; border: 1px solid #D1D5DB;">
+                            <option value="">-- Select Purok --</option>
+                            {% for p in puroks %}
+                            <option value="{{ p.id }}">{{ p.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Street Address</label>
+                        <input type="text" name="street" id="edit_street" class="form-control" style="width: 100%; height: 38px; border-radius: 6px; border: 1px solid #D1D5DB;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Ownership Status</label>
+                        <select name="ownership_status" id="edit_ownership_status" class="form-control" style="width: 100%; height: 38px; border-radius: 6px; border: 1px solid #D1D5DB;">
+                            <option value="Owned">Owned</option>
+                            <option value="Rented">Rented</option>
+                            <option value="Living with Relatives">Living with Relatives</option>
+                            <option value="Informal Settler">Informal Settler</option>
+                            <option value="Caretaker">Caretaker</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem;">
+                    <div>
+                        <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Interviewed By</label>
+                        <input type="text" name="interviewed_by" id="edit_interviewed_by" class="form-control" style="width: 100%; height: 38px; border-radius: 6px; border: 1px solid #D1D5DB;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Reviewed By</label>
+                        <input type="text" name="reviewed_by" id="edit_reviewed_by" class="form-control" style="width: 100%; height: 38px; border-radius: 6px; border: 1px solid #D1D5DB;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Date of Visit</label>
+                        <input type="date" name="date_of_visit" id="edit_date_of_visit" class="form-control" style="width: 100%; height: 38px; border-radius: 6px; border: 1px solid #D1D5DB;">
+                    </div>
+                </div>
+
+                <!-- Dynamic Household Members Section for Edit -->
+                <div style="border-top: 1px solid #E5E7EB; padding-top: 0.85rem; margin-top: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <div>
+                            <span style="font-size: 0.8125rem; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.03em;">Household Members</span>
+                            <p style="margin: 0.15rem 0 0 0; font-size: 0.75rem; color: #6B7280;">Modify or add family members with birthdate, auto-age, and sector tags (PWD, Solo Parent, 4Ps).</p>
+                        </div>
+                        <button type="button" id="btn-add-member-edit" style="background: #F3F4F6; color: #374151; border: 1px solid #D1D5DB; font-weight: 700; font-size: 0.75rem; padding: 0.35rem 0.75rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+                            + Add Member
+                        </button>
+                    </div>
+
+                    <div style="border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden; background: #FFFFFF;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 0.8125rem;">
+                            <thead>
+                                <tr style="background: #F9FAFB; color: #374151; border-bottom: 1px solid #E5E7EB;">
+                                    <th style="padding: 0.5rem 0.5rem; text-align: left; font-weight: 600; width: 21%;">First Name</th>
+                                    <th style="padding: 0.5rem 0.5rem; text-align: left; font-weight: 600; width: 21%;">Last Name</th>
+                                    <th style="padding: 0.5rem 0.5rem; text-align: left; font-weight: 600; width: 14%;">Relationship</th>
+                                    <th style="padding: 0.5rem 0.5rem; text-align: left; font-weight: 600; width: 16%;">Birthdate</th>
+                                    <th style="padding: 0.5rem 0.25rem; text-align: center; font-weight: 600; width: 6%;">Age</th>
+                                    <th style="padding: 0.5rem 0.5rem; text-align: left; font-weight: 600; width: 18%;">Sector (PWD, Solo Parent, 4Ps)</th>
+                                    <th style="padding: 0.5rem 0.35rem; text-align: center; width: 4%;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="edit-members-table-body">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <div style="padding: 1rem 1.5rem; background: #FAFAFA; border-top: 1px solid #E5E7EB; display: flex; justify-content: flex-end; gap: 0.75rem;">
+                <button type="button" id="btn-cancel-edit-household" class="btn btn-secondary" style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1rem; border-radius: 6px;">
+                    Cancel
+                </button>
+                <button type="submit" class="btn" style="font-size: 0.8125rem; font-weight: 700; padding: 0.45rem 1.25rem; border-radius: 6px; background: #4B5563; color: #FFFFFF; border: none; cursor: pointer;">
+                    Update Record
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ======================================================== -->
+<!-- 3. REMOVE HOUSEHOLD MODAL                                -->
+<!-- ======================================================== -->
+<div id="deleteHouseholdModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: #FFFFFF; border-radius: 12px; width: 100%; max-width: 440px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05); overflow: hidden; animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; gap: 0.75rem;">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: #FEF2F2; color: #DC2626; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+                {% icon 'triangle-alert' %}
+            </div>
+            <div>
+                <h3 style="margin: 0; font-size: 1rem; font-weight: 700; color: #111827;">Remove Household</h3>
+                <p style="margin: 0; font-size: 0.8125rem; color: #6B7280;">This record will be permanently deleted from the registry.</p>
+            </div>
+        </div>
+        <form id="deleteHouseholdForm" method="post" action="">
+            {% csrf_token %}
+            <div style="padding: 1.25rem 1.5rem; color: #374151; font-size: 0.875rem; line-height: 1.5;">
+                Are you sure you want to remove household ID: <strong id="delete-hh-number" style="color: #111827;"></strong> (<span id="delete-hh-id" style="color: #6B7280;"></span>)?
+            </div>
+            <div style="padding: 1rem 1.5rem; background: #F9FAFB; border-top: 1px solid #E5E7EB; display: flex; justify-content: flex-end; gap: 0.75rem;">
+                <button type="button" id="btn-cancel-delete-household" class="btn btn-secondary" style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1rem; border-radius: 6px;">Cancel</button>
+                <button type="submit" class="btn btn-danger" style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1.25rem; border-radius: 6px; background: #DC2626; border-color: #DC2626;">Yes, Remove</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/household_list.js' %}" defer></script>
+{% endblock %}

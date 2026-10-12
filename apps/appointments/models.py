@@ -94,6 +94,18 @@ class DocumentType(models.Model):
     fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text='Fee for this document type')
     order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
+
+    # Dynamic Letter Template Fields
+    letter_header = models.TextField(blank=True, default='', help_text='Official letterhead text / Republic / City Province header. Leave blank for default.')
+    letter_title = models.CharField(max_length=150, blank=True, default='', help_text='Official document title (e.g. BARANGAY CLEARANCE). Leave blank to use document name.')
+    letter_salutation = models.CharField(max_length=150, blank=True, default='TO WHOM IT MAY CONCERN:', help_text='Salutation')
+    letter_body = models.TextField(blank=True, default='', help_text='Official original letter body with dynamic tags [FULL_NAME], [ADDRESS], [AGE], [PURPOSE], [DATE_ISSUED], [CONTROL_NO], [BARANGAY_NAME]')
+    letter_footer = models.TextField(blank=True, default='', help_text='Official footer notes, validity period, and dry seal notice text. Leave blank for default.')
+    signatory_1_name = models.CharField(max_length=150, blank=True, default='', help_text='Processed / Verified by signatory name (optional)')
+    signatory_1_title = models.CharField(max_length=150, blank=True, default='Barangay Records Officer', help_text='Left signatory designation')
+    signatory_2_name = models.CharField(max_length=150, blank=True, default='', help_text='Approved / Punong Barangay signatory name (optional)')
+    signatory_2_title = models.CharField(max_length=150, blank=True, default='Punong Barangay / Kapitan', help_text='Right signatory designation')
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -340,6 +352,14 @@ class Appointment(models.Model):
             return self.document_type.name
         return "Appointment Request"
 
+    @property
+    def service_name(self):
+        return self.get_service_title()
+
+    @property
+    def applicant_name(self):
+        return self.get_applicant_name()
+
     def __str__(self):
         return f"{self.get_service_title()} - {self.get_applicant_name()} ({self.get_status_display()})"
 
@@ -390,6 +410,10 @@ class IssuedDocumentLog(models.Model):
     )
     issued_at = models.DateTimeField(auto_now_add=True)
     qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
+    customized_letter_title = models.CharField(max_length=150, blank=True, default='', help_text='Custom title override for this issued document')
+    customized_letter_header = models.TextField(blank=True, default='', help_text='Custom header override for this issued document')
+    customized_letter_body = models.TextField(blank=True, default='', help_text='Customized / tailored letter text for this specific issued document')
+    customized_letter_footer = models.TextField(blank=True, default='', help_text='Custom footer override for this issued document')
 
     class Meta:
         ordering = ['-issued_at']

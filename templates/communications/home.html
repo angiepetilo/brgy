@@ -21,15 +21,15 @@
     <h2 class="civic-section-title" id="feed-latest-title">{% icon 'newspaper' %} Latest posts</h2>
     <div class="feed-cards-stream" data-section="feed" aria-labelledby="feed-latest-title" style="display: flex; flex-direction: column; gap: 1.25rem;">
         {% for post in announcements %}
-        <article class="card feed-card" id="post-{{ post.id }}" style="padding: 0;">
+        <article class="card feed-card" id="post-{{ post.id }}" style="padding: 0; border: 1px solid #E5E7EB; border-radius: 12px; background: #FFFFFF; overflow: hidden; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);">
             
             <!-- Feed Card Header -->
             <div class="feed-card-header" style="padding: 1rem 1.25rem 0.75rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; border-bottom: 1px solid #F3F4F6;">
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
                     <!-- Author Avatar or Initials -->
-                    <div style="width: 42px; height: 42px; background: #1F2937; color: #FFFFFF; font-weight: 700; font-size: 0.875rem; display: flex; align-items: center; justify-content: center; border: 1px solid #374151; flex-shrink: 0;">
+                    <div style="width: 42px; height: 42px; border-radius: 50%; background: #1F2937; color: #FFFFFF; font-weight: 700; font-size: 0.875rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;">
                         {% if post.author.avatar %}
-                            <img src="{{ post.author.avatar.url }}" alt="{{ post.author.username }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            <img src="{{ post.author.avatar.url }}" alt="{{ post.author.username }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
                         {% else %}
                             {{ post.author.initials|default:"BG" }}
                         {% endif %}
@@ -37,7 +37,7 @@
                     <div>
                         <div style="font-weight: 700; font-size: 0.875rem; color: #111827; line-height: 1.2; display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
                             <span>{{ post.author|display_name:"Barangay Official" }}</span>
-                            <span class="badge badge-secondary" style="font-size: 0.875rem; padding: 1px 4px; font-weight: 700;">[{{ post.author_position|upper }}]</span>
+                            <span class="badge badge-secondary" style="font-size: 0.875rem; padding: 1px 4px; font-weight: 700;">{% if not post.author %}[BARANGAY OFFICIAL]{% else %}{{ post.author_position|upper }}{% endif %}</span>
                         </div>
                         <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.15rem;">
                             {% icon 'clock' cls='icon-sm' %} {{ post.created_at|date:"M d, Y" }} at {{ post.created_at|date:"h:i A" }}
@@ -121,8 +121,8 @@
                 </div>
 
                 {% if post.image %}
-                <div style="margin-top: 0.75rem; margin-bottom: 0.75rem; max-height: 420px; overflow: hidden; background: #F9FAFB; border: 1px solid #E5E7EB;">
-                    <img src="{{ post.image.url }}" alt="{{ post.title }}" style="width: 100%; height: auto; max-height: 420px; object-fit: contain; display: block;">
+                <div class="feed-card-media" style="margin-top: 0.75rem; margin-bottom: 0.75rem; max-height: 440px; overflow: hidden; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px;">
+                    <img src="{{ post.image.url }}" alt="{{ post.title }}" style="width: 100%; height: auto; max-height: 440px; object-fit: contain; display: block; border-radius: 10px;">
                 </div>
                 {% endif %}
             </div>
@@ -130,30 +130,30 @@
             <!-- Clean Interactions Bar (Comments Only) -->
             <div class="feed-interactions-bar" style="padding: 0.625rem 1.25rem; background: #F9FAFB; border-top: 1px solid #E5E7EB; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: flex-end; align-items: center;">
                 <!-- Comment Toggle Button -->
-                <button type="button" class="btn btn-sm btn-secondary comment-toggle-btn" data-toggle-comments="comments-section-{{ post.id }}" style="min-height: 36px; font-weight: 700;">
-                    {% icon 'messages-square' %} Comments (<span class="comments-counter-{{ post.id }}">{{ post.comments.all|length }}</span>)
+                <button type="button" class="btn btn-sm btn-secondary comment-toggle-btn" data-toggle-comments="comments-section-{{ post.id }}" aria-label="Toggle comments" style="min-height: 36px; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.35rem;">
+                    {% icon 'messages-square' %} <span class="comments-counter-{{ post.id }}">{{ post.comments.all|length }}</span>
                 </button>
             </div>
 
 
-            <!-- Collapsible Comments Section -->
-            <div id="comments-section-{{ post.id }}" class="feed-comments-section" style="padding: 1rem 1.25rem; background: #FFFFFF;">
+            <!-- Collapsible Comments Section (Hidden by default, shown on click) -->
+            <div id="comments-section-{{ post.id }}" class="feed-comments-section" style="padding: 1rem 1.25rem; background: #FFFFFF; border-top: 1px solid #E5E7EB; display: none;">
                 
                 <!-- Existing Comments Thread -->
                 <div class="comments-list" id="comments-list-{{ post.id }}" style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem;">
                     {% if post.comments.all %}
                         {% for comment in post.comments.all %}
-                        <div class="comment-item" style="padding: 0.65rem 0.75rem; background: #F9FAFB; border: 1px solid #E5E7EB;">
+                        <div class="comment-item" style="padding: 0.65rem 0.85rem; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
                                 <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <span style="font-weight: 700; font-size: 0.875rem; color: #1F2937; background: #E5E7EB; padding: 2px 5px;">
+                                    <span style="font-weight: 700; font-size: 0.8125rem; color: #1F2937; background: #E5E7EB; padding: 2px 6px; border-radius: 4px;">
                                         {{ comment.author.initials|default:"RD" }}
                                     </span>
                                     <span style="font-weight: 700; font-size: 0.875rem; color: #111827;">
                                         {{ comment.author.get_full_name|default:comment.author.username }}
                                     </span>
                                 </div>
-                                <span style="font-size: 0.875rem; color: #6B7280;">
+                                <span style="font-size: 0.8125rem; color: #6B7280;">
                                     {{ comment.created_at|date:"M d, H:i" }}
                                 </span>
                             </div>
@@ -163,19 +163,36 @@
                         </div>
                         {% endfor %}
                     {% else %}
-                        <div class="empty-comments-hint" style="font-size: 0.875rem; color: #6B7280; font-style: italic;">
-                            {% icon 'message-square-text' %} No comments yet. Be the first to share your thoughts.
+                        <div class="empty-comments-hint" style="text-align: center; padding: 2rem 1rem 1.75rem;">
+                            <svg width="68" height="80" viewBox="0 0 68 80" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: block; margin: 0 auto 1rem;">
+                                <path d="M4 0C1.79086 0 0 1.79086 0 4V76C0 78.2091 1.79086 80 4 80H64C66.2091 80 68 78.2091 68 76V24L44 0H4Z" fill="#9CA3AF"/>
+                                <path d="M44 0L68 24H48C45.7909 24 44 22.2091 44 20V0Z" fill="#1877F2"/>
+                                <rect x="12" y="36" width="44" height="4" rx="2" fill="#FFFFFF"/>
+                                <rect x="12" y="46" width="44" height="4" rx="2" fill="#FFFFFF"/>
+                                <rect x="12" y="56" width="44" height="4" rx="2" fill="#FFFFFF"/>
+                            </svg>
+                            <div style="font-size: 1.125rem; font-weight: 700; color: #4B5563; margin-bottom: 0.25rem;">No comments yet</div>
+                            <div style="font-size: 0.9375rem; color: #6B7280;">Be the first to comment.</div>
                         </div>
                     {% endif %}
                 </div>
 
                 <!-- Instant Comment Input Form -->
-                <form action="{% url 'communications:comment_post' post.id %}" method="post" class="feed-comment-form" data-post-id="{{ post.id }}" style="display: flex; gap: 0.5rem;">
+                <form action="{% url 'communications:comment_post' post.id %}" method="post" class="feed-comment-form" data-post-id="{{ post.id }}" style="display: flex; align-items: center; gap: 0.625rem; margin-top: 0.5rem;">
                     {% csrf_token %}
-                    <input type="text" name="content" class="form-control comment-input" placeholder="Write a comment or question..." required style="flex: 1; font-size: 0.875rem; min-height: 44px;">
-                    <button type="submit" class="btn btn-primary" style="font-weight: 700; min-height: 44px; padding: 0 1.25rem; white-space: nowrap;">
-                        {% icon 'send' %} Comment
-                    </button>
+                    {% if request.user.avatar %}
+                        <img src="{{ request.user.avatar.url }}" alt="{{ request.user.username }}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
+                    {% else %}
+                        <div style="width: 36px; height: 36px; border-radius: 50%; background: #1E3A8A; color: #FFFFFF; font-weight: 700; font-size: 0.8125rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            {{ request.user.first_name|slice:":1"|default:request.user.username|slice:":1"|upper|default:"U" }}
+                        </div>
+                    {% endif %}
+                    <div style="flex: 1; display: flex; align-items: center; background: #F0F2F5; border-radius: 24px; padding: 0.25rem 0.5rem 0.25rem 1rem; border: 1px solid #E5E7EB;">
+                        <input type="text" name="content" class="form-control comment-input" placeholder="Write a comment..." required style="flex: 1; border: none; background: transparent; font-size: 0.9375rem; padding: 0.4rem 0.25rem; outline: none; box-shadow: none; color: #111827;">
+                        <button type="submit" class="btn btn-link" title="Post comment" aria-label="Post comment" style="color: #6B7280; padding: 0.35rem 0.6rem; border: none; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: color 0.15s ease;">
+                            {% icon 'send' %}
+                        </button>
+                    </div>
                 </form>
             </div>
 

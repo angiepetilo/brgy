@@ -58,3 +58,17 @@ def display_name(user, fallback=''):
         return full.strip()
     username = getattr(user, 'username', '') or ''
     return username or (fallback or '')
+
+
+@register.filter
+def peso(value):
+    """Formats numeric value to Philippine Peso currency with thousands separator and 2 decimal places."""
+    if value is None or value == '':
+        return '₱0.00'
+    try:
+        from decimal import Decimal, InvalidOperation
+        val = Decimal(str(value).replace(',', '').replace('₱', '').strip())
+        return f"₱{val:,.2f}"
+    except (ValueError, TypeError, InvalidOperation):
+        return f"₱{value}"
+

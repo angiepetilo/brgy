@@ -11,7 +11,7 @@ message so internals never reach the browser.
 
 import logging
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.http import JsonResponse
@@ -226,7 +226,7 @@ def concern_category_save_view(request, cat_id=None):
             ),
             lambda cat: f"Concern Category '{cat.name}' saved successfully.",
         )
-    return _settings_redirect('user_management', 'concerns')
+    return _settings_redirect('post_categories', 'concerns')
 
 
 @require_perm('system', 'manage_concerns')
@@ -237,7 +237,20 @@ def concern_category_delete_view(request, cat_id):
             lambda: system_services.delete_concern_category_service(request.user, cat_id),
             "Concern Category deleted successfully.",
         )
-    return _settings_redirect('user_management', 'concerns')
+    return _settings_redirect('post_categories', 'concerns')
+
+
+@require_perm('system', 'edit')
+def update_appointment_windows_view(request):
+    if request.method == 'POST':
+        _run_service(
+            request,
+            lambda: system_services.update_appointment_windows_service(
+                request.user, request.POST
+            ),
+            "Standard Operating Windows updated successfully.",
+        )
+    return _settings_redirect('appointment_setup')
 
 
 @require_perm('system', 'manage_staff')
@@ -324,3 +337,60 @@ def email_template_edit_view(request, template_name):
         raise
     except Exception as exc:
         return _json_error(exc, request.path)
+
+
+# -----------------------------------------------------------------------------
+# Purok Creation & Management (Screenshot 4)
+# -----------------------------------------------------------------------------
+
+@require_perm('system', 'edit')
+def purok_create_view(request):
+    from apps.accounts.models import Purok, Officer
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        description = request.POST.get('description', '').strip()
+        leader_id = request.POST.get('leader')
+        if not name:
+            messages.error(request, "Purok name is required.")
+        else:
+            leader = Officer.objects.filter(id=leader_id).first() if leader_id else None
+            purok, created = Purok.objects.get_or_create(
+                name=name,
+                defaults={'description': description, 'leader': leader}
+            )
+            if not created:
+                messages.warning(request, f"Purok '{name}' already exists.")
+            else:
+                messages.success(request, f"Purok '{name}' created successfully.")
+    return _settings_redirect('puroks')
+
+
+@require_perm('system', 'edit')
+def purok_edit_view(request, purok_id):
+    from apps.accounts.models import Purok, Officer
+    purok = get_object_or_404(Purok, id=purok_id)
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        description = request.POST.get('description', '').strip()
+        leader_id = request.POST.get('leader')
+        if not name:
+            messages.error(request, "Purok name is required.")
+        else:
+            purok.name = name
+            purok.description = description
+            purok.leader = Officer.objects.filter(id=leader_id).first() if leader_id else None
+            purok.save()
+            messages.success(request, f"Purok '{name}' updated successfully.")
+    return _settings_redirect('puroks')
+
+
+@require_perm('system', 'edit')
+def purok_delete_view(request, purok_id):
+    from apps.accounts.models import Purok
+    purok = get_object_or_404(Purok, id=purok_id)
+    if request.method == 'POST':
+        name = purok.name
+        purok.delete()
+        messages.success(request, f"Purok '{name}' deleted successfully.")
+    return _settings_redirect('puroks')
+

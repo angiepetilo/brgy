@@ -93,10 +93,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (isSentByMe) {
                         row.innerHTML = `
                             <div class="message-bubble">
-                                <p class="message-text">${escapeHtml(data.content)}</p>
+                                <p class="message-text" style="margin: 0; white-space: pre-wrap; font-size: 14px; font-weight: 400; color: #FFFFFF;">${escapeHtml(data.content)}</p>
                                 <span class="message-time">
-                                    <span class="icon-labelled" title="Delivered">${BrgyUI.icon('check', 'icon-sm')}<span class="sr-only">Delivered</span></span>
-                                    ${escapeHtml(data.created_at)}
+                                    <span>${escapeHtml(data.created_at)}</span>
+                                    <span class="icon-labelled" title="Delivered" style="display: inline-flex; align-items: center; opacity: 0.7;">${BrgyUI.icon('check', 'icon-sm')}<span class="sr-only">Delivered</span></span>
                                 </span>
                             </div>
                         `;
@@ -105,8 +105,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         row.innerHTML = `
                             <div class="message-avatar">${escapeHtml(initials)}</div>
                             <div class="message-bubble">
-                                <p class="message-text">${escapeHtml(data.content)}</p>
-                                <span class="message-time">${escapeHtml(data.created_at)}</span>
+                                <p class="message-text" style="margin: 0; white-space: pre-wrap; font-size: 14px; font-weight: 400; color: #111827;">${escapeHtml(data.content)}</p>
+                                <span class="message-time"><span>${escapeHtml(data.created_at)}</span></span>
                             </div>
                         `;
                     }
