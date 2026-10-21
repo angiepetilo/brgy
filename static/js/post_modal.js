@@ -250,6 +250,23 @@ document.addEventListener('change', function(event) {
   } else if (el.id === 'editPostImageFileInput') {
     handleEditImageSelection(el);
   } else if (el.hasAttribute && el.hasAttribute('data-pin-toggle') && el.parentElement) {
-    el.parentElement.style.opacity = el.checked ? '1' : '0.5';
+    var btn = el.closest('button') || el.parentElement;
+    var isChecked = el.checked;
+    btn.classList.toggle('is-active', isChecked);
+    btn.setAttribute('aria-pressed', isChecked ? 'true' : 'false');
+  }
+});
+
+// Pin to Top button click handler (checkbox inside button)
+document.addEventListener('click', function(event) {
+  var btn = event.target.closest('#btnPinToTop');
+  if (btn) {
+    var checkbox = btn.querySelector('[data-pin-toggle]');
+    if (checkbox) {
+      checkbox.checked = !checkbox.checked;
+      var isChecked = checkbox.checked;
+      btn.classList.toggle('is-active', isChecked);
+      btn.setAttribute('aria-pressed', isChecked ? 'true' : 'false');
+    }
   }
 });

@@ -132,36 +132,47 @@ def book_appointment_service(user, data, request=None):
     - Sets status='pending'.
     - Dispatches Email 1 (appt_received.txt) on transaction commit.
     """
-    if not user or not user.is_authenticated:
-        raise PermissionDenied("Authentication required to book an appointment.")
+    is_auth = user is not None and getattr(user, 'is_authenticated', False)
+    resident = user if is_auth else None
 
     # 1. Prefill / extract identity details
-    applicant_first_name = user.first_name.strip()
-    applicant_middle_name = getattr(user, 'middle_name', '').strip()
-    applicant_last_name = user.last_name.strip()
-    applicant_email = user.email.strip().lower()
-    applicant_phone = (user.phone_number or getattr(user, 'contact_no', '')).strip()
+    if is_auth:
+        applicant_first_name = (user.first_name or data.get('first_name', '')).strip()
+        applicant_middle_name = (getattr(user, 'middle_name', '') or data.get('middle_name', '')).strip()
+        applicant_last_name = (user.last_name or data.get('last_name', '')).strip()
+        applicant_email = (user.email or data.get('email', '')).strip().lower()
+        applicant_phone = (user.phone_number or getattr(user, 'contact_no', '') or data.get('phone_number', '') or data.get('phone', '')).strip()
 
-    # Address
-    if hasattr(user, 'resident_profile') and user.resident_profile and user.resident_profile.address:
-        applicant_address = user.resident_profile.address.strip()
-    elif getattr(user, 'street_address', '').strip():
-        applicant_address = user.street_address.strip()
-    elif getattr(user, 'address', '').strip():
-        applicant_address = user.address.strip()
+        # Address
+        if hasattr(user, 'resident_profile') and user.resident_profile and user.resident_profile.address:
+            applicant_address = user.resident_profile.address.strip()
+        elif getattr(user, 'street_address', '').strip():
+            applicant_address = user.street_address.strip()
+        elif getattr(user, 'address', '').strip():
+            applicant_address = user.address.strip()
+        else:
+            applicant_address = data.get('address', '').strip()
+
+        # Age calculation from birthdate (server-side, read-only)
+        birthdate = None
+        if hasattr(user, 'resident_profile') and user.resident_profile and user.resident_profile.birthdate:
+            birthdate = user.resident_profile.birthdate
+        elif getattr(user, 'date_of_birth', None):
+            birthdate = user.date_of_birth
+
+        if birthdate:
+            applicant_age = calculate_age(birthdate)
+        else:
+            raw_age = data.get('age')
+            applicant_age = int(raw_age) if raw_age else 18
     else:
-        applicant_address = data.get('address', '').strip()
-
-    # Age calculation from birthdate (server-side, read-only)
-    birthdate = None
-    if hasattr(user, 'resident_profile') and user.resident_profile and user.resident_profile.birthdate:
-        birthdate = user.resident_profile.birthdate
-    elif getattr(user, 'date_of_birth', None):
-        birthdate = user.date_of_birth
-
-    if birthdate:
-        applicant_age = calculate_age(birthdate)
-    else:
+        # Guest applicant (no account)
+        applicant_first_name = (data.get('first_name') or '').strip()
+        applicant_middle_name = (data.get('middle_name') or '').strip()
+        applicant_last_name = (data.get('last_name') or '').strip()
+        applicant_email = (data.get('email') or '').strip().lower()
+        applicant_phone = (data.get('phone_number') or data.get('phone') or '').strip()
+        applicant_address = (data.get('address') or '').strip()
         raw_age = data.get('age')
         applicant_age = int(raw_age) if raw_age else 18
 
@@ -232,17 +243,26 @@ def book_appointment_service(user, data, request=None):
             if booked_count >= schedule.capacity:
                 raise ValueError(f"No available slots for {health_svc.name} on this date and time window (capacity full).")
 
-    # Refuse duplicate pending or approved booking by the same resident for the same service and date
+    # Refuse duplicate pending or approved booking by the same resident/phone for the same service and date
     active_statuses = [
         Appointment.STATUS_PENDING,
         Appointment.STATUS_APPROVED,
     ]
-    existing_dup = Appointment.objects.filter(
-        resident=user,
-        appt_date=appt_date,
-        category=category,
-        status__in=active_statuses
-    )
+    if is_auth:
+        existing_dup = Appointment.objects.filter(
+            resident=user,
+            appt_date=appt_date,
+            category=category,
+            status__in=active_statuses
+        )
+    else:
+        existing_dup = Appointment.objects.filter(
+            resident__isnull=True,
+            applicant_phone=applicant_phone,
+            appt_date=appt_date,
+            category=category,
+            status__in=active_statuses
+        )
     if category == Appointment.CATEGORY_DOCUMENT:
         existing_dup = existing_dup.filter(document_type=document_type)
     elif category == Appointment.CATEGORY_HEALTHCARE:
@@ -266,7 +286,7 @@ def book_appointment_service(user, data, request=None):
         # Snapshot the fee now so later price changes in Settings only affect NEW bookings.
         fee_val = document_type.fee if (category == Appointment.CATEGORY_DOCUMENT and document_type) else 0
         appointment = Appointment.objects.create(
-            resident=user,
+            resident=resident,
             applicant_first_name=applicant_first_name,
             applicant_middle_name=applicant_middle_name,
             applicant_last_name=applicant_last_name,

@@ -765,5 +765,18 @@
 {% endblock %}
 
 {% block extra_js %}
+<script type="application/json" id="health-services-data">
+[
+    {% for svc in active_health_services %}
+    {
+        "id": {{ svc.id }},
+        "name": "{{ svc.name|escapejs }}",
+        "daysText": "{{ svc.available_date|default:'Monday - Friday'|escapejs }}",
+        "timeText": "{{ svc.available_time|default:'8:00 AM - 5:00 PM'|escapejs }}",
+        "is_free": {% if svc.is_free %}true{% else %}false{% endif %}
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+]
+</script>
 <script src="{% static 'js/appointments.js' %}" defer></script>
 {% endblock %}

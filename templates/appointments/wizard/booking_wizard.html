@@ -1,0 +1,98 @@
+{% load core_tags %}
+<!-- Simplified 5-Step Accessible Booking Wizard -->
+<div id="bookAppointmentModal" class="modal-overlay wizard-modal-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="wizard-modal-title">
+    <div class="wizard-modal-container" id="wizard-container" data-font-size="normal">
+        
+        <!-- Modal Header with Text-Size Toggle -->
+        <header class="wizard-header">
+            <div class="wizard-header-left">
+                <div class="wizard-icon-badge" aria-hidden="true">
+                    {% icon 'calendar-check' %}
+                </div>
+                <div>
+                    <h1 id="wizard-modal-title" class="wizard-title">Book an Appointment</h1>
+                </div>
+            </div>
+
+            <div class="wizard-header-actions">
+                <!-- Text Size Toggle (Accessibility requirement) -->
+                <div class="wizard-font-toggle" role="group" aria-label="Text size options">
+                    <button type="button" id="wizard-font-normal" class="font-toggle-btn active" aria-pressed="true" aria-label="Normal text size (100%)">
+                        A
+                    </button>
+                    <button type="button" id="wizard-font-large" class="font-toggle-btn" aria-pressed="false" aria-label="Large text size (125%)">
+                        <span style="font-size: 1.25em; font-weight: 800;">A</span>
+                    </button>
+                </div>
+
+                <button type="button" id="wizard-modal-close" class="wizard-close-btn" data-call="closeBookAppointmentModal" aria-label="Close booking modal">
+                    {% icon 'x' %}
+                </button>
+            </div>
+        </header>
+
+        <!-- Progress Indicator -->
+        <div class="wizard-progress-section" id="wizard-progress-section">
+            <div class="wizard-progress-bar" id="wizard-progress-bar" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="5" aria-label="Wizard progress">
+                <div class="wizard-progress-segment current" id="progress-seg-1"></div>
+                <div class="wizard-progress-segment upcoming" id="progress-seg-2"></div>
+                <div class="wizard-progress-segment upcoming" id="progress-seg-3"></div>
+                <div class="wizard-progress-segment upcoming" id="progress-seg-4"></div>
+                <div class="wizard-progress-segment upcoming" id="progress-seg-5"></div>
+            </div>
+            <div class="wizard-step-counter" id="wizard-step-counter" aria-live="polite">
+                Step 1 of 5
+            </div>
+        </div>
+
+        <!-- Scrollable Modal Body -->
+        <main class="wizard-body modal-scrollable" id="wizard-body">
+            <form id="public-booking-form" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="category" id="form-category-input" value="">
+                <input type="hidden" name="document_type" id="form-doc-input" value="">
+                <input type="hidden" name="healthcare_service" id="form-health-input" value="">
+                <input type="hidden" name="appt_date" id="modal-date-input" value="">
+                <input type="hidden" name="time_window" id="modal-time-slot" value="morning">
+                <input type="hidden" name="time_exact" id="modal-time-exact-value" value="">
+                <input type="hidden" name="purpose" id="modal-purpose-input" value="">
+
+                <!-- Step 1: What do you need? -->
+                {% include 'appointments/wizard/step1_need.html' %}
+
+                <!-- Step 2: Pick a day -->
+                {% include 'appointments/wizard/step2_day.html' %}
+
+                <!-- Step 3: Pick a time -->
+                {% include 'appointments/wizard/step3_time.html' %}
+
+                <!-- Step 4: Your details -->
+                {% include 'appointments/wizard/step4_details.html' %}
+
+                <!-- Step 5: Check and send -->
+                {% include 'appointments/wizard/step5_confirm.html' %}
+            </form>
+
+            <!-- Need Help Box (Shown on Steps 1 to 4) -->
+            <div class="wizard-help-box" id="wizard-help-box">
+                <div class="wizard-help-icon" aria-hidden="true">
+                    {% icon 'phone' %}
+                </div>
+                <div class="wizard-help-text">
+                    Need help? Call the Barangay Hall <a href="tel:{{ admin_phone|default:barangay_info.contact_no|cut:' '|cut:'-' }}" class="wizard-help-link">{{ admin_phone|default:barangay_info.contact_no|default:'(02) 8123-4567' }}</a>
+                </div>
+            </div>
+        </main>
+
+        <!-- Sticky Footer Navigation -->
+        <footer class="wizard-footer" id="wizard-footer">
+            <button type="button" id="wizard-btn-back" class="wizard-footer-btn wizard-btn-back" style="display: none;" aria-label="Go back to previous step">
+                {% icon 'chevron-left' %} Back
+            </button>
+            <button type="button" id="wizard-btn-next" class="wizard-footer-btn wizard-btn-next" disabled aria-label="Continue to next step">
+                Next {% icon 'chevron-right' %}
+            </button>
+        </footer>
+
+    </div>
+</div>

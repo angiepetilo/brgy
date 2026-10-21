@@ -3,10 +3,12 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.shortcuts import redirect
+from django.views.generic.base import RedirectView
 
 from apps.communications import views as comm_views
 
 urlpatterns = [
+    path('favicon.ico', RedirectView.as_view(url='/static/images/barangay_logo.png', permanent=False)),
     # Root only Django Admin
     path('admin/', admin.site.urls),
 

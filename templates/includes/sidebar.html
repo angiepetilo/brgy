@@ -9,37 +9,32 @@
         </a>
         <button type="button" class="sidebar-toggle-btn" id="sidebar-toggle-btn" title="Toggle Sidebar" aria-label="Toggle Sidebar">
             <span class="sidebar-toggle-icon-collapse" title="Collapse Sidebar">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <rect width="18" height="18" x="3" y="3" rx="2.5"></rect>
-                    <path d="M9 3v18"></path>
-                    <path d="m14 9-3 3 3 3"></path>
-                </svg>
+                {% icon 'chevron-left' %}
+                <span class="sr-only">Collapse</span>
             </span>
-            <span class="sidebar-toggle-icon-expand" title="Expand Sidebar">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <rect width="18" height="18" x="3" y="3" rx="2.5"></rect>
-                    <path d="M9 3v18"></path>
-                    <path d="m13 15 3-3-3-3"></path>
-                </svg>
+            <span class="sidebar-toggle-icon-expand" title="Expand Sidebar" style="display: none;">
+                {% icon 'chevron-right' %}
+                <span class="sr-only">Expand</span>
             </span>
         </button>
     </div>
 
-    <!-- Sidebar Header -->
-    <div class="hig-sidebar-header">
-        <span class="hig-sidebar-menu-heading">Menu</span>
-    </div>
-
     <!-- Sidebar Navigation -->
-    <nav class="hig-sidebar-nav">
-        <!-- Appointment (All roles) -->
-        <a href="{% url 'appointments:list' %}" class="hig-nav-item {% if 'appointment' in request.path %}hig-nav-item-active active{% endif %}">
+    <nav class="hig-sidebar-nav" aria-label="Sidebar Sections">
+
+        <!-- 1. MAIN SECTION -->
+        <div class="hig-nav-section">
+            <div class="hig-nav-section-title">MAIN</div>
+        </div>
+
+        <!-- Appointments -->
+        <a href="{% url 'appointments:list' %}" class="hig-nav-item {% if 'appointment' in request.path %}hig-nav-item-active active{% endif %}" title="Appointments">
             {% icon 'calendar-check' cls='hig-nav-icon' %}
             <span class="hig-nav-label">Appointments</span>
         </a>
 
-        <!-- Messages (All roles) -->
-        <a href="{% url 'chat:inbox' %}" class="hig-nav-item {% if 'chat' in request.path or 'messages' in request.path %}hig-nav-item-active active{% endif %}">
+        <!-- Messages -->
+        <a href="{% url 'chat:inbox' %}" class="hig-nav-item {% if 'chat' in request.path or 'messages' in request.path %}hig-nav-item-active active{% endif %}" title="Messages">
             {% icon 'messages-square' cls='hig-nav-icon' %}
             <span class="hig-nav-label">Messages</span>
             {% if unread_messages_count > 0 %}
@@ -47,104 +42,88 @@
             {% endif %}
         </a>
 
-        <!-- Section Divider -->
+        <!-- 2. COMMUNITY MANAGEMENT SECTION -->
         {% if request.user.is_admin_user or request.user.is_kapitan_user or request.user.is_staff %}
         <div class="hig-nav-section">
-            <div class="hig-nav-section-title">Management</div>
+            <div class="hig-nav-section-title">COMMUNITY MANAGEMENT</div>
         </div>
-        {% endif %}
-        
-        <!-- Households (Admin, Kapitan, & Staff Only) -->
-        {% if request.user.is_admin_user or request.user.is_kapitan_user or request.user.is_staff %}
-        <a href="{% url 'accounts:household_list' %}" class="hig-nav-item {% if 'household' in request.path %}hig-nav-item-active active{% endif %}">
-            {% icon 'home' cls='hig-nav-icon' %}
+
+        <!-- Households -->
+        <a href="{% url 'accounts:household_list' %}" class="hig-nav-item {% if 'household' in request.path %}hig-nav-item-active active{% endif %}" title="Households">
+            {% icon 'users' cls='hig-nav-icon' %}
             <span class="hig-nav-label">Households</span>
         </a>
-        {% endif %}
 
-        <!-- Resident Account (Centralized Profiles of Constituents & Demographics) -->
-        {% if request.user.is_admin_user or request.user.is_kapitan_user or request.user.is_staff %}
-        <a href="{% url 'accounts:residents_tabbed' %}" class="hig-nav-item {% if 'residents' in request.path or 'resident-accounts' in request.path %}hig-nav-item-active active{% endif %}">
-            {% icon 'users' cls='hig-nav-icon' %}
-            <span class="hig-nav-label">Resident Account</span>
+        <!-- Resident Accounts -->
+        <a href="{% url 'accounts:residents_tabbed' %}" class="hig-nav-item {% if 'residents' in request.path or 'resident-accounts' in request.path %}hig-nav-item-active active{% endif %}" title="Resident Accounts & Demographics">
+            {% icon 'user' cls='hig-nav-icon' %}
+            <span class="hig-nav-label">Resident Accounts</span>
             {% if dashboard_metrics.pending_registrations_count > 0 or pending_approvals_count > 0 %}
             <span class="hig-nav-badge">{{ dashboard_metrics.pending_registrations_count|default:pending_approvals_count }}</span>
             {% endif %}
         </a>
-        {% endif %}
 
-        <!-- Officers and Directory (Barangay Officers & Department Directory) -->
-        {% if request.user.is_admin_user or request.user.is_kapitan_user or request.user.is_staff %}
-        <a href="{% url 'accounts:departments_directory' %}" class="hig-nav-item {% if 'departments' in request.path or 'directory' in request.path or 'officers' in request.path %}hig-nav-item-active active{% endif %}">
-            {% icon 'building' cls='hig-nav-icon' %}
-            <span class="hig-nav-label">Officers and Directory</span>
+        <!-- Officers & Directory -->
+        <a href="{% url 'accounts:departments_directory' %}" class="hig-nav-item {% if 'departments' in request.path or 'directory' in request.path or 'officers' in request.path %}hig-nav-item-active active{% endif %}" title="Officers and Directory">
+            {% icon 'clipboard-list' cls='hig-nav-icon' %}
+            <span class="hig-nav-label">Officers & Directory</span>
         </a>
-        {% endif %}
 
-        <!-- Blotter -->
+        <!-- Blotter & Complaints -->
         {% if not request.user.is_resident_user %}{% user_can request.user 'blotter' 'view' as can_view_blotter %}{% endif %}
         {% if can_view_blotter %}
-        <a href="{% url 'blotter:case_list' %}" class="hig-nav-item {% if 'blotter' in request.path %}hig-nav-item-active active{% endif %}">
+        <a href="{% url 'blotter:case_list' %}" class="hig-nav-item {% if 'blotter' in request.path %}hig-nav-item-active active{% endif %}" title="Blotter and Complaints">
             {% icon 'scale' cls='hig-nav-icon' %}
-            <span class="hig-nav-label">Blotter</span>
+            <span class="hig-nav-label">Blotter & Complaints</span>
         </a>
         {% endif %}
 
-        <!-- Inventory (Physical properties, medical kits, relief goods, event attendance) -->
+        <!-- Official Records & Archives -->
+        <a href="{% url 'accounts:residents_tabbed' %}?tab=records" class="hig-nav-item {% if 'records' in request.path %}hig-nav-item-active active{% endif %}" title="Official Records and Archives">
+            {% icon 'folder-open' cls='hig-nav-icon' %}
+            <span class="hig-nav-label">Official Records</span>
+        </a>
+        {% endif %}
+
+        <!-- 3. OPERATIONS SECTION -->
         {% if request.user.is_admin_user or request.user.is_kapitan_user or request.user.is_staff %}
-        <a href="{% url 'inventory:inventory' %}" class="hig-nav-item {% if 'inventory' in request.path %}hig-nav-item-active active{% endif %}" title="Inventory and Asset Tracking: Monitors physical barangay properties, emergency medical kits, relief goods, and community event attendance.">
+        <div class="hig-nav-section">
+            <div class="hig-nav-section-title">OPERATIONS</div>
+        </div>
+
+        <!-- Inventory & Supplies -->
+        <a href="{% url 'inventory:inventory' %}" class="hig-nav-item {% if 'inventory' in request.path %}hig-nav-item-active active{% endif %}" title="Inventory and Supplies Tracking">
             {% icon 'box' cls='hig-nav-icon' %}
-            <span class="hig-nav-label">Inventory</span>
+            <span class="hig-nav-label">Inventory & Supplies</span>
         </a>
-        {% endif %}
 
-        <!-- Financial Management (Fund tracking, disbursement vouchers, supplier records, cash advances, liquidation reports, UACS) -->
-        {% if request.user.is_admin_user or request.user.is_kapitan_user or request.user.is_staff %}
-        <a href="{% url 'finance:financial_management' %}" class="hig-nav-item {% if 'financial-management' in request.path or 'finance' in request.path %}hig-nav-item-active active{% endif %}" title="Budget and Financial Management: Handles local fund tracking, disbursement vouchers, supplier records, cash advances, liquidation reports, and UACS (Unified Accounts Code Structure) line items">
-            {% icon 'landmark' cls='hig-nav-icon' %}
+        <!-- Financial Management -->
+        <a href="{% url 'finance:financial_management' %}" class="hig-nav-item {% if 'financial-management' in request.path or 'finance' in request.path %}hig-nav-item-active active{% endif %}" title="Budget and Financial Management">
+            {% icon 'coins' cls='hig-nav-icon' %}
             <span class="hig-nav-label">Financial Management</span>
         </a>
-        {% endif %}
 
-        <!-- Statistics -->
+        <!-- Statistics & Reports -->
         {% user_can request.user 'statistics' 'view' as can_view_statistics %}
         {% if can_view_statistics %}
-        <a href="{% url 'statistics:overview' %}" class="hig-nav-item {% if 'statistics' in request.path or 'stats_overview' in request.path %}hig-nav-item-active active{% endif %}">
+        <a href="{% url 'statistics:overview' %}" class="hig-nav-item {% if 'statistics' in request.path or 'stats_overview' in request.path %}hig-nav-item-active active{% endif %}" title="Statistics and Reports">
             {% icon 'chart-pie' cls='hig-nav-icon' %}
-            <span class="hig-nav-label">Statistics</span>
+            <span class="hig-nav-label">Statistics & Reports</span>
         </a>
         {% endif %}
-
-        <!-- Section Divider -->
-        {% if request.user.is_admin_user or request.user.is_superuser %}
-        <div class="hig-nav-section">
-            <div class="hig-nav-section-title">System</div>
-        </div>
         {% endif %}
 
-        <!-- System Settings (Admin & Superuser Only) -->
+        <!-- 4. SYSTEM SECTION -->
         {% if request.user.is_admin_user or request.user.is_superuser %}
-        <a href="{% url 'accounts:system_dashboard' %}" class="hig-nav-item {% if 'system' in request.path or 'settings' in request.path or '/accounts/profile/' in request.path %}hig-nav-item-active active{% endif %}">
+        <div class="hig-nav-section">
+            <div class="hig-nav-section-title">SYSTEM</div>
+        </div>
+
+        <!-- Settings -->
+        <a href="{% url 'accounts:system_dashboard' %}" class="hig-nav-item {% if 'system' in request.path or 'settings' in request.path or '/accounts/profile/' in request.path %}hig-nav-item-active active{% endif %}" title="System Settings">
             {% icon 'settings' cls='hig-nav-icon' %}
             <span class="hig-nav-label">Settings</span>
         </a>
         {% endif %}
     </nav>
-
-    <!-- Sidebar Footer -->
-    <div class="hig-sidebar-footer">
-        <div class="hig-footer-user">
-            <div class="hig-footer-avatar">
-                {% if request.user.avatar %}
-                    <img src="{{ request.user.avatar.url }}" alt="{{ request.user.username }}" class="hig-avatar-img">
-                {% else %}
-                    <div class="hig-avatar-initials">{{ request.user.initials }}</div>
-                {% endif %}
-            </div>
-            <div class="hig-footer-info">
-                <div class="hig-footer-name">{{ request.user.get_full_name|default:request.user.username|truncatechars:20 }}</div>
-                <div class="hig-footer-role">{{ request.user.get_role_display }}</div>
-            </div>
-        </div>
-    </div>
 </aside>

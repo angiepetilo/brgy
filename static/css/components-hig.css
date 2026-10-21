@@ -1245,3 +1245,274 @@ body {
   box-sizing: border-box !important;
 }
 
+/* ==========================================================================
+   SHARED COMPONENT: MODAL DYNAMIC SCROLLBAR
+   Scrollbar is completely hidden by default and only appears when hovered
+   or actively scrolling up and down. Shared across every modal dialog.
+   ========================================================================== */
+.modal-scrollable,
+.reg-wizard-modal-scroll,
+.wizard-body,
+.wizard-container,
+.modal-overlay [style*="overflow-y: auto"],
+.modal-overlay [style*="overflow-y:auto"],
+.modal-overlay [style*="overflow: auto"],
+.modal-overlay [style*="overflow:auto"],
+.modal-overlay .modal-body,
+.modal-overlay .modal-content,
+[role="dialog"] [style*="overflow-y: auto"],
+[role="dialog"] [style*="overflow-y:auto"],
+[role="dialog"] [style*="overflow: auto"],
+[role="dialog"] [style*="overflow:auto"],
+[role="dialog"] .modal-body {
+  scrollbar-width: thin !important;
+  scrollbar-color: transparent transparent !important;
+  transition: scrollbar-color 0.25s ease !important;
+}
+
+.modal-scrollable::-webkit-scrollbar,
+.reg-wizard-modal-scroll::-webkit-scrollbar,
+.wizard-body::-webkit-scrollbar,
+.wizard-container::-webkit-scrollbar,
+.modal-overlay [style*="overflow-y: auto"]::-webkit-scrollbar,
+.modal-overlay [style*="overflow-y:auto"]::-webkit-scrollbar,
+.modal-overlay [style*="overflow: auto"]::-webkit-scrollbar,
+.modal-overlay [style*="overflow:auto"]::-webkit-scrollbar,
+.modal-overlay .modal-body::-webkit-scrollbar,
+.modal-overlay .modal-content::-webkit-scrollbar,
+[role="dialog"] [style*="overflow-y: auto"]::-webkit-scrollbar,
+[role="dialog"] [style*="overflow-y:auto"]::-webkit-scrollbar,
+[role="dialog"] [style*="overflow: auto"]::-webkit-scrollbar,
+[role="dialog"] [style*="overflow:auto"]::-webkit-scrollbar,
+[role="dialog"] .modal-body::-webkit-scrollbar {
+  width: 6px !important;
+  height: 6px !important;
+}
+
+.modal-scrollable::-webkit-scrollbar-button,
+.reg-wizard-modal-scroll::-webkit-scrollbar-button,
+.wizard-body::-webkit-scrollbar-button,
+.wizard-container::-webkit-scrollbar-button,
+.modal-overlay [style*="overflow-y: auto"]::-webkit-scrollbar-button,
+.modal-overlay [style*="overflow-y:auto"]::-webkit-scrollbar-button,
+.modal-overlay [style*="overflow: auto"]::-webkit-scrollbar-button,
+.modal-overlay [style*="overflow:auto"]::-webkit-scrollbar-button,
+.modal-overlay .modal-body::-webkit-scrollbar-button,
+.modal-overlay .modal-content::-webkit-scrollbar-button,
+[role="dialog"] [style*="overflow-y: auto"]::-webkit-scrollbar-button,
+[role="dialog"] [style*="overflow-y:auto"]::-webkit-scrollbar-button,
+[role="dialog"] [style*="overflow: auto"]::-webkit-scrollbar-button,
+[role="dialog"] [style*="overflow:auto"]::-webkit-scrollbar-button,
+[role="dialog"] .modal-body::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.modal-scrollable::-webkit-scrollbar-track,
+.reg-wizard-modal-scroll::-webkit-scrollbar-track,
+.wizard-body::-webkit-scrollbar-track,
+.wizard-container::-webkit-scrollbar-track,
+.modal-overlay [style*="overflow-y: auto"]::-webkit-scrollbar-track,
+.modal-overlay [style*="overflow-y:auto"]::-webkit-scrollbar-track,
+.modal-overlay [style*="overflow: auto"]::-webkit-scrollbar-track,
+.modal-overlay [style*="overflow:auto"]::-webkit-scrollbar-track,
+.modal-overlay .modal-body::-webkit-scrollbar-track,
+.modal-overlay .modal-content::-webkit-scrollbar-track,
+[role="dialog"] [style*="overflow-y: auto"]::-webkit-scrollbar-track,
+[role="dialog"] [style*="overflow-y:auto"]::-webkit-scrollbar-track,
+[role="dialog"] [style*="overflow: auto"]::-webkit-scrollbar-track,
+[role="dialog"] [style*="overflow:auto"]::-webkit-scrollbar-track,
+[role="dialog"] .modal-body::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.modal-scrollable::-webkit-scrollbar-thumb,
+.reg-wizard-modal-scroll::-webkit-scrollbar-thumb,
+.wizard-body::-webkit-scrollbar-thumb,
+.wizard-container::-webkit-scrollbar-thumb,
+.modal-overlay [style*="overflow-y: auto"]::-webkit-scrollbar-thumb,
+.modal-overlay [style*="overflow-y:auto"]::-webkit-scrollbar-thumb,
+.modal-overlay [style*="overflow: auto"]::-webkit-scrollbar-thumb,
+.modal-overlay [style*="overflow:auto"]::-webkit-scrollbar-thumb,
+.modal-overlay .modal-body::-webkit-scrollbar-thumb,
+.modal-overlay .modal-content::-webkit-scrollbar-thumb,
+[role="dialog"] [style*="overflow-y: auto"]::-webkit-scrollbar-thumb,
+[role="dialog"] [style*="overflow-y:auto"]::-webkit-scrollbar-thumb,
+[role="dialog"] [style*="overflow: auto"]::-webkit-scrollbar-thumb,
+[role="dialog"] [style*="overflow:auto"]::-webkit-scrollbar-thumb,
+[role="dialog"] .modal-body::-webkit-scrollbar-thumb {
+  background: transparent !important;
+  border-radius: 9999px !important;
+  transition: background-color 0.25s ease !important;
+}
+
+/* 1. Show scrollbar on hover of the container or the parent modal */
+.modal-scrollable:hover,
+.reg-wizard-modal-scroll:hover,
+.wizard-body:hover,
+.wizard-container:hover,
+.modal-overlay:hover .modal-scrollable,
+.modal-overlay:hover .reg-wizard-modal-scroll,
+.modal-overlay:hover [style*="overflow-y: auto"],
+.modal-overlay:hover [style*="overflow-y:auto"],
+.modal-overlay:hover [style*="overflow: auto"],
+.modal-overlay:hover [style*="overflow:auto"],
+.modal-overlay:hover .modal-body,
+[role="dialog"]:hover .modal-scrollable,
+[role="dialog"]:hover .reg-wizard-modal-scroll,
+[role="dialog"]:hover [style*="overflow-y: auto"],
+[role="dialog"]:hover [style*="overflow-y:auto"],
+[role="dialog"]:hover [style*="overflow: auto"],
+[role="dialog"]:hover [style*="overflow:auto"],
+[role="dialog"]:hover .modal-body {
+  scrollbar-color: rgba(148, 163, 184, 0.45) transparent !important;
+}
+
+.modal-scrollable:hover::-webkit-scrollbar-thumb,
+.reg-wizard-modal-scroll:hover::-webkit-scrollbar-thumb,
+.wizard-body:hover::-webkit-scrollbar-thumb,
+.wizard-container:hover::-webkit-scrollbar-thumb,
+.modal-overlay:hover .modal-scrollable::-webkit-scrollbar-thumb,
+.modal-overlay:hover .reg-wizard-modal-scroll::-webkit-scrollbar-thumb,
+.modal-overlay:hover [style*="overflow-y: auto"]::-webkit-scrollbar-thumb,
+.modal-overlay:hover [style*="overflow-y:auto"]::-webkit-scrollbar-thumb,
+.modal-overlay:hover [style*="overflow: auto"]::-webkit-scrollbar-thumb,
+.modal-overlay:hover [style*="overflow:auto"]::-webkit-scrollbar-thumb,
+.modal-overlay:hover .modal-body::-webkit-scrollbar-thumb,
+[role="dialog"]:hover .modal-scrollable::-webkit-scrollbar-thumb,
+[role="dialog"]:hover .reg-wizard-modal-scroll::-webkit-scrollbar-thumb,
+[role="dialog"]:hover [style*="overflow-y: auto"]::-webkit-scrollbar-thumb,
+[role="dialog"]:hover [style*="overflow-y:auto"]::-webkit-scrollbar-thumb,
+[role="dialog"]:hover [style*="overflow: auto"]::-webkit-scrollbar-thumb,
+[role="dialog"]:hover [style*="overflow:auto"]::-webkit-scrollbar-thumb,
+[role="dialog"]:hover .modal-body::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.45) !important;
+}
+
+/* Hover directly on scrollbar thumb */
+.modal-scrollable::-webkit-scrollbar-thumb:hover,
+.reg-wizard-modal-scroll::-webkit-scrollbar-thumb:hover,
+.wizard-body::-webkit-scrollbar-thumb:hover,
+.wizard-container::-webkit-scrollbar-thumb:hover,
+.modal-overlay [style*="overflow-y: auto"]::-webkit-scrollbar-thumb:hover,
+.modal-overlay [style*="overflow-y:auto"]::-webkit-scrollbar-thumb:hover,
+.modal-overlay [style*="overflow: auto"]::-webkit-scrollbar-thumb:hover,
+.modal-overlay [style*="overflow:auto"]::-webkit-scrollbar-thumb:hover,
+.modal-overlay .modal-body::-webkit-scrollbar-thumb:hover,
+[role="dialog"] [style*="overflow-y: auto"]::-webkit-scrollbar-thumb:hover,
+[role="dialog"] [style*="overflow-y:auto"]::-webkit-scrollbar-thumb:hover,
+[role="dialog"] [style*="overflow: auto"]::-webkit-scrollbar-thumb:hover,
+[role="dialog"] [style*="overflow:auto"]::-webkit-scrollbar-thumb:hover,
+[role="dialog"] .modal-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.75) !important;
+}
+
+/* 2. Show scrollbar when actively scrolling up and down */
+.modal-scrollable.is-scrolling,
+.reg-wizard-modal-scroll.is-scrolling,
+.wizard-body.is-scrolling,
+.wizard-container.is-scrolling,
+.is-scrolling {
+  scrollbar-color: rgba(148, 163, 184, 0.6) transparent !important;
+}
+
+.modal-scrollable.is-scrolling::-webkit-scrollbar-thumb,
+.reg-wizard-modal-scroll.is-scrolling::-webkit-scrollbar-thumb,
+.wizard-body.is-scrolling::-webkit-scrollbar-thumb,
+.wizard-container.is-scrolling::-webkit-scrollbar-thumb,
+.is-scrolling::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.6) !important;
+}
+
+/* ============================================
+   PROFILE DROPDOWN: Quick Nav (Emergency / Home / Announcements)
+   ============================================ */
+
+.fb-profile-quick-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 10px;
+}
+
+.fb-quick-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 6px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #374151;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: background 0.14s ease, color 0.14s ease;
+  text-align: center;
+  min-width: 0;
+}
+
+.fb-quick-nav-item:hover {
+  background: #F3F4F6;
+  color: #111827;
+  text-decoration: none;
+}
+
+.fb-quick-nav-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.fb-quick-nav-emergency {
+  color: #DC2626;
+}
+
+.fb-quick-nav-emergency:hover {
+  background: #FEF2F2;
+  color: #B91C1C;
+}
+
+/* ============================================
+   CREATE POST MODAL: Pin to Top button active state
+   ============================================ */
+
+.add-to-post-card .icon-btn.pin.is-active,
+.add-to-post-card .icon-btn.pin[aria-pressed="true"] {
+  background: #EFF6FF;
+  border-color: #BFDBFE;
+  color: #1D4ED8;
+}
+
+.add-to-post-card .icon-btn.pin.is-active:hover,
+.add-to-post-card .icon-btn.pin[aria-pressed="true"]:hover {
+  background: #DBEAFE;
+  border-color: #93C5FD;
+}
+
+/* ============================================
+   SIDEBAR BRAND LOGO
+   ============================================ */
+
+/* Properly sized logo in expanded sidebar */
+.sidebar-brand-logo {
+  height: 26px;
+  width: 26px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+/* Collapsed state: show only logo centered, hide toggle btn */
+.hig-sidebar.collapsed .sidebar-brand-logo {
+  height: 28px !important;
+  width: 28px !important;
+  display: block !important;
+}
+
+.hig-sidebar.collapsed .sidebar-toggle-btn {
+  display: none !important;
+}
+

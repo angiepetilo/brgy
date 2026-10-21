@@ -81,8 +81,7 @@ class RateLimitTests(TestCase):
     @mock.patch('apps.appointments.views.validate_email_address')
     def test_external_email_api_never_called_for_anonymous(self, validator):
         r1 = self.client.get(reverse('appointments:api_validate_email') + '?email=a@example.com')
-        r2 = self.client.post(reverse('appointments:api_public_book'), {'email': 'a@example.com'})
-        self.assertEqual((r1.status_code, r2.status_code), (401, 401))
+        self.assertEqual(r1.status_code, 401)
         validator.assert_not_called()
 
     @mock.patch('apps.appointments.views.validate_email_address')
@@ -91,13 +90,11 @@ class RateLimitTests(TestCase):
         from django.test import RequestFactory
         from apps.appointments import views
         rf = RequestFactory()
-        for view, request in (
-            (views.api_validate_email_view, rf.get('/appointments/api/validate-email/?email=a@example.com')),
-            (views.public_appointment_book_view, rf.post('/appointments/api/public-book/', {'email': 'a@example.com'})),
-        ):
-            request.user = AnonymousUser()
-            request.META['REMOTE_ADDR'] = '192.0.2.77'
-            self.assertEqual(view(request).status_code, 401)
+        view = views.api_validate_email_view
+        request = rf.get('/appointments/api/validate-email/?email=a@example.com')
+        request.user = AnonymousUser()
+        request.META['REMOTE_ADDR'] = '192.0.2.77'
+        self.assertEqual(view(request).status_code, 401)
         validator.assert_not_called()
 
     def test_chat_room_send_per_user(self):

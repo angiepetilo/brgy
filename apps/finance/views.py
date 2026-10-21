@@ -1,5 +1,6 @@
-from decimal import Decimal, InvalidOperation
 import datetime
+import re
+from decimal import Decimal, InvalidOperation
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db.models import Q, Sum
@@ -10,6 +11,45 @@ from apps.finance.services import (
     record_financial_transaction,
     liquidate_cash_advance,
 )
+
+MAX_PESO_AMOUNT = Decimal('999999999999.99')
+
+
+def parse_peso_amount(raw_value, allow_zero=True):
+    """
+    Validates and parses a Philippine Peso currency string.
+    Rules:
+    - Strips '₱', 'PHP', spaces, and thousands-separator commas.
+    - Rejects strings/letters, multiple decimals, negative numbers, or invalid inputs.
+    - Limits value to <= ₱999,999,999,999.99 (matches DecimalField(max_digits=14, decimal_places=2)).
+    Returns (Decimal, None) on success or (None, error_message_str) on failure.
+    """
+    if raw_value is None:
+        return (Decimal('0.00'), None) if allow_zero else (None, 'Amount is required.')
+
+    cleaned = str(raw_value).strip().replace('₱', '').replace('PHP', '').replace('php', '').replace(',', '').strip()
+    if not cleaned:
+        return (Decimal('0.00'), None) if allow_zero else (None, 'Amount is required.')
+
+    # Do not allow letters, negative values, or invalid formats; must be standard numeric decimal
+    if not re.match(r'^\d+(\.\d{1,2})?$', cleaned):
+        return None, 'Amount must be a valid number following the Philippine Peso standard (e.g. 500,000.00). Letters and special characters are not allowed.'
+
+    try:
+        val = Decimal(cleaned)
+    except (InvalidOperation, TypeError):
+        return None, 'Invalid numeric value.'
+
+    if not allow_zero and val <= Decimal('0.00'):
+        return None, 'Amount must be greater than zero.'
+
+    if val < Decimal('0.00'):
+        return None, 'Amount cannot be negative.'
+
+    if val > MAX_PESO_AMOUNT:
+        return None, f'Amount exceeds the maximum allowable budget of ₱{MAX_PESO_AMOUNT:,.2f}.'
+
+    return val, None
 
 
 @resident_forbidden
@@ -35,10 +75,13 @@ def financial_management_view(request):
             accountable_officer = request.POST.get('accountable_officer', '').strip()
             description = request.POST.get('description', '').strip()
 
-            try:
-                initial_allocation = Decimal(request.POST.get('initial_allocation', '0').replace(',', ''))
-            except (InvalidOperation, TypeError):
-                initial_allocation = Decimal('0.00')
+            initial_allocation, err = parse_peso_amount(
+                request.POST.get('initial_allocation', '0'),
+                allow_zero=True
+            )
+            if err:
+                messages.error(request, err)
+                return redirect(f"{request.path}?tab=accounts")
 
             if not name or not code:
                 messages.error(request, 'Account name and unique code are required.')
@@ -66,15 +109,13 @@ def financial_management_view(request):
             uacs_code = request.POST.get('uacs_code', '').strip()
             particulars = request.POST.get('particulars', '').strip()
 
-            try:
-                amount = Decimal(request.POST.get('amount', '0').replace(',', ''))
-            except (InvalidOperation, TypeError):
-                amount = Decimal('0.00')
+            amount, err = parse_peso_amount(request.POST.get('amount'), allow_zero=False)
+            if err:
+                messages.error(request, err)
+                return redirect(f"{request.path}?tab=transactions")
 
             if not account_id:
                 messages.error(request, 'Selection of Source Account from dropdown is required to prevent mixing of funds.')
-            elif amount <= Decimal('0.00'):
-                messages.error(request, 'Please specify a valid transaction amount greater than zero.')
             elif not title:
                 messages.error(request, 'Transaction title or payee is required.')
             else:
@@ -101,22 +142,20 @@ def financial_management_view(request):
             ca_id = request.POST.get('ca_id')
             ca = get_object_or_404(CashAdvance, id=ca_id)
 
-            try:
-                actual_spent = Decimal(request.POST.get('actual_spent', '0').replace(',', ''))
-            except (InvalidOperation, TypeError):
-                actual_spent = Decimal('0.00')
+            actual_spent, err_spent = parse_peso_amount(request.POST.get('actual_spent', '0'), allow_zero=True)
+            if err_spent:
+                messages.error(request, f'Actual spent: {err_spent}')
+                return redirect(f"{request.path}?tab=liquidations")
 
-            try:
-                refund_amount = Decimal(request.POST.get('refund_amount', '0').replace(',', ''))
-            except (InvalidOperation, TypeError):
-                refund_amount = Decimal('0.00')
+            refund_amount, err_refund = parse_peso_amount(request.POST.get('refund_amount', '0'), allow_zero=True)
+            if err_refund:
+                messages.error(request, f'Refund amount: {err_refund}')
+                return redirect(f"{request.path}?tab=liquidations")
 
             or_number = request.POST.get('or_number', '').strip()
             remarks = request.POST.get('remarks', '').strip()
 
-            if actual_spent < Decimal('0.00'):
-                messages.error(request, 'Actual spent amount cannot be negative.')
-            elif actual_spent + refund_amount > ca.amount:
+            if actual_spent + refund_amount > ca.amount:
                 messages.error(
                     request,
                     f'Total accounted amount (₱{actual_spent + refund_amount:,.2f}) cannot exceed granted advance of ₱{ca.amount:,.2f}.'
@@ -145,17 +184,17 @@ def financial_management_view(request):
             liquidation_deadline = request.POST.get('liquidation_deadline', '').strip()
             post_disbursement = request.POST.get('post_disbursement') == 'on'
 
-            try:
-                amount = Decimal(request.POST.get('amount', '0').replace(',', ''))
-            except (InvalidOperation, TypeError):
-                amount = Decimal('0.00')
+            amount, err = parse_peso_amount(request.POST.get('amount'), allow_zero=False)
+            if err:
+                messages.error(request, err)
+                return redirect(f"{request.path}?tab=liquidations")
 
             account = get_object_or_404(FinancialAccount, id=account_id) if account_id else None
 
             if not account:
                 messages.error(request, 'Please select a source fund account for the cash advance.')
-            elif not officer or not purpose or amount <= Decimal('0.00'):
-                messages.error(request, 'Accountable officer, purpose, and a valid granted amount are required.')
+            elif not officer or not purpose:
+                messages.error(request, 'Accountable officer and purpose are required.')
             else:
                 if not ref_no:
                     curr_year = datetime.date.today().year

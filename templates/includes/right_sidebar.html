@@ -13,8 +13,8 @@
         <div class="stats-cards-grid">
             <!-- Stat Card 1 -->
             <div class="stat-card-item">
-                <div class="stat-label">{% icon 'book-user' %} REGISTERED RESIDENTS</div>
-                <div class="stat-value stat-primary">{{ dashboard_metrics.registered_residents_count|default:stat_total_residents_count }}</div>
+                <div class="stat-label">{% icon 'id-card' %} REGISTERED RESIDENTS</div>
+                <div class="stat-value stat-primary">{{ dashboard_metrics.registered_residents_count|default:stat_total_residents_count|default:0 }}</div>
                 <div class="stat-sub">Verified inhabitants in barangay registry</div>
             </div>
 
@@ -25,19 +25,17 @@
                 <div class="stat-sub">Active online portal residents</div>
             </div>
 
-            {% if dashboard_metrics.needs_attention_count is not None %}
             <!-- Stat Card 3 -->
             <div class="stat-card-item">
                 <div class="stat-label">{% icon 'hand-heart' %} NEEDS ATTENTION</div>
-                <div class="stat-value stat-warning">{{ dashboard_metrics.needs_attention_count }}</div>
+                <div class="stat-value stat-warning">{{ dashboard_metrics.needs_attention_count|default:stat_needs_attention_count|default:0 }}</div>
                 <div class="stat-sub">PWD, senior, low-income assistance</div>
             </div>
-            {% endif %}
 
             <!-- Stat Card 4 -->
             <div class="stat-card-item">
                 <div class="stat-label">{% icon 'hourglass' %} PENDING REGISTRATIONS</div>
-                <div class="stat-value stat-danger">{{ dashboard_metrics.pending_registrations_count|default:stat_pending_residents_count }}</div>
+                <div class="stat-value stat-danger">{{ dashboard_metrics.pending_registrations_count|default:stat_pending_residents_count|default:0 }}</div>
                 <div class="stat-sub">Awaiting admin review and approval</div>
             </div>
         </div>

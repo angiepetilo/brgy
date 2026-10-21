@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Barangay Information & Management System{% endblock %}</title>
     {% load static core_tags %}
+    <link rel="icon" type="image/png" href="{% static 'images/barangay_logo.png' %}">
     <!-- Legacy styles (load first) -->
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" href="{% static 'css/theme.css' %}">
@@ -21,6 +22,8 @@
     <link rel="stylesheet" href="{% static 'css/components/forms.css' %}">
     <link rel="stylesheet" href="{% static 'css/components/dropdowns.css' %}">
     <link rel="stylesheet" href="{% static 'css/components/cards.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components/auth.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components/dashboard.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body data-icon-sprite="{% static 'vendor/lucide/sprite.svg' %}" data-authenticated="{% if request.user.is_authenticated %}true{% else %}false{% endif %}" data-user-id="{% if request.user.is_authenticated %}{{ request.user.id }}{% endif %}">
@@ -29,7 +32,7 @@
     <!-- 1. Top Bar Navigation System (Facebook Style Clean Header) -->
     <header class="fb-topbar">
         <div class="fb-topbar-left">
-            <a href="{% if request.user.is_authenticated %}{% url 'home' %}{% else %}/{% endif %}" class="fb-brand-title mobile-brand-only" title="Barangay.ph - Back to Home" data-tooltip="Barangay.ph" style="display: flex; align-items: center; gap: 0.65rem;">
+            <a href="{% if request.user.is_authenticated %}{% url 'home' %}{% else %}/{% endif %}" class="fb-brand-title" title="Barangay.ph - Back to Home" data-tooltip="Barangay.ph" style="display: flex; align-items: center; gap: 0.65rem;">
                 <img src="{% static 'images/barangay_logo.png' %}" alt="Barangay.ph Logo" style="height: 38px; width: auto; object-fit: contain;">
                 <span style="font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em; color: #111827;">BARANGAY.PH</span>
             </a>
@@ -38,13 +41,13 @@
         {% block topbar_center %}
         {% if request.user.is_authenticated and request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'signup' and request.path != '/' %}
         <nav class="fb-topbar-center" aria-label="Main">
+            <a href="{% url 'communications:emergency_list' %}" class="fb-nav-tab fb-nav-tab-emergency {% if 'emergency' in request.path %}active{% endif %}" title="Emergency Alerts" data-tooltip="Emergency Alerts">
+                {% icon 'triangle-alert' %}
+                <span class="nav-tab-label">Emergency</span>
+            </a>
             <a href="{% url 'home' %}" class="fb-nav-tab {% if request.path == '/home/' or request.path == '/feed/' or request.resolver_match.url_name == 'feed' or request.resolver_match.url_name == 'home' %}active{% endif %}" title="Home" data-tooltip="Home">
                 {% icon 'house' %}
                 <span class="nav-tab-label">Home</span>
-            </a>
-            <a href="{% url 'communications:emergency_list' %}" class="fb-nav-tab {% if 'emergency' in request.path %}active{% endif %}" title="Emergency" data-tooltip="Emergency">
-                {% icon 'triangle-alert' %}
-                <span class="nav-tab-label">Emergency</span>
             </a>
             <a href="{% url 'communications:announcements_list' %}" class="fb-nav-tab {% if 'announcement' in request.path %}active{% endif %}" title="Announcements" data-tooltip="Announcements">
                 {% icon 'megaphone' %}
@@ -57,6 +60,15 @@
         <!-- B. Right Action Group (Facebook-Style Floating Action Dropdowns) -->
         <div class="fb-topbar-right">
             {% if request.user.is_authenticated %}
+            <!-- Accessibility Font-Resizing Controls (A / A+) -->
+            <div class="topbar-font-switcher" role="group" aria-label="Text size control">
+                <button type="button" class="topbar-font-btn active" id="btn-topbar-font-normal" aria-pressed="true" title="Normal text size (100%)">
+                    A
+                </button>
+                <button type="button" class="topbar-font-btn" id="btn-topbar-font-large" aria-pressed="false" title="Large text size (Accessibility 125%)">
+                    A+
+                </button>
+            </div>
             
             <!-- 1. MESSAGES DROPDOWN WRAPPER -->
             <div class="fb-nav-dropdown-wrapper" id="fb-messages-wrapper">
@@ -243,6 +255,24 @@
 
                     <div class="fb-dropdown-divider"></div>
 
+                    <!-- Quick Nav Links: Emergency / Home / Announcements -->
+                    <div class="fb-profile-quick-nav">
+                        <a href="{% url 'communications:emergency_list' %}" class="fb-quick-nav-item fb-quick-nav-emergency">
+                            {% icon 'triangle-alert' cls='fb-quick-nav-icon' %}
+                            <span>Emergency</span>
+                        </a>
+                        <a href="{% url 'home' %}" class="fb-quick-nav-item">
+                            {% icon 'house' cls='fb-quick-nav-icon' %}
+                            <span>Home</span>
+                        </a>
+                        <a href="{% url 'communications:announcements_list' %}" class="fb-quick-nav-item">
+                            {% icon 'megaphone' cls='fb-quick-nav-icon' %}
+                            <span>Announcements</span>
+                        </a>
+                    </div>
+
+                    <div class="fb-dropdown-divider"></div>
+
                     <!-- Menu Action Links -->
                     <div class="fb-profile-menu-items">
                         <a href="{% url 'accounts:profile' %}" class="fb-menu-item">
@@ -274,6 +304,36 @@
         </div>
     </header>
 
+    <!-- Floating Toast Notifications Stack (Top-Right Floating Overlay) -->
+    <div id="toast-container" class="app-toast-container" aria-live="polite" aria-atomic="true">
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+            <div class="app-toast alert alert-{{ message.tags|default:'info' }}" role="alert" data-toast-auto-dismiss="4500">
+                <div class="app-toast-icon">
+                    {% if 'success' in message.tags %}
+                        {% icon 'circle-check' %}
+                    {% elif 'error' in message.tags or 'danger' in message.tags %}
+                        {% icon 'circle-alert' %}
+                    {% elif 'warning' in message.tags %}
+                        {% icon 'triangle-alert' %}
+                    {% else %}
+                        {% icon 'info' %}
+                    {% endif %}
+                </div>
+                <div class="app-toast-body">
+                    <span>{{ message }}</span>
+                </div>
+                <button type="button" class="close-btn app-toast-close" data-action="dismiss" aria-label="Dismiss notification">
+                    {% icon 'x' %}
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% block floating_toasts %}{% endblock %}
+    </div>
+
     <!-- 3-Column Layout Container (Left Sidebar | Center Feed | Right Stats & Roster) -->
     <div class="fb-main-container dashboard-layout app-main-content" id="fb-main-container">
         
@@ -284,18 +344,6 @@
 
         <!-- 3. Center Activity Feed & Main Content -->
         <main id="main-content" class="fb-center-content main-content-area center-content-area {% if not request.user.is_authenticated %}full-width{% endif %}">
-            <!-- Flash Messages -->
-            {% if messages %}
-            <div class="messages-container" style="margin-bottom: 1rem;">
-                {% for message in messages %}
-                <div class="alert alert-{{ message.tags|default:'info' }}">
-                    <span>{{ message }}</span>
-                    <button type="button" class="close-btn" data-action="dismiss" style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase;">DISMISS</button>
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-
             {% block content %}{% endblock %}
         </main>
 

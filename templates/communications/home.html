@@ -3,9 +3,26 @@
 
 {% block title %}Barangay Home{% endblock %}
 
+{% block floating_toasts %}
+    {% if can_publish %}
+    <!-- 1. Admin Welcome Toast Notification -->
+    <div class="admin-welcome-banner app-toast app-toast-welcome" id="adminWelcomeBanner" role="alert" data-toast-auto-dismiss="4500">
+        <div class="app-toast-icon">
+            {% icon 'shield' cls='welcome-icon' %}
+        </div>
+        <div class="admin-welcome-content app-toast-body">
+            <span class="admin-welcome-text">Welcome back, {{ user.first_name|default:user.username }}!</span>
+            <span class="app-toast-subtitle">Barangay Admin Portal</span>
+        </div>
+        <button type="button" class="admin-welcome-dismiss app-toast-close" id="dismissWelcomeBannerBtn" data-action="dismiss" aria-label="Dismiss notification">
+            {% icon 'x' %}
+        </button>
+    </div>
+    {% endif %}
+{% endblock %}
+
 {% block content %}
 <div class="feed-container" style="max-width: 760px; margin: 0 auto;">
-
 
     <!-- Post creation (Admin and staff only) -->
     {% if can_publish %}
@@ -200,10 +217,13 @@
         {% endfor %}
     </div>
     {% else %}
-    <div class="card" data-section="feed" style="text-align: center; padding: 3rem 1.5rem;">
-        <h3 style="font-size: 1.125rem; font-weight: 700; color: #111827; margin-bottom: 0.5rem;">NO POSTS FOUND IN THIS CATEGORY</h3>
-        <p style="font-size: 0.875rem; color: #6B7280; margin-bottom: 1.25rem;">Select "ALL POSTS" or publish a new official update above.</p>
-        <a href="{% url 'communications:feed' %}" class="btn btn-primary" style="font-weight: 700;">VIEW ALL POSTS</a>
+    <div class="card feed-empty-state-card" data-section="feed" style="text-align: center; padding: 3.5rem 1.5rem; background: #FFFFFF; border: 1.5px solid #E5E7EB; border-radius: 12px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);">
+        <div class="empty-state-icon" style="width: 56px; height: 56px; border-radius: 50%; background: #F3F4F6; color: #1E3A8A; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+            {% icon 'newspaper' %}
+        </div>
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: #111827; margin-bottom: 0.5rem; letter-spacing: -0.01em;">No posts found in this category</h3>
+        <p style="font-size: 0.95rem; color: #4B5563; margin-bottom: 1.5rem; max-width: 420px; margin-left: auto; margin-right: auto; line-height: 1.5;">Select "VIEW ALL POSTS" or publish a new official update above.</p>
+        <a href="{% url 'communications:feed' %}" class="btn btn-primary" style="font-weight: 700; min-height: 44px; padding: 0.65rem 1.75rem; font-size: 0.95rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;">VIEW ALL POSTS</a>
     </div>
     {% endif %}
 

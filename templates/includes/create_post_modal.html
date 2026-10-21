@@ -59,13 +59,15 @@
       <div class="add-to-post-card">
         <span class="add-label">Add to your post</span>
         <div class="attachment-icons">
-          <button type="button" class="icon-btn media" title="Attach Photo" data-action="click-target" data-target="#postImageFileInput" aria-label="Attach Photo">
+          <!-- Photo Button: triggers hidden file input -->
+          <button type="button" class="icon-btn media" id="btnAttachPhoto" title="Attach Photo" data-action="click-target" data-target="#postImageFileInput" aria-label="Attach Photo">
             {% icon 'image' %} <span>Photo</span>
           </button>
-          <label class="icon-btn pin" title="Pin to top of feed" style="cursor: pointer; margin: 0;" aria-label="Pin to top">
-            <input type="checkbox" name="is_pinned" value="1" style="display: none;" data-pin-toggle>
+          <!-- Pin to Top toggle button -->
+          <button type="button" class="icon-btn pin" id="btnPinToTop" title="Pin to top of feed" aria-label="Pin to top" aria-pressed="false">
+            <input type="checkbox" name="is_pinned" id="postIsPinned" value="1" style="display: none;" data-pin-toggle>
             {% icon 'pin' %} <span>Pin to top</span>
-          </label>
+          </button>
         </div>
       </div>
 

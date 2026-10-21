@@ -1,77 +1,114 @@
 {% extends 'base.html' %}
 {% load static core_tags %}
 
-{% block title %}Sign In - Barangay e-Portal{% endblock %}
+{% block title %}Sign In - Barangay.ph{% endblock %}
 
 {% block topbar_center %}{% endblock %}
 
 {% block content %}
-<div style="max-width: 420px; margin: 3.5rem auto; padding: 0 1rem;">
-    <div class="card" style="background: #FFFFFF; border: 1px solid #E5E5E7; border-radius: 10px; box-shadow: none; padding: 2.25rem 2rem;">
-        
-        <div style="text-align: center; margin-bottom: 2rem;">
-            <h1 style="font-size: 22px; font-weight: 700; color: #1D1D1F; letter-spacing: -0.26px; margin: 0; text-transform: uppercase;">
-                LOGIN
-            </h1>
-        </div>
-
-        {% if throttled %}
-        <div class="alert alert-danger" role="alert" style="font-size: 13px; margin-bottom: 1rem; border-radius: 6px; padding: 8px 12px; line-height: 1.4;">
-            Too many failed sign-in attempts. Please try again in {{ lockout_minutes }} minute{{ lockout_minutes|pluralize }}.
-        </div>
-        {% endif %}
-
-        {% if form.non_field_errors %}
-        <div class="alert alert-danger" style="font-size: 13px; margin-bottom: 1rem; border-radius: 6px; padding: 8px 12px; line-height: 1.4;">
-            {% for error in form.non_field_errors %}
-            <div>{{ error }}</div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <form method="post" action="{% url 'accounts:login' %}" style="display: flex; flex-direction: column; gap: 1rem;">
-            {% csrf_token %}
-
-            <div class="form-group" style="margin: 0;">
-                <label for="id_username" style="display: block; font-size: 11px; font-weight: 600; color: #86868B; text-transform: uppercase; letter-spacing: 0.06px; margin-bottom: 6px;">
-                    EMAIL ADDRESS OR USERNAME
-                </label>
-                <input type="text" name="username" id="id_username" class="form-control" placeholder="EMAIL ADDRESS" required autofocus
-                       style="width: 100%; height: 36px; padding: 0 12px; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 13px; color: #1D1D1F; box-sizing: border-box;">
-            </div>
-
-            <div class="form-group" style="margin: 0;">
-                <label for="id_password" style="display: block; font-size: 11px; font-weight: 600; color: #86868B; text-transform: uppercase; letter-spacing: 0.06px; margin-bottom: 6px;">
-                    PASSWORD
-                </label>
-                <div style="position: relative; display: flex; align-items: center;">
-                    <input type="password" name="password" id="id_password" class="form-control" placeholder="PASSWORD" required
-                           style="width: 100%; height: 36px; padding: 0 38px 0 12px; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 13px; color: #1D1D1F; box-sizing: border-box;">
-                    <button type="button" id="togglePasswordBtn" aria-label="Toggle password visibility"
-                            style="position: absolute; right: 6px; background: none; border: none; padding: 4px; cursor: pointer; color: #6B7280; display: inline-flex; align-items: center; justify-content: center;">
-                        <span id="eyeIconOpen">{% icon 'eye' style='width: 18px; height: 18px;' %}</span>
-                        <span id="eyeIconClosed" style="display: none;">{% icon 'eye-off' style='width: 18px; height: 18px;' %}</span>
-                    </button>
-                </div>
-                
-                <div style="margin-top: 6px; text-align: left;">
-                    <a href="{% url 'accounts:password_reset' %}" style="font-size: 11px; font-weight: 600; color: #DC2626; text-transform: uppercase; letter-spacing: 0.05px; text-decoration: none;">
-                        FORGOT PASSWORD
-                    </a>
-                </div>
-            </div>
-
-            <button type="submit" class="hig-btn" 
-                    style="width: 100%; height: 36px; margin-top: 0.5rem; background: #0071E3; color: #FFFFFF; font-size: 13px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; letter-spacing: 0.02em;">
-                login
+<div class="login-fullscreen-root" id="loginFullscreenRoot">
+    <!-- 1. Top Header Controls -->
+    <header class="login-header-controls">
+        <a href="/" class="login-back-pill" title="Back to home">
+            {% icon 'arrow-left' cls='login-back-icon' %}
+            <span>Back to home</span>
+        </a>
+        <div class="login-font-controls" role="group" aria-label="Text size control">
+            <button type="button" class="login-font-square-btn active" id="btn-font-normal" aria-pressed="true" aria-label="Normal text size">
+                <span style="font-size: 13px; font-weight: 700;">A</span>
             </button>
-        </form>
-
-        <div style="text-align: center; margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid #F2F2F7; font-size: 13px; color: #86868B;">
-            <span>New resident in this Barangay? </span>
-            <a href="{% url 'accounts:signup' %}" style="color: #0071E3; font-weight: 600; text-decoration: none;">Register Account</a>
+            <button type="button" class="login-font-square-btn" id="btn-font-large" aria-pressed="false" aria-label="Large text size">
+                <span style="font-size: 18px; font-weight: 800;">A</span>
+            </button>
         </div>
-    </div>
+    </header>
+
+    <!-- 2. Center Layout & Central Sign-In Card -->
+    <main class="login-center-wrapper">
+        <div class="login-card">
+            <!-- Header & Branding -->
+            <div class="login-brand">
+                {% icon 'house' cls='login-brand-icon' %}
+                <span class="login-brand-text">Barangay.ph</span>
+            </div>
+            <h1 class="login-title">Sign in</h1>
+            <p class="login-subtitle">Type your email or username and your password.</p>
+
+            <!-- Error Alerts -->
+            {% if throttled %}
+            <div class="login-alert-danger" role="alert">
+                Too many failed sign-in attempts. Please try again in {{ lockout_minutes }} minute{{ lockout_minutes|pluralize }}.
+            </div>
+            {% endif %}
+
+            {% if form.non_field_errors %}
+            <div class="login-alert-danger" role="alert">
+                {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- 3. Form Fields & Action Controls -->
+            <form method="post" action="{% url 'accounts:login' %}" class="login-form" novalidate>
+                {% csrf_token %}
+
+                <!-- Email or username -->
+                <div class="login-field-group">
+                    <label for="id_username" class="login-field-label">Email or username</label>
+                    <input type="text" name="username" id="id_username" class="login-input" 
+                           placeholder="name@example.com" autocomplete="username" required autofocus 
+                           value="{{ form.username.value|default:'' }}">
+                    {% if form.username.errors %}
+                    <div class="login-field-error">{{ form.username.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Password -->
+                <div class="login-field-group">
+                    <label for="id_password" class="login-field-label">Password</label>
+                    <div class="login-password-wrapper">
+                        <input type="password" name="password" id="id_password" class="login-input login-input-password" 
+                               placeholder="Your password" autocomplete="current-password" required>
+                        <button type="button" id="togglePasswordBtn" class="login-show-btn" aria-label="Toggle password visibility">
+                            Show
+                        </button>
+                    </div>
+                    {% if form.password.errors %}
+                    <div class="login-field-error">{{ form.password.errors.0 }}</div>
+                    {% endif %}
+                    <!-- Forgot Password Link -->
+                    <div class="login-forgot-wrap">
+                        <a href="{% url 'accounts:password_reset' %}" class="login-forgot-link">Forgot your password?</a>
+                    </div>
+                </div>
+
+                <!-- Primary Action: Sign in -->
+                <button type="submit" class="login-primary-btn" id="loginSubmitBtn">
+                    Sign in
+                </button>
+
+                <!-- Divider: New here? -->
+                <div class="login-divider" aria-hidden="true">
+                    <span class="login-divider-text">New here?</span>
+                </div>
+
+                <!-- Secondary Action: Create an account -->
+                <a href="{% url 'accounts:signup' %}" class="login-secondary-btn">
+                    Create an account
+                </a>
+            </form>
+        </div>
+
+        <!-- 4. Footer Contact Section -->
+        <div class="login-footer-contact">
+            <span class="login-footer-text">Need help? Call the Barangay Hall</span>
+            <strong class="login-footer-phone">(02) 8123-4567</strong>
+        </div>
+    </main>
+
+    <!-- Empty spacer to balance header height in column flex -->
+    <div style="height: 1px;" aria-hidden="true"></div>
 </div>
 {% endblock %}
 

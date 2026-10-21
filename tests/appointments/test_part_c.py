@@ -249,8 +249,8 @@ class PartCAppointmentsTests(TestCase):
         resp = self.client.post(reverse("appointments:approve", kwargs={"pk": self.apt_doc.pk}))
         self.assertEqual(resp.status_code, 403)
 
-    def test_booking_requires_authentication(self):
-        """Anonymous booking is redirected to login with next parameter."""
+    def test_anonymous_guest_booking_allowed(self):
+        """Anonymous guest applicants without an account can book appointments."""
         post_data = {
             "first_name": "Ghost",
             "last_name": "Applicant",
@@ -264,16 +264,16 @@ class PartCAppointmentsTests(TestCase):
             "time_window": "morning",
             "purpose": "Test anonymous booking"
         }
-        resp = self.client.post(reverse("appointments:api_public_book"), data=post_data)
-        # Stage A8: JSON API path -> 401 JSON with a login URL, not a redirect.
-        self.assertEqual(resp.status_code, 401)
-        self.assertTrue(resp.json()["requires_login"])
-        self.assertIn("/accounts/login/", resp.json()["login_url"])
-        self.assertIn("next=", resp.json()["login_url"])
-        self.assertFalse(Appointment.objects.filter(purpose="Test anonymous booking").exists())
-
-        with self.assertRaises(PermissionDenied):
-            book_appointment_service(None, post_data)
+        with self.captureOnCommitCallbacks(execute=True):
+            resp = self.client.post(reverse("appointments:api_public_book"), data=post_data)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json()["status"], "ok")
+        self.assertTrue(resp.json()["ref_number"].startswith("APT-"))
+        apt = Appointment.objects.get(purpose="Test anonymous booking")
+        self.assertIsNone(apt.resident)
+        self.assertEqual(apt.applicant_first_name, "Ghost")
+        self.assertEqual(apt.applicant_last_name, "Applicant")
+        self.assertEqual(apt.applicant_phone, "09171112222")
 
     def test_resident_prefilled_details_and_server_side_age(self):
         """Booking prefills details and calculates age on server from birthdate."""

@@ -94,16 +94,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 3. Auto dismiss flash alerts after 5 seconds
-    const alerts = document.querySelectorAll('.alert');
-    alerts.forEach(alert => {
+    // 3. Auto dismiss flash toasts and alerts after standard duration (4.5s)
+    const toasts = document.querySelectorAll('.app-toast, .alert');
+    toasts.forEach(toast => {
+        if (toast.id === 'adminWelcomeBanner') return; // Handled specifically in home.js
+        const duration = parseInt(toast.getAttribute('data-toast-auto-dismiss') || '4500', 10);
         setTimeout(() => {
-            if (alert.parentElement) {
-                alert.style.transition = 'opacity 0.4s ease';
-                alert.style.opacity = '0';
-                setTimeout(() => alert.remove(), 400);
+            if (toast.parentElement) {
+                toast.classList.add('toast-dismissing');
+                toast.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(40px)';
+                setTimeout(() => {
+                    if (toast.parentElement) toast.remove();
+                }, 350);
             }
-        }, 5000);
+        }, duration);
     });
 
     // 4. Smooth Sidebar Collapse / Expand Toggle
@@ -632,8 +638,16 @@ document.addEventListener('DOMContentLoaded', () => {
         switch (action) {
             case 'dismiss': {
                 event.preventDefault();
-                var box = actionEl.closest('[data-dismiss-target]') || actionEl.parentElement;
-                if (box) box.remove();
+                var box = actionEl.closest('[data-dismiss-target]') || actionEl.closest('.app-toast') || actionEl.parentElement;
+                if (box) {
+                    box.classList.add('toast-dismissing');
+                    box.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    box.style.opacity = '0';
+                    box.style.transform = 'translateX(40px)';
+                    setTimeout(function() {
+                        if (box.parentElement) box.remove();
+                    }, 300);
+                }
                 break;
             }
             case 'print':
@@ -733,4 +747,104 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!el.getAttribute('max')) el.setAttribute('max', '9999-12-31');
         }
     });
+
+    // Topbar Accessibility Font Switcher
+    function initTopbarFontSwitcher() {
+        var btnNormal = document.getElementById('btn-topbar-font-normal');
+        var btnLarge = document.getElementById('btn-topbar-font-large');
+        if (!btnNormal && !btnLarge) return;
+
+        function applyFontSize(size) {
+            if (size === 'large') {
+                document.body.setAttribute('data-font-size', 'large');
+                if (btnLarge) {
+                    btnLarge.classList.add('active');
+                    btnLarge.setAttribute('aria-pressed', 'true');
+                }
+                if (btnNormal) {
+                    btnNormal.classList.remove('active');
+                    btnNormal.setAttribute('aria-pressed', 'false');
+                }
+                try { localStorage.setItem('reg_font_size', 'large'); } catch (e) {}
+            } else {
+                document.body.removeAttribute('data-font-size');
+                if (btnNormal) {
+                    btnNormal.classList.add('active');
+                    btnNormal.setAttribute('aria-pressed', 'true');
+                }
+                if (btnLarge) {
+                    btnLarge.classList.remove('active');
+                    btnLarge.setAttribute('aria-pressed', 'false');
+                }
+                try { localStorage.setItem('reg_font_size', 'normal'); } catch (e) {}
+            }
+        }
+
+        try {
+            if (localStorage.getItem('reg_font_size') === 'large') {
+                applyFontSize('large');
+            }
+        } catch (e) {}
+
+        if (btnNormal) {
+            btnNormal.addEventListener('click', function () {
+                applyFontSize('normal');
+            });
+        }
+        if (btnLarge) {
+            btnLarge.addEventListener('click', function () {
+                applyFontSize('large');
+            });
+        }
+    }
+    initTopbarFontSwitcher();
+
+    // Sidebar dynamic scrollbar: reveals scrollbar when user actively scrolls up/down
+    function initSidebarScrollObserver() {
+        var sidebarNav = document.querySelector('.hig-sidebar-nav');
+        if (!sidebarNav) return;
+
+        var scrollTimeout = null;
+        sidebarNav.addEventListener('scroll', function () {
+            sidebarNav.classList.add('is-scrolling');
+            if (scrollTimeout) {
+                clearTimeout(scrollTimeout);
+            }
+            scrollTimeout = setTimeout(function () {
+                sidebarNav.classList.remove('is-scrolling');
+            }, 800);
+        }, { passive: true });
+    }
+    initSidebarScrollObserver();
+
+    // Modal dynamic scrollbar: reveals scrollbar when user actively scrolls up/down in ANY modal
+    function initModalScrollObserver() {
+        var scrollTimeouts = new WeakMap();
+
+        document.addEventListener('scroll', function (event) {
+            var target = event.target;
+            if (!target || target === document || target === window || typeof target.closest !== 'function') {
+                return;
+            }
+
+            var isModalScroll = target.matches('.modal-scrollable, .reg-wizard-modal-scroll, .wizard-body, .wizard-container') ||
+                                target.closest('.modal-overlay, [role="dialog"], .modal-dialog, .modal');
+
+            if (!isModalScroll) return;
+
+            if (target.scrollHeight > target.clientHeight) {
+                target.classList.add('is-scrolling');
+                var existingTimeout = scrollTimeouts.get(target);
+                if (existingTimeout) {
+                    clearTimeout(existingTimeout);
+                }
+                var timeoutId = setTimeout(function () {
+                    target.classList.remove('is-scrolling');
+                    scrollTimeouts.delete(target);
+                }, 800);
+                scrollTimeouts.set(target, timeoutId);
+            }
+        }, { passive: true, capture: true });
+    }
+    initModalScrollObserver();
 })();

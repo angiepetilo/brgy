@@ -156,3 +156,56 @@ class FinanceManagementTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(Supplier.objects.filter(name='VitalHealth Medical Supplies').exists())
 
+    def test_create_account_rejects_string_and_invalid_allocation(self):
+        # 1. Reject plain string
+        response = self.client.post(reverse('finance:financial_management'), {
+            'action': 'create_account',
+            'name': 'Invalid Fund Test',
+            'code': 'INV-001',
+            'account_type': FinancialAccount.ACCOUNT_TYPE_OTHER,
+            'initial_allocation': 'not_a_number',
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(FinancialAccount.objects.filter(code='INV-001').exists())
+
+        # 2. Reject excessive digits (the exact bug from screenshot 2)
+        response = self.client.post(reverse('finance:financial_management'), {
+            'action': 'create_account',
+            'name': 'Excessive Digits Fund',
+            'code': 'INV-002',
+            'account_type': FinancialAccount.ACCOUNT_TYPE_OTHER,
+            'initial_allocation': '33333333333333333333333333333.',
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(FinancialAccount.objects.filter(code='INV-002').exists())
+
+        # 3. Reject negative amounts
+        response = self.client.post(reverse('finance:financial_management'), {
+            'action': 'create_account',
+            'name': 'Negative Fund',
+            'code': 'INV-003',
+            'account_type': FinancialAccount.ACCOUNT_TYPE_OTHER,
+            'initial_allocation': '-5000.00',
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(FinancialAccount.objects.filter(code='INV-003').exists())
+
+        # Verify page loads cleanly with 200 and no 500 CSP issues
+        get_res = self.client.get(reverse('finance:financial_management') + '?tab=accounts')
+        self.assertEqual(get_res.status_code, 200)
+
+    def test_create_account_accepts_peso_standard_format(self):
+        # Accepts with peso sign and commas
+        response = self.client.post(reverse('finance:financial_management'), {
+            'action': 'create_account',
+            'name': 'Clean Peso Fund',
+            'code': 'CPF-701',
+            'account_type': FinancialAccount.ACCOUNT_TYPE_OTHER,
+            'initial_allocation': '₱150,000.50',
+            'accountable_officer': 'Treasurer Test',
+        })
+        self.assertEqual(response.status_code, 302)
+        acc = FinancialAccount.objects.get(code='CPF-701')
+        self.assertEqual(acc.initial_allocation, Decimal('150000.50'))
+        self.assertEqual(acc.current_balance, Decimal('150000.50'))
+

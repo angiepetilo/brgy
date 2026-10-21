@@ -1,0 +1,131 @@
+{% load core_tags %}
+<!-- Step 1: About you -->
+<div id="reg-step-1" class="reg-step-panel" role="region" aria-label="Step 1: About you">
+    <div class="reg-step-header">
+        <h2 class="reg-step-title">About you</h2>
+        <p class="reg-step-desc">Type your name as it appears on your ID.</p>
+    </div>
+
+    <div class="reg-form-fields">
+        <!-- First Name -->
+        <div class="reg-field-group" id="group-first-name">
+            <label for="reg-first-name" class="reg-field-label">
+                First name <span class="required" aria-hidden="true">*</span>
+            </label>
+            <input type="text" id="reg-first-name" name="first_name" class="reg-input" placeholder="e.g. Maria" autocomplete="given-name" required value="{{ form.first_name.value|default:'' }}">
+            <div class="reg-field-error" id="error-first-name" role="alert" aria-live="assertive">{% if form and form.first_name.errors %}{{ form.first_name.errors.0 }}{% endif %}</div>
+        </div>
+
+        <!-- Middle Name (Optional) -->
+        <div class="reg-field-group" id="group-middle-name">
+            <label for="reg-middle-name" class="reg-field-label">
+                Middle name <span class="optional">(optional)</span>
+            </label>
+            <input type="text" id="reg-middle-name" name="middle_name" class="reg-input" placeholder="e.g. Santos" autocomplete="additional-name" value="{{ form.middle_name.value|default:'' }}">
+            <div class="reg-field-error" id="error-middle-name" role="alert" aria-live="assertive">{% if form and form.middle_name.errors %}{{ form.middle_name.errors.0 }}{% endif %}</div>
+        </div>
+
+        <!-- Last Name -->
+        <div class="reg-field-group" id="group-last-name">
+            <label for="reg-last-name" class="reg-field-label">
+                Last name <span class="required" aria-hidden="true">*</span>
+            </label>
+            <input type="text" id="reg-last-name" name="last_name" class="reg-input" placeholder="e.g. Dela Cruz" autocomplete="family-name" required value="{{ form.last_name.value|default:'' }}">
+            <div class="reg-field-error" id="error-last-name" role="alert" aria-live="assertive">{% if form and form.last_name.errors %}{{ form.last_name.errors.0 }}{% endif %}</div>
+        </div>
+
+        <!-- Date of Birth: Month / Day / Year Selects -->
+        <div class="reg-field-group" id="group-birthdate">
+            <label class="reg-field-label" id="label-dob">
+                Date of birth <span class="required" aria-hidden="true">*</span>
+            </label>
+            <div class="reg-dob-grid" role="group" aria-labelledby="label-dob">
+                <div class="reg-dob-col">
+                    <label for="reg-dob-month" class="reg-sub-label">Month</label>
+                    <select id="reg-dob-month" class="reg-select" aria-label="Birth month">
+                        <option value="">Month</option>
+                        <option value="01">January</option>
+                        <option value="02">February</option>
+                        <option value="03">March</option>
+                        <option value="04">April</option>
+                        <option value="05">May</option>
+                        <option value="06">June</option>
+                        <option value="07">July</option>
+                        <option value="08">August</option>
+                        <option value="09">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
+                <div class="reg-dob-col">
+                    <label for="reg-dob-day" class="reg-sub-label">Day</label>
+                    <select id="reg-dob-day" class="reg-select" aria-label="Birth day">
+                        <option value="">Day</option>
+                        {% for d in "x"|rjust:"31" %}
+                        <option value="{% if forloop.counter < 10 %}0{% endif %}{{ forloop.counter }}">{{ forloop.counter }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="reg-dob-col">
+                    <label for="reg-dob-year" class="reg-sub-label">Year</label>
+                    <select id="reg-dob-year" class="reg-select" aria-label="Birth year">
+                        <option value="">Year</option>
+                        <!-- Populated by JS down to 1920 -->
+                    </select>
+                </div>
+            </div>
+            <!-- Hidden backend birthdate input (YYYY-MM-DD) -->
+            <input type="hidden" name="birthdate" id="id_birthdate" value="{% if form.birthdate.value %}{% if form.birthdate.value.year %}{{ form.birthdate.value|date:'Y-m-d' }}{% else %}{{ form.birthdate.value }}{% endif %}{% endif %}">
+            <div class="reg-field-error" id="error-birthdate" role="alert" aria-live="assertive">{% if form and form.birthdate.errors %}{{ form.birthdate.errors.0 }}{% endif %}</div>
+        </div>
+
+        <!-- Gender Choice Buttons -->
+        <div class="reg-field-group" id="group-gender">
+            <label class="reg-field-label" id="label-gender">
+                Gender <span class="required" aria-hidden="true">*</span>
+            </label>
+            <div class="reg-choice-grid reg-grid-2" role="radiogroup" aria-labelledby="label-gender" id="reg-gender-group">
+                <div class="reg-choice-btn" role="radio" aria-checked="false" tabindex="0" data-field="gender" data-value="male">
+                    <span class="reg-choice-text">Male</span>
+                    <span class="reg-choice-check" aria-hidden="true">✓</span>
+                </div>
+                <div class="reg-choice-btn" role="radio" aria-checked="false" tabindex="0" data-field="gender" data-value="female">
+                    <span class="reg-choice-text">Female</span>
+                    <span class="reg-choice-check" aria-hidden="true">✓</span>
+                </div>
+            </div>
+            <!-- Hidden input for backend form binding -->
+            <input type="hidden" name="gender" id="id_gender" value="{{ form.gender.value|default:'' }}">
+            <div class="reg-field-error" id="error-gender" role="alert" aria-live="assertive">{% if form and form.gender.errors %}{{ form.gender.errors.0 }}{% endif %}</div>
+        </div>
+
+        <!-- Civil Status Choice Buttons -->
+        <div class="reg-field-group" id="group-civil-status">
+            <label class="reg-field-label" id="label-civil-status">
+                Civil status <span class="required" aria-hidden="true">*</span>
+            </label>
+            <div class="reg-choice-grid reg-grid-4" role="radiogroup" aria-labelledby="label-civil-status" id="reg-civil-status-group">
+                <div class="reg-choice-btn" role="radio" aria-checked="false" tabindex="0" data-field="civil_status" data-value="single">
+                    <span class="reg-choice-text">Single</span>
+                    <span class="reg-choice-check" aria-hidden="true">✓</span>
+                </div>
+                <div class="reg-choice-btn" role="radio" aria-checked="false" tabindex="0" data-field="civil_status" data-value="married">
+                    <span class="reg-choice-text">Married</span>
+                    <span class="reg-choice-check" aria-hidden="true">✓</span>
+                </div>
+                <div class="reg-choice-btn" role="radio" aria-checked="false" tabindex="0" data-field="civil_status" data-value="widowed">
+                    <span class="reg-choice-text">Widowed</span>
+                    <span class="reg-choice-check" aria-hidden="true">✓</span>
+                </div>
+                <div class="reg-choice-btn" role="radio" aria-checked="false" tabindex="0" data-field="civil_status" data-value="separated">
+                    <span class="reg-choice-text">Separated</span>
+                    <span class="reg-choice-check" aria-hidden="true">✓</span>
+                </div>
+            </div>
+            <!-- Hidden input for backend form binding -->
+            <input type="hidden" name="civil_status" id="id_civil_status" value="{{ form.civil_status.value|default:'' }}">
+            <div class="reg-field-error" id="error-civil-status" role="alert" aria-live="assertive">{% if form and form.civil_status.errors %}{{ form.civil_status.errors.0 }}{% endif %}</div>
+        </div>
+    </div>
+</div>

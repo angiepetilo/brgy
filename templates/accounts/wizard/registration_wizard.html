@@ -1,0 +1,127 @@
+{% load core_tags %}
+
+{% if registration_submitted %}
+<!-- SUCCESS SCREEN -->
+<div id="reg-success-screen" class="reg-wizard-container reg-success-card">
+    <div class="reg-success-icon-wrap" aria-hidden="true">
+        {% icon 'check' style='width: 48px; height: 48px; color: #12703a;' %}
+    </div>
+    <h1 class="reg-success-title">Registration sent</h1>
+    <p class="reg-success-message">
+        The barangay will check your ID. You will receive an email once your account is verified. You can sign in once your account is approved.
+    </p>
+    {% if registered_user and registered_user.email %}
+    <div class="reg-success-email-badge">
+        Credentials will be sent to: <strong>{{ registered_user.email }}</strong>
+    </div>
+    {% endif %}
+    <div class="reg-success-actions">
+        {% if is_modal %}
+        <button type="button" data-action="close-register-resident" class="reg-btn-primary" style="display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border: none;">
+            Done / Close
+        </button>
+        {% else %}
+        <a href="/" class="reg-btn-primary" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+            Back to home
+        </a>
+        <a href="{% url 'accounts:login' %}" class="reg-btn-secondary" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+            Go to sign in
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+{% else %}
+
+<!-- REGISTRATION WIZARD CONTAINER -->
+<div class="reg-wizard-container{% if is_modal %} reg-wizard-modal-mode{% endif %}" id="reg-wizard-root" data-current-step="1">
+
+    <!-- SERVER-SIDE ERROR SUMMARY BANNER (Shown if form validation failed after POST) -->
+    {% if form and form.errors %}
+    <div class="reg-error-banner" role="alert" id="reg-server-error-banner"
+         {% if form.first_name.errors or form.middle_name.errors or form.last_name.errors or form.birthdate.errors or form.gender.errors or form.civil_status.errors %}data-error-step="1"
+         {% elif form.address.errors or form.contact_no.errors or form.email.errors %}data-error-step="2"
+         {% elif form.id_photo.errors %}data-error-step="3"
+         {% elif form.privacy_consent.errors %}data-error-step="4"
+         {% else %}data-error-step="1"{% endif %}>
+        <div class="reg-error-banner-header">
+            {% icon 'circle-alert' style='width: 20px; height: 20px; color: #a3200f; flex-shrink: 0;' %}
+            <strong>Please fix the errors below to continue:</strong>
+        </div>
+        <ul class="reg-error-banner-list">
+            {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+            {% for field in form %}
+                {% for error in field.errors %}
+                <li><strong>{{ field.label|default:field.name|title }}:</strong> {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- PROGRESS HEADER -->
+    <div class="reg-progress-header" aria-label="Registration Progress">
+        <div class="reg-progress-status">
+            <span class="reg-progress-step-text" id="reg-progress-step-text">Step 1 of 4: About you</span>
+        </div>
+        <div class="reg-progress-bars" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="4" id="reg-progress-bar">
+            <div class="reg-progress-bar-seg active" data-step-seg="1" aria-hidden="true"></div>
+            <div class="reg-progress-bar-seg" data-step-seg="2" aria-hidden="true"></div>
+            <div class="reg-progress-bar-seg" data-step-seg="3" aria-hidden="true"></div>
+            <div class="reg-progress-bar-seg" data-step-seg="4" aria-hidden="true"></div>
+        </div>
+    </div>
+
+    <!-- MAIN FORM -->
+    <form method="post" action="{% if wizard_action_url %}{{ wizard_action_url }}{% else %}{% url 'accounts:signup' %}{% endif %}" enctype="multipart/form-data" id="reg-wizard-form" novalidate>
+        {% csrf_token %}
+
+        <!-- Hidden inputs for compatibility -->
+        <div style="display: none;" aria-hidden="true">
+            <input type="checkbox" name="is_solo_parent" id="id_is_solo_parent" {% if form and form.is_solo_parent.value %}checked{% endif %}>
+            <input type="checkbox" name="is_pwd" id="id_is_pwd" {% if form and form.is_pwd.value %}checked{% endif %}>
+            <input type="checkbox" name="is_4ps" id="id_is_4ps" {% if form and form.is_4ps.value %}checked{% endif %}>
+            {% if form and form.purok %}{{ form.purok }}{% endif %}
+        </div>
+
+        <!-- STEP PANELS -->
+        <div class="reg-wizard-body">
+            {% include 'accounts/wizard/step1_about.html' %}
+            {% include 'accounts/wizard/step2_contact.html' %}
+            {% include 'accounts/wizard/step3_id.html' %}
+            {% include 'accounts/wizard/step4_confirm.html' %}
+        </div>
+
+        <!-- STICKY BOTTOM NAVIGATION BAR -->
+        <div class="reg-wizard-footer">
+            <button type="button" id="reg-btn-back" class="reg-nav-btn reg-nav-btn-back" disabled aria-label="Go to previous step">
+                {% icon 'arrow-left' style='width: 18px; height: 18px;' %} Back
+            </button>
+            <div class="reg-footer-right">
+                <button type="button" id="reg-btn-next" class="reg-nav-btn reg-nav-btn-primary" aria-label="Go to next step">
+                    Next
+                </button>
+                <button type="submit" id="reg-btn-submit" class="reg-nav-btn reg-nav-btn-submit" style="display: none;" aria-label="Submit registration" data-submitting-text="{% if is_modal %}Registering resident...{% else %}Sending registration...{% endif %}">
+                    {% if is_modal %}Register resident{% else %}Send registration{% endif %}
+                </button>
+            </div>
+        </div>
+    </form>
+
+    {% if not is_modal %}
+    <!-- NEED HELP / SIGN IN FOOTER -->
+    <div class="reg-help-footer">
+        <div class="reg-help-text">
+            Need help? Visit the Barangay Hall (Mon–Fri, 8AM–5PM) or call (02) 8123-4567.
+        </div>
+        <div class="reg-signin-prompt">
+            Already have an approved account? 
+            <a href="{% url 'accounts:login' %}" class="reg-link-bold">Sign In Here</a>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endif %}

@@ -1,0 +1,62 @@
+{% load core_tags %}
+<!-- Step 2: Pick a day -->
+<div id="wizard-step-2" class="wizard-step-panel" role="region" aria-label="Step 2: Pick a day" style="display: none;">
+    <div class="wizard-step-header">
+        <h2 class="wizard-step-title">Pick a day</h2>
+        <p class="wizard-step-desc">Choose an open date for your appointment.</p>
+    </div>
+
+    <!-- Big Accessible Calendar -->
+    <div class="wizard-cal-container">
+        <!-- Month Navigation Header -->
+        <div class="wizard-cal-header">
+            <button type="button" id="wizard-cal-prev" class="wizard-cal-nav-btn" aria-label="Previous month" disabled>
+                {% icon 'chevron-left' %}
+            </button>
+            <div id="wizard-cal-month-title" class="wizard-cal-month-title" aria-live="polite">
+                October 2026
+            </div>
+            <button type="button" id="wizard-cal-next" class="wizard-cal-nav-btn" aria-label="Next month">
+                {% icon 'chevron-right' %}
+            </button>
+        </div>
+
+        <!-- Weekdays Header -->
+        <div class="wizard-cal-weekdays" aria-hidden="true">
+            <div>Sun</div>
+            <div>Mon</div>
+            <div>Tue</div>
+            <div>Wed</div>
+            <div>Thu</div>
+            <div>Fri</div>
+            <div>Sat</div>
+        </div>
+
+        <!-- Days Grid -->
+        <div id="wizard-cal-grid" class="wizard-cal-grid" role="grid" aria-label="Appointment Calendar">
+            <!-- Dynamically populated by BookingWizard -->
+        </div>
+
+        <!-- Calendar Legend -->
+        <div class="wizard-cal-legend" aria-label="Calendar status legend">
+            <div class="legend-item">
+                <span class="legend-swatch legend-open" aria-hidden="true"></span>
+                <span>Open</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-swatch legend-closed" aria-hidden="true"></span>
+                <span>Closed</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-swatch legend-selected" aria-hidden="true">✓</span>
+                <span>Your day</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Date Confirmation Box -->
+    <div id="wizard-day-confirmation" class="wizard-selection-box" style="display: none;">
+        <span class="wizard-selection-icon" aria-hidden="true">📅</span>
+        <span id="wizard-confirmed-day-text" class="wizard-selection-text">Select a day on the calendar</span>
+    </div>
+</div>

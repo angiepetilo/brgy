@@ -430,22 +430,29 @@
     transition: margin-left 0.2s ease, width 0.2s ease !important;
   }
 
-  .fb-topbar .fb-topbar-left .mobile-brand-only {
+  .fb-topbar .fb-topbar-left .fb-brand-title {
     display: none !important;
   }
 
-  /* Trailing-edge alignment for controls */
+  /* Center topbar quick nav tabs (Emergency, Home, Announcements) */
   .fb-topbar-center {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    height: 100%;
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    height: auto !important;
+    margin: 0 !important;
+    pointer-events: auto !important;
   }
 
   .fb-topbar-center .fb-nav-tab {
-    height: 30px;
-    min-height: 30px;
-    padding: 0 10px;
+    height: 32px;
+    min-height: 32px;
+    padding: 0 12px;
     font-size: 13px;
     font-weight: 500;
     border-radius: 6px;
@@ -467,6 +474,25 @@
   .fb-topbar-center .fb-nav-tab.active {
     background: #E8F2FF;
     color: #0071E3;
+    font-weight: 600;
+  }
+
+  .fb-topbar-center .fb-nav-tab.fb-nav-tab-emergency {
+    color: #DC2626;
+  }
+
+  .fb-topbar-center .fb-nav-tab.fb-nav-tab-emergency svg {
+    color: #DC2626;
+  }
+
+  .fb-topbar-center .fb-nav-tab.fb-nav-tab-emergency:hover {
+    background: #FEF2F2;
+    color: #B91C1C;
+  }
+
+  .fb-topbar-center .fb-nav-tab.fb-nav-tab-emergency.active {
+    background: #FEE2E2;
+    color: #B91C1C;
     font-weight: 600;
   }
 

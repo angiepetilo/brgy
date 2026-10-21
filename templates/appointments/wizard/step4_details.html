@@ -1,0 +1,61 @@
+{% load core_tags %}
+<!-- Step 4: Your details -->
+<div id="wizard-step-4" class="wizard-step-panel" role="region" aria-label="Step 4: Your details" style="display: none;">
+    <div class="wizard-step-header">
+        <h2 class="wizard-step-title">Your details</h2>
+        <p class="wizard-step-desc">Enter your contact information so the barangay can prepare your schedule.</p>
+    </div>
+
+    <div class="wizard-form-fields">
+        <!-- Name Row (First, Middle, Last) -->
+        <div class="wizard-field-grid wizard-grid-3">
+            <div class="wizard-field-group" id="group-first-name">
+                <label for="wizard-first-name" class="wizard-field-label">First name <span class="required" aria-hidden="true">*</span></label>
+                <input type="text" id="wizard-first-name" name="first_name" class="wizard-input" placeholder="e.g. Juan" autocomplete="given-name" required value="{% if user.is_authenticated %}{{ user.first_name }}{% endif %}">
+                <div class="wizard-field-error" id="error-first-name" role="alert" aria-live="assertive"></div>
+            </div>
+
+            <div class="wizard-field-group" id="group-middle-name">
+                <label for="wizard-middle-name" class="wizard-field-label">Middle name <span class="optional">(optional)</span></label>
+                <input type="text" id="wizard-middle-name" name="middle_name" class="wizard-input" placeholder="e.g. Santos" autocomplete="additional-name" value="{% if user.is_authenticated and user.middle_name %}{{ user.middle_name }}{% endif %}">
+            </div>
+
+            <div class="wizard-field-group" id="group-last-name">
+                <label for="wizard-last-name" class="wizard-field-label">Last name <span class="required" aria-hidden="true">*</span></label>
+                <input type="text" id="wizard-last-name" name="last_name" class="wizard-input" placeholder="e.g. Dela Cruz" autocomplete="family-name" required value="{% if user.is_authenticated %}{{ user.last_name }}{% endif %}">
+                <div class="wizard-field-error" id="error-last-name" role="alert" aria-live="assertive"></div>
+            </div>
+        </div>
+
+        <!-- Age & Home Address -->
+        <div class="wizard-field-grid wizard-grid-age-address">
+            <div class="wizard-field-group" id="group-age">
+                <label for="wizard-age" class="wizard-field-label">Age <span class="required" aria-hidden="true">*</span></label>
+                <input type="text" id="wizard-age" name="age" class="wizard-input" placeholder="e.g. 28" inputmode="numeric" pattern="[0-9]*" maxlength="3" required>
+                <div class="wizard-field-error" id="error-age" role="alert" aria-live="assertive"></div>
+            </div>
+
+            <div class="wizard-field-group" id="group-address">
+                <label for="wizard-address" class="wizard-field-label">Home address <span class="required" aria-hidden="true">*</span></label>
+                <input type="text" id="wizard-address" name="address" class="wizard-input" placeholder="e.g. Block 5 Lot 12, Rizal St." autocomplete="street-address" required value="{% if user.is_authenticated %}{{ user.street_address|default:user.address|default:'' }}{% endif %}">
+                <div class="wizard-field-error" id="error-address" role="alert" aria-live="assertive"></div>
+            </div>
+        </div>
+
+        <!-- Phone & Email -->
+        <div class="wizard-field-grid wizard-grid-2">
+            <div class="wizard-field-group" id="group-phone">
+                <label for="wizard-phone" class="wizard-field-label">Mobile number <span class="required" aria-hidden="true">*</span></label>
+                <input type="tel" id="wizard-phone" name="phone_number" class="wizard-input" placeholder="e.g. 09171234567" inputmode="numeric" pattern="09[0-9]{9}" maxlength="11" autocomplete="tel" required value="{% if user.is_authenticated %}{{ user.phone_number }}{% endif %}">
+                <div class="wizard-field-help" id="help-phone">11 numbers, starting with 09</div>
+                <div class="wizard-field-error" id="error-phone" role="alert" aria-live="assertive"></div>
+            </div>
+
+            <div class="wizard-field-group" id="group-email">
+                <label for="wizard-email" class="wizard-field-label">Email <span class="optional">(optional)</span></label>
+                <input type="email" id="wizard-email" name="email" class="wizard-input" placeholder="e.g. resident@example.com" autocomplete="email" value="{% if user.is_authenticated %}{{ user.email }}{% endif %}">
+                <div class="wizard-field-error" id="error-email" role="alert" aria-live="assertive"></div>
+            </div>
+        </div>
+    </div>
+</div>

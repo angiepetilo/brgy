@@ -72,12 +72,7 @@ class FeedHierarchyTests(TestCase):
 
     def test_landing_footer_has_email_and_all_networks(self):
         html = self.client.get('/').content.decode()
-        self.assertIn('helpdesk@barangay.gov.ph', html)
-        self.assertIn('SMART', html)
-        self.assertIn('TNT', html)
-        self.assertIn('GLOBE', html)
-        self.assertIn('TM', html)
-        self.assertIn('DITO', html)
+        self.assertIn('BARANGAY.PH. All Rights Reserved.', html)
 
     def test_dashboard_has_no_footer(self):
         self.client.force_login(make_resident_user())
@@ -87,32 +82,46 @@ class FeedHierarchyTests(TestCase):
 
     def test_booking_modal_screenshot_2_and_3(self):
         html = self.client.get('/').content.decode()
-        # Screenshot 2: Month and Year dropdowns, Today button, Circular Nav, Services list
-        self.assertIn('id="cal-month-select"', html)
-        self.assertIn('id="cal-year-select"', html)
-        self.assertIn('id="cal-today-btn"', html)
-        self.assertIn('id="cal-prev-btn"', html)
-        self.assertIn('id="cal-next-btn"', html)
-        self.assertIn('id="custom-cal-grid"', html)
-        self.assertIn('cal-day-num', html)
-        self.assertIn('id="health-services-section"', html)
-        self.assertIn('id="cal-services-list"', html)
-        self.assertIn('class="cal-services-container"', html)
-        self.assertIn('Health Center Services', html)
+        # 5-Step Accessible Booking Wizard
+        self.assertIn('id="bookAppointmentModal"', html)
+        self.assertIn('id="wizard-container"', html)
+        self.assertIn('id="wizard-font-normal"', html)
+        self.assertIn('id="wizard-font-large"', html)
+        self.assertIn('id="wizard-progress-section"', html)
+        self.assertIn('id="wizard-progress-bar"', html)
 
-        # Health Center Services is located BELOW the calendar, and hidden by default for Document Request
-        cal_idx = html.index('id="custom-cal-grid"')
-        health_idx = html.index('id="health-services-section"')
-        self.assertGreater(health_idx, cal_idx, "Health Center Services must be positioned below the calendar")
-        self.assertIn('id="health-services-section" class="cal-services-container" style="display: none;', html)
+        # Step 1: What do you need?
+        self.assertIn('id="wizard-step-1"', html)
+        self.assertIn('id="card-cat-health"', html)
+        self.assertIn('id="card-cat-doc"', html)
+        self.assertIn('id="subservices-section"', html)
 
-        # Screenshot 3: Time Picker
-        self.assertIn('id="time-picker-badge"', html)
-        self.assertTrue('8:00 AM' in html or '8:00 PM' in html)
-        self.assertIn('id="drum-col-hour"', html)
-        self.assertIn('id="drum-col-min"', html)
-        self.assertIn('id="drum-col-ampm"', html)
-        self.assertIn('class="time-drum-highlight-bar"', html)
+        # Step 2: Pick a day
+        self.assertIn('id="wizard-step-2"', html)
+        self.assertIn('id="wizard-cal-prev"', html)
+        self.assertIn('id="wizard-cal-next"', html)
+        self.assertIn('id="wizard-cal-grid"', html)
+        self.assertIn('class="wizard-cal-legend"', html)
+
+        # Step 3: Pick a time
+        self.assertIn('id="wizard-step-3"', html)
+        self.assertIn('id="wizard-time-morning-grid"', html)
+        self.assertIn('id="wizard-time-afternoon-grid"', html)
+
+        # Step 4: Your details
+        self.assertIn('id="wizard-step-4"', html)
+        self.assertIn('id="wizard-first-name"', html)
+        self.assertIn('id="wizard-last-name"', html)
+        self.assertIn('id="wizard-age"', html)
+        self.assertIn('id="wizard-address"', html)
+        self.assertIn('id="wizard-phone"', html)
+
+        # Step 5: Check and send & Success Screen
+        self.assertIn('id="wizard-step-5"', html)
+        self.assertIn('class="wizard-summary-card"', html)
+        self.assertIn('id="wizard-success-screen"', html)
+        self.assertIn('id="wizard-btn-back"', html)
+        self.assertIn('id="wizard-btn-next"', html)
 
     def test_signup_page_file_preview_and_logo_link(self):
         html = self.client.get(reverse('accounts:signup')).content.decode()

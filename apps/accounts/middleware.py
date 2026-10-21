@@ -55,7 +55,7 @@ class ApprovalGateMiddleware:
                 raise PermissionDenied("Direct access to ID photo files is restricted.")
 
         # Completely public paths accessible without login
-        public_exact = ['/', '/landing/']
+        public_exact = ['/', '/landing/', '/favicon.ico', '/robots.txt']
         public_prefixes = [
             '/static/',
             '/media/avatars/',
@@ -65,6 +65,7 @@ class ApprovalGateMiddleware:
             '/accounts/signup/',
             '/accounts/logout/',
             '/accounts/password-reset/',
+            '/appointments/api/',
         ]
 
         is_public = (

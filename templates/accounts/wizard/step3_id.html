@@ -1,0 +1,112 @@
+{% load core_tags %}
+<!-- Step 3: Your ID -->
+<div id="reg-step-3" class="reg-step-panel" role="region" aria-label="Step 3: Your ID" style="display: none;">
+    <div class="reg-step-header">
+        <h2 class="reg-step-title">Your ID verification</h2>
+        <p class="reg-step-desc">Upload a clear photo of your valid government ID so the barangay can verify your record.</p>
+    </div>
+
+    <!-- Helpful Tips Box -->
+    <div class="reg-tips-box" role="note">
+        <div class="reg-tips-header">
+            {% icon 'info' style='width: 20px; height: 20px; color: #1e3a8a;' %}
+            <strong>Quick photo tips for fast approval:</strong>
+        </div>
+        <ul class="reg-tips-list">
+            <li>Use a bright, well-lit place.</li>
+            <li>Make sure all 4 corners of the ID are visible.</li>
+            <li>Ensure your name, photo, and birthdate are clear and readable.</li>
+        </ul>
+        <div class="reg-tips-note">
+            Accepted IDs: PhilSys National ID, Driver's License, UMID, Voter's ID, Postal ID, Passport, Senior Citizen ID, or PWD ID.
+        </div>
+    </div>
+
+    <div class="reg-upload-container">
+        <!-- Front ID Upload Zone -->
+        <div class="reg-upload-card" id="front_id_card_box">
+            <div class="reg-upload-header-row">
+                <label class="reg-field-label" style="margin-bottom: 0;">
+                    Front of your ID <span class="required" aria-hidden="true">*</span>
+                </label>
+                <span id="front_id_status_badge" class="reg-badge-success" style="display: none;">✓ Photo added</span>
+            </div>
+
+            <!-- Upload Prompt Box -->
+            <div id="front_id_prompt_box" class="reg-upload-dropzone">
+                <div class="reg-upload-icon-circle" aria-hidden="true">
+                    {% icon 'image' style='width: 28px; height: 28px; color: #1e3a8a;' %}
+                </div>
+                <div class="reg-upload-title">Front side of ID</div>
+                <div class="reg-upload-subtext">JPG, PNG, WebP or PDF (up to 10MB)</div>
+                <label for="id_id_photo" class="reg-file-button" role="button" tabindex="0">
+                    <span aria-hidden="true">📷</span> Take or choose a photo
+                </label>
+                <input type="file" name="id_photo" id="id_id_photo" accept="image/*,.pdf" class="reg-hidden-file-input">
+            </div>
+
+            <!-- Front ID Preview Card -->
+            <div id="front_id_preview_card" class="id-preview-card" style="display: none;">
+                <img class="preview-thumb-img" src="" alt="Front ID Preview" style="display: none;">
+                <div class="preview-thumb-pdf" style="display: none;">
+                    {% icon 'file-text' style='width: 40px; height: 40px;' %}
+                    <span class="preview-file-name"></span>
+                </div>
+                <div class="id-preview-hover-overlay">
+                    <button type="button" class="btn-view-uploaded" aria-label="View front ID photo">
+                        {% icon 'eye' %} View
+                    </button>
+                    <button type="button" class="btn-remove-uploaded" aria-label="Remove front ID photo">
+                        {% icon 'trash-2' %} Remove
+                    </button>
+                </div>
+            </div>
+
+            <div class="reg-field-error" id="error-id-photo" role="alert" aria-live="assertive">
+                {% if form and form.id_photo.errors %}{{ form.id_photo.errors.0 }}{% endif %}
+            </div>
+        </div>
+
+        <!-- Back ID Upload Zone (Optional) -->
+        <div class="reg-upload-card" id="back_id_card_box">
+            <div class="reg-upload-header-row">
+                <label class="reg-field-label" style="margin-bottom: 0;">
+                    Back of your ID <span class="optional">(optional)</span>
+                </label>
+                <span id="back_id_status_badge" class="reg-badge-success" style="display: none;">✓ Photo added</span>
+            </div>
+
+            <!-- Upload Prompt Box -->
+            <div id="back_id_prompt_box" class="reg-upload-dropzone">
+                <div class="reg-upload-icon-circle" aria-hidden="true">
+                    {% icon 'file-text' style='width: 28px; height: 28px; color: #4a5670;' %}
+                </div>
+                <div class="reg-upload-title">Back side of ID or address proof</div>
+                <div class="reg-upload-subtext">Optional, but helps speed up approval</div>
+                <label for="id_photo_back_input" class="reg-file-button reg-file-button-secondary" role="button" tabindex="0">
+                    <span aria-hidden="true">📷</span> Take or choose back photo
+                </label>
+                <input type="file" name="id_photo_back" id="id_photo_back_input" accept="image/*,.pdf" class="reg-hidden-file-input">
+            </div>
+
+            <!-- Back ID Preview Card -->
+            <div id="back_id_preview_card" class="id-preview-card" style="display: none;">
+                <img class="preview-thumb-img" src="" alt="Back ID Preview" style="display: none;">
+                <div class="preview-thumb-pdf" style="display: none;">
+                    {% icon 'file-text' style='width: 40px; height: 40px;' %}
+                    <span class="preview-file-name"></span>
+                </div>
+                <div class="id-preview-hover-overlay">
+                    <button type="button" class="btn-view-uploaded" aria-label="View back ID photo">
+                        {% icon 'eye' %} View
+                    </button>
+                    <button type="button" class="btn-remove-uploaded" aria-label="Remove back ID photo">
+                        {% icon 'trash-2' %} Remove
+                    </button>
+                </div>
+            </div>
+
+            <div class="reg-field-error" id="error-id-photo-back" role="alert" aria-live="assertive"></div>
+        </div>
+    </div>
+</div>

@@ -206,4 +206,91 @@ document.addEventListener('DOMContentLoaded', function () {
             openModal(liqModal);
         });
     });
+
+    // 5. Philippine Peso Currency Standard Input Sanitization & Formatting
+    // Strictly enforces: numbers only, single decimal point, max 2 decimal places, max 12 integer digits
+    var pesoInputs = document.querySelectorAll('.peso-currency-input');
+
+    function sanitizePesoInput(input) {
+        var raw = input.value;
+        // Strip any character that is not a digit or decimal point
+        var cleaned = raw.replace(/[^0-9.]/g, '');
+
+        // Ensure only at most one decimal point
+        var firstDot = cleaned.indexOf('.');
+        if (firstDot !== -1) {
+            var intPart = cleaned.substring(0, firstDot);
+            var decPart = cleaned.substring(firstDot + 1).replace(/\./g, '');
+            // Limit integer digits to 12 (max 999,999,999,999)
+            if (intPart.length > 12) intPart = intPart.substring(0, 12);
+            // Limit decimal digits to 2 (centavos standard)
+            if (decPart.length > 2) decPart = decPart.substring(0, 2);
+            cleaned = intPart + '.' + decPart;
+        } else {
+            // No decimal point yet: limit integer digits to 12
+            if (cleaned.length > 12) cleaned = cleaned.substring(0, 12);
+        }
+
+        if (input.value !== cleaned) {
+            input.value = cleaned;
+        }
+    }
+
+    pesoInputs.forEach(function (input) {
+        // Block invalid characters at keypress time
+        input.addEventListener('keydown', function (e) {
+            // Allow control keys (Backspace, Tab, Enter, Esc, Delete, Arrow keys, Home, End)
+            if ([8, 9, 13, 27, 46, 37, 38, 39, 40, 35, 36].indexOf(e.keyCode) !== -1 ||
+                (e.ctrlKey || e.metaKey)) {
+                return;
+            }
+
+            // Allow decimal point only if not already present
+            if (e.key === '.' || e.key === 'Decimal') {
+                if (this.value.indexOf('.') !== -1) {
+                    e.preventDefault();
+                }
+                return;
+            }
+
+            // Block non-digit keys (including 'e', '+', '-', letters, symbols)
+            if (e.key < '0' || e.key > '9') {
+                e.preventDefault();
+            }
+        });
+
+        // Intercept paste & input to clean any invalid pasted content
+        input.addEventListener('input', function () {
+            sanitizePesoInput(this);
+            if (this.id === 'liq-actual-spent' && typeof updateRefundCalculation === 'function') {
+                updateRefundCalculation();
+            }
+        });
+
+        input.addEventListener('paste', function () {
+            var self = this;
+            setTimeout(function () {
+                sanitizePesoInput(self);
+                if (self.id === 'liq-actual-spent' && typeof updateRefundCalculation === 'function') {
+                    updateRefundCalculation();
+                }
+            }, 0);
+        });
+
+        // Format to 2 decimal places on blur if user entered a number
+        input.addEventListener('blur', function () {
+            var val = this.value.trim();
+            if (!val) return;
+            if (val.endsWith('.')) {
+                val = val.slice(0, -1);
+            }
+            var num = parseFloat(val);
+            if (!isNaN(num) && isFinite(num)) {
+                this.value = num.toFixed(2);
+            }
+            if (this.id === 'liq-actual-spent' && typeof updateRefundCalculation === 'function') {
+                updateRefundCalculation();
+            }
+        });
+    });
 });

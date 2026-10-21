@@ -1,0 +1,34 @@
+{% load core_tags %}
+<!-- Step 3: Pick a time -->
+<div id="wizard-step-3" class="wizard-step-panel" role="region" aria-label="Step 3: Pick a time" style="display: none;">
+    <div class="wizard-step-header">
+        <h2 class="wizard-step-title">Pick a time</h2>
+        <p class="wizard-step-desc">Select an available hourly time slot.</p>
+    </div>
+
+    <!-- Morning Slots -->
+    <div class="wizard-time-section">
+        <div class="wizard-time-heading">
+            {% icon 'clock' %} Morning
+        </div>
+        <div id="wizard-time-morning-grid" class="wizard-time-grid" role="radiogroup" aria-label="Morning Time Slots">
+            <!-- Dynamically populated buttons -->
+        </div>
+    </div>
+
+    <!-- Afternoon Slots -->
+    <div class="wizard-time-section" style="margin-top: 1.5rem;">
+        <div class="wizard-time-heading">
+            {% icon 'clock' %} Afternoon
+        </div>
+        <div id="wizard-time-afternoon-grid" class="wizard-time-grid" role="radiogroup" aria-label="Afternoon Time Slots">
+            <!-- Dynamically populated buttons -->
+        </div>
+    </div>
+
+    <!-- Live Time Confirmation Box -->
+    <div id="wizard-time-confirmation" class="wizard-selection-box" style="display: none; margin-top: 1.5rem;">
+        <span class="wizard-selection-icon" aria-hidden="true">⏰</span>
+        <span id="wizard-confirmed-time-text" class="wizard-selection-text">Select a time slot above</span>
+    </div>
+</div>

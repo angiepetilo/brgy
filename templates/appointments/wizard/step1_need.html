@@ -1,0 +1,84 @@
+{% load core_tags %}
+<!-- Step 1: What do you need? -->
+<div id="wizard-step-1" class="wizard-step-panel" role="region" aria-label="Step 1: What do you need?">
+    <div class="wizard-step-header">
+        <h2 class="wizard-step-title">What do you need?</h2>
+        <p class="wizard-step-desc">Choose between health care services or document clearances.</p>
+    </div>
+
+    <!-- Category Selection Cards -->
+    <div class="wizard-radio-group" role="radiogroup" aria-label="Appointment Category">
+        <!-- Health Center Option -->
+        <div class="wizard-card-select" id="card-cat-health" role="radio" aria-checked="false" tabindex="0" data-category="healthcare">
+            <div class="wizard-card-icon">
+                {% icon 'heart-pulse' %}
+            </div>
+            <div class="wizard-card-text">
+                <div class="wizard-card-label">Health Center</div>
+                <div class="wizard-card-sub">Check-up, dental, medical care</div>
+            </div>
+            <div class="wizard-card-check" aria-hidden="true">✓</div>
+        </div>
+
+        <!-- Documents Option -->
+        <div class="wizard-card-select" id="card-cat-doc" role="radio" aria-checked="false" tabindex="0" data-category="document">
+            <div class="wizard-card-icon">
+                {% icon 'file-text' %}
+            </div>
+            <div class="wizard-card-text">
+                <div class="wizard-card-label">Documents</div>
+                <div class="wizard-card-sub">Clearance, certificates</div>
+            </div>
+            <div class="wizard-card-check" aria-hidden="true">✓</div>
+        </div>
+    </div>
+
+    <!-- Sub-Service Selection ("Which one?") -->
+    <div id="subservices-section" style="display: none; margin-top: 1.5rem;">
+        <h3 class="wizard-sub-title" style="margin-bottom: 0.75rem;">Which one?</h3>
+        
+        <!-- Health services list container -->
+        <div id="health-services-radiogroup" class="wizard-services-list" role="radiogroup" aria-label="Available Health Services" style="display: none;">
+            {% for svc in healthcare_services %}
+            <div class="wizard-service-card" role="radio" aria-checked="false" tabindex="0" data-service-id="{{ svc.id }}" data-service-name="{{ svc.name }}" data-service-hours="{{ svc.available_time|default:'8:00 AM - 5:00 PM' }}" data-service-days="{{ svc.available_date|default:'Monday - Friday' }}" data-is-free="true">
+                <div class="wizard-service-info">
+                    <div class="wizard-service-name">{{ svc.name }}</div>
+                    <div class="wizard-service-hours">Open {{ svc.available_time|default:'8:00 AM to 5:00 PM' }} ({{ svc.available_date|default:'Monday - Friday' }})</div>
+                </div>
+                <div class="wizard-service-badge-wrap">
+                    <span class="wizard-tag-free">Free</span>
+                    <span class="wizard-card-check" aria-hidden="true">✓</span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="wizard-empty-state">
+                No services are open right now. Please call the Barangay Hall.
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Document services list container -->
+        <div id="document-services-radiogroup" class="wizard-services-list" role="radiogroup" aria-label="Available Document Services" style="display: none;">
+            {% for dt in document_types %}
+            <div class="wizard-service-card" role="radio" aria-checked="false" tabindex="0" data-service-id="{{ dt.id }}" data-service-name="{{ dt.name }}" data-service-hours="8:00 AM to 5:00 PM" data-service-days="Monday - Friday" data-is-free="{% if dt.fee == 0 %}true{% else %}false{% endif %}">
+                <div class="wizard-service-info">
+                    <div class="wizard-service-name">{{ dt.name }}</div>
+                    <div class="wizard-service-hours">Open 8:00 AM to 5:00 PM (Monday - Friday)</div>
+                </div>
+                <div class="wizard-service-badge-wrap">
+                    {% if dt.fee == 0 %}
+                    <span class="wizard-tag-free">Free</span>
+                    {% else %}
+                    <span class="wizard-tag-fee">₱{{ dt.fee }}</span>
+                    {% endif %}
+                    <span class="wizard-card-check" aria-hidden="true">✓</span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="wizard-empty-state">
+                No services are open right now. Please call the Barangay Hall.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

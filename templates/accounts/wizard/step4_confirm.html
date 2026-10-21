@@ -1,0 +1,94 @@
+{% load core_tags %}
+<!-- Step 4: Check and send -->
+<div id="reg-step-4" class="reg-step-panel" role="region" aria-label="Step 4: Check and send" style="display: none;">
+    <div class="reg-step-header">
+        <h2 class="reg-step-title">Check and send</h2>
+        <p class="reg-step-desc">Please review your information before submitting. Click "Change" if anything looks wrong.</p>
+    </div>
+
+    <!-- Review Summary Card -->
+    <div class="reg-summary-card">
+        <!-- Section 1: Personal Details -->
+        <div class="reg-summary-section">
+            <div class="reg-summary-section-header">
+                <span class="reg-summary-section-title">Personal Details</span>
+                <button type="button" class="reg-summary-change-btn" data-jump-to="1" aria-label="Change personal details">
+                    Change
+                </button>
+            </div>
+            <dl class="reg-summary-grid">
+                <div class="reg-summary-row">
+                    <dt class="reg-summary-label">Full Name</dt>
+                    <dd class="reg-summary-value" id="summary-full-name">—</dd>
+                </div>
+                <div class="reg-summary-row">
+                    <dt class="reg-summary-label">Date of Birth</dt>
+                    <dd class="reg-summary-value" id="summary-dob">—</dd>
+                </div>
+                <div class="reg-summary-row">
+                    <dt class="reg-summary-label">Gender & Status</dt>
+                    <dd class="reg-summary-value" id="summary-gender-status">—</dd>
+                </div>
+            </dl>
+        </div>
+
+        <!-- Section 2: Contact Details -->
+        <div class="reg-summary-section">
+            <div class="reg-summary-section-header">
+                <span class="reg-summary-section-title">Contact & Address</span>
+                <button type="button" class="reg-summary-change-btn" data-jump-to="2" aria-label="Change contact details">
+                    Change
+                </button>
+            </div>
+            <dl class="reg-summary-grid">
+                <div class="reg-summary-row">
+                    <dt class="reg-summary-label">Address</dt>
+                    <dd class="reg-summary-value" id="summary-address">—</dd>
+                </div>
+                <div class="reg-summary-row">
+                    <dt class="reg-summary-label">Mobile Phone</dt>
+                    <dd class="reg-summary-value" id="summary-contact-no">—</dd>
+                </div>
+                <div class="reg-summary-row">
+                    <dt class="reg-summary-label">Email</dt>
+                    <dd class="reg-summary-value" id="summary-email">—</dd>
+                </div>
+            </dl>
+        </div>
+
+        <!-- Section 3: ID Verification -->
+        <div class="reg-summary-section">
+            <div class="reg-summary-section-header">
+                <span class="reg-summary-section-title">ID Verification</span>
+                <button type="button" class="reg-summary-change-btn" data-jump-to="3" aria-label="Change ID documents">
+                    Change
+                </button>
+            </div>
+            <dl class="reg-summary-grid">
+                <div class="reg-summary-row">
+                    <dt class="reg-summary-label">Front of ID</dt>
+                    <dd class="reg-summary-value" id="summary-id-front">—</dd>
+                </div>
+                <div class="reg-summary-row">
+                    <dt class="reg-summary-label">Back of ID</dt>
+                    <dd class="reg-summary-value" id="summary-id-back"><span class="reg-text-muted">Not provided</span></dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+
+    <!-- 32px Privacy Consent Row -->
+    <div class="reg-consent-card" id="group-privacy-consent">
+        <label for="id_privacy_consent" class="reg-consent-label">
+            <input type="checkbox" name="privacy_consent" id="id_privacy_consent" class="reg-consent-checkbox" required {% if form and form.privacy_consent.value %}checked{% endif %}>
+            <span class="reg-consent-text">
+                I have read, understood, and agree to the Barangay 
+                <a href="#privacy-notice" id="openPrivacyNoticeLink" class="reg-link-inline">Privacy Notice</a> 
+                and consent to the processing of my personal data for official barangay verification. <span class="required" aria-hidden="true">*</span>
+            </span>
+        </label>
+        <div class="reg-field-error" id="error-privacy-consent" role="alert" aria-live="assertive">
+            {% if form and form.privacy_consent.errors %}{{ form.privacy_consent.errors.0 }}{% endif %}
+        </div>
+    </div>
+</div>

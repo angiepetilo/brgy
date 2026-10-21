@@ -1,19 +1,23 @@
 {% load core_tags %}
-<div class="post-trigger-card" data-post-action="open-create" role="button" tabindex="0" aria-label="Open the post an announcement dialog">
-  {% if user.avatar %}
-    <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="trigger-avatar">
-  {% else %}
-    <div class="trigger-avatar-initial">{{ user.first_name|slice:":1"|default:user.username|slice:":1"|upper }}</div>
-  {% endif %}
-  <div class="trigger-input-placeholder">
-    Post an announcement for residents, {{ user.first_name|default:user.username }}
+<div class="announcement-creator-card card post-trigger-card" data-post-action="open-create" role="button" tabindex="0" aria-label="Post an announcement for residents">
+  <div class="creator-card-body">
+    {% if user.avatar %}
+      <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="trigger-avatar">
+    {% else %}
+      <div class="trigger-avatar-initial">{{ user.first_name|slice:":1"|default:user.username|slice:":1"|upper }}</div>
+    {% endif %}
+    <div class="creator-input-area trigger-input-placeholder">
+      Post an announcement for residents, {{ user.first_name|default:user.username }}...
+    </div>
   </div>
-  <div class="trigger-quick-actions">
-    <button type="button" class="btn btn-secondary btn-sm action-btn" data-post-action="open-create" title="Create post" aria-label="Create post">
-      {% icon 'megaphone' %}
+  <div class="creator-card-footer">
+    <button type="button" class="creator-quick-btn action-btn" data-post-action="open-create" title="Post an announcement">
+      <span class="action-icon icon-announcement">{% icon 'megaphone' %}</span>
+      <span>Post Announcement</span>
     </button>
-    <button type="button" class="btn btn-secondary btn-sm action-btn media" data-post-action="open-create" title="Add photo" aria-label="Add photo">
-      {% icon 'image' %}
+    <button type="button" class="creator-quick-btn action-btn media" data-post-action="open-create" title="Attach a photo">
+      <span class="action-icon icon-photo">{% icon 'image' %}</span>
+      <span>Attach Photo</span>
     </button>
   </div>
 </div>

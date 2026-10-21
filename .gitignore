@@ -29,3 +29,4 @@ Thumbs.db
 
 # Local DB backups
 backups/
+*.bak

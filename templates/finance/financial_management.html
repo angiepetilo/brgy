@@ -541,7 +541,11 @@
 
                 <div class="form-group">
                     <label for="tx-amount" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Amount (₱) <span style="color: #DC2626;">*</span></label>
-                    <input type="number" step="0.01" min="0.01" name="amount" id="tx-amount" class="form-control" placeholder="0.00" required style="font-weight: 700; font-size: 0.95rem;">
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <span style="position: absolute; left: 12px; font-weight: 700; color: #4B5563; font-size: 0.95rem; pointer-events: none;">₱</span>
+                        <input type="text" inputmode="decimal" name="amount" id="tx-amount" class="form-control peso-currency-input" placeholder="0.00" maxlength="17" required autocomplete="off" style="padding-left: 28px; font-weight: 700; font-size: 0.95rem;">
+                    </div>
+                    <small style="color: #6B7280; font-size: 0.72rem; margin-top: 0.25rem; display: block;">Standard Philippine Peso format (e.g. 10,000.00).</small>
                 </div>
             </div>
 
@@ -626,7 +630,11 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                 <div class="form-group">
                     <label for="acc-alloc" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Initial Annual Budget (₱)</label>
-                    <input type="number" step="0.01" min="0" name="initial_allocation" id="acc-alloc" class="form-control" placeholder="0.00">
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <span style="position: absolute; left: 12px; font-weight: 700; color: #4B5563; font-size: 0.95rem; pointer-events: none;">₱</span>
+                        <input type="text" inputmode="decimal" name="initial_allocation" id="acc-alloc" class="form-control peso-currency-input" placeholder="0.00" maxlength="17" autocomplete="off" style="padding-left: 28px; font-weight: 600; font-size: 0.95rem;">
+                    </div>
+                    <small style="color: #6B7280; font-size: 0.72rem; margin-top: 0.25rem; display: block;">Standard Philippine Peso format (e.g. 500,000.00). Max 2 decimal places.</small>
                 </div>
 
                 <div class="form-group">
@@ -693,7 +701,10 @@
                     <label for="liq-actual-spent" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">
                         Actual Disbursed (₱) <span style="color: #DC2626;">*</span>
                     </label>
-                    <input type="number" step="0.01" min="0" name="actual_spent" id="liq-actual-spent" class="form-control" required style="font-weight: 700; font-size: 0.95rem;">
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <span style="position: absolute; left: 12px; font-weight: 700; color: #4B5563; font-size: 0.95rem; pointer-events: none;">₱</span>
+                        <input type="text" inputmode="decimal" name="actual_spent" id="liq-actual-spent" class="form-control peso-currency-input" required autocomplete="off" style="padding-left: 28px; font-weight: 700; font-size: 0.95rem;">
+                    </div>
                     <small style="color: #6B7280; font-size: 0.72rem;">Total receipts and verified invoices.</small>
                 </div>
 
@@ -701,7 +712,10 @@
                     <label for="liq-refund-amount" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">
                         Excess Cash Refund (₱)
                     </label>
-                    <input type="number" step="0.01" min="0" name="refund_amount" id="liq-refund-amount" class="form-control" style="font-weight: 700; font-size: 0.95rem; background: #F3F4F6;">
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <span style="position: absolute; left: 12px; font-weight: 700; color: #4B5563; font-size: 0.95rem; pointer-events: none;">₱</span>
+                        <input type="text" inputmode="decimal" name="refund_amount" id="liq-refund-amount" class="form-control peso-currency-input" autocomplete="off" style="padding-left: 28px; font-weight: 700; font-size: 0.95rem; background: #F3F4F6;">
+                    </div>
                     <small style="color: #4B5563; font-size: 0.72rem; font-weight: 600;">Auto-credited back to fund balance.</small>
                 </div>
             </div>
@@ -786,7 +800,11 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                 <div class="form-group">
                     <label for="ca-amount" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Granted Amount (₱) <span style="color: #DC2626;">*</span></label>
-                    <input type="number" step="0.01" min="0.01" name="amount" id="ca-amount" class="form-control" placeholder="0.00" required style="font-weight: 700; font-size: 0.95rem;">
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <span style="position: absolute; left: 12px; font-weight: 700; color: #4B5563; font-size: 0.95rem; pointer-events: none;">₱</span>
+                        <input type="text" inputmode="decimal" name="amount" id="ca-amount" class="form-control peso-currency-input" placeholder="0.00" maxlength="17" required autocomplete="off" style="padding-left: 28px; font-weight: 700; font-size: 0.95rem;">
+                    </div>
+                    <small style="color: #6B7280; font-size: 0.72rem; margin-top: 0.25rem; display: block;">Standard Philippine Peso format (e.g. 25,000.00).</small>
                 </div>
                 <div class="form-group">
                     <label for="ca-deadline" style="font-weight: 700; font-size: 0.85rem; color: #1F2937; margin-bottom: 0.35rem;">Liquidation Deadline</label>

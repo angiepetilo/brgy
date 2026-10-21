@@ -1,0 +1,56 @@
+{% load core_tags %}
+<!-- Step 2: How to reach you -->
+<div id="reg-step-2" class="reg-step-panel" role="region" aria-label="Step 2: How to reach you" style="display: none;">
+    <div class="reg-step-header">
+        <h2 class="reg-step-title">How to reach you</h2>
+        <p class="reg-step-desc">We will use this to update you on your registration and send your login credentials.</p>
+    </div>
+
+    <div class="reg-form-fields">
+        <!-- Home Address -->
+        <div class="reg-field-group" id="group-address">
+            <label for="reg-address" class="reg-field-label">
+                Home address <span class="required" aria-hidden="true">*</span>
+            </label>
+            <input type="text" id="reg-address" name="address" class="reg-input" 
+                   placeholder="House / Unit #, Street Name, Purok" 
+                   autocomplete="street-address" required 
+                   value="{{ form.address.value|default:'' }}">
+            <div class="reg-field-hint">Include your house number, street name, and purok if known.</div>
+            <div class="reg-field-error" id="error-address" role="alert" aria-live="assertive">{% if form and form.address.errors %}{{ form.address.errors.0 }}{% endif %}</div>
+        </div>
+
+        <!-- Mobile Phone Number -->
+        <div class="reg-field-group" id="group-contact-no">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <label for="reg-contact-no" class="reg-field-label" style="margin-bottom: 0;">
+                    Mobile phone <span class="required" aria-hidden="true">*</span>
+                </label>
+                <span id="reg-phone-badge" class="reg-badge-success" style="display: none;" aria-live="polite">✓ Looks good</span>
+            </div>
+            <div class="reg-input-with-icon" style="margin-top: 8px;">
+                <span class="reg-input-prefix-icon" aria-hidden="true">
+                    {% icon 'phone' style='width: 20px; height: 20px; color: #4a5670;' %}
+                </span>
+                <input type="tel" id="reg-contact-no" name="contact_no" class="reg-input reg-input-padded" 
+                       placeholder="09XXXXXXXXX" maxlength="11" inputmode="numeric" 
+                       autocomplete="tel-national" required 
+                       value="{{ form.contact_no.value|default:'' }}">
+            </div>
+            <div class="reg-field-hint" id="hint-contact-no">Must be exactly 11 digits starting with 09 (e.g. 09171234567).</div>
+            <div class="reg-field-error" id="error-contact-no" role="alert" aria-live="assertive">{% if form and form.contact_no.errors %}{{ form.contact_no.errors.0 }}{% endif %}</div>
+        </div>
+
+        <!-- Email Address -->
+        <div class="reg-field-group" id="group-email">
+            <label for="reg-email" class="reg-field-label">
+                Email address <span class="required" aria-hidden="true">*</span>
+            </label>
+            <input type="email" id="reg-email" name="email" class="reg-input" 
+                   placeholder="name@example.com" autocomplete="email" required 
+                   value="{{ form.email.value|default:'' }}">
+            <div class="reg-field-hint">Your temporary password will be sent to this email once your ID is verified.</div>
+            <div class="reg-field-error" id="error-email" role="alert" aria-live="assertive">{% if form and form.email.errors %}{{ form.email.errors.0 }}{% endif %}</div>
+        </div>
+    </div>
+</div>

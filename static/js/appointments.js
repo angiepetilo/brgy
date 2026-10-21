@@ -201,74 +201,58 @@
         ampm: 'AM'
     };
 
-    var HEALTH_SERVICES = [
-        {
-            id: 6,
-            name: 'Child Immunization / Vaccination',
-            days: [3, 5],
-            daysText: 'Every Wednesday & Friday',
-            timeText: '8:00 AM - 11:30 AM',
-            startHour: 8,
-            startMin: 0,
-            startAmpm: 'AM',
-            dotClass: 'dot-blue'
-        },
-        {
-            id: 1,
-            name: 'Dental Cleaning',
-            days: [2, 4],
-            daysText: 'Every Tuesday & Thursday',
-            timeText: '9:00 AM - 3:00 PM',
-            startHour: 9,
-            startMin: 0,
-            startAmpm: 'AM',
-            dotClass: 'dot-navy'
-        },
-        {
-            id: 4,
-            name: 'General Consultation',
-            days: [1, 2, 3, 4, 5],
-            daysText: 'Monday - Friday',
-            timeText: '8:00 AM - 4:00 PM',
-            startHour: 8,
-            startMin: 0,
-            startAmpm: 'AM',
-            dotClass: 'dot-gray'
-        },
-        {
-            id: 2,
-            name: 'Health Check-up',
-            days: [1, 2, 3, 4, 5],
-            daysText: 'Monday - Friday',
-            timeText: '8:00 AM - 12:00 PM',
-            startHour: 8,
-            startMin: 0,
-            startAmpm: 'AM',
-            dotClass: 'dot-gray'
-        },
-        {
-            id: 5,
-            name: 'Prenatal Check-up',
-            days: [1, 4],
-            daysText: 'Every Monday & Thursday',
-            timeText: '8:30 AM - 2:00 PM',
-            startHour: 8,
-            startMin: 30,
-            startAmpm: 'AM',
-            dotClass: 'dot-red'
-        },
-        {
-            id: 3,
-            name: 'Tooth Extraction',
-            days: [2, 5],
-            daysText: 'Every Tuesday & Friday',
-            timeText: '1:00 PM - 4:30 PM',
-            startHour: 1,
-            startMin: 0,
-            startAmpm: 'PM',
-            dotClass: 'dot-green'
+    // Dynamic health services loader (Strict CSP compliant: reads from JSON script tag)
+    function loadHealthServices() {
+        var scriptEl = document.getElementById('health-services-data');
+        if (!scriptEl) return [];
+        try {
+            var raw = JSON.parse(scriptEl.textContent.trim());
+            if (Array.isArray(raw)) {
+                var colors = ['dot-blue', 'dot-navy', 'dot-green', 'dot-red', 'dot-gray'];
+                return raw.map(function(item, idx) {
+                    var days = [];
+                    var dText = (item.daysText || '').toLowerCase();
+                    if (dText.indexOf('mon') !== -1 && dText.indexOf('fri') !== -1) {
+                        days = [1, 2, 3, 4, 5];
+                    } else {
+                        if (dText.indexOf('mon') !== -1) days.push(1);
+                        if (dText.indexOf('tue') !== -1) days.push(2);
+                        if (dText.indexOf('wed') !== -1) days.push(3);
+                        if (dText.indexOf('thu') !== -1) days.push(4);
+                        if (dText.indexOf('fri') !== -1) days.push(5);
+                        if (dText.indexOf('sat') !== -1) days.push(6);
+                        if (dText.indexOf('sun') !== -1) days.push(0);
+                    }
+                    if (days.length === 0) days = [1, 2, 3, 4, 5];
+
+                    var timeText = item.timeText || '8:00 AM - 5:00 PM';
+                    var startHour = 8, startMin = 0, startAmpm = 'AM';
+                    var m = timeText.match(/(\d+):?(\d*)\s*(AM|PM)/i);
+                    if (m) {
+                        startHour = parseInt(m[1], 10);
+                        startMin = m[2] ? parseInt(m[2], 10) : 0;
+                        startAmpm = m[3].toUpperCase();
+                    }
+
+                    return {
+                        id: item.id,
+                        name: item.name,
+                        days: days,
+                        daysText: item.daysText || 'Monday - Friday',
+                        timeText: timeText,
+                        startHour: startHour,
+                        startMin: startMin,
+                        startAmpm: startAmpm,
+                        dotClass: colors[idx % colors.length],
+                        is_free: item.is_free !== false
+                    };
+                });
+            }
+        } catch (e) {
+            console.warn('Could not parse health services data:', e);
         }
-    ];
+        return [];
+    }
 
     var MONTH_NAMES = [
         'January', 'February', 'March', 'April', 'May', 'June',
@@ -340,7 +324,8 @@
                 cell.classList.add('selected');
             }
 
-            var servicesForDay = HEALTH_SERVICES.filter(function(s) {
+            var dynamicServices = loadHealthServices();
+            var servicesForDay = dynamicServices.filter(function(s) {
                 return s.days.indexOf(dayOfWeek) !== -1;
             });
 
@@ -350,7 +335,7 @@
 
             var dotHtml = '';
             if (servicesForDay.length > 0) {
-                var dotClass = servicesForDay[0].dotClass;
+                var dotClass = servicesForDay[0].dotClass || 'dot-blue';
                 dotHtml = '<span class="cal-day-dot ' + dotClass + '"></span>';
             }
 
@@ -394,14 +379,22 @@
         var counter = document.getElementById('cal-services-counter');
         if (!container) return;
 
-        var openSvcs = HEALTH_SERVICES.filter(function(s) {
+        var services = loadHealthServices();
+
+        if (services.length === 0) {
+            if (counter) counter.textContent = '0 Available';
+            container.innerHTML = '<div style="padding: 1.25rem 1rem; text-align: center; color: #6B7280; font-size: 0.8125rem; background: #F9FAFB; border-radius: 8px; border: 1px dashed #E5E7EB;">No health center services currently scheduled.</div>';
+            return;
+        }
+
+        var openSvcs = services.filter(function(s) {
             return s.days.indexOf(dayOfWeek) !== -1;
         });
 
-        var displayList = openSvcs.length > 0 ? openSvcs : HEALTH_SERVICES;
+        var displayList = openSvcs.length > 0 ? openSvcs : services;
 
         if (counter) {
-            counter.textContent = openSvcs.length > 0 ? openSvcs.length + ' Open Today' : 'All Clinics';
+            counter.textContent = openSvcs.length > 0 ? openSvcs.length + ' Open Today' : services.length + ' Total';
         }
 
         container.innerHTML = '';
@@ -414,10 +407,10 @@
             var dateLabel = selectedDateISO ? formatDisplayDate(selectedDateISO) : svc.daysText;
 
             card.innerHTML =
-                '<div class="service-card-dot ' + svc.dotClass + '"></div>' +
+                '<div class="service-card-dot ' + (svc.dotClass || 'dot-blue') + '"></div>' +
                 '<div style="flex: 1;">' +
                     '<div class="service-card-datetime">' + dateLabel + ' • ' + svc.timeText + '</div>' +
-                    '<div class="service-card-name">' + svc.name + ' <span style="font-weight: 700; color: #111827;">(Free)</span></div>' +
+                    '<div class="service-card-name">' + svc.name + ' <span style="font-weight: 600; color: #111827;">(Free)</span></div>' +
                 '</div>';
 
             card.addEventListener('click', function() {

@@ -1,0 +1,29 @@
+{% load core_tags %}
+<!-- FILE VIEWER LIGHTBOX MODAL (To see or view uploaded file) -->
+<div id="fileViewerModal" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.75); backdrop-filter: blur(4px); z-index: 99999; align-items: center; justify-content: center; padding: 1.5rem;" role="dialog" aria-modal="true" aria-labelledby="viewerModalFilename">
+    <div style="background: #FFFFFF; border-radius: 14px; width: 100%; max-width: 720px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);">
+        <!-- Modal Header -->
+        <div style="padding: 1rem 1.25rem; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between; background: #F9FAFB;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; overflow: hidden;">
+                {% icon 'file-check' cls='icon-primary' %}
+                <span id="viewerModalFilename" style="font-weight: 700; font-size: 0.95rem; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 480px;">Uploaded Document Preview</span>
+            </div>
+            <button type="button" id="viewerModalCloseBtn" style="border: none; background: transparent; color: #6B7280; font-size: 1.25rem; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Close modal">
+                {% icon 'x' %}
+            </button>
+        </div>
+
+        <!-- Modal Body Content -->
+        <div class="modal-scrollable" style="padding: 1rem; flex: 1; overflow-y: auto; display: flex; align-items: center; justify-content: center; background: #F3F4F6; min-height: 320px;">
+            <img id="viewerModalImage" src="" alt="Full Uploaded Document" style="display: none; max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 6px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+            <iframe id="viewerModalPdf" src="" title="PDF Preview" style="display: none; width: 100%; height: 70vh; border: none; border-radius: 6px;"></iframe>
+        </div>
+
+        <!-- Modal Footer -->
+        <div style="padding: 0.85rem 1.25rem; border-top: 1px solid #E5E7EB; display: flex; justify-content: flex-end; background: #FFFFFF;">
+            <button type="button" id="viewerModalDismissBtn" class="reg-btn-secondary" style="height: 40px; padding: 0 18px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                Close Preview
+            </button>
+        </div>
+    </div>
+</div>

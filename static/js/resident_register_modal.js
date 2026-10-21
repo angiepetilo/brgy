@@ -30,8 +30,8 @@
         if (!el) { return; }
         regOpener = trigger;
         el.style.display = 'flex';
-        var first = el.querySelector('input, select, textarea');
-        if (first) { first.focus(); }
+        var first = el.querySelector('#reg-first-name, input:not([type="hidden"]), select, textarea');
+        if (first && typeof first.focus === 'function') { first.focus(); }
     }
 
     function closeRegModal() {

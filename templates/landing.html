@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barangay.ph - Public Service & Online Appointment</title>
     {% load static core_tags %}
+    <link rel="icon" type="image/png" href="{% static 'images/barangay_logo.png' %}">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" href="{% static 'css/theme.css' %}">
     <!-- FullCalendar 6.1.11, vendored (the 6.x global bundle injects its own CSS) -->
@@ -395,54 +396,62 @@
         .calendar-section-grid {
             margin-bottom: 1.25rem;
         }
+        /* Shadcn UI styled Calendar (rounded-lg border, captionLayout="dropdown", mode="single") */
         .cal-box-card {
             background: #FFFFFF;
-            border: 1px solid #E5E7EB;
-            border-radius: 14px;
-            padding: 1.15rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
             margin-bottom: 1.25rem;
         }
         .cal-header-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
+            margin-bottom: 0.875rem;
             gap: 0.5rem;
         }
         .cal-header-left {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.375rem;
         }
         .cal-select {
-            padding: 0.4rem 0.65rem;
-            border: 1px solid #D1D5DB;
-            border-radius: 8px;
-            font-size: 0.9375rem;
-            font-weight: 700;
-            color: #111827;
-            background: #FFFFFF;
+            height: 32px;
+            padding: 0 0.5rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #0F172A;
+            background-color: #FFFFFF;
             cursor: pointer;
             outline: none;
-            transition: border-color 0.15s ease;
+            transition: all 0.15s ease;
+        }
+        .cal-select:hover {
+            background-color: #F8FAFC;
+            border-color: #CBD5E1;
         }
         .cal-select:focus {
             border-color: #1E3A8A;
+            box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.15);
         }
         .cal-header-right {
             display: flex;
             align-items: center;
-            gap: 0.4rem;
+            gap: 0.35rem;
         }
         .cal-today-btn {
+            height: 32px;
             background: #FFFFFF;
-            border: 1px solid #D1D5DB;
-            border-radius: 8px;
-            padding: 0.35rem 0.75rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            padding: 0 0.65rem;
             font-size: 0.8125rem;
-            font-weight: 600;
-            color: #374151;
+            font-weight: 500;
+            color: #334155;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -450,16 +459,17 @@
             transition: all 0.15s ease;
         }
         .cal-today-btn:hover {
-            background: #F3F4F6;
-            color: #111827;
+            background: #F1F5F9;
+            color: #0F172A;
+            border-color: #CBD5E1;
         }
         .cal-nav-btn {
             width: 32px;
             height: 32px;
-            border-radius: 50%;
-            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            border: 1px solid #E2E8F0;
             background: #FFFFFF;
-            color: #4B5563;
+            color: #475569;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -467,8 +477,9 @@
             transition: all 0.15s ease;
         }
         .cal-nav-btn:hover {
-            background: #F3F4F6;
-            color: #111827;
+            background: #F1F5F9;
+            color: #0F172A;
+            border-color: #CBD5E1;
         }
         .cal-nav-btn.primary {
             background: #1E3A8A;
@@ -476,107 +487,118 @@
             color: #FFFFFF;
         }
         .cal-nav-btn.primary:hover {
-            background: #0F4C81;
+            background: #172554;
+            border-color: #172554;
         }
         .cal-weekdays-row {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-            margin-bottom: 0.5rem;
+            gap: 2px;
+            margin-bottom: 0.35rem;
             text-align: center;
         }
         .cal-weekday-label {
-            font-size: 0.8125rem;
-            font-weight: 600;
-            color: #6B7280;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #64748B;
             padding: 4px 0;
         }
         .cal-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
+            gap: 2px;
         }
         .cal-day-cell {
-            min-height: 44px;
+            min-height: 38px;
+            width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-radius: 8px;
-            border: 1.5px solid transparent;
+            border-radius: 6px;
+            border: 1px solid transparent;
             background: #FFFFFF;
             cursor: pointer;
             position: relative;
             transition: all 0.15s ease;
             user-select: none;
-            padding: 4px;
-            color: #111827;
+            padding: 3px 0;
+            color: #0F172A;
         }
         .cal-day-cell:hover {
-            background: #F3F4F6;
-            border-color: #D1D5DB;
+            background: #F1F5F9;
+            color: #0F172A;
         }
         .cal-day-cell.other-month {
-            color: #9CA3AF;
+            color: #94A3B8;
+            opacity: 0.45;
         }
         .cal-day-cell.other-month .cal-day-num {
-            color: #9CA3AF;
+            color: #94A3B8;
             font-weight: 500;
         }
         .cal-day-cell.current-month {
-            color: #111827;
+            color: #0F172A;
         }
         .cal-day-cell.current-month .cal-day-num {
-            color: #111827;
-            font-weight: 700;
+            color: #0F172A;
+            font-weight: 500;
+        }
+        .cal-day-cell.today {
+            border: 1px solid #CBD5E1;
+            background: #F8FAFC;
+            font-weight: 600;
         }
         .cal-day-cell.past {
-            color: #9CA3AF;
+            color: #CBD5E1 !important;
+            opacity: 0.35 !important;
+            cursor: not-allowed !important;
+            pointer-events: none !important;
         }
         .cal-day-cell.past .cal-day-num {
-            color: #9CA3AF;
+            color: #CBD5E1 !important;
         }
         .cal-day-cell.has-services {
-            background: #F9FAFB;
-            border-color: #E5E7EB;
+            background: #F8FAFC;
         }
         .cal-day-cell.selected {
-            background: #1E3A8A;
-            border-color: #1E3A8A;
-            font-weight: 800;
-            color: #FFFFFF;
+            background: #1E3A8A !important;
+            border-color: #1E3A8A !important;
+            font-weight: 600 !important;
+            color: #FFFFFF !important;
         }
         .cal-day-cell.selected .cal-day-num {
-            color: #FFFFFF;
-            font-weight: 800;
+            color: #FFFFFF !important;
+            font-weight: 600 !important;
         }
         .cal-day-cell.selected .cal-day-dot {
             background: #FFFFFF !important;
         }
         .cal-day-num {
-            font-size: 0.9375rem;
+            font-size: 0.875rem;
             line-height: 1;
-            font-weight: 700;
+            font-weight: 500;
             color: inherit;
         }
         .cal-day-dot {
-            width: 5px;
-            height: 5px;
+            width: 4px;
+            height: 4px;
             border-radius: 50%;
-            margin-top: 4px;
+            margin-top: 3px;
         }
         .cal-day-dot.dot-blue { background: #1E3A8A; }
         .cal-day-dot.dot-navy { background: #0F4C81; }
         .cal-day-dot.dot-red { background: #DC2626; }
         .cal-day-dot.dot-green { background: #16A34A; }
-        .cal-day-dot.dot-gray { background: #374151; }
+        .cal-day-dot.dot-gray { background: #475569; }
 
         /* Available Health Services Container (Positioned below Calendar) */
         .cal-services-container {
             background: #FFFFFF;
-            border: 1px solid #E5E7EB;
-            border-radius: 14px;
-            padding: 1.15rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
             margin-bottom: 1.25rem;
         }
         .cal-services-list {
@@ -704,6 +726,87 @@
                 grid-template-columns: 1fr !important;
             }
         }
+
+        /* Mobile Viewport Refinements (<768px) */
+        @media (max-width: 768px) {
+            .landing-civic {
+                padding: 0 1rem;
+                margin: 0.75rem auto;
+            }
+            .landing-header-inner {
+                padding: 0.75rem 1rem;
+            }
+            .landing-hero {
+                padding: 2.75rem 1rem 3.5rem 1rem;
+            }
+            .hero-inner {
+                grid-template-columns: 1fr !important;
+                gap: 1.75rem !important;
+            }
+            .hero-title,
+            .landing-hero h1,
+            .landing-hero .hero-title {
+                font-size: 1.85rem !important;
+                line-height: 1.2 !important;
+            }
+            .hero-subtitle,
+            .landing-hero p,
+            .landing-hero .hero-subtitle {
+                font-size: 0.95rem !important;
+                margin-bottom: 1.25rem !important;
+            }
+            .hero-card {
+                padding: 1.25rem;
+            }
+            .workflow-section {
+                margin: -2rem auto 2.5rem auto;
+                padding: 0 1rem;
+            }
+            .workflow-card {
+                padding: 1.25rem 1rem;
+            }
+            .workflow-steps-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 1rem !important;
+            }
+            .services-section {
+                padding: 0 1rem;
+                margin-bottom: 2.5rem;
+            }
+            .services-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+            }
+            .modal-overlay {
+                padding: 0.5rem !important;
+            }
+            .modal-container {
+                max-height: 96vh !important;
+                border-radius: 12px !important;
+            }
+            .modal-header-bar {
+                padding: 1rem 1.25rem;
+            }
+            .category-pill-group {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        /* Small Phones (<480px) */
+        @media (max-width: 480px) {
+            .workflow-steps-grid {
+                grid-template-columns: 1fr !important;
+                gap: 0.75rem !important;
+            }
+            .hero-title,
+            .landing-hero h1,
+            .landing-hero .hero-title {
+                font-size: 1.65rem !important;
+            }
+            .brand-text {
+                font-size: 1rem !important;
+            }
+        }
     </style>
 </head>
 <body data-icon-sprite="{% static 'vendor/lucide/sprite.svg' %}">
@@ -765,19 +868,35 @@
                 </div>
             </div>
 
-            <!-- Crisp Hero Card -->
+            <!-- Dynamic Hero Card -->
             <div class="hero-card">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid #E5E7EB; padding-bottom: 0.75rem;">
                     <span style="font-weight: 700; font-size: 0.875rem; text-transform: uppercase; color: #111827;">
-                        {% icon 'circle-check' cls='icon-success' %} Daily Service Window
+                        {% icon 'circle-check' cls='icon-success' %} DAILY SERVICE WINDOW
                     </span>
-                    <span class="badge badge-primary">Open 8 AM - 5 PM</span>
+                    <span class="badge badge-primary">
+                        {% if barangay_info.morning_window_start and barangay_info.afternoon_window_end %}
+                        OPEN {{ barangay_info.morning_window_start }} - {{ barangay_info.afternoon_window_end }}
+                        {% else %}
+                        {{ barangay_info.office_hours|default:"OPEN 8 AM - 5 PM"|upper }}
+                        {% endif %}
+                    </span>
                 </div>
                 <div style="font-size: 0.875rem; color: #4B5563; margin-bottom: 0.75rem;">
-                    {% icon 'file-text' cls='icon-primary' %} <strong>Document Clearances:</strong> Same-day or next-day pickup.
+                    {% icon 'file-text' cls='icon-primary' %} <strong>Document Clearances:</strong> 
+                    {% if document_types.exists %}
+                    {% for dt in document_types|slice:":3" %}{{ dt.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if document_types.count > 3 %} & more{% endif %} ({{ document_types.count }} available online).
+                    {% else %}
+                    No document clearance services currently active.
+                    {% endif %}
                 </div>
                 <div style="font-size: 0.875rem; color: #4B5563;">
-                    {% icon 'smile' cls='icon-primary' %} <strong>Health Center:</strong> Dental, consultations & check-ups.
+                    {% icon 'smile' cls='icon-primary' %} <strong>Health Center:</strong> 
+                    {% if healthcare_services %}
+                    {% for svc in healthcare_services|slice:":3" %}{{ svc.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if healthcare_services|length > 3 %} & more{% endif %} ({{ healthcare_services|length }} available).
+                    {% else %}
+                    No health center consultations currently scheduled.
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -831,22 +950,34 @@
                     <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0; color: #111827;">Document Clearances</h3>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                    <div class="service-box">
-                        <div style="font-weight: 700; color: #111827; font-size: 0.875rem;">Barangay Clearance</div>
-                        <div style="font-size: 0.875rem; color: #6B7280;">Official certificate for employment, business, and postal identification.</div>
+                    {% for dt in document_types %}
+                    <div class="service-box" style="display: flex; flex-direction: column; gap: 0.35rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                            <div style="font-weight: 700; color: #111827; font-size: 0.9rem;">{{ dt.name }}</div>
+                            <span class="badge" style="font-size: 0.75rem; background: #EFF6FF; color: #1E3A8A; border: 1px solid #BFDBFE; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 4px;">
+                                {% if dt.fee and dt.fee > 0 %}₱{{ dt.fee }}{% else %}FREE{% endif %}
+                            </span>
+                        </div>
+                        <div style="font-size: 0.875rem; color: #6B7280; line-height: 1.45;">
+                            {{ dt.description|default:"Available for online request and pickup at Barangay Hall." }}
+                        </div>
+                        {% if dt.processing_days %}
+                        <div style="font-size: 0.75rem; color: #9CA3AF; margin-top: 0.15rem;">
+                            Processing: {{ dt.processing_days }} business day{{ dt.processing_days|pluralize }}
+                        </div>
+                        {% endif %}
                     </div>
-                    <div class="service-box">
-                        <div style="font-weight: 700; color: #111827; font-size: 0.875rem;">Certificate of Residency</div>
-                        <div style="font-size: 0.875rem; color: #6B7280;">Proof of domicile required by banks, universities, and government agencies.</div>
+                    {% empty %}
+                    <div class="service-box" style="text-align: center; padding: 2.25rem 1.5rem; background: #F9FAFB; border: 1px dashed #D1D5DB; border-radius: 8px;">
+                        <div style="color: #9CA3AF; margin-bottom: 0.65rem;">
+                            {% icon 'file-text' cls='icon-lg' %}
+                        </div>
+                        <div style="font-weight: 700; color: #374151; font-size: 0.925rem; margin-bottom: 0.3rem;">No Document Services Published</div>
+                        <div style="font-size: 0.8125rem; color: #6B7280; line-height: 1.5; max-width: 380px; margin: 0 auto;">
+                            Official certificates and clearances will appear here once added and configured by the Barangay Administration in the system settings.
+                        </div>
                     </div>
-                    <div class="service-box">
-                        <div style="font-weight: 700; color: #111827; font-size: 0.875rem;">Certificate of Indigency</div>
-                        <div style="font-size: 0.875rem; color: #6B7280;">Financial, hospital, and legal aid qualification clearance.</div>
-                    </div>
-                    <div class="service-box">
-                        <div style="font-weight: 700; color: #111827; font-size: 0.875rem;">Notice of Award (NOA)</div>
-                        <div style="font-size: 0.875rem; color: #6B7280;">Official verification and community grant approval notices.</div>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
 
@@ -861,29 +992,34 @@
                     <div class="service-box" style="display: flex; flex-direction: column; gap: 0.35rem;">
                         <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                             <div style="font-weight: 700; color: #111827; font-size: 0.9rem;">{{ svc.name }}</div>
-                            <span class="badge" style="font-size: 0.875rem; background: #FFFFFF; color: #111827; border: 1px solid #16A34A; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 4px;">ACTIVE</span>
+                            <span class="badge" style="font-size: 0.75rem; background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 4px;">ACTIVE</span>
                         </div>
                         <!-- Available Date & Time -->
-                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; font-size: 0.875rem; color: #4B5563; margin: 0.15rem 0;">
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; font-size: 0.8125rem; color: #4B5563; margin: 0.15rem 0;">
+                            {% if svc.available_date %}
                             <span style="display: inline-flex; align-items: center; gap: 0.3rem; background: #F3F4F6; padding: 0.2rem 0.5rem; border-radius: 6px;">
                                 {% icon 'calendar' cls='icon-primary' %}
-                                <strong>{{ svc.available_date|default:"Monday - Friday" }}</strong>
+                                <strong>{{ svc.available_date }}</strong>
                             </span>
+                            {% endif %}
+                            {% if svc.available_time %}
                             <span style="display: inline-flex; align-items: center; gap: 0.3rem; background: #F3F4F6; padding: 0.2rem 0.5rem; border-radius: 6px;">
                                 {% icon 'clock' cls='icon-success' %}
-                                <span>{{ svc.available_time|default:"8:00 AM - 5:00 PM" }}</span>
+                                <span>{{ svc.available_time }}</span>
                             </span>
+                            {% endif %}
                         </div>
                         <div style="font-size: 0.875rem; color: #6B7280; line-height: 1.45;">{{ svc.description|default:"Available at Barangay Health Center." }}</div>
                     </div>
                     {% empty %}
-                    <div class="service-box">
-                        <div style="font-weight: 700; color: #111827; font-size: 0.875rem;">Dental Cleaning & Oral Care</div>
-                        <div style="font-size: 0.875rem; color: #6B7280;">Free dental prophylaxis and oral health checkup.</div>
-                    </div>
-                    <div class="service-box">
-                        <div style="font-weight: 700; color: #111827; font-size: 0.875rem;">General Medical Consultation</div>
-                        <div style="font-size: 0.875rem; color: #6B7280;">Physician consultation and basic health assessment.</div>
+                    <div class="service-box" style="text-align: center; padding: 2.25rem 1.5rem; background: #F9FAFB; border: 1px dashed #D1D5DB; border-radius: 8px;">
+                        <div style="color: #9CA3AF; margin-bottom: 0.65rem;">
+                            {% icon 'hospital' cls='icon-lg' %}
+                        </div>
+                        <div style="font-weight: 700; color: #374151; font-size: 0.925rem; margin-bottom: 0.3rem;">No Health Services Scheduled</div>
+                        <div style="font-size: 0.8125rem; color: #6B7280; line-height: 1.5; max-width: 380px; margin: 0 auto;">
+                            Clinic consultation hours, medical programs, and health appointments will be listed here once scheduled by the Barangay Health Center.
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
@@ -897,13 +1033,19 @@
             <div style="display: flex; align-items: center; gap: 0.75rem;">
                 {% icon 'triangle-alert' cls='icon-danger' %}
                 <div>
-                    <h3 style="margin: 0; font-size: 1rem; font-weight: 700; color: #111827;">Emergency Hotline and Assistance</h3>
+                    <h3 style="margin: 0; font-size: 1rem; font-weight: 700; color: #111827;">Emergency Hotline &amp; Assistance</h3>
                     <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem; color: #6B7280;">For immediate dispatch, medical emergencies, and calamity reporting.</p>
                 </div>
             </div>
-            <a href="tel:{{ barangay_info.contact_no|default:'09171234567' }}" class="btn btn-danger" style="font-weight: 700;">
-                {% icon 'phone' %} Call {{ barangay_info.contact_no|default:'09171234567' }}
+            {% if barangay_info.emergency_hotline or barangay_info.contact_no %}
+            <a href="tel:{{ barangay_info.emergency_hotline|default:barangay_info.contact_no|cut:' '|cut:'-' }}" class="btn btn-danger" style="font-weight: 700;">
+                {% icon 'phone' %} Call {{ barangay_info.emergency_hotline|default:barangay_info.contact_no }}
             </a>
+            {% else %}
+            <a href="tel:911" class="btn btn-danger" style="font-weight: 700;">
+                {% icon 'phone' %} National Emergency: 911
+            </a>
+            {% endif %}
         </div>
     </section>
 
@@ -912,437 +1054,23 @@
         {% include 'includes/footer.html' %}
     </div>
 
-    <!-- ==================== BOOK APPOINTMENT MODAL ==================== -->
-    <div id="bookAppointmentModal" class="modal-overlay">
-        <div class="modal-container modal-container-side-by-side">
-            <!-- Modal Header -->
-            <div class="modal-header-bar">
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <div style="width: 40px; height: 40px; border-radius: 10px; background: #1E3A8A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; box-shadow: none;">
-                        {% icon 'calendar-check' %}
-                    </div>
-                    <div>
-                        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #111827; letter-spacing: -0.01em;">Book an Appointment</h3>
-                        <p style="margin: 0; font-size: 0.875rem; color: #6B7280;">Schedule your document request or barangay health center consultation</p>
-                    </div>
-                </div>
-                <button type="button" class="modal-close-btn" data-call="closeBookAppointmentModal" aria-label="Close">{% icon 'x' %}</button>
-            </div>
-            
-            <div style="padding: 1.5rem;" id="modal-body-container">
-                <!-- 1. Category Switcher -->
-                <div style="margin-bottom: 1.25rem;">
-                    <div class="category-pill-group">
-                        <div class="cat-pill active" id="pill-doc" data-call="switchCategory" data-arg="document">
-                            {% icon 'file-text' %}
-                            <div>
-                                <div style="font-weight: 700;">Document Request</div>
-                                <div style="font-size: 0.8125rem; font-weight: 500; opacity: 0.85;">Clearances & Certifications</div>
-                            </div>
-                        </div>
-                        <div class="cat-pill" id="pill-health" data-call="switchCategory" data-arg="healthcare">
-                            {% icon 'heart-pulse' cls='icon-success' %}
-                            <div>
-                                <div style="font-weight: 700;">Health Center</div>
-                                <div style="font-size: 0.8125rem; font-weight: 500; opacity: 0.85;">Medical & Dental Care</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <!-- ==================== BOOK APPOINTMENT WIZARD MODAL ==================== -->
+    {% include 'appointments/wizard/booking_wizard.html' %}
 
-    <!-- MAIN SIDE-BY-SIDE CONTAINER: CALENDAR ON LEFT, FIELDS & TIME ON RIGHT -->
-    <div style="display: grid; grid-template-columns: 440px 1fr; gap: 1.5rem; align-items: start;" class="modal-side-grid">
-        
-        <!-- LEFT COLUMN: CALENDAR & HEALTH SERVICES (below calendar) -->
-        <div>
-            <!-- CALENDAR -->
-            <div class="cal-box-card" style="margin-bottom: 1rem;">
-                <div class="cal-header-bar">
-                    <div class="cal-header-left">
-                        <select id="cal-month-select" class="cal-select" aria-label="Month">
-                            <option value="0">January</option>
-                            <option value="1">February</option>
-                            <option value="2">March</option>
-                            <option value="3">April</option>
-                            <option value="4">May</option>
-                            <option value="5">June</option>
-                            <option value="6">July</option>
-                            <option value="7">August</option>
-                            <option value="8">September</option>
-                            <option value="9">October</option>
-                            <option value="10">November</option>
-                            <option value="11">December</option>
-                        </select>
-                        <select id="cal-year-select" class="cal-select" aria-label="Year">
-                            <option value="2024">2024</option>
-                            <option value="2025">2025</option>
-                            <option value="2026">2026</option>
-                            <option value="2027">2027</option>
-                            <option value="2028">2028</option>
-                            <option value="2029">2029</option>
-                            <option value="2030">2030</option>
-                        </select>
-                    </div>
-                    <div class="cal-header-right">
-                        <button type="button" id="cal-today-btn" class="cal-today-btn">
-                            {% icon 'calendar' %} Today
-                        </button>
-                        <button type="button" id="cal-prev-btn" class="cal-nav-btn" aria-label="Previous month">
-                            {% icon 'chevron-left' %}
-                        </button>
-                        <button type="button" id="cal-next-btn" class="cal-nav-btn primary" aria-label="Next month">
-                            {% icon 'chevron-right' %}
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Weekdays row -->
-                <div class="cal-weekdays-row">
-                    <div class="cal-weekday-label">Sun</div>
-                    <div class="cal-weekday-label">Mon</div>
-                    <div class="cal-weekday-label">Tue</div>
-                    <div class="cal-weekday-label">Wed</div>
-                    <div class="cal-weekday-label">Thu</div>
-                    <div class="cal-weekday-label">Fri</div>
-                    <div class="cal-weekday-label">Sat</div>
-                </div>
-
-                <!-- Calendar days grid -->
-                <div id="custom-cal-grid" class="cal-grid">
-                    <div class="cal-day-cell other-month"><span class="cal-day-num">28</span></div>
-                    <div class="cal-day-cell other-month"><span class="cal-day-num">29</span></div>
-                    <div class="cal-day-cell other-month"><span class="cal-day-num">30</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">01</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">02</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">03</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">04</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">05</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">06</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">07</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">08</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">09</span></div>
-                    <div class="cal-day-cell current-month selected"><span class="cal-day-num">10</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">11</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">12</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">13</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">14</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">15</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">16</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">17</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">18</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">19</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">20</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">21</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">22</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">23</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">24</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">25</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">26</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">27</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">28</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">29</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">30</span></div>
-                    <div class="cal-day-cell current-month"><span class="cal-day-num">31</span></div>
-                    <div class="cal-day-cell other-month"><span class="cal-day-num">01</span></div>
-                </div>
-
-                <div style="font-size: 11px; color: #8E8E93; margin-top: 8px; text-align: center;">
-                    Click any date on the calendar to select appointment date.
-                </div>
-            </div>
-
-            <!-- HEALTH SERVICES SECTION (Positioned BELOW the calendar when Health Center is selected) -->
-            <div id="health-services-section" class="cal-services-container" style="display: none; margin-bottom: 1rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-                    <span style="font-size: 11px; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.04em;">
-                        Health Center Services
-                    </span>
-                    <span id="cal-services-counter" style="font-size: 11px; font-weight: 600; color: #1E3A8A; background: #F3F4F6; padding: 1px 6px; border-radius: 4px;">
-                        Available
-                    </span>
-                </div>
-                <p style="font-size: 11px; color: #8E8E93; margin: 0 0 6px 0;">
-                    Click a service below to book.
-                </p>
-                <div id="cal-services-list" class="cal-services-list">
-                    {% for svc in healthcare_services %}
-                    <div class="cal-service-card" data-service-id="{{ svc.id }}" data-service-name="{{ svc.name }}" data-service-date="{{ svc.available_date }}" data-service-time="{{ svc.available_time }}">
-                        <div class="service-card-dot" style="background: #1E3A8A;"></div>
-                        <div style="flex: 1;">
-                            <div class="service-card-datetime">{{ svc.available_date|default:'Monday - Friday' }} • {{ svc.available_time|default:'8:00 AM - 4:00 PM' }}</div>
-                            <div class="service-card-name">{{ svc.name }} <span style="font-weight: 600; color: #111827;">(Free)</span></div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
-        <!-- RIGHT COLUMN: APPLICANT DETAILS FORM & TIME PICKER -->
-        <div>
-            <form id="public-booking-form">
-                {% csrf_token %}
-                <input type="hidden" name="category" id="form-category-input" value="document">
-                <input type="date" name="appt_date" id="modal-date-input" required style="display: none;">
-                <input type="hidden" name="time_window" id="modal-time-slot" value="morning">
-                <input type="hidden" name="time_exact" id="modal-time-exact-value" value="8:00 AM">
-
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <!-- Specific Service Selector -->
-                    <div id="subservice-doc-container">
-                        <label class="form-label-modern" for="modal-doc-select" style="font-size: 11px; font-weight: 700; color: #86868B;">
-                            <span>SELECT DOCUMENT TYPE *</span>
-                        </label>
-                        <div class="input-group-modern">
-                            <select name="document_type" id="modal-doc-select" class="form-control-modern">
-                                {% for dt in document_types %}
-                                <option value="{{ dt.id }}">{{ dt.name }}{% if dt.fee %} (₱{{ dt.fee }}){% endif %}</option>
-                                {% empty %}
-                                <option value="">No document types available</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div id="subservice-health-container" style="display: none;">
-                        <label class="form-label-modern" for="modal-health-select" style="font-size: 11px; font-weight: 700; color: #86868B;">
-                            <span>SELECTED HEALTH CENTER SERVICE *</span>
-                        </label>
-                        <div class="input-group-modern">
-                            <select name="healthcare_service" id="modal-health-select" class="form-control-modern">
-                                {% for svc in healthcare_services %}
-                                <option value="{{ svc.id }}">{{ svc.name }} (Free)</option>
-                                {% empty %}
-                                <option value="">General Consultation (Free)</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div id="health-service-free-badge" style="font-size: 11px; color: #111827; font-weight: 600; margin-top: 0.35rem; display: flex; align-items: center; gap: 0.35rem;">
-                            {% icon 'circle-check' cls='icon-success' %} Free health center consultation &amp; services (₱0.00)
-                        </div>
-                    </div>
-
-                    <!-- Applicant Identification -->
-                    <div>
-                        <label class="form-label-modern" style="font-size: 11px; font-weight: 700; color: #86868B;">
-                            <span>APPLICANT IDENTIFICATION *</span>
-                        </label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;">
-                            <div class="input-group-modern">
-                                <input type="text" name="first_name" id="input_first_name" placeholder="e.g. Juan *" value="" class="form-control-modern" required>
-                            </div>
-                            <div class="input-group-modern">
-                                <input type="text" name="middle_name" id="input_middle_name" placeholder="e.g. Santos (Optional)" value="" class="form-control-modern">
-                            </div>
-                            <div class="input-group-modern">
-                                <input type="text" name="last_name" id="input_last_name" placeholder="e.g. Dela Cruz *" value="" class="form-control-modern" required>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Age & Address -->
-                    <div style="display: grid; grid-template-columns: 0.7fr 1.3fr; gap: 0.75rem;">
-                        <div>
-                            <label class="form-label-modern" for="input_age" style="font-size: 11px; font-weight: 700; color: #86868B;">
-                                <span>AGE *</span>
-                            </label>
-                            <div class="input-group-modern">
-                                <input type="number" name="age" id="input_age" min="1" max="120" placeholder="e.g. 28" value="" required class="form-control-modern">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="form-label-modern" for="input_address" style="font-size: 11px; font-weight: 700; color: #86868B;">
-                                <span>RESIDENTIAL ADDRESS *</span>
-                            </label>
-                            <div class="input-group-modern">
-                                <input type="text" name="address" id="input_address" placeholder="e.g. Block 5 Lot 12, Rizal St." value="" required class="form-control-modern">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Email & Phone -->
-                    <div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 0.75rem;">
-                        <div>
-                            <label class="form-label-modern" for="input_email" style="font-size: 11px; font-weight: 700; color: #86868B;">
-                                <span>EMAIL ADDRESS *</span>
-                            </label>
-                            <div class="input-group-modern">
-                                <input type="email" name="email" id="input_email" placeholder="e.g. resident@example.com" value="" required class="form-control-modern">
-                            </div>
-                            <div id="email-verification-feedback" style="font-size: 11px; margin-top: 0.2rem; min-height: 16px; display: flex; align-items: center; gap: 0.35rem;"></div>
-                        </div>
-                        <div>
-                            <label class="form-label-modern" for="input_phone_number" style="font-size: 11px; font-weight: 700; color: #86868B;">
-                                <span>PHONE NUMBER *</span>
-                                <span style="font-size: 11px; color: #86868B; font-weight: 500; text-transform: none;">11 digits</span>
-                            </label>
-                            <div class="input-group-modern">
-                                <input type="tel" name="phone_number" id="input_phone_number" maxlength="11" inputmode="numeric" pattern="09[0-9]{9}" autocomplete="tel" title="11 digits starting with 09, e.g. 09171234567" placeholder="e.g. 09171234567" value="" required class="form-control-modern" data-phone>
-                            </div>
-                            <div id="phone-feedback" style="font-size: 11px; color: #86868B; margin-top: 0.2rem;">
-                                Must be 11 digits starting with 09
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Purpose -->
-                    <div id="landing-purpose-container">
-                        <label class="form-label-modern" for="input_purpose" style="font-size: 11px; font-weight: 700; color: #86868B;">
-                            <span>PURPOSE OF REQUEST *</span>
-                        </label>
-                        <textarea name="purpose" id="input_purpose" rows="2" class="form-control-modern" placeholder="e.g. Requirement for job application, health consultation..." required></textarea>
-                    </div>
-
-                    <!-- Time Picker & Schedule & Assistance Row -->
-                    <div style="display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 0.75rem; align-items: start;">
-                        <!-- Time Picker Card -->
-                        <div class="time-picker-card">
-                            <div class="time-picker-header">
-                                <span style="font-size: 0.95rem; font-weight: 700; color: #111827;">Time</span>
-                                <span id="time-picker-badge" class="time-picker-badge">8:00 AM</span>
-                            </div>
-
-                            <div class="time-drum-wrapper" id="time-drum-container">
-                                <div class="time-drum-highlight-bar"></div>
-
-                                <!-- Hour Column -->
-                                <div class="time-drum-col" id="drum-col-hour">
-                                    <div class="time-drum-val-prev" id="time-hour-prev">7</div>
-                                    <div class="time-drum-val-curr" id="time-hour-curr">8</div>
-                                    <div class="time-drum-val-next" id="time-hour-next">9</div>
-                                </div>
-
-                                <!-- Minute Column -->
-                                <div class="time-drum-col" id="drum-col-min">
-                                    <div class="time-drum-val-prev" id="time-min-prev">55</div>
-                                    <div class="time-drum-val-curr" id="time-min-curr">00</div>
-                                    <div class="time-drum-val-next" id="time-min-next">05</div>
-                                </div>
-
-                                <!-- AM/PM Column -->
-                                <div class="time-drum-col" id="drum-col-ampm">
-                                    <div class="time-drum-val-prev" id="time-ampm-prev">PM</div>
-                                    <div class="time-drum-val-curr" id="time-ampm-curr">AM</div>
-                                    <div class="time-drum-val-next" id="time-ampm-next">&nbsp;</div>
-                                </div>
-                            </div>
-
-                            <div style="font-size: 11px; color: #8E8E93; text-align: center; margin-top: 0.5rem;">
-                                Click or scroll numbers to change appointment time.
-                            </div>
-                        </div>
-
-                        <!-- Schedule Preview & Admin Contact -->
-                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                            <!-- Selected Appointment Summary Pill -->
-                            <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; padding: 0.75rem 0.85rem;">
-                                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #86868B; letter-spacing: 0.04em; margin-bottom: 0.2rem;">
-                                    SELECTED SCHEDULE
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.8125rem; font-weight: 700; color: #111827;">
-                                    {% icon 'calendar-check' cls='icon-primary' %}
-                                    <span id="selected-schedule-preview">Select date on calendar</span>
-                                </div>
-                            </div>
-
-                            <!-- Admin Contact Card -->
-                            <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 10px; padding: 0.75rem 0.85rem;">
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <div style="width: 30px; height: 30px; border-radius: 6px; background: #F3F4F6; color: #1E3A8A; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
-                                        {% icon 'headset' %}
-                                    </div>
-                                    <div style="flex: 1;">
-                                        <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #86868B;">BARANGAY ADMIN ASSISTANCE</div>
-                                        <div style="font-size: 0.8125rem; font-weight: 800; color: #111827;">
-                                            {{ admin_phone }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Error Banner -->
-                    <div id="booking-error-banner" style="display: none; background: #FFFFFF; border: 1.5px solid #DC2626; border-radius: 8px; padding: 0.65rem 0.85rem; color: #DC2626; font-size: 0.8125rem;">
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            {% icon 'triangle-alert' cls='icon-danger' %}
-                            <span id="booking-error-text" style="font-weight: 600;">Please check your input fields.</span>
-                        </div>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button type="submit" id="btn-submit-public-booking" class="btn btn-primary" style="width: 100%; font-weight: 700; min-height: 42px; font-size: 0.9rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: #0071E3; border: none; color: #FFFFFF; box-shadow: none;">
-                        {% icon 'send' %} Submit Appointment Request
-                    </button>
-                </div>
-            </form>
-        </div>
-
-    </div>
-</div>
-
-            <!-- SUCCESS CONFIRMATION MODAL STATE -->
-            <div id="modal-success-container" style="display: none; padding: 2.5rem 1.75rem; text-align: center;">
-                <div style="width: 72px; height: 72px; border-radius: 50%; background: #FFFFFF; color: #16A34A; display: flex; align-items: center; justify-content: center; font-size: 2.25rem; margin: 0 auto 1.25rem auto; box-shadow: none; animation: pingSuccess 1s ease;">
-                    {% icon 'check' %}
-                </div>
-                <h2 style="font-size: 1.5rem; font-weight: 800; color: #111827; margin: 0 0 0.5rem 0;">
-                    Appointment Booked Successfully!
-                </h2>
-                <div>
-                    <span id="success-ref-badge" class="badge badge-primary" style="font-size: 0.95rem; font-weight: 800; padding: 0.4rem 0.9rem; border-radius: 9999px; letter-spacing: 0.03em;">
-                        REF #APT-0000
-                    </span>
-                </div>
-
-                <!-- REQUIRED NOTIFICATION NOTICE -->
-                <div style="max-width: 680px; margin: 1.5rem auto; background: #F3F4F6; border: 1.5px solid #D1D5DB; border-radius: 14px; padding: 1.25rem 1.5rem; text-align: left; box-shadow: none;">
-                    <div style="display: flex; gap: 0.85rem; align-items: flex-start;">
-                        <span style="font-size: 1.5rem; color: #1E3A8A; line-height: 1;">
-                            {% icon 'mail-check' %}
-                        </span>
-                        <div>
-                            <div style="font-size: 0.95rem; font-weight: 700; color: #1E3A8A; margin-bottom: 0.35rem;">
-                                Confirmation & Verification in Progress
-                            </div>
-                            <p style="font-size: 0.875rem; line-height: 1.6; color: #1E3A8A; margin: 0;" id="success-required-message">
-                                Wait for the email sent for approved your appointment date. We will notify via email please keep track on you email. Thank you if you have any question please contact <strong>{{ admin_phone }}</strong>.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Booking Summary Card -->
-                <div style="max-width: 680px; margin: 0 auto 1.75rem auto; background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.15rem; text-align: left; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;" class="modal-side-grid">
-                    <div>
-                        <div style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #6B7280;">Applicant Name</div>
-                        <div style="font-size: 0.95rem; font-weight: 700; color: #111827;" id="summary-applicant-name">-</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #6B7280;">Requested Service</div>
-                        <div style="font-size: 0.95rem; font-weight: 700; color: #1E3A8A;" id="summary-service-title">-</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #6B7280;">Scheduled Date & Time</div>
-                        <div style="font-size: 0.875rem; font-weight: 700; color: #111827;" id="summary-schedule">-</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #6B7280;">Notification Email & Phone</div>
-                        <div style="font-size: 0.875rem; font-weight: 700; color: #111827;" id="summary-contact">-</div>
-                    </div>
-                </div>
-
-                <div style="display: flex; justify-content: center; gap: 0.75rem;">
-                    <button type="button" class="btn btn-secondary" data-call="resetAndBookAnother" style="font-weight: 700; min-height: 42px; padding: 0 1.25rem;">
-                        {% icon 'plus' %} Book Another
-                    </button>
-                    <button type="button" class="btn btn-primary" data-call="closeBookAppointmentModal" style="font-weight: 700; min-height: 42px; padding: 0 1.5rem; background: #1E3A8A;">
-                        {% icon 'check' %} Done & Return Home
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Dynamic Server Data for Booking Calendar -->
+    <script type="application/json" id="health-services-data">
+    [
+        {% for svc in healthcare_services %}
+        {
+            "id": {{ svc.id }},
+            "name": "{{ svc.name|escapejs }}",
+            "daysText": "{{ svc.available_date|default:'Monday - Friday'|escapejs }}",
+            "timeText": "{{ svc.available_time|default:'8:00 AM - 5:00 PM'|escapejs }}",
+            "is_free": {% if svc.is_free %}true{% else %}false{% endif %}
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ]
+    </script>
 
     <!-- Scripts -->
     <script src="{% static 'js/icons.js' %}"></script>

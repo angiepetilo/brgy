@@ -6,7 +6,6 @@ from django.core.exceptions import PermissionDenied
 from django import forms
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-
 from apps.accounts.models import User
 from apps.accounts.selectors import get_contact_number
 from apps.communications.models import Announcement, PostReaction, PostComment, PostCategory, Post
@@ -27,6 +26,9 @@ def landing_view(request):
     Features services overview, announcements, upcoming community events, and registration.
     """
     from apps.appointments.models import DocumentType, HealthCareService
+    from apps.accounts.models import BarangayInfo
+
+    barangay_info = BarangayInfo.get_solo()
     raw_services = HealthCareService.objects.filter(is_active=True, is_free=True).order_by('name')
     healthcare_services = []
     seen = set()
@@ -55,6 +57,7 @@ def landing_view(request):
     )
 
     return render(request, 'landing.html', {
+        'barangay_info': barangay_info,
         'emergency_posts': emergency_posts,
         'healthcare_services': healthcare_services,
         'document_types': DocumentType.objects.filter(is_active=True).order_by('order', 'name'),
@@ -181,6 +184,8 @@ def feed_view(request):
     stat_handled_requests_count = User.objects.filter(
         appointments__status=Appointment.STATUS_COMPLETED
     ).distinct().count()
+    stat_portal_accounts_count = User.objects.filter(is_active=True).distinct().count()
+    stat_pending_appointments_count = Appointment.objects.filter(status=Appointment.STATUS_PENDING).count()
     duty_officers_roster = User.objects.filter(
         Q(role__in=[User.ROLE_ADMIN, User.ROLE_KAPITAN]) | Q(is_staff=True)
     ).distinct().order_by('role', 'last_name')
@@ -196,8 +201,10 @@ def feed_view(request):
         'user_supported_post_ids': user_supported_post_ids,
         'user_important_post_ids': user_important_post_ids,
         'stat_pending_docs_count': stat_pending_docs_count,
+        'stat_pending_appointments_count': stat_pending_appointments_count,
         'stat_pending_residents_count': stat_pending_residents_count,
         'stat_total_residents_count': stat_total_residents_count,
+        'stat_portal_accounts_count': stat_portal_accounts_count,
         'stat_handled_requests_count': stat_handled_requests_count,
         'duty_officers_roster': duty_officers_roster,
         'staff_members': duty_officers_roster,

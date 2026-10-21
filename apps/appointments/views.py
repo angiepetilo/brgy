@@ -366,15 +366,6 @@ def public_appointment_book_view(request):
     if request.method != 'POST':
         return JsonResponse({'status': 'error', 'message': 'POST method required.'}, status=405)
 
-    # Authentication first: never call the external email API for anonymous users.
-    if not request.user.is_authenticated:
-        return JsonResponse({
-            'status': 'error',
-            'requires_login': True,
-            'login_url': '/accounts/login/?next=/#bookAppointmentModal',
-            'message': 'Please log in or register before booking an appointment.'
-        }, status=401)
-
     first_name = request.POST.get('first_name', '').strip()
     last_name = request.POST.get('last_name', '').strip()
     middle_name = request.POST.get('middle_name', '').strip()
@@ -419,10 +410,11 @@ def public_appointment_book_view(request):
         except ValidationError as exc:
             errors['phone_number'] = exc.messages[0]
 
-    # Email validation via Abstract API validator
-    if not email:
-        errors['email'] = 'Email address is required.'
-    else:
+    # Email validation: optional per Step 4, validate only when provided
+    if not email and request.user.is_authenticated and request.user.email:
+        email = request.user.email
+
+    if email:
         is_email_valid, email_msg, _ = validate_email_address(email)
         if not is_email_valid:
             errors['email'] = email_msg
@@ -445,7 +437,7 @@ def public_appointment_book_view(request):
             purpose = 'Health Service Consultation'
     else:
         if not purpose:
-            errors['purpose'] = 'Purpose of appointment or consultation notes are required.'
+            purpose = 'Document Clearance Request'
 
     # Category and subservice validation
     healthcare_service = None
@@ -482,7 +474,8 @@ def public_appointment_book_view(request):
         data['purpose'] = purpose
         data['address'] = address
         data['age'] = age_str
-        appointment = book_appointment_service(request.user, data)
+        booking_user = request.user if (request.user and request.user.is_authenticated) else None
+        appointment = book_appointment_service(booking_user, data)
     except (ValueError, PermissionDenied) as exc:
         return JsonResponse({'status': 'error', 'message': str(exc)}, status=400)
 
