@@ -7,12 +7,15 @@
 <!-- Appointments Module - Phase 5 HIG Complete -->
 <div class="hig-content-area">
     <!-- Toolbar -->
-    <div class="hig-toolbar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+    <div class="hig-toolbar"
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
         <div>
-            <h1 class="hig-title-1" style="font-size: 1.25rem; font-weight: 700; color: #111827; margin: 0;">Appointment</h1>
+            <h1 class="hig-title-1" style="font-size: 1.25rem; font-weight: 700; color: #111827; margin: 0;">Appointment
+            </h1>
         </div>
         <div class="hig-toolbar-actions">
-            <button type="button" data-call="openAddAppointmentModal" class="btn btn-primary" style="font-weight: 600; font-size: 0.8125rem; padding: 0.45rem 1.15rem; border-radius: 6px; background: #0071E3;">
+            <button type="button" data-call="openAddAppointmentModal" class="btn btn-primary"
+                style="font-weight: 600; font-size: 0.8125rem; padding: 0.45rem 1.15rem; border-radius: 6px; background: #0071E3;">
                 Book Appointment
             </button>
         </div>
@@ -21,25 +24,27 @@
     <!-- Main Content -->
     <div class="hig-content-main">
         <!-- Table with Filters -->
-        <div class="hig-card hig-card-table" style="border: 1px solid #E5E7EB; border-radius: 8px; background: #FFFFFF; overflow: hidden;">
+        <div class="hig-card hig-card-table"
+            style="border: 1px solid #E5E7EB; border-radius: 8px; background: #FFFFFF; overflow: hidden;">
             <!-- Filters Toolbar -->
             <div style="padding: 1rem 1.25rem; border-bottom: 1px solid #E5E7EB;">
-                <form method="get" action="{% url 'appointments:list' %}" id="appointments-filter-form" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
-                    
+                <form method="get" action="{% url 'appointments:list' %}" id="appointments-filter-form"
+                    style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+
                     <!-- Search Input -->
                     <div class="search-input-container" style="flex: 1; max-width: 480px; position: relative;">
-                        <span class="search-input-icon" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; width: 16px; height: 16px; color: #9CA3AF; display: flex; align-items: center; justify-content: center; z-index: 2;">
+                        <span class="search-input-icon"
+                            style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; width: 16px; height: 16px; color: #9CA3AF; display: flex; align-items: center; justify-content: center; z-index: 2;">
                             {% icon 'search' style='width: 16px; height: 16px;' %}
                         </span>
-                        <input type="text" 
-                               name="q" 
-                               value="{{ search_query }}" 
-                               class="search-input-field"
-                               placeholder="Search by ref no, applicant and service" 
-                               style="padding-left: 38px !important; height: 38px; border-radius: 8px; border: 1px solid #E5E7EB; width: 100%; font-size: 0.875rem;"
-                               autocomplete="off">
+                        <input type="text" name="q" value="{{ search_query }}" class="search-input-field"
+                            placeholder="Search by ref no, applicant and service"
+                            style="padding-left: 38px !important; height: 38px; border-radius: 8px; border: 1px solid #E5E7EB; width: 100%; font-size: 0.875rem;"
+                            autocomplete="off">
                         {% if search_query %}
-                        <a href="{% url 'appointments:list' %}?tab=appointments" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #9CA3AF; text-decoration: none; z-index: 2;" title="Clear search" aria-label="Clear search">
+                        <a href="{% url 'appointments:list' %}?tab=appointments"
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #9CA3AF; text-decoration: none; z-index: 2;"
+                            title="Clear search" aria-label="Clear search">
                             {% icon 'circle-x' %}
                         </a>
                         {% endif %}
@@ -48,18 +53,21 @@
                     <!-- Dropdowns -->
                     <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                         <!-- Service Filter -->
-                        <select name="service" data-auto-submit style="height: 38px; border-radius: 8px; border: 1px solid #E5E7EB; font-size: 0.875rem; font-weight: 500; cursor: pointer; padding: 0 1.75rem 0 0.85rem; appearance: auto; background: #FFFFFF;">
+                        <select name="service" data-auto-submit
+                            style="height: 38px; border-radius: 8px; border: 1px solid #E5E7EB; font-size: 0.875rem; font-weight: 500; cursor: pointer; padding: 0 1.75rem 0 0.85rem; appearance: auto; background: #FFFFFF;">
                             <option value="">All Service</option>
                             <optgroup label="Document Clearances">
                                 {% for dt in document_types %}
-                                <option value="doc_{{ dt.id }}" {% if service_filter == 'doc_'|add:dt.id|stringformat:'s' %}selected{% endif %}>
+                                <option value="doc_{{ dt.id }}" {% if service_filter=='doc_' |add:dt.id|stringformat:'s'
+                                    %}selected{% endif %}>
                                     {{ dt.name }}
                                 </option>
                                 {% endfor %}
                             </optgroup>
                             <optgroup label="Health Services">
                                 {% for hs in active_health_services %}
-                                <option value="health_{{ hs.id }}" {% if service_filter == 'health_'|add:hs.id|stringformat:'s' %}selected{% endif %}>
+                                <option value="health_{{ hs.id }}" {% if service_filter=='health_'
+                                    |add:hs.id|stringformat:'s' %}selected{% endif %}>
                                     {{ hs.name }}
                                 </option>
                                 {% endfor %}
@@ -67,10 +75,12 @@
                         </select>
 
                         <!-- Status Filter -->
-                        <select name="status" data-auto-submit style="height: 38px; border-radius: 8px; border: 1px solid #E5E7EB; font-size: 0.875rem; font-weight: 500; cursor: pointer; padding: 0 1.75rem 0 0.85rem; appearance: auto; background: #FFFFFF;">
+                        <select name="status" data-auto-submit
+                            style="height: 38px; border-radius: 8px; border: 1px solid #E5E7EB; font-size: 0.875rem; font-weight: 500; cursor: pointer; padding: 0 1.75rem 0 0.85rem; appearance: auto; background: #FFFFFF;">
                             <option value="">All Statuses</option>
                             {% for code, label in status_choices %}
-                            <option value="{{ code }}" {% if status_filter == code %}selected{% endif %}>{{ label }}</option>
+                            <option value="{{ code }}" {% if status_filter==code %}selected{% endif %}>{{ label }}
+                            </option>
                             {% endfor %}
                         </select>
                     </div>
@@ -83,23 +93,38 @@
                 <table class="clean-table" style="width: 100%; border-collapse: collapse;">
                     <thead>
                         <tr style="border-bottom: 1px solid #E5E7EB; background: #FAFAFA;">
-                            <th class="col-idx" style="width: 50px; text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280;">#</th>
-                            <th style="text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280; width: 18%;">Ref No.</th>
-                            <th style="text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280; width: 34%;">Applicant</th>
-                            <th style="text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280; width: 22%;">Schedule</th>
-                            <th style="text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280; width: 16%;">Status</th>
-                            <th style="width: 60px; text-align: center; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280;">Action</th>
+                            <th class="col-idx"
+                                style="width: 50px; text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280;">
+                                #</th>
+                            <th
+                                style="text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280; width: 18%;">
+                                Ref No.</th>
+                            <th
+                                style="text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280; width: 34%;">
+                                Applicant</th>
+                            <th
+                                style="text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280; width: 22%;">
+                                Schedule</th>
+                            <th
+                                style="text-align: left; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280; width: 16%;">
+                                Status</th>
+                            <th
+                                style="width: 60px; text-align: center; padding: 0.65rem 0.85rem; font-size: 0.8125rem; font-weight: 600; color: #6B7280;">
+                                Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for appt in appointments %}
                         <tr style="border-bottom: 1px solid #F3F4F6;">
-                            <td class="col-idx" style="padding: 0.65rem 0.85rem; font-size: 0.875rem; color: #111827;">{{ forloop.counter }}</td>
-                            <td style="padding: 0.65rem 0.85rem; font-size: 0.875rem; font-weight: 600; color: #111827;">
+                            <td class="col-idx" style="padding: 0.65rem 0.85rem; font-size: 0.875rem; color: #111827;">
+                                {{ forloop.counter }}</td>
+                            <td
+                                style="padding: 0.65rem 0.85rem; font-size: 0.875rem; font-weight: 600; color: #111827;">
                                 {{ appt.reference_no|default:appt.id }}
                             </td>
                             <td style="padding: 0.65rem 0.85rem;">
-                                <div style="font-weight: 600; font-size: 0.875rem; color: #111827;">{{ appt.get_applicant_name }}</div>
+                                <div style="font-weight: 600; font-size: 0.875rem; color: #111827;">{{
+                                    appt.get_applicant_name }}</div>
                                 <div style="font-size: 0.75rem; color: #6B7280;">{{ appt.get_service_title }}</div>
                             </td>
                             <td style="padding: 0.65rem 0.85rem; color: #111827; font-size: 0.875rem;">
@@ -107,45 +132,48 @@
                             </td>
                             <td style="padding: 0.65rem 0.85rem;">
                                 {% if appt.status == 'pending' %}
-                                <span class="badge" style="background: #FEF3C7; color: #92400E; font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px; font-weight: 500; text-transform: lowercase;">pending</span>
+                                <span class="badge"
+                                    style="background: #FEF3C7; color: #92400E; font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px; font-weight: 500; text-transform: lowercase;">pending</span>
                                 {% elif appt.status == 'approved' %}
-                                <span class="badge" style="background: #D1FAE5; color: #065F46; font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px; font-weight: 500; text-transform: lowercase;">approved</span>
+                                <span class="badge"
+                                    style="background: #D1FAE5; color: #065F46; font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px; font-weight: 500; text-transform: lowercase;">approved</span>
                                 {% elif appt.status == 'completed' %}
-                                <span class="badge" style="background: #E0E7FF; color: #3730A3; font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px; font-weight: 500; text-transform: lowercase;">completed</span>
+                                <span class="badge"
+                                    style="background: #E0E7FF; color: #3730A3; font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px; font-weight: 500; text-transform: lowercase;">completed</span>
                                 {% elif appt.status == 'rejected' %}
-                                <span class="badge" style="background: #FEE2E2; color: #991B1B; font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px; font-weight: 500; text-transform: lowercase;">rejected</span>
+                                <span class="badge"
+                                    style="background: #FEE2E2; color: #991B1B; font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px; font-weight: 500; text-transform: lowercase;">rejected</span>
                                 {% else %}
-                                <span class="badge" style="background: #F3F4F6; color: #374151; font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px; font-weight: 500; text-transform: lowercase;">{{ appt.get_status_display }}</span>
+                                <span class="badge"
+                                    style="background: #F3F4F6; color: #374151; font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px; font-weight: 500; text-transform: lowercase;">{{
+                                    appt.get_status_display }}</span>
                                 {% endif %}
                             </td>
                             <td style="text-align: center; padding: 0.65rem 0.85rem; white-space: nowrap;">
                                 <button type="button" class="btn-action-circle" data-appt-action="review"
-                                        data-id="{{ appt.id }}"
-                                        data-ref="{{ appt.reference_no|default:appt.id }}"
-                                        data-category="{{ appt.get_category_display }}"
-                                        data-service="{{ appt.get_service_title }}"
-                                        data-title="{{ appt.purpose|default:appt.get_service_title }}"
-                                        data-applicant="{{ appt.get_applicant_name }}"
-                                        data-age="{{ appt.applicant_age|default:'' }}"
-                                        data-address="{{ appt.applicant_address|default:'' }}"
-                                        data-phone="{{ appt.get_applicant_phone }}"
-                                        data-email="{{ appt.get_applicant_email }}"
-                                        data-time="{{ appt.appt_date|date:'m/d/y' }} ({{ appt.get_time_window_display }})"
-                                        data-purpose="{{ appt.purpose|default:'' }}"
-                                        data-status="{{ appt.status }}"
-                                        data-status-display="{{ appt.get_status_display }}"
-                                        data-can-approve="{% if can_approve and appt.status == 'pending' %}true{% else %}false{% endif %}"
-                                        data-can-reject="{% if can_reject and appt.status == 'pending' %}true{% else %}false{% endif %}"
-                                        title="View Appointment" aria-label="View Appointment"
-                                        style="border: none; background: transparent; cursor: pointer; color: #6B7280; font-size: 1.1rem; padding: 4px; display: inline-flex; align-items: center;">
+                                    data-id="{{ appt.id }}" data-ref="{{ appt.reference_no|default:appt.id }}"
+                                    data-category="{{ appt.get_category_display }}"
+                                    data-service="{{ appt.get_service_title }}"
+                                    data-title="{{ appt.purpose|default:appt.get_service_title }}"
+                                    data-applicant="{{ appt.get_applicant_name }}"
+                                    data-age="{{ appt.applicant_age|default:'' }}"
+                                    data-address="{{ appt.applicant_address|default:'' }}"
+                                    data-phone="{{ appt.get_applicant_phone }}"
+                                    data-email="{{ appt.get_applicant_email }}"
+                                    data-time="{{ appt.appt_date|date:'m/d/y' }} ({{ appt.get_time_window_display }})"
+                                    data-purpose="{{ appt.purpose|default:'' }}" data-status="{{ appt.status }}"
+                                    data-status-display="{{ appt.get_status_display }}"
+                                    data-can-approve="{% if can_approve and appt.status == 'pending' %}true{% else %}false{% endif %}"
+                                    data-can-reject="{% if can_reject and appt.status == 'pending' %}true{% else %}false{% endif %}"
+                                    title="View Appointment" aria-label="View Appointment"
+                                    style="border: none; background: transparent; cursor: pointer; color: #6B7280; font-size: 1.1rem; padding: 4px; display: inline-flex; align-items: center;">
                                     {% icon 'eye' %}
                                 </button>
                                 <button type="button" class="btn-action-circle" data-appt-action="delete"
-                                        data-id="{{ appt.id }}"
-                                        data-ref="{{ appt.reference_no|default:appt.id }}"
-                                        data-name="{{ appt.get_applicant_name }}"
-                                        title="Delete Appointment" aria-label="Delete Appointment"
-                                        style="border: none; background: transparent; cursor: pointer; color: #DC2626; font-size: 1.1rem; padding: 4px; display: inline-flex; align-items: center; margin-left: 6px;">
+                                    data-id="{{ appt.id }}" data-ref="{{ appt.reference_no|default:appt.id }}"
+                                    data-name="{{ appt.get_applicant_name }}" title="Delete Appointment"
+                                    aria-label="Delete Appointment"
+                                    style="border: none; background: transparent; cursor: pointer; color: #DC2626; font-size: 1.1rem; padding: 4px; display: inline-flex; align-items: center; margin-left: 6px;">
                                     {% icon 'trash-2' %}
                                 </button>
                             </td>
@@ -173,7 +201,7 @@
                 </div>
                 {% endif %}
             </div>
-            
+
             <!-- Mobile List (shows on <768px) -->
             <div class="mobile-list-container">
                 {% if appointments %}
@@ -222,7 +250,7 @@
                             {% else %}
                             <span class="hig-badge hig-badge-gray">{{ appt.get_status_display }}</span>
                             {% endif %}
-                            
+
                             <div class="mobile-item-actions">
                                 {% icon 'chevron-right' %}
                             </div>
@@ -252,520 +280,664 @@
             </div>
         </div>
     </div>
-<!-- APPOINTMENT REVIEW MODAL -->
-<div id="reviewAppointmentModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
-    <div style="background: #FFFFFF; border-radius: 12px; width: 100%; max-width: 540px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05); overflow: hidden; animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
-        <div style="padding: 1.15rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between; background: #FFFFFF;">
-            <div>
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: #111827;">Appointment Details</h3>
-                    <span id="rev-ref" style="font-size: 0.8125rem; font-weight: 700; color: #0071E3; background: #EFF6FF; padding: 2px 8px; border-radius: 4px;"></span>
+    <!-- APPOINTMENT REVIEW MODAL -->
+    <div id="reviewAppointmentModal" class="modal-overlay"
+        style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+        <div
+            style="background: #FFFFFF; border-radius: 12px; width: 100%; max-width: 540px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05); overflow: hidden; animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+            <div
+                style="padding: 1.15rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between; background: #FFFFFF;">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: #111827;">Appointment Details
+                        </h3>
+                        <span id="rev-ref"
+                            style="font-size: 0.8125rem; font-weight: 700; color: #0071E3; background: #EFF6FF; padding: 2px 8px; border-radius: 4px;"></span>
+                    </div>
+                    <div id="rev-category" style="font-size: 0.8125rem; color: #6B7280; margin-top: 0.2rem;">Category:
+                        Document Request</div>
                 </div>
-                <div id="rev-category" style="font-size: 0.8125rem; color: #6B7280; margin-top: 0.2rem;">Category: Document Request</div>
+                <button type="button" data-appt-action="close-review"
+                    style="border: none; background: transparent; color: #6B7280; font-size: 0.8125rem; font-weight: 600; cursor: pointer; text-transform: uppercase;">CLOSE</button>
             </div>
-            <button type="button" data-appt-action="close-review" style="border: none; background: transparent; color: #6B7280; font-size: 0.8125rem; font-weight: 600; cursor: pointer; text-transform: uppercase;">CLOSE</button>
-        </div>
-        
-        <div style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 0.85rem; max-height: 70vh; overflow-y: auto;">
-            <!-- Service and Schedule Cards -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                <div style="background: #F9FAFB; padding: 0.65rem 0.85rem; border: 1px solid #E5E7EB; border-radius: 6px;">
-                    <span style="display: block; font-size: 0.75rem; font-weight: 600; color: #6B7280; text-transform: uppercase; margin-bottom: 0.2rem;">Requested Service</span>
-                    <div id="rev-title" style="font-size: 0.875rem; font-weight: 700; color: #111827;">-</div>
+
+            <div
+                style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 0.85rem; max-height: 70vh; overflow-y: auto;">
+                <!-- Service and Schedule Cards -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                    <div
+                        style="background: #F9FAFB; padding: 0.65rem 0.85rem; border: 1px solid #E5E7EB; border-radius: 6px;">
+                        <span
+                            style="display: block; font-size: 0.75rem; font-weight: 600; color: #6B7280; text-transform: uppercase; margin-bottom: 0.2rem;">Requested
+                            Service</span>
+                        <div id="rev-title" style="font-size: 0.875rem; font-weight: 700; color: #111827;">-</div>
+                    </div>
+                    <div
+                        style="background: #F9FAFB; padding: 0.65rem 0.85rem; border: 1px solid #E5E7EB; border-radius: 6px;">
+                        <span
+                            style="display: block; font-size: 0.75rem; font-weight: 600; color: #6B7280; text-transform: uppercase; margin-bottom: 0.2rem;">Appointment
+                            Schedule</span>
+                        <div id="rev-time" style="font-size: 0.875rem; font-weight: 600; color: #111827;">-</div>
+                    </div>
                 </div>
-                <div style="background: #F9FAFB; padding: 0.65rem 0.85rem; border: 1px solid #E5E7EB; border-radius: 6px;">
-                    <span style="display: block; font-size: 0.75rem; font-weight: 600; color: #6B7280; text-transform: uppercase; margin-bottom: 0.2rem;">Appointment Schedule</span>
-                    <div id="rev-time" style="font-size: 0.875rem; font-weight: 600; color: #111827;">-</div>
+
+                <!-- Applicant Identity -->
+                <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 0.85rem;">
+                    <span
+                        style="display: block; font-size: 0.75rem; font-weight: 700; color: #374151; text-transform: uppercase; margin-bottom: 0.5rem; border-bottom: 1px solid #F3F4F6; padding-bottom: 0.35rem;">Applicant
+                        Profile</span>
+                    <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <div>
+                            <span style="display: block; font-size: 0.75rem; color: #6B7280;">Full Name:</span>
+                            <div id="rev-applicant" style="font-size: 0.875rem; font-weight: 600; color: #111827;">-
+                            </div>
+                        </div>
+                        <div>
+                            <span style="display: block; font-size: 0.75rem; color: #6B7280;">Age:</span>
+                            <div id="rev-age" style="font-size: 0.875rem; color: #111827;">-</div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 0.5rem;">
+                        <span style="display: block; font-size: 0.75rem; color: #6B7280;">Address:</span>
+                        <div id="rev-address" style="font-size: 0.875rem; color: #111827;">-</div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                        <div>
+                            <span style="display: block; font-size: 0.75rem; color: #6B7280;">Phone:</span>
+                            <div id="rev-phone" style="font-size: 0.875rem; color: #111827;">-</div>
+                        </div>
+                        <div>
+                            <span style="display: block; font-size: 0.75rem; color: #6B7280;">Email:</span>
+                            <div id="rev-email" style="font-size: 0.875rem; color: #111827;">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Purpose -->
+                <div>
+                    <label
+                        style="display: block; font-size: 0.75rem; font-weight: 600; color: #6B7280; text-transform: uppercase; margin-bottom: 0.25rem;">Purpose
+                        of Request</label>
+                    <div id="rev-purpose"
+                        style="padding: 0.6rem 0.85rem; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 0.875rem; color: #374151; min-height: 40px; white-space: pre-wrap;">
+                        -</div>
+                </div>
+
+                <!-- Status -->
+                <div
+                    style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.75rem; background: #F9FAFB; border-radius: 6px;">
+                    <span style="font-size: 0.8125rem; font-weight: 600; color: #4B5563;">Current Status:</span>
+                    <div id="rev-status-pill">-</div>
                 </div>
             </div>
 
-            <!-- Applicant Identity -->
-            <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 0.85rem;">
-                <span style="display: block; font-size: 0.75rem; font-weight: 700; color: #374151; text-transform: uppercase; margin-bottom: 0.5rem; border-bottom: 1px solid #F3F4F6; padding-bottom: 0.35rem;">Applicant Profile</span>
-                <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 0.5rem; margin-bottom: 0.5rem;">
-                    <div>
-                        <span style="display: block; font-size: 0.75rem; color: #6B7280;">Full Name:</span>
-                        <div id="rev-applicant" style="font-size: 0.875rem; font-weight: 600; color: #111827;">-</div>
-                    </div>
-                    <div>
-                        <span style="display: block; font-size: 0.75rem; color: #6B7280;">Age:</span>
-                        <div id="rev-age" style="font-size: 0.875rem; color: #111827;">-</div>
-                    </div>
-                </div>
-                <div style="margin-bottom: 0.5rem;">
-                    <span style="display: block; font-size: 0.75rem; color: #6B7280;">Address:</span>
-                    <div id="rev-address" style="font-size: 0.875rem; color: #111827;">-</div>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-                    <div>
-                        <span style="display: block; font-size: 0.75rem; color: #6B7280;">Phone:</span>
-                        <div id="rev-phone" style="font-size: 0.875rem; color: #111827;">-</div>
-                    </div>
-                    <div>
-                        <span style="display: block; font-size: 0.75rem; color: #6B7280;">Email:</span>
-                        <div id="rev-email" style="font-size: 0.875rem; color: #111827;">-</div>
-                    </div>
-                </div>
+            <div
+                style="padding: 1rem 1.5rem; background: #FAFAFA; border-top: 1px solid #E5E7EB; display: flex; justify-content: flex-end; gap: 0.75rem; align-items: center;">
+                <form id="rev-reject-form" method="post" action="" style="margin: 0; display: none;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn"
+                        style="background: #FFFFFF; border: 1.5px solid #DC2626; color: #DC2626; font-size: 0.8125rem; font-weight: 700; padding: 0.5rem 1.35rem; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 1px 2px rgba(220, 38, 38, 0.1);">
+                        Reject
+                    </button>
+                </form>
+                <form id="rev-approve-form" method="post" action="" style="margin: 0; display: none;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn"
+                        style="background: linear-gradient(135deg, #16A34A 0%, #15803D 100%); border: none; color: #FFFFFF; font-size: 0.8125rem; font-weight: 700; padding: 0.5rem 1.35rem; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 6px rgba(22, 163, 74, 0.3);">
+                        Approve
+                    </button>
+                </form>
+                <a id="rev-detail-link" href="#" class="btn btn-secondary"
+                    style="font-size: 0.8125rem; font-weight: 700; padding: 0.5rem 1.15rem; text-decoration: none; border-radius: 8px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);">
+                    Full Details
+                </a>
             </div>
-
-            <!-- Purpose -->
-            <div>
-                <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #6B7280; text-transform: uppercase; margin-bottom: 0.25rem;">Purpose of Request</label>
-                <div id="rev-purpose" style="padding: 0.6rem 0.85rem; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 0.875rem; color: #374151; min-height: 40px; white-space: pre-wrap;">-</div>
-            </div>
-
-            <!-- Status -->
-            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.75rem; background: #F9FAFB; border-radius: 6px;">
-                <span style="font-size: 0.8125rem; font-weight: 600; color: #4B5563;">Current Status:</span>
-                <div id="rev-status-pill">-</div>
-            </div>
-        </div>
-
-        <div style="padding: 1rem 1.5rem; background: #FAFAFA; border-top: 1px solid #E5E7EB; display: flex; justify-content: flex-end; gap: 0.75rem; align-items: center;">
-            <form id="rev-reject-form" method="post" action="" style="margin: 0; display: none;">
-                {% csrf_token %}
-                <button type="submit" class="btn" style="background: #FFFFFF; border: 1.5px solid #DC2626; color: #DC2626; font-size: 0.8125rem; font-weight: 700; padding: 0.5rem 1.35rem; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 1px 2px rgba(220, 38, 38, 0.1);">
-                    Reject
-                </button>
-            </form>
-            <form id="rev-approve-form" method="post" action="" style="margin: 0; display: none;">
-                {% csrf_token %}
-                <button type="submit" class="btn" style="background: linear-gradient(135deg, #16A34A 0%, #15803D 100%); border: none; color: #FFFFFF; font-size: 0.8125rem; font-weight: 700; padding: 0.5rem 1.35rem; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 6px rgba(22, 163, 74, 0.3);">
-                    Approve
-                </button>
-            </form>
-            <a id="rev-detail-link" href="#" class="btn btn-secondary" style="font-size: 0.8125rem; font-weight: 700; padding: 0.5rem 1.15rem; text-decoration: none; border-radius: 8px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);">
-                Full Details
-            </a>
         </div>
     </div>
-</div>
 
-<!-- BOOK APPOINTMENT MODAL (Screenshot 2 Side-by-Side Design) -->
-<div id="moduleAddAppointmentModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.72); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 1.25rem;">
-    <div class="modal-container modal-container-side-by-side" style="background: #FFFFFF; border-radius: 16px; width: 100%; max-width: 1120px; max-height: 94vh; overflow-y: auto; border: 1px solid rgba(0, 0, 0, 0.08);">
-        <!-- Modal Header -->
-        <div class="modal-header-bar">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <div style="width: 40px; height: 40px; border-radius: 10px; background: #1E3A8A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; box-shadow: none;">
-                    {% icon 'calendar-check' %}
-                </div>
-                <div>
-                    <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #111827; letter-spacing: -0.01em;">Book an Appointment</h3>
-                    <p style="margin: 0; font-size: 0.875rem; color: #6B7280;">Schedule your document request or barangay health center consultation</p>
-                </div>
-            </div>
-            <button type="button" class="modal-close-btn" data-call="closeAddAppointmentModal" aria-label="Close">{% icon 'x' %}</button>
-        </div>
-        
-        <div style="padding: 1.5rem;" id="modal-form-wrapper">
-            <!-- 1. Category Switcher -->
-            <div style="margin-bottom: 1.25rem;">
-                <div class="category-pill-group">
-                    <div class="cat-pill active" id="modal-pill-doc" data-call="switchModalCategory" data-arg="document">
-                        {% icon 'file-text' %}
-                        <div>
-                            <div style="font-weight: 700;">Document Request</div>
-                            <div style="font-size: 0.8125rem; font-weight: 500; opacity: 0.85;">Clearances &amp; Certifications</div>
-                        </div>
+    <!-- BOOK APPOINTMENT MODAL (Screenshot 2 Side-by-Side Design) -->
+    <div id="moduleAddAppointmentModal" class="modal-overlay"
+        style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.72); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 1.25rem;">
+        <div class="modal-container modal-container-side-by-side"
+            style="background: #FFFFFF; border-radius: 16px; width: 100%; max-width: 1120px; max-height: 94vh; overflow-y: auto; border: 1px solid rgba(0, 0, 0, 0.08);">
+            <!-- Modal Header -->
+            <div class="modal-header-bar">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div
+                        style="width: 40px; height: 40px; border-radius: 10px; background: #1E3A8A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; box-shadow: none;">
+                        {% icon 'calendar-check' %}
                     </div>
-                    <div class="cat-pill" id="modal-pill-health" data-call="switchModalCategory" data-arg="healthcare">
-                        {% icon 'heart-pulse' cls='icon-success' %}
-                        <div>
-                            <div style="font-weight: 700;">Health Center</div>
-                            <div style="font-size: 0.8125rem; font-weight: 500; opacity: 0.85;">Medical &amp; Dental Care</div>
-                        </div>
+                    <div>
+                        <h3
+                            style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #111827; letter-spacing: -0.01em;">
+                            Book an Appointment</h3>
+                        <p style="margin: 0; font-size: 0.875rem; color: #6B7280;">Schedule your document request or
+                            barangay health center consultation</p>
                     </div>
                 </div>
+                <button type="button" class="modal-close-btn" data-call="closeAddAppointmentModal" aria-label="Close">{%
+                    icon 'x' %}</button>
             </div>
 
-            <!-- MAIN SIDE-BY-SIDE CONTAINER: CALENDAR ON LEFT, FIELDS & TIME ON RIGHT -->
-            <div style="display: grid; grid-template-columns: 440px 1fr; gap: 1.5rem; align-items: start;" class="modal-side-grid">
-                
-                <!-- LEFT COLUMN: CALENDAR & HEALTH SERVICES -->
-                <div>
-                    <!-- CALENDAR -->
-                    <div class="cal-box-card" style="margin-bottom: 1rem;">
-                        <div class="cal-header-bar">
-                            <div class="cal-header-left">
-                                <select id="cal-month-select" class="cal-select" aria-label="Month">
-                                    <option value="0">January</option>
-                                    <option value="1">February</option>
-                                    <option value="2">March</option>
-                                    <option value="3">April</option>
-                                    <option value="4">May</option>
-                                    <option value="5">June</option>
-                                    <option value="6">July</option>
-                                    <option value="7">August</option>
-                                    <option value="8">September</option>
-                                    <option value="9">October</option>
-                                    <option value="10">November</option>
-                                    <option value="11">December</option>
-                                </select>
-                                <select id="cal-year-select" class="cal-select" aria-label="Year">
-                                    <option value="2024">2024</option>
-                                    <option value="2025">2025</option>
-                                    <option value="2026">2026</option>
-                                    <option value="2027">2027</option>
-                                    <option value="2028">2028</option>
-                                    <option value="2029">2029</option>
-                                    <option value="2030">2030</option>
-                                </select>
-                            </div>
-                            <div class="cal-header-right">
-                                <button type="button" id="cal-today-btn" class="cal-today-btn">
-                                    {% icon 'calendar' %} Today
-                                </button>
-                                <button type="button" id="cal-prev-btn" class="cal-nav-btn" aria-label="Previous month">
-                                    {% icon 'chevron-left' %}
-                                </button>
-                                <button type="button" id="cal-next-btn" class="cal-nav-btn primary" aria-label="Next month">
-                                    {% icon 'chevron-right' %}
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Weekdays row -->
-                        <div class="cal-weekdays-row">
-                            <div class="cal-weekday-label">Sun</div>
-                            <div class="cal-weekday-label">Mon</div>
-                            <div class="cal-weekday-label">Tue</div>
-                            <div class="cal-weekday-label">Wed</div>
-                            <div class="cal-weekday-label">Thu</div>
-                            <div class="cal-weekday-label">Fri</div>
-                            <div class="cal-weekday-label">Sat</div>
-                        </div>
-
-                        <!-- Calendar days grid -->
-                        <div id="custom-cal-grid" class="cal-grid"></div>
-
-                        <div style="font-size: 11px; color: #8E8E93; margin-top: 8px; text-align: center;">
-                            Click any date on the calendar to select appointment date.
-                        </div>
-                    </div>
-
-                    <!-- HEALTH SERVICES SECTION (Positioned BELOW calendar when Health Center selected) -->
-                    <div id="health-services-section" class="cal-services-container" style="display: none; margin-bottom: 1rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-                            <span style="font-size: 11px; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.04em;">
-                                Health Center Services
-                            </span>
-                            <span id="cal-services-counter" style="font-size: 11px; font-weight: 600; color: #1E3A8A; background: #F3F4F6; padding: 1px 6px; border-radius: 4px;">
-                                Available
-                            </span>
-                        </div>
-                        <p style="font-size: 11px; color: #8E8E93; margin: 0 0 6px 0;">
-                            Click a service below to book.
-                        </p>
-                        <div id="cal-services-list" class="cal-services-list">
-                            {% for svc in active_health_services %}
-                            <div class="cal-service-card" data-service-id="{{ svc.id }}" data-service-name="{{ svc.name }}" data-service-date="{{ svc.available_date }}" data-service-time="{{ svc.available_time }}">
-                                <div class="service-card-dot" style="background: #1E3A8A;"></div>
-                                <div style="flex: 1;">
-                                    <div class="service-card-datetime">{{ svc.available_date|default:'Monday - Friday' }} • {{ svc.available_time|default:'8:00 AM - 4:00 PM' }}</div>
-                                    <div class="service-card-name">{{ svc.name }} <span style="font-weight: 600; color: #111827;">(Free)</span></div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- RIGHT COLUMN: APPLICANT DETAILS FORM & TIME PICKER -->
-                <div>
-                    <form id="module-appointment-form" style="margin: 0;">
-                        {% csrf_token %}
-                        <input type="hidden" name="category" id="modal-category-input" value="document">
-                        <input type="date" name="appt_date" id="modal-date-input" required style="display: none;">
-                        <input type="hidden" name="time_window" id="modal-time-slot" value="morning">
-                        <input type="hidden" name="time_exact" id="modal-time-exact-value" value="8:00 AM">
-
-                        <div style="display: flex; flex-direction: column; gap: 1rem;">
-                            <!-- Specific Service Selector -->
-                            <div id="modal-doc-type-box">
-                                <label class="form-label-modern" for="modal-document-select" style="font-size: 11px; font-weight: 700; color: #86868B;">
-                                    <span>SELECT DOCUMENT TYPE *</span>
-                                </label>
-                                <div class="input-group-modern">
-                                    <select name="document_type" id="modal-document-select" class="form-control-modern">
-                                        {% for dt in document_types %}
-                                        <option value="{{ dt.id }}">{{ dt.name }}{% if dt.fee %} (₱{{ dt.fee }}){% endif %}</option>
-                                        {% empty %}
-                                        <option value="">No document types available</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div id="modal-health-type-box" style="display: none;">
-                                <label class="form-label-modern" for="modal-healthcare-select" style="font-size: 11px; font-weight: 700; color: #86868B;">
-                                    <span>SELECTED HEALTH CENTER SERVICE *</span>
-                                </label>
-                                <div class="input-group-modern">
-                                    <select name="healthcare_service" id="modal-healthcare-select" class="form-control-modern">
-                                        {% for svc in active_health_services %}
-                                        <option value="{{ svc.id }}">{{ svc.name }} (Free)</option>
-                                        {% empty %}
-                                        <option value="">General Consultation (Free)</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div id="health-service-free-badge" style="font-size: 11px; color: #111827; font-weight: 600; margin-top: 0.35rem; display: flex; align-items: center; gap: 0.35rem;">
-                                    {% icon 'circle-check' cls='icon-success' %} Free health center consultation &amp; services (₱0.00)
-                                </div>
-                            </div>
-
-                            <!-- Applicant Identification -->
+            <div style="padding: 1.5rem;" id="modal-form-wrapper">
+                <!-- 1. Category Switcher -->
+                <div style="margin-bottom: 1.25rem;">
+                    <div class="category-pill-group">
+                        <div class="cat-pill active" id="modal-pill-doc" data-call="switchModalCategory"
+                            data-arg="document">
+                            {% icon 'file-text' %}
                             <div>
-                                <label class="form-label-modern" style="font-size: 11px; font-weight: 700; color: #86868B;">
-                                    <span>APPLICANT IDENTIFICATION *</span>
-                                </label>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;">
-                                    <div class="input-group-modern">
-                                        <input type="text" name="first_name" id="modal_input_first_name" placeholder="e.g. Juan *" value="" class="form-control-modern" required>
-                                    </div>
-                                    <div class="input-group-modern">
-                                        <input type="text" name="middle_name" id="modal_input_middle_name" placeholder="e.g. Santos (Optional)" value="" class="form-control-modern">
-                                    </div>
-                                    <div class="input-group-modern">
-                                        <input type="text" name="last_name" id="modal_input_last_name" placeholder="e.g. Dela Cruz *" value="" class="form-control-modern" required>
-                                    </div>
+                                <div style="font-weight: 700;">Document Request</div>
+                                <div style="font-size: 0.8125rem; font-weight: 500; opacity: 0.85;">Clearances &amp;
+                                    Certifications</div>
+                            </div>
+                        </div>
+                        <div class="cat-pill" id="modal-pill-health" data-call="switchModalCategory"
+                            data-arg="healthcare">
+                            {% icon 'heart-pulse' cls='icon-success' %}
+                            <div>
+                                <div style="font-weight: 700;">Health Center</div>
+                                <div style="font-size: 0.8125rem; font-weight: 500; opacity: 0.85;">Medical &amp; Dental
+                                    Care</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MAIN SIDE-BY-SIDE CONTAINER: CALENDAR ON LEFT, FIELDS & TIME ON RIGHT -->
+                <div style="display: grid; grid-template-columns: 440px 1fr; gap: 1.5rem; align-items: start;"
+                    class="modal-side-grid">
+
+                    <!-- LEFT COLUMN: CALENDAR & HEALTH SERVICES -->
+                    <div>
+                        <!-- CALENDAR -->
+                        <div class="cal-box-card" style="margin-bottom: 1rem;">
+                            <div class="cal-header-bar">
+                                <div class="cal-header-left">
+                                    <select id="cal-month-select" class="cal-select" aria-label="Month">
+                                        <option value="0">January</option>
+                                        <option value="1">February</option>
+                                        <option value="2">March</option>
+                                        <option value="3">April</option>
+                                        <option value="4">May</option>
+                                        <option value="5">June</option>
+                                        <option value="6">July</option>
+                                        <option value="7">August</option>
+                                        <option value="8">September</option>
+                                        <option value="9">October</option>
+                                        <option value="10">November</option>
+                                        <option value="11">December</option>
+                                    </select>
+                                    <select id="cal-year-select" class="cal-select" aria-label="Year">
+                                        <option value="2024">2024</option>
+                                        <option value="2025">2025</option>
+                                        <option value="2026">2026</option>
+                                        <option value="2027">2027</option>
+                                        <option value="2028">2028</option>
+                                        <option value="2029">2029</option>
+                                        <option value="2030">2030</option>
+                                    </select>
+                                </div>
+                                <div class="cal-header-right">
+                                    <button type="button" id="cal-today-btn" class="cal-today-btn">
+                                        {% icon 'calendar' %} Today
+                                    </button>
+                                    <button type="button" id="cal-prev-btn" class="cal-nav-btn"
+                                        aria-label="Previous month">
+                                        {% icon 'chevron-left' %}
+                                    </button>
+                                    <button type="button" id="cal-next-btn" class="cal-nav-btn primary"
+                                        aria-label="Next month">
+                                        {% icon 'chevron-right' %}
+                                    </button>
                                 </div>
                             </div>
 
-                            <!-- Age & Residential Address -->
-                            <div style="display: grid; grid-template-columns: 0.7fr 1.3fr; gap: 0.75rem;">
-                                <div>
-                                    <label class="form-label-modern" for="modal_input_age" style="font-size: 11px; font-weight: 700; color: #86868B;">
-                                        <span>AGE *</span>
-                                    </label>
-                                    <div class="input-group-modern">
-                                        <input type="number" name="age" id="modal_input_age" min="1" max="120" placeholder="e.g. 28" value="" required class="form-control-modern">
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="form-label-modern" for="modal_input_address" style="font-size: 11px; font-weight: 700; color: #86868B;">
-                                        <span>RESIDENTIAL ADDRESS *</span>
-                                    </label>
-                                    <div class="input-group-modern">
-                                        <input type="text" name="address" id="modal_input_address" placeholder="e.g. Block 5 Lot 12, Rizal St." value="" required class="form-control-modern">
-                                    </div>
-                                </div>
+                            <!-- Weekdays row -->
+                            <div class="cal-weekdays-row">
+                                <div class="cal-weekday-label">Sun</div>
+                                <div class="cal-weekday-label">Mon</div>
+                                <div class="cal-weekday-label">Tue</div>
+                                <div class="cal-weekday-label">Wed</div>
+                                <div class="cal-weekday-label">Thu</div>
+                                <div class="cal-weekday-label">Fri</div>
+                                <div class="cal-weekday-label">Sat</div>
                             </div>
 
-                            <!-- Email & Phone -->
-                            <div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 0.75rem;">
-                                <div>
-                                    <label class="form-label-modern" for="modal_input_email" style="font-size: 11px; font-weight: 700; color: #86868B;">
-                                        <span>EMAIL ADDRESS *</span>
+                            <!-- Calendar days grid -->
+                            <div id="custom-cal-grid" class="cal-grid"></div>
+
+                            <div style="font-size: 11px; color: #8E8E93; margin-top: 8px; text-align: center;">
+                                Click any date on the calendar to select appointment date.
+                            </div>
+                        </div>
+
+                        <!-- HEALTH SERVICES SECTION (Positioned BELOW calendar when Health Center selected) -->
+                        <div id="health-services-section" class="cal-services-container"
+                            style="display: none; margin-bottom: 1rem;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                <span
+                                    style="font-size: 11px; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.04em;">
+                                    Health Center Services
+                                </span>
+                                <span id="cal-services-counter"
+                                    style="font-size: 11px; font-weight: 600; color: #1E3A8A; background: #F3F4F6; padding: 1px 6px; border-radius: 4px;">
+                                    Available
+                                </span>
+                            </div>
+                            <p style="font-size: 11px; color: #8E8E93; margin: 0 0 6px 0;">
+                                Click a service below to book.
+                            </p>
+                            <div id="cal-services-list" class="cal-services-list">
+                                {% for svc in active_health_services %}
+                                <div class="cal-service-card" data-service-id="{{ svc.id }}"
+                                    data-service-name="{{ svc.name }}" data-service-date="{{ svc.available_date }}"
+                                    data-service-time="{{ svc.available_time }}">
+                                    <div class="service-card-dot" style="background: #1E3A8A;"></div>
+                                    <div style="flex: 1;">
+                                        <div class="service-card-datetime">{{ svc.available_date|default:'Monday -
+                                            Friday' }} • {{ svc.available_time|default:'8:00 AM - 4:00 PM' }}</div>
+                                        <div class="service-card-name">{{ svc.name }} <span
+                                                style="font-weight: 600; color: #111827;">(Free)</span></div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT COLUMN: APPLICANT DETAILS FORM & TIME PICKER -->
+                    <div>
+                        <form id="module-appointment-form" style="margin: 0;">
+                            {% csrf_token %}
+                            <input type="hidden" name="category" id="modal-category-input" value="document">
+                            <input type="date" name="appt_date" id="modal-date-input" required style="display: none;">
+                            <input type="hidden" name="time_window" id="modal-time-slot" value="morning">
+                            <input type="hidden" name="time_exact" id="modal-time-exact-value" value="8:00 AM">
+
+                            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                <!-- Specific Service Selector -->
+                                <div id="modal-doc-type-box">
+                                    <label class="form-label-modern" for="modal-document-select"
+                                        style="font-size: 11px; font-weight: 700; color: #86868B;">
+                                        <span>SELECT DOCUMENT TYPE *</span>
                                     </label>
                                     <div class="input-group-modern">
-                                        <input type="email" name="email" id="modal_input_email" placeholder="e.g. resident@example.com" value="" required class="form-control-modern">
+                                        <select name="document_type" id="modal-document-select"
+                                            class="form-control-modern">
+                                            {% for dt in document_types %}
+                                            <option value="{{ dt.id }}">{{ dt.name }}{% if dt.fee %} (₱{{ dt.fee }}){%
+                                                endif %}</option>
+                                            {% empty %}
+                                            <option value="">No document types available</option>
+                                            {% endfor %}
+                                        </select>
                                     </div>
-                                    <div id="modal-email-feedback" style="font-size: 11px; margin-top: 0.2rem; min-height: 16px; display: flex; align-items: center; gap: 0.35rem;"></div>
                                 </div>
-                                <div>
-                                    <label class="form-label-modern" for="modal_input_phone" style="font-size: 11px; font-weight: 700; color: #86868B;">
-                                        <span>PHONE NUMBER *</span>
-                                        <span style="font-size: 11px; color: #86868B; font-weight: 500; text-transform: none;">11 digits</span>
+
+                                <div id="modal-health-type-box" style="display: none;">
+                                    <label class="form-label-modern" for="modal-healthcare-select"
+                                        style="font-size: 11px; font-weight: 700; color: #86868B;">
+                                        <span>SELECTED HEALTH CENTER SERVICE *</span>
                                     </label>
                                     <div class="input-group-modern">
-                                        <input type="tel" name="phone_number" id="modal_input_phone" maxlength="11" inputmode="numeric" pattern="09[0-9]{9}" autocomplete="tel" title="11 digits starting with 09, e.g. 09171234567" placeholder="e.g. 09171234567" value="" required class="form-control-modern" data-phone>
+                                        <select name="healthcare_service" id="modal-healthcare-select"
+                                            class="form-control-modern">
+                                            {% for svc in active_health_services %}
+                                            <option value="{{ svc.id }}" data-service-date="{{ svc.available_date }}"
+                                                data-service-time="{{ svc.available_time }}">{{ svc.name }} (Free)
+                                            </option>
+                                            {% empty %}
+                                            <option value="">General Consultation (Free)</option>
+                                            {% endfor %}
+                                        </select>
                                     </div>
-                                    <div id="modal-phone-feedback" style="font-size: 11px; color: #86868B; margin-top: 0.2rem;">
-                                        Must be 11 digits starting with 09
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Purpose -->
-                            <div id="module-purpose-group">
-                                <label class="form-label-modern" for="module_input_purpose" style="font-size: 11px; font-weight: 700; color: #86868B;">
-                                    <span>PURPOSE OF REQUEST *</span>
-                                </label>
-                                <textarea name="purpose" id="module_input_purpose" rows="2" class="form-control-modern" placeholder="e.g. Requirement for job application, medical consultation..." required></textarea>
-                            </div>
-
-                            <!-- Time Picker & Schedule & Assistance Row -->
-                            <div style="display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 0.75rem; align-items: start;">
-                                <!-- Time Picker Card -->
-                                <div class="time-picker-card">
-                                    <div class="time-picker-header">
-                                        <span style="font-size: 0.95rem; font-weight: 700; color: #111827;">Time</span>
-                                        <span id="time-picker-badge" class="time-picker-badge">8:00 AM</span>
-                                    </div>
-
-                                    <div class="time-drum-wrapper" id="time-drum-container">
-                                        <div class="time-drum-highlight-bar"></div>
-
-                                        <!-- Hour Column -->
-                                        <div class="time-drum-col" id="drum-col-hour">
-                                            <div class="time-drum-val-prev" id="time-hour-prev">7</div>
-                                            <div class="time-drum-val-curr" id="time-hour-curr">8</div>
-                                            <div class="time-drum-val-next" id="time-hour-next">9</div>
-                                        </div>
-
-                                        <!-- Minute Column -->
-                                        <div class="time-drum-col" id="drum-col-min">
-                                            <div class="time-drum-val-prev" id="time-min-prev">55</div>
-                                            <div class="time-drum-val-curr" id="time-min-curr">00</div>
-                                            <div class="time-drum-val-next" id="time-min-next">05</div>
-                                        </div>
-
-                                        <!-- AM/PM Column -->
-                                        <div class="time-drum-col" id="drum-col-ampm">
-                                            <div class="time-drum-val-prev" id="time-ampm-prev">PM</div>
-                                            <div class="time-drum-val-curr" id="time-ampm-curr">AM</div>
-                                            <div class="time-drum-val-next" id="time-ampm-next">&nbsp;</div>
-                                        </div>
-                                    </div>
-
-                                    <div style="font-size: 11px; color: #8E8E93; text-align: center; margin-top: 0.5rem;">
-                                        Click or scroll numbers to change appointment time.
+                                    <div id="health-service-free-badge"
+                                        style="font-size: 11px; color: #111827; font-weight: 600; margin-top: 0.35rem; display: flex; align-items: center; gap: 0.35rem;">
+                                        {% icon 'circle-check' cls='icon-success' %} Free health center consultation
+                                        &amp; services (₱0.00)
                                     </div>
                                 </div>
 
-                                <!-- Schedule Preview & Admin Contact -->
-                                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                                    <!-- Selected Appointment Summary Pill -->
-                                    <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; padding: 0.75rem 0.85rem;">
-                                        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #86868B; letter-spacing: 0.04em; margin-bottom: 0.2rem;">
-                                            SELECTED SCHEDULE
-                                        </div>
-                                        <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.8125rem; font-weight: 700; color: #111827;">
-                                            {% icon 'calendar-check' cls='icon-primary' %}
-                                            <span id="selected-schedule-preview">Select date on calendar</span>
-                                        </div>
-                                    </div>
-
-                                    <!-- Admin Contact Card -->
-                                    <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 10px; padding: 0.75rem 0.85rem;">
-                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                            <div style="width: 30px; height: 30px; border-radius: 6px; background: #F3F4F6; color: #1E3A8A; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
-                                                {% icon 'headset' %}
+                                <!-- Applicant Identification -->
+                                <div>
+                                    <label class="form-label-modern"
+                                        style="font-size: 11px; font-weight: 700; color: #86868B; margin-bottom: 0.35rem;">
+                                        <span>APPLICANT IDENTIFICATION *</span>
+                                    </label>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;">
+                                        <div>
+                                            <span
+                                                style="display: block; font-size: 10.5px; font-weight: 700; color: #4B5563; margin-bottom: 3px;">First
+                                                Name *</span>
+                                            <div class="input-group-modern">
+                                                <input type="text" name="first_name" id="modal_input_first_name"
+                                                    placeholder="e.g. Juan" value="" class="form-control-modern"
+                                                    required>
                                             </div>
-                                            <div style="flex: 1;">
-                                                <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #86868B;">BARANGAY ADMIN ASSISTANCE</div>
-                                                <div style="font-size: 0.8125rem; font-weight: 800; color: #111827;">
-                                                    {{ admin_phone }}
+                                        </div>
+                                        <div>
+                                            <span
+                                                style="display: block; font-size: 10.5px; font-weight: 700; color: #6B7280; margin-bottom: 3px;">Middle
+                                                Name <span
+                                                    style="font-weight: 400; color: #9CA3AF;">(Opt.)</span></span>
+                                            <div class="input-group-modern">
+                                                <input type="text" name="middle_name" id="modal_input_middle_name"
+                                                    placeholder="e.g. Santos" value="" class="form-control-modern">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span
+                                                style="display: block; font-size: 10.5px; font-weight: 700; color: #4B5563; margin-bottom: 3px;">Last
+                                                Name *</span>
+                                            <div class="input-group-modern">
+                                                <input type="text" name="last_name" id="modal_input_last_name"
+                                                    placeholder="e.g. Dela Cruz" value="" class="form-control-modern"
+                                                    required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Age & Residential Address -->
+                                <div style="display: grid; grid-template-columns: 0.7fr 1.3fr; gap: 0.75rem;">
+                                    <div>
+                                        <label class="form-label-modern" for="modal_input_age"
+                                            style="font-size: 11px; font-weight: 700; color: #86868B;">
+                                            <span>AGE *</span>
+                                        </label>
+                                        <div class="input-group-modern">
+                                            <input type="number" name="age" id="modal_input_age" min="1" max="120"
+                                                placeholder="e.g. 28" value="" required class="form-control-modern">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="form-label-modern" for="modal_input_address"
+                                            style="font-size: 11px; font-weight: 700; color: #86868B;">
+                                            <span>RESIDENTIAL ADDRESS *</span>
+                                        </label>
+                                        <div class="input-group-modern">
+                                            <input type="text" name="address" id="modal_input_address"
+                                                placeholder="e.g. Block 5 Lot 12, Rizal St." value="" required
+                                                class="form-control-modern">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Email & Phone -->
+                                <div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 0.75rem;">
+                                    <div>
+                                        <label class="form-label-modern" for="modal_input_email"
+                                            style="font-size: 11px; font-weight: 700; color: #86868B;">
+                                            <span>EMAIL ADDRESS *</span>
+                                        </label>
+                                        <div class="input-group-modern">
+                                            <input type="email" name="email" id="modal_input_email"
+                                                placeholder="e.g. resident@example.com" value="" required
+                                                class="form-control-modern">
+                                        </div>
+                                        <div id="modal-email-feedback"
+                                            style="font-size: 11px; margin-top: 0.2rem; min-height: 16px; display: flex; align-items: center; gap: 0.35rem;">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="form-label-modern" for="modal_input_phone"
+                                            style="font-size: 11px; font-weight: 700; color: #86868B;">
+                                            <span>PHONE NUMBER *</span>
+                                            <span
+                                                style="font-size: 11px; color: #86868B; font-weight: 500; text-transform: none;">11
+                                                digits</span>
+                                        </label>
+                                        <div class="input-group-modern">
+                                            <input type="tel" name="phone_number" id="modal_input_phone" maxlength="11"
+                                                inputmode="numeric" pattern="09[0-9]{9}" autocomplete="tel"
+                                                title="11 digits starting with 09, e.g. 09171234567"
+                                                placeholder="e.g. 09171234567" value="" required
+                                                class="form-control-modern" data-phone>
+                                        </div>
+                                        <div id="modal-phone-feedback"
+                                            style="font-size: 11px; color: #86868B; margin-top: 0.2rem;">
+                                            Must be 11 digits starting with 09
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Purpose -->
+                                <div id="module-purpose-group">
+                                    <label class="form-label-modern" for="module_input_purpose"
+                                        style="font-size: 11px; font-weight: 700; color: #86868B;">
+                                        <span>PURPOSE OF REQUEST *</span>
+                                    </label>
+                                    <textarea name="purpose" id="module_input_purpose" rows="2"
+                                        class="form-control-modern"
+                                        placeholder="e.g. Requirement for job application, medical consultation..."
+                                        required></textarea>
+                                </div>
+
+                                <!-- Time Picker & Schedule & Assistance Row -->
+                                <div
+                                    style="display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 0.75rem; align-items: start;">
+                                    <!-- Time Picker Card -->
+                                    <div class="time-picker-card">
+                                        <div class="time-picker-header">
+                                            <span
+                                                style="font-size: 0.95rem; font-weight: 700; color: #111827;">Time</span>
+                                            <span id="time-picker-badge" class="time-picker-badge">8:00 AM</span>
+                                        </div>
+
+                                        <div class="time-drum-wrapper" id="time-drum-container">
+                                            <div class="time-drum-highlight-bar"></div>
+
+                                            <!-- Hour Column -->
+                                            <div class="time-drum-col" id="drum-col-hour">
+                                                <div class="time-drum-val-prev" id="time-hour-prev">7</div>
+                                                <div class="time-drum-val-curr" id="time-hour-curr">8</div>
+                                                <div class="time-drum-val-next" id="time-hour-next">9</div>
+                                            </div>
+
+                                            <!-- Minute Column -->
+                                            <div class="time-drum-col" id="drum-col-min">
+                                                <div class="time-drum-val-prev" id="time-min-prev">55</div>
+                                                <div class="time-drum-val-curr" id="time-min-curr">00</div>
+                                                <div class="time-drum-val-next" id="time-min-next">05</div>
+                                            </div>
+
+                                            <!-- AM/PM Column -->
+                                            <div class="time-drum-col" id="drum-col-ampm">
+                                                <div class="time-drum-val-prev" id="time-ampm-prev">PM</div>
+                                                <div class="time-drum-val-curr" id="time-ampm-curr">AM</div>
+                                                <div class="time-drum-val-next" id="time-ampm-next">&nbsp;</div>
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            style="font-size: 11px; color: #8E8E93; text-align: center; margin-top: 0.5rem;">
+                                            Click or scroll numbers to change appointment time.
+                                        </div>
+                                    </div>
+
+                                    <!-- Schedule Preview & Admin Contact -->
+                                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                        <!-- Selected Appointment Summary Pill -->
+                                        <div
+                                            style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; padding: 0.75rem 0.85rem;">
+                                            <div
+                                                style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #86868B; letter-spacing: 0.04em; margin-bottom: 0.2rem;">
+                                                SELECTED SCHEDULE
+                                            </div>
+                                            <div
+                                                style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.8125rem; font-weight: 700; color: #111827;">
+                                                {% icon 'calendar-check' cls='icon-primary' %}
+                                                <span id="selected-schedule-preview">Select date on calendar</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Admin Contact Card -->
+                                        <div
+                                            style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 10px; padding: 0.75rem 0.85rem;">
+                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <div
+                                                    style="width: 30px; height: 30px; border-radius: 6px; background: #F3F4F6; color: #1E3A8A; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
+                                                    {% icon 'headset' %}
+                                                </div>
+                                                <div style="flex: 1;">
+                                                    <div
+                                                        style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #86868B;">
+                                                        BARANGAY ADMIN ASSISTANCE</div>
+                                                    <div
+                                                        style="font-size: 0.8125rem; font-weight: 800; color: #111827;">
+                                                        {{ admin_phone }}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Error Banner -->
-                            <div id="modal-error-banner" style="display: none; background: #FFFFFF; border: 1.5px solid #DC2626; border-radius: 8px; padding: 0.65rem 0.85rem; color: #DC2626; font-size: 0.8125rem;">
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    {% icon 'triangle-alert' cls='icon-danger' %}
-                                    <span id="modal-error-text" style="font-weight: 600;">Please check your input fields.</span>
+                                <!-- Error Banner -->
+                                <div id="modal-error-banner"
+                                    style="display: none; background: #FFFFFF; border: 1.5px solid #DC2626; border-radius: 8px; padding: 0.65rem 0.85rem; color: #DC2626; font-size: 0.8125rem;">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        {% icon 'triangle-alert' cls='icon-danger' %}
+                                        <span id="modal-error-text" style="font-weight: 600;">Please check your input
+                                            fields.</span>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Submit Button -->
-                            <button type="submit" id="btn-submit-modal-appointment" class="btn btn-primary" style="width: 100%; font-weight: 700; min-height: 42px; font-size: 0.9rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: #0071E3; border: none; color: #FFFFFF; box-shadow: none;">
-                                {% icon 'send' %} Submit Appointment Request
-                            </button>
-                        </div>
-                    </form>
+                                <!-- Submit Button -->
+                                <button type="submit" id="btn-submit-modal-appointment" class="btn btn-primary"
+                                    style="width: 100%; font-weight: 700; min-height: 42px; font-size: 0.9rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: #0071E3; border: none; color: #FFFFFF; box-shadow: none;">
+                                    {% icon 'send' %} Submit Appointment Request
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Success Wrapper -->
+            <div id="modal-success-wrapper" style="display: none; padding: 2.5rem 1.75rem; text-align: center;">
+                <div
+                    style="width: 72px; height: 72px; border-radius: 50%; background: #FFFFFF; color: #16A34A; display: flex; align-items: center; justify-content: center; font-size: 2.25rem; margin: 0 auto 1.25rem auto; box-shadow: none;">
+                    {% icon 'check' %}
+                </div>
+                <h2 style="font-size: 1.5rem; font-weight: 800; color: #111827; margin: 0 0 0.5rem 0;">
+                    Appointment Booked Successfully!
+                </h2>
+                <div>
+                    <span id="modal-success-ref" class="badge badge-primary"
+                        style="font-size: 0.95rem; font-weight: 800; padding: 0.4rem 0.9rem; border-radius: 9999px; letter-spacing: 0.03em;">
+                        REF #APT-0000
+                    </span>
                 </div>
 
-            </div>
-        </div>
-
-        <!-- Success Wrapper -->
-        <div id="modal-success-wrapper" style="display: none; padding: 2.5rem 1.75rem; text-align: center;">
-            <div style="width: 72px; height: 72px; border-radius: 50%; background: #FFFFFF; color: #16A34A; display: flex; align-items: center; justify-content: center; font-size: 2.25rem; margin: 0 auto 1.25rem auto; box-shadow: none;">
-                {% icon 'check' %}
-            </div>
-            <h2 style="font-size: 1.5rem; font-weight: 800; color: #111827; margin: 0 0 0.5rem 0;">
-                Appointment Booked Successfully!
-            </h2>
-            <div>
-                <span id="modal-success-ref" class="badge badge-primary" style="font-size: 0.95rem; font-weight: 800; padding: 0.4rem 0.9rem; border-radius: 9999px; letter-spacing: 0.03em;">
-                    REF #APT-0000
-                </span>
-            </div>
-
-            <!-- REQUIRED NOTIFICATION NOTICE -->
-            <div style="max-width: 680px; margin: 1.5rem auto; background: #F3F4F6; border: 1.5px solid #D1D5DB; border-radius: 14px; padding: 1.25rem 1.5rem; text-align: left; box-shadow: none;">
-                <div style="display: flex; gap: 0.85rem; align-items: flex-start;">
-                    <span style="font-size: 1.5rem; color: #1E3A8A; line-height: 1;">
-                        {% icon 'mail-check' %}
-                    </span>
-                    <div>
-                        <div style="font-size: 0.95rem; font-weight: 700; color: #1E3A8A; margin-bottom: 0.35rem;">
-                            Confirmation &amp; Verification in Progress
+                <!-- REQUIRED NOTIFICATION NOTICE -->
+                <div
+                    style="max-width: 680px; margin: 1.5rem auto; background: #F3F4F6; border: 1.5px solid #D1D5DB; border-radius: 14px; padding: 1.25rem 1.5rem; text-align: left; box-shadow: none;">
+                    <div style="display: flex; gap: 0.85rem; align-items: flex-start;">
+                        <span style="font-size: 1.5rem; color: #1E3A8A; line-height: 1;">
+                            {% icon 'mail-check' %}
+                        </span>
+                        <div>
+                            <div style="font-size: 0.95rem; font-weight: 700; color: #1E3A8A; margin-bottom: 0.35rem;">
+                                Confirmation &amp; Verification in Progress
+                            </div>
+                            <p style="font-size: 0.875rem; line-height: 1.6; color: #1E3A8A; margin: 0;"
+                                id="modal-success-required-message">
+                                Wait for the email sent for approved your appointment date. We will notify via email
+                                please keep track on you email. Thank you if you have any question please contact
+                                <strong>{{ admin_phone }}</strong>.
+                            </p>
                         </div>
-                        <p style="font-size: 0.875rem; line-height: 1.6; color: #1E3A8A; margin: 0;" id="modal-success-required-message">
-                            Wait for the email sent for approved your appointment date. We will notify via email please keep track on you email. Thank you if you have any question please contact <strong>{{ admin_phone }}</strong>.
-                        </p>
                     </div>
                 </div>
-            </div>
 
-            <!-- Booking Summary Card -->
-            <div style="max-width: 680px; margin: 0 auto 1.75rem auto; background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.15rem; text-align: left; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;" class="modal-side-grid">
-                <div>
-                    <div style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #6B7280;">Applicant Name</div>
-                    <div style="font-size: 0.95rem; font-weight: 700; color: #111827;" id="modal-summary-applicant-name">-</div>
+                <!-- Booking Summary Card -->
+                <div style="max-width: 680px; margin: 0 auto 1.75rem auto; background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.15rem; text-align: left; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;"
+                    class="modal-side-grid">
+                    <div>
+                        <div style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #6B7280;">
+                            Applicant Name</div>
+                        <div style="font-size: 0.95rem; font-weight: 700; color: #111827;"
+                            id="modal-summary-applicant-name">-</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #6B7280;">
+                            Requested Service</div>
+                        <div style="font-size: 0.95rem; font-weight: 700; color: #1E3A8A;"
+                            id="modal-summary-service-title">-</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #6B7280;">
+                            Scheduled Date &amp; Time</div>
+                        <div style="font-size: 0.875rem; font-weight: 700; color: #111827;" id="modal-summary-schedule">
+                            -</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #6B7280;">
+                            Notification Email &amp; Phone</div>
+                        <div style="font-size: 0.875rem; font-weight: 700; color: #111827;" id="modal-summary-contact">-
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <div style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #6B7280;">Requested Service</div>
-                    <div style="font-size: 0.95rem; font-weight: 700; color: #1E3A8A;" id="modal-summary-service-title">-</div>
-                </div>
-                <div>
-                    <div style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #6B7280;">Scheduled Date &amp; Time</div>
-                    <div style="font-size: 0.875rem; font-weight: 700; color: #111827;" id="modal-summary-schedule">-</div>
-                </div>
-                <div>
-                    <div style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; color: #6B7280;">Notification Email &amp; Phone</div>
-                    <div style="font-size: 0.875rem; font-weight: 700; color: #111827;" id="modal-summary-contact">-</div>
-                </div>
-            </div>
 
-            <div style="display: flex; justify-content: center; gap: 0.75rem;">
-                <button type="button" class="btn btn-secondary" data-call="resetModalForm" style="font-weight: 700; min-height: 42px; padding: 0 1.25rem;">
-                    {% icon 'plus' %} Book Another
-                </button>
-                <button type="button" class="btn btn-primary" data-call="closeAndReload" style="font-weight: 700; min-height: 42px; padding: 0 1.5rem; background: #1E3A8A;">
-                    {% icon 'check' %} Done
-                </button>
+                <div style="display: flex; justify-content: center; gap: 0.75rem;">
+                    <button type="button" class="btn btn-secondary" data-call="resetModalForm"
+                        style="font-weight: 700; min-height: 42px; padding: 0 1.25rem;">
+                        {% icon 'plus' %} Book Another
+                    </button>
+                    <button type="button" class="btn btn-primary" data-call="closeAndReload"
+                        style="font-weight: 700; min-height: 42px; padding: 0 1.5rem; background: #1E3A8A;">
+                        {% icon 'check' %} Done
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- DELETE APPOINTMENT MODAL -->
-<div id="deleteAppointmentModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
-    <div style="background: #FFFFFF; border-radius: 12px; width: 100%; max-width: 440px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05); overflow: hidden; animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
-        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; gap: 0.75rem;">
-            <div style="width: 36px; height: 36px; border-radius: 50%; background: #FEF2F2; color: #DC2626; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
-                {% icon 'triangle-alert' %}
+    <!-- DELETE APPOINTMENT MODAL -->
+    <div id="deleteAppointmentModal" class="modal-overlay"
+        style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+        <div
+            style="background: #FFFFFF; border-radius: 12px; width: 100%; max-width: 440px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05); overflow: hidden; animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+            <div
+                style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; gap: 0.75rem;">
+                <div
+                    style="width: 36px; height: 36px; border-radius: 50%; background: #FEF2F2; color: #DC2626; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+                    {% icon 'triangle-alert' %}
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 1rem; font-weight: 700; color: #111827;">Delete Appointment</h3>
+                    <p style="margin: 0; font-size: 0.8125rem; color: #6B7280;">This appointment record will be deleted.
+                    </p>
+                </div>
             </div>
-            <div>
-                <h3 style="margin: 0; font-size: 1rem; font-weight: 700; color: #111827;">Delete Appointment</h3>
-                <p style="margin: 0; font-size: 0.8125rem; color: #6B7280;">This appointment record will be deleted.</p>
-            </div>
+            <form id="deleteAppointmentForm" method="post" action="">
+                {% csrf_token %}
+                <div style="padding: 1.25rem 1.5rem; color: #374151; font-size: 0.875rem; line-height: 1.5;">
+                    Are you sure you want to delete appointment <strong id="delete-apt-ref"
+                        style="color: #111827;"></strong> for <strong id="delete-apt-name"
+                        style="color: #111827;"></strong>?
+                </div>
+                <div
+                    style="padding: 1rem 1.5rem; background: #F9FAFB; border-top: 1px solid #E5E7EB; display: flex; justify-content: flex-end; gap: 0.75rem;">
+                    <button type="button" data-call="closeDeleteAppointmentModal" class="btn btn-secondary"
+                        style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1rem; border-radius: 6px;">Cancel</button>
+                    <button type="submit" class="btn btn-danger"
+                        style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1.25rem; border-radius: 6px; background: #DC2626; border-color: #DC2626;">Yes,
+                        Delete</button>
+                </div>
+            </form>
         </div>
-        <form id="deleteAppointmentForm" method="post" action="">
-            {% csrf_token %}
-            <div style="padding: 1.25rem 1.5rem; color: #374151; font-size: 0.875rem; line-height: 1.5;">
-                Are you sure you want to delete appointment <strong id="delete-apt-ref" style="color: #111827;"></strong> for <strong id="delete-apt-name" style="color: #111827;"></strong>?
-            </div>
-            <div style="padding: 1rem 1.5rem; background: #F9FAFB; border-top: 1px solid #E5E7EB; display: flex; justify-content: flex-end; gap: 0.75rem;">
-                <button type="button" data-call="closeDeleteAppointmentModal" class="btn btn-secondary" style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1rem; border-radius: 6px;">Cancel</button>
-                <button type="submit" class="btn btn-danger" style="font-size: 0.8125rem; font-weight: 600; padding: 0.45rem 1.25rem; border-radius: 6px; background: #DC2626; border-color: #DC2626;">Yes, Delete</button>
-            </div>
-        </form>
     </div>
-</div>
 
-{% endblock %}
+    {% endblock %}
 
-{% block extra_js %}
-<script type="application/json" id="health-services-data">
+    {% block extra_js %}
+    <script id="brgy-closed-dates-data" type="application/json">{{ closed_dates_json|default:'{}'|safe }}</script>
+    <script type="application/json" id="health-services-data">
 [
     {% for svc in active_health_services %}
     {
@@ -778,5 +950,5 @@
     {% endfor %}
 ]
 </script>
-<script src="{% static 'js/appointments.js' %}" defer></script>
-{% endblock %}
+        <script src="{% static 'js/appointments.js' %}" defer></script>
+        {% endblock %}

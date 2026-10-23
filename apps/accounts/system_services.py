@@ -26,6 +26,7 @@ from decimal import Decimal, InvalidOperation
 from django.conf import settings
 from django.db import transaction
 from django.template import Context, Engine, TemplateSyntaxError
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 
@@ -595,29 +596,63 @@ def delete_concern_category_service(actor, cat_id):
 
 
 # 6. STAFF ACCOUNTS MANAGEMENT
-def create_staff_account_service(actor, data):
+def create_staff_account_service(actor, data, request=None):
     """
-    Creates a staff account:
-    - Generates a temporary password.
-    - Sets term_end date.
-    - Sends temporary password email (reg_approved.txt).
+    Creates a staff or officer account:
+    - Only email is strictly required.
+    - Generates a safe collision-free username.
+    - Assigns selected role / officer.
+    - Generates a temporary password and sets must_change_password.
+    - Sends temporary password and direct system link via staff_created email.
     - Logs creation.
     """
     email = data.get('email', '').strip().lower()
-    username = data.get('username', '').strip() or email.split('@')[0]
-    first_name = data.get('first_name', '').strip()
-    last_name = data.get('last_name', '').strip()
-    department = data.get('department', '').strip()
-    role = data.get('role', User.ROLE_STAFF)
-    if role not in [User.ROLE_STAFF, User.ROLE_ADMIN]:
-        role = User.ROLE_STAFF
-
     if not email:
         raise ValueError("Email address is required.")
     if User.objects.filter(email__iexact=email).exists():
         raise ValueError(f"An account with email '{email}' already exists.")
-    if User.objects.filter(username__iexact=username).exists():
-        raise ValueError(f"An account with username '{username}' already exists.")
+
+    username = data.get('username', '').strip()
+    if not username:
+        base_username = email.split('@')[0].strip().lower()
+        base_username = ''.join(c for c in base_username if c.isalnum() or c in '._-') or 'user'
+        candidate_username = base_username
+        counter = 1
+        while User.objects.filter(username__iexact=candidate_username).exists():
+            candidate_username = f"{base_username}{counter}"
+            counter += 1
+        username = candidate_username
+    else:
+        if User.objects.filter(username__iexact=username).exists():
+            raise ValueError(f"An account with username '{username}' already exists.")
+
+    first_name = data.get('first_name', '').strip()
+    last_name = data.get('last_name', '').strip()
+    department = data.get('department', '').strip()
+    
+    role = data.get('role', User.ROLE_STAFF)
+    role_id = data.get('role_id') or data.get('officer_id')
+    officer = None
+
+    if role_id:
+        if str(role_id).isdigit():
+            officer = Officer.objects.filter(id=int(role_id)).first()
+            if officer:
+                if officer.position == 'Punong Barangay':
+                    role = User.ROLE_ADMIN
+                else:
+                    role = User.ROLE_STAFF
+        elif str(role_id).lower() == 'admin':
+            role = User.ROLE_ADMIN
+        elif str(role_id).lower() == 'staff':
+            role = User.ROLE_STAFF
+        else:
+            officer = Officer.objects.filter(position__iexact=str(role_id).strip()).first()
+            if officer:
+                role = User.ROLE_STAFF
+
+    if role not in [User.ROLE_STAFF, User.ROLE_ADMIN, User.ROLE_KAPITAN]:
+        role = User.ROLE_STAFF
 
     term_end_raw = data.get('term_end')
     term_end = None
@@ -639,7 +674,7 @@ def create_staff_account_service(actor, data):
             password=temp_pw,
             first_name=first_name,
             last_name=last_name,
-            department=department,
+            department=department or (officer.position if officer else ''),
             role=role,
             status=User.STATUS_ACTIVE,
             is_staff=True,
@@ -662,14 +697,9 @@ def create_staff_account_service(actor, data):
             user.allowed_modules = allowed_modules
             user.save(update_fields=['allowed_modules'])
 
-        # Optional Barangay Officer assignment (not every staff member is an officer)
-        officer_id = data.get('officer_id')
-        officer = None
-        if officer_id and str(officer_id).isdigit():
-            officer = Officer.objects.filter(id=int(officer_id)).first()
-
+        # Staff Assignment
         scope_type = data.get('scope_type', StaffAssignment.SCOPE_SERVICE_AREA)
-        scope_value = department or data.get('scope_value', 'general')
+        scope_value = department or (officer.position if officer else 'General')
         StaffAssignment.objects.create(
             user=user,
             officer=officer,
@@ -678,17 +708,30 @@ def create_staff_account_service(actor, data):
             term_end=term_end
         )
 
+        if officer and not officer.user:
+            officer.user = user
+            officer.save(update_fields=['user'])
+
         log_activity(
             actor=actor,
             action='create',
             action_type='StaffAccount',
             target_id=str(user.id),
             target_name=user.get_full_name() or user.username,
-            details=f"Created staff account '{user.email}' (department={department}, officer={officer}, term_end={term_end}). Dispatched temporary password."
+            details=f"Created user account '{user.email}' (role={role}, officer={officer}, term_end={term_end}). Dispatched temporary credentials and direct system link."
         )
 
         # Dispatch staff_created email with temp password inside on_commit
-        position_title = officer.position if (officer and hasattr(officer, 'position')) else (department or 'Staff')
+        position_title = officer.position if (officer and hasattr(officer, 'position')) else (department or ('Administrator' if role == User.ROLE_ADMIN else 'Staff'))
+        
+        if request:
+            try:
+                login_url = request.build_absolute_uri(reverse('accounts:login'))
+            except Exception:
+                login_url = '/accounts/login/'
+        else:
+            login_url = '/accounts/login/'
+
         transaction.on_commit(
             lambda: send_templated_email(
                 template_name='staff_created',
@@ -697,7 +740,7 @@ def create_staff_account_service(actor, data):
                     'first_name': user.first_name or user.username,
                     'email': user.email,
                     'temp_password': temp_pw,
-                    'login_url': '/accounts/login/',
+                    'login_url': login_url,
                     'position': position_title,
                 },
                 ref_table='User',
@@ -740,6 +783,77 @@ def update_appointment_windows_service(actor, data):
     return info
 
 
+def add_appointment_closed_date_service(actor, data):
+    """
+    Adds a single-day or multi-day closed date period to AppointmentClosedDate.
+    Logs audit activity.
+    """
+    from datetime import date
+    from apps.appointments.models import AppointmentClosedDate
+    start_date_raw = (data.get('start_date') or '').strip()
+    end_date_raw = (data.get('end_date') or '').strip()
+    reason = (data.get('reason') or '').strip() or 'Barangay Closed / Holiday'
+
+    if not start_date_raw:
+        raise ValueError("Start date is required.")
+    try:
+        start_date = date.fromisoformat(start_date_raw)
+    except ValueError:
+        raise ValueError("Invalid start date format (must be YYYY-MM-DD).")
+
+    if end_date_raw:
+        try:
+            end_date = date.fromisoformat(end_date_raw)
+        except ValueError:
+            raise ValueError("Invalid end date format (must be YYYY-MM-DD).")
+    else:
+        end_date = start_date
+
+    if end_date < start_date:
+        raise ValueError("End date cannot be earlier than start date.")
+
+    closed_obj = AppointmentClosedDate.objects.create(
+        start_date=start_date,
+        end_date=end_date,
+        reason=reason,
+        closed_by=actor if getattr(actor, 'is_authenticated', False) else None
+    )
+
+    log_activity(
+        actor=actor,
+        action='create',
+        action_type='AppointmentClosedDate',
+        target_id=str(closed_obj.id),
+        target_name=f"Closed Date: {start_date} to {end_date}",
+        details=f"Closed appointment schedule from {start_date} to {end_date}. Reason: {reason}"
+    )
+    return closed_obj
+
+
+def delete_appointment_closed_date_service(actor, closed_id):
+    """
+    Removes a closed date period from AppointmentClosedDate and reopens the date(s).
+    Logs audit activity.
+    """
+    from apps.appointments.models import AppointmentClosedDate
+    closed_obj = AppointmentClosedDate.objects.filter(id=closed_id).first()
+    if not closed_obj:
+        raise ValueError("Closed date record not found.")
+
+    desc = f"{closed_obj.start_date} to {closed_obj.end_date} ({closed_obj.reason})"
+    closed_obj.delete()
+
+    log_activity(
+        actor=actor,
+        action='delete',
+        action_type='AppointmentClosedDate',
+        target_id=str(closed_id),
+        target_name=desc,
+        details=f"Reopened appointment schedule for: {desc}"
+    )
+    return True
+
+
 def disable_staff_account_service(actor, staff_user_id):
     """
     Disables a staff account:
@@ -770,6 +884,149 @@ def disable_staff_account_service(actor, staff_user_id):
         details=f"Disabled staff account '{user.username}'. Status: {old_status} -> disabled."
     )
     return user
+
+
+def update_staff_account_service(actor, staff_user_id, data):
+    """
+    Updates an existing staff/admin account:
+    - Email (must be unique).
+    - First name, last name.
+    - Role assignment (Officer or standard Staff/Admin).
+    - Status (active/disabled).
+    - Term end date.
+    - Logs updates to ActivityLog.
+    """
+    user = _get_or_missing(User, staff_user_id, 'staff account')
+    
+    if user.is_superuser and not getattr(actor, 'is_superuser', False):
+        raise ValueError("Only a superuser can modify another superuser account.")
+
+    email = str(data.get('email') or '').strip().lower()
+    if not email:
+        raise ValueError("Email address is required.")
+    
+    conflict = User.objects.filter(email__iexact=email).exclude(id=user.id)
+    if conflict.exists():
+        raise ValueError(f"An account with email '{email}' already exists.")
+
+    first_name = str(data.get('first_name') or '').strip()
+    last_name = str(data.get('last_name') or '').strip()
+    status = str(data.get('status') or '').strip().lower()
+    
+    role_id = data.get('role_id') or data.get('officer_id')
+    officer = None
+    role = user.role
+
+    if role_id:
+        if str(role_id).isdigit():
+            officer = Officer.objects.filter(id=int(role_id)).first()
+            if officer:
+                role = User.ROLE_ADMIN if officer.position == 'Punong Barangay' else User.ROLE_STAFF
+        elif str(role_id).lower() == 'admin':
+            role = User.ROLE_ADMIN
+        elif str(role_id).lower() == 'staff':
+            role = User.ROLE_STAFF
+
+    term_end_raw = data.get('term_end')
+    term_end = None
+    if term_end_raw:
+        if isinstance(term_end_raw, str) and term_end_raw.strip():
+            try:
+                term_end = datetime.date.fromisoformat(term_end_raw.strip())
+            except ValueError:
+                raise ValueError("Term end must be a valid date (YYYY-MM-DD).")
+        elif isinstance(term_end_raw, datetime.date):
+            term_end = term_end_raw
+
+    with transaction.atomic():
+        old_email = user.email
+        old_role = user.role
+        user.email = email
+        if first_name:
+            user.first_name = first_name
+        if last_name:
+            user.last_name = last_name
+        user.role = role
+        user.term_end = term_end
+
+        if status in (User.STATUS_ACTIVE, User.STATUS_DISABLED):
+            if user.id == actor.id and status == User.STATUS_DISABLED:
+                raise ValueError("You cannot disable your own administrator account.")
+            user.status = status
+            user.is_active = (status == User.STATUS_ACTIVE)
+
+        user.save()
+
+        # Update or create staff assignment
+        assignment = StaffAssignment.objects.filter(user=user).first()
+        if officer:
+            if assignment:
+                assignment.officer = officer
+                assignment.term_end = term_end
+                assignment.save()
+            else:
+                StaffAssignment.objects.create(
+                    user=user,
+                    officer=officer,
+                    scope_type=StaffAssignment.SCOPE_SERVICE_AREA,
+                    scope_value=officer.position,
+                    term_end=term_end
+                )
+            if not officer.user or officer.user_id == user.id:
+                officer.user = user
+                officer.save(update_fields=['user'])
+        elif role_id in ('admin', 'staff'):
+            if assignment and assignment.officer:
+                if assignment.officer.user_id == user.id:
+                    assignment.officer.user = None
+                    assignment.officer.save(update_fields=['user'])
+                assignment.officer = None
+                assignment.save()
+
+        log_activity(
+            actor=actor,
+            action='update',
+            action_type='StaffAccount',
+            target_id=str(user.id),
+            target_name=user.get_full_name() or user.username,
+            details=f"Updated account '{user.username}'. Email: {old_email} -> {email}, Role: {old_role} -> {role}, Officer: {officer}."
+        )
+
+    return user
+
+
+def delete_staff_account_service(actor, staff_user_id):
+    """
+    Permanently deletes a staff or officer account:
+    - Cannot delete yourself.
+    - Cannot delete primary admin.
+    - Unlinks StaffAssignment and Officer associations.
+    - Logs deletion.
+    """
+    user = _get_or_missing(User, staff_user_id, 'staff account')
+    if user.id == actor.id:
+        raise ValueError("You cannot delete your own account.")
+    if user.username == 'admin':
+        raise ValueError("The primary system administrator account cannot be deleted.")
+    if user.is_superuser and not getattr(actor, 'is_superuser', False):
+        raise ValueError("Only a superuser can delete another superuser account.")
+
+    with transaction.atomic():
+        Officer.objects.filter(user=user).update(user=None)
+        StaffAssignment.objects.filter(user=user).delete()
+        user_email = user.email
+        user_name = user.get_full_name() or user.username
+        user.delete()
+
+        log_activity(
+            actor=actor,
+            action='delete',
+            action_type='StaffAccount',
+            target_id=str(staff_user_id),
+            target_name=user_name,
+            details=f"Permanently deleted staff account '{user_name}' ({user_email})."
+        )
+    return True
 
 
 # 7. EMAIL TEMPLATES
